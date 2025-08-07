@@ -27,11 +27,10 @@ class ImageSerializer(serializers.ModelSerializer):
         return instance
 
 class TypesValueSerializer(serializers.ModelSerializer):
-    type = serializers.PrimaryKeyRelatedField(queryset=Types.objects.all())
 
     class Meta:
         model = TypesValues
-        fields = ['id', 'type', 'type_value']
+        fields = ['id', 'type_value']
 
     def create(self, validated_data):
         return TypesValues.objects.create(**validated_data)

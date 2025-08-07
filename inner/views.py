@@ -1,10 +1,9 @@
 from rest_framework import viewsets
-from .models import Product, Images, Types, TypesValues, Features, FrequentlyAskedQuestions
+from .models import Product, Images, Types, Features, FrequentlyAskedQuestions
 from .serializers import (
     ProductSerializer,
     ImageSerializer,
     TypesSerializer,
-    TypesValueSerializer,
     FeatureSerializer,
     FAQSerializer,
     ProductReadOnlySerializer)
@@ -20,10 +19,6 @@ class ImageViewSet(viewsets.ModelViewSet):
 class TypesViewSet(viewsets.ModelViewSet):
     queryset = Types.objects.all()
     serializer_class = TypesSerializer
-
-class TypesValuesViewSet(viewsets.ModelViewSet):
-    queryset = TypesValues.objects.all()
-    serializer_class = TypesValueSerializer
 
 class FeatureViewSet(viewsets.ModelViewSet):
     queryset = Features.objects.all()
