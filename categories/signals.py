@@ -1,0 +1,34 @@
+import os
+from django.db.models.signals import pre_delete, pre_save
+from django.dispatch import receiver
+from .models import ProductCategory
+
+# حذف تصویر هنگام حذف رکورد
+@receiver(pre_delete, sender=ProductCategory)
+def delete_category_image_on_delete(sender, instance, **kwargs):
+    if instance.image and hasattr(instance.image, 'delete'):
+        try:
+            instance.image.delete(save=False)
+        except Exception:
+            pass
+
+# حذف تصویر قبلی در صورت جایگزینی در زمان آپدیت
+@receiver(pre_save, sender=ProductCategory)
+def delete_old_category_image_on_change(sender, instance, **kwargs):
+    if not instance.pk:
+        return  # رکورد جدیده، نیازی به حذف نیست
+
+    try:
+        old_instance = sender.objects.get(pk=instance.pk)
+    except sender.DoesNotExist:
+        return
+
+    old_image = getattr(old_instance, 'image', None)
+    new_image = getattr(instance, 'image', None)
+
+    if old_image and old_image != new_image:
+        if hasattr(old_image, 'path') and os.path.isfile(old_image.path):
+            try:
+                old_image.delete(save=False)
+            except Exception:
+                pass
