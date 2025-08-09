@@ -75,7 +75,7 @@ const Navbar = () => {
                 <UserCircleIcon className="absolute inset-0 text-3xl text-blue-600 opacity-100 group-hover:opacity-0 scale-100 group-hover:scale-0 transition-all duration-300" />
 
                 <UserCircleSolid
-                  onClick={() => navigate("/account")}
+                  onClick={() => navigate("/account/profile")}
                   className="absolute inset-0 text-3xl text-blue-600 opacity-0 group-hover:opacity-100 scale-0 group-hover:scale-100 transition-all duration-300"
                 />
 
