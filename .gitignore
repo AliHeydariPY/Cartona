@@ -1,0 +1,29 @@
+# Python bytecode
+*.py[cod]
+__pycache__/
+
+# Virtual environments
+venv/
+.venv/
+
+# Django stuff:
+db.sqlite3
+*.log
+*.pot
+*.pyc
+
+# Environment variables
+.env
+
+# Static and media files
+/staticfiles/
+/media/
+
+# Node modules
+node_modules/
+
+# IDEs and editors
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
