@@ -10,10 +10,9 @@ import { FiArrowRight } from "react-icons/fi";
 import { FiChevronLeft } from "react-icons/fi";
 import { FiHeart } from "react-icons/fi";
 import { FiStar } from "react-icons/fi";
-import { FiShoppingCart } from "react-icons/fi";
 import { TfiQuoteRight } from "react-icons/tfi";
 import { FiSearch } from "react-icons/fi";
-import { IoCart, IoCartOutline } from "react-icons/io5";
+import { IoCartOutline } from "react-icons/io5";
 
 const Home = () => {
   return (
@@ -50,13 +49,21 @@ const Home = () => {
               </button>
             </div>
 
-            <button className="hero-cta-button cursor-pointer">
+            <button
+              className="flex items-center gap-2 mx-auto mt-8 px-6 py-3 
+             text-white font-medium rounded-full 
+             shadow-md hover:shadow-lg hover:shadow-blue-400/30
+             transition-colors cursor-pointer duration-300 ease-[cubic-bezier(0.4,0,0.6,1)] 
+             bg-gradient-to-r from-cyan-500 to-blue-500 
+             hover:from-cyan-600 hover:to-blue-600 
+             animate-pulse-slow"
+            >
               Explore Top Products
             </button>
           </div>
         </div>
       </section>
-      
+
       <section className="relative bg-gradient-to-b from-blue-50 to-white py-16 overflow-hidden">
         {/* Floating gradient bubbles */}
         <div className="absolute top-20 left-10 w-80 h-80 bg-blue-600/10 rounded-full filter blur-3xl animate-float"></div>
@@ -90,7 +97,7 @@ const Home = () => {
               ].map((category, i) => (
                 <div
                   key={i}
-                  className="group relative overflow-hidden rounded-2xl bg-white shadow-lg hover:shadow-xl transition-all duration-500"
+                  className="group cursor-pointer relative overflow-hidden rounded-2xl bg-white shadow-lg hover:shadow-xl transition-all duration-500"
                 >
                   <div
                     className={`${category.color} h-32 flex items-center justify-center`}
@@ -124,7 +131,7 @@ const Home = () => {
                 <p className="text-lg md:text-xl mb-6 opacity-90">
                   Up to 50% off on selected items. Limited time offer.
                 </p>
-                <button className="bg-white text-blue-600 hover:bg-blue-50 px-8 py-3 rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-300">
+                <button className="bg-white cursor-pointer text-blue-600 hover:bg-blue-100 px-8 py-3 rounded-full font-semibold shadow-lg hover:shadow-xl transition-colors duration-300">
                   Shop Now
                 </button>
               </div>
@@ -157,7 +164,7 @@ const Home = () => {
                   <div className="relative h-60 bg-blue-50 flex items-center justify-center">
                     <div className="w-40 h-40 bg-gradient-to-br from-blue-100 to-white rounded-full"></div>
                     <div className="absolute top-4 right-4">
-                      <button className="p-2 bg-white rounded-full shadow-md hover:bg-rose-100 transition-colors">
+                      <button className="p-2 cursor-pointer bg-white rounded-full shadow-md hover:bg-rose-100 transition-colors">
                         <FiHeart className="text-rose-400" />
                       </button>
                     </div>
@@ -251,10 +258,10 @@ const Home = () => {
               for their shopping needs.
             </p>
             <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
-              <button className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white px-8 py-4 rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-300">
+              <button className="bg-gradient-to-r cursor-pointer from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white px-8 py-4 rounded-full font-semibold shadow-lg hover:shadow-xl transition-colors duration-300">
                 Start Shopping Now
               </button>
-              <button className="bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 px-8 py-4 rounded-full font-semibold shadow hover:shadow-md transition-all duration-300">
+              <button className="bg-white cursor-pointer border-2 border-blue-600 text-blue-600 hover:bg-blue-100 px-8 py-4 rounded-full font-semibold shadow hover:shadow-md transition-all duration-300">
                 Learn More
               </button>
             </div>

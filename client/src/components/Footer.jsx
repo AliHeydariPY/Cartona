@@ -119,7 +119,7 @@ const Footer = () => {
                 placeholder="Your email"
                 className="w-full py-3 px-5 pr-14 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-400 text-white placeholder-blue-200"
               />
-              <button className="absolute right-2 top-1/2 -translate-y-1/2 bg-gradient-to-r from-cyan-400 to-blue-500 p-2 rounded-full hover:shadow-lg hover:shadow-cyan-400/30 transition-all duration-300">
+              <button className="absolute cursor-pointer right-2 top-1/2 -translate-y-1/2 bg-gradient-to-r from-cyan-400 to-blue-500 p-2 rounded-full hover:shadow-lg hover:shadow-cyan-400/30 transition-all duration-300">
                 <FiSend className="text-lg text-white" />
               </button>
             </div>
@@ -142,7 +142,7 @@ const Footer = () => {
               <a
                 key={item}
                 href="#"
-                className="text-blue-100 hover:text-white text-sm transition-colors duration-300 flex items-center"
+                className="text-gray-200 hover:text-white text-sm transition-colors duration-300 flex items-center"
               >
                 {item}
               </a>
