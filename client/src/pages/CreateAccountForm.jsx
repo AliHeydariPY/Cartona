@@ -6,17 +6,17 @@ import { createUser } from "../services/userAPIService";
 const CreateAccountForm = () => {
   const SignupSchema = Yup.object().shape({
     username: Yup.string()
-      .matches(/^[a-zA-Z0-9_]+$/, "فقط حروف انگلیسی، عدد و آندرلاین مجاز است")
-      .min(3, "حداقل ۳ کاراکتر")
-      .max(20, "حداکثر ۲۰ کاراکتر")
-      .required("وارد کردن نام کاربری الزامی است"),
+      .matches(/^[a-zA-Z0-9@./+\-_]+$/, "Only English letters, numbers and @./+-_ characters are allowed")
+      .min(3, "At least 3 characters")
+      .max(18, "Maximum 18 characters")
+      .required("Username is required"),
     password: Yup.string()
-      .min(8, "حداقل ۸ کاراکتر")
-      .matches(/[A-Z]/, "حداقل یک حرف بزرگ")
-      .matches(/[a-z]/, "حداقل یک حرف کوچک")
-      .matches(/[0-9]/, "حداقل یک عدد")
-      .matches(/[@$!%*?&]/, "حداقل یک کاراکتر خاص")
-      .required("وارد کردن رمز عبور الزامی است"),
+      .min(8, "At least 8 characters")
+      .matches(/[A-Z]/, "at least one uppercase letter")
+      .matches(/[a-z]/, "at least one lowercase letter")
+      .matches(/[0-9]/, "at least one number")
+      .matches(/[@$!%*?&]/, "at least one special character")
+      .required("Password entry is required"),
   });
 
   return (
@@ -31,72 +31,66 @@ const CreateAccountForm = () => {
           initialValues={{ username: "", password: "" }}
           validationSchema={SignupSchema}
           onSubmit={(values) => {
-            console.log("ثبت نام:", values);
-            const users = createUser(values)
-            console.log(users)
+            createUser({
+              username: values.username,
+              password: values.password,
+            });
           }}
         >
-          {({ isSubmitting }) => (
-            <Form className="p-6 space-y-5">
-              {/* Username */}
-              <div className="space-y-1">
-                <label className="block text-sm font-medium text-blue-800">
-                  User Name
-                </label>
-                <Field
-                  type="text"
-                  name="username"
-                  placeholder="John_Doe"
-                  className="w-full px-4 py-3 bg-white/70 rounded-lg border border-blue-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent placeholder-blue-300 text-blue-800"
-                />
-                <ErrorMessage
-                  name="username"
-                  component="div"
-                  className="text-red-500 text-sm mt-1"
-                />
-              </div>
+          <Form className="p-6 space-y-5">
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-blue-800">
+                User Name
+              </label>
+              <Field
+                type="text"
+                name="username"
+                placeholder="John_Doe"
+                className="w-full px-4 py-3 bg-white/70 rounded-lg border border-blue-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent placeholder-blue-300 text-blue-950"
+              />
+              <ErrorMessage
+                name="username"
+                component="div"
+                className="text-red-500 text-sm ml-0.5 mt-1"
+              />
+            </div>
 
-              {/* Password */}
-              <div className="space-y-1">
-                <label className="block text-sm font-medium text-blue-800">
-                  Password
-                </label>
-                <Field
-                  type="password"
-                  name="password"
-                  placeholder="••••••••"
-                  className="w-full px-4 py-3 bg-white/70 rounded-lg border border-blue-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent placeholder-blue-300 text-blue-800"
-                />
-                <ErrorMessage
-                  name="password"
-                  component="div"
-                  className="text-red-500 text-sm mt-1"
-                />
-              </div>
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-blue-800">
+                Password
+              </label>
+              <Field
+                type="text"
+                name="password"
+                placeholder="••••••••"
+                className="w-full px-4 py-3 bg-white/70 rounded-lg border border-blue-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent placeholder-blue-300 text-blue-950"
+              />
+              <ErrorMessage
+                name="password"
+                component="div"
+                className="text-red-500 text-sm ml-0.5 mt-1"
+              />
+            </div>
 
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-semibold py-3 px-4 rounded-lg shadow-lg hover:shadow-cyan-500/30 transition-all duration-700 mt-4"
-              >
-                {isSubmitting ? "در حال ساخت..." : "Create Account"}
-              </button>
+            <button
+              type="submit"
+              className="w-full cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-semibold py-3 px-4 rounded-lg shadow-lg hover:shadow-cyan-500/30 transition-all duration-700 mt-2"
+            >
+              Create Account
+            </button>
 
-              {/* Login Link */}
-              <div className="text-center">
-                <p className="text-sm text-blue-700">
-                  Already have an account?{" "}
-                  <a
-                    href="#"
-                    className="font-medium text-cyan-600 hover:text-cyan-700"
-                  >
-                    Log in
-                  </a>
-                </p>
-              </div>
-            </Form>
-          )}
+            <div className="text-center">
+              <p className="text-sm text-blue-700">
+                Already have an account?{" "}
+                <a
+                  href="#"
+                  className="font-medium text-cyan-600 hover:text-cyan-700"
+                >
+                  Log in
+                </a>
+              </p>
+            </div>
+          </Form>
         </Formik>
       </div>
     </div>
