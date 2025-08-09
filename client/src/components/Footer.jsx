@@ -34,10 +34,10 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
           <div className="space-y-6">
             <div className="flex items-center">
-              <h3 className="text-3xl font-bold bg-gradient-to-r from-cyan-300 to-white bg-clip-text text-transparent">
+              <h3 className="text-3xl font-bold bg-gradient-to-r from-cyan-300 to-cyan-200 bg-clip-text text-transparent">
                 Cartona
               </h3>
-              <span className="ml-2 px-2 py-1 bg-cyan-500/20 text-cyan-200 text-xs rounded-full">
+              <span className="ml-2 px-2 py-1 mt-1 bg-cyan-500/20 text-cyan-200 text-xs rounded-full">
                 Premium
               </span>
             </div>
@@ -49,7 +49,7 @@ const Footer = () => {
                 (Icon, i) => (
                   <button
                     key={i}
-                    className="relative p-2 group"
+                    className="relative p-2 group cursor-pointer"
                     aria-label={`Follow us on ${
                       [
                         "Facebook",
@@ -81,7 +81,7 @@ const Footer = () => {
                       href="#"
                       className="text-blue-100 hover:text-white flex items-center group transition-all duration-300"
                     >
-                      <FiChevronLeft className="mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <FiChevronLeft className="mr-2 mb-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       {item}
                     </a>
                   </li>
@@ -102,7 +102,7 @@ const Footer = () => {
                     href="#"
                     className="text-blue-100 hover:text-white flex items-center group transition-all duration-300"
                   >
-                    <FiChevronLeft className="mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <FiChevronLeft className="mr-2 mb-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     {item}
                   </a>
                 </li>
@@ -123,8 +123,8 @@ const Footer = () => {
                 <FiSend className="text-lg text-white" />
               </button>
             </div>
-            <div className="flex items-center space-x-4 pt-2">
-              <FiShield className="text-cyan-300" />
+            <div className="flex items-center space-x-2 pt-2">
+              <FiShield className="text-cyan-300 mb-0.25" />
               <span className="text-xs text-blue-100/60">
                 We never share your data
               </span>
@@ -134,7 +134,7 @@ const Footer = () => {
 
         <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-blue-100/60 text-sm flex items-center">
-            <FiHeart className="mr-2 text-rose-400" />©{" "}
+            <FiHeart className="mr-2 text-rose-400 mb-0.5" />©{" "}
             {new Date().getFullYear()} Cartona. All rights reserved.
           </p>
           <div className="flex space-x-6 mt-4 md:mt-0">

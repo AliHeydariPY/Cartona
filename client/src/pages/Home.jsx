@@ -13,6 +13,7 @@ import { FiStar } from "react-icons/fi";
 import { FiShoppingCart } from "react-icons/fi";
 import { TfiQuoteRight } from "react-icons/tfi";
 import { FiSearch } from "react-icons/fi";
+import { IoCart, IoCartOutline } from "react-icons/io5";
 
 const Home = () => {
   return (
@@ -55,6 +56,7 @@ const Home = () => {
           </div>
         </div>
       </section>
+      
       <section className="relative bg-gradient-to-b from-blue-50 to-white py-16 overflow-hidden">
         {/* Floating gradient bubbles */}
         <div className="absolute top-20 left-10 w-80 h-80 bg-blue-600/10 rounded-full filter blur-3xl animate-float"></div>
@@ -160,7 +162,7 @@ const Home = () => {
                       </button>
                     </div>
                     <div className="absolute bottom-4 left-0 right-0 flex justify-center">
-                      <button className="bg-white/90 backdrop-blur-sm px-6 py-2 rounded-full shadow-md hover:bg-cyan-500 hover:text-white transition-all duration-300 transform translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100">
+                      <button className="bg-white/90 cursor-pointer backdrop-blur-sm px-6 py-2 rounded-full shadow-md hover:bg-cyan-500 hover:text-white transition-all duration-300 transform translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100">
                         Quick View
                       </button>
                     </div>
@@ -187,8 +189,8 @@ const Home = () => {
                       <span className="font-bold text-blue-900">
                         ${(199 + item * 50).toFixed(2)}
                       </span>
-                      <button className="p-2 bg-blue-600 hover:bg-cyan-500 rounded-full text-white transition-colors">
-                        <FiShoppingCart />
+                      <button className="p-2 cursor-pointer bg-blue-600 hover:bg-cyan-500 rounded-full text-white transition-colors">
+                        <IoCartOutline className="text-lg m-0.5" />
                       </button>
                     </div>
                   </div>

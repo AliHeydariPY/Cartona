@@ -3,6 +3,7 @@ import { Toaster } from 'react-hot-toast';
 
 import Home from "./pages/Home";
 import CreateAccountForm from "./pages/CreateAccountForm";
+import UserDashboard from "./pages/UserDashboard";
 
 function App() {
   return (
@@ -20,7 +21,7 @@ function App() {
       />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/account" element={<CreateAccountForm />} />
+        <Route path="/account" element={<UserDashboard />} />
       </Routes>
     </>
   );
