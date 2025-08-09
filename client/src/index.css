@@ -1,10 +1,10 @@
 @import "tailwindcss";
 
-:root{
-    font-family: "Roboto";
+:root {
+  font-family: "Roboto";
 }
 
-/* افکت‌های انیمیشن */
+/* انیمیشن‌های اصلی */
 @keyframes float {
   0%, 100% { transform: translateY(0) translateX(0); }
   50% { transform: translateY(-20px) translateX(10px); }
@@ -20,7 +20,7 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* استایل اصلی */
+/* استایل‌های هیرو */
 .hero-section {
   position: relative;
   background: linear-gradient(to right, #1d4ed8, #1e40af, #3730a3);
@@ -72,6 +72,7 @@
   font-weight: 700;
   margin-bottom: 1rem;
   animation: fadeIn 1s ease-out;
+
 }
 
 @media (min-width: 768px) {
@@ -105,7 +106,6 @@
   color: white;
 }
 
-/* کادر جستجو */
 .hero-search-container {
   position: relative;
   max-width: 28rem;
@@ -154,7 +154,6 @@
   background: #0891b2;
 }
 
-/* دکمه CTA */
 .hero-cta-button {
   display: flex;
   align-items: center;
@@ -175,260 +174,14 @@
   box-shadow: 0 6px 8px rgba(59, 130, 246, 0.3);
 }
 
-.mask-icon svg {
-  mask-image: linear-gradient(to right, transparent, transparent);
-  -webkit-mask-image: linear-gradient(to right, transparent, transparent);
-}
-
 @keyframes float {
   0%, 100% { transform: translateY(0) rotate(0deg); }
   50% { transform: translateY(-20px) rotate(5deg); }
 }
 
-.animate-float {
-  animation: float 8s ease-in-out infinite;
-}
-
-.animate-float-delay {
-  animation: float 8s ease-in-out 2s infinite;
-}
-
-.footer {
-  position: relative;
-  background: linear-gradient(to bottom, rgba(37, 99, 235, 0.1), rgba(30, 58, 138, 0.3));
-  backdrop-filter: blur(12px);
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  overflow: hidden;
-  padding: 3rem 0;
-}
-
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1.5rem;
-  display: grid;
-  grid-template-columns: repeat(1, 1fr);
-  gap: 2rem;
-  position: relative;
-  z-index: 10;
-}
-
-@media (min-width: 768px) {
-  .container {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-/* افکت‌های موجی */
-.waveEffect1 {
-  position: absolute;
-  bottom: -5rem;
-  left: -5rem;
-  width: 16rem;
-  height: 16rem;
-  background: rgba(6, 182, 212, 0.2);
-  border-radius: 50%;
-  filter: blur(48px);
-  opacity: 0.7;
-  animation: float 8s ease-in-out infinite;
-}
-
-.waveEffect2 {
-  position: absolute;
-  top: -2.5rem;
-  right: -2.5rem;
-  width: 18rem;
-  height: 18rem;
-  background: rgba(37, 99, 235, 0.2);
-  border-radius: 50%;
-  filter: blur(48px);
-  opacity: 0.5;
-  animation: float 10s ease-in-out 2s infinite;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-20px) rotate(5deg); }
-}
-
-/* بخش لوگو */
-.logo {
-  background: linear-gradient(to right, #2563eb, #06b6d4);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  font-size: 1.5rem;
-  font-weight: 700;
-}
-
-.description {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.875rem;
-  margin-bottom: 1rem;
-}
-
-/* آیکون‌های اجتماعی */
-.socialIcons {
-  display: flex;
-  gap: 1rem;
-}
-
-.socialIcon {
-  width: 2.5rem;
-  height: 2.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.1);
-  transition: all 0.3s ease;
-}
-
-.socialIcon:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 0 12px rgba(6, 182, 212, 0.3);
-  transform: scale(1.1);
-}
-
-.icon {
-  width: 1.5rem;
-  height: 1.5rem;
-  fill: currentColor;
-  color: white;
-}
-
-/* لینک‌ها */
-.sectionTitle {
-  color: white;
-  font-weight: 700;
-  font-size: 1.125rem;
-  margin-bottom: 1rem;
-  display: inline-block;
-}
-
-.underlineHover {
-  position: relative;
-}
-
-.underlineHover::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background: linear-gradient(to right, #60a5fa, #06b6d4);
-  transition: width 0.5s ease;
-}
-
-.underlineHover:hover::after {
-  width: 100%;
-}
-
-.linksList {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.linkItem {
-  color: rgba(255, 255, 255, 0.7);
-  transition: color 0.3s ease;
-  position: relative;
-}
-
-.linkItem:hover {
-  color: white;
-}
-
-.linkItem::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 0;
-  height: 1px;
-  background-color: #06b6d4;
-  transition: width 0.3s ease;
-}
-
-.linkItem:hover::after {
-  width: 100%;
-}
-
-/* فرم خبرنامه */
-.newsletterText {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.875rem;
-  margin-bottom: 1rem;
-}
-
-.newsletterForm {
-  display: flex;
-}
-
-.emailInput {
-  flex-grow: 1;
-  padding: 0.5rem 1rem;
-  border-radius: 9999px 0 0 9999px;
-  background-color: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
-  outline: none;
-  transition: all 0.3s ease;
-}
-
-.emailInput:focus {
-  box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.5);
-}
-
-.emailInput::placeholder {
-  color: rgba(255, 255, 255, 0.5);
-}
-
-.submitButton {
-  padding: 0.5rem 1.5rem;
-  border-radius: 0 9999px 9999px 0;
-  background: linear-gradient(to right, #2563eb, #06b6d4);
-  color: white;
-  font-weight: 500;
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.submitButton:hover {
-  background: linear-gradient(to right, #1d4ed8, #0891b2);
-  box-shadow: 0 4px 6px rgba(6, 182, 212, 0.2);
-}
-
-/* کپی رایت */
-.copyright {
-  margin-top: 3rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  text-align: center;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 0.875rem;
-}
-
-@keyframes pulse {
-  0% { opacity: 0.3; transform: scale(0.95); }
-  100% { opacity: 0.8; transform: scale(1.1); }
-}
-
-@keyframes wave {
-  0% { background-position-x: 0; }
-  100% { background-position-x: 1200px; }
-}
-
+/* انیمیشن‌های فوتر */
 .animate-wave {
   animation: wave 20s linear infinite;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-20px) rotate(5deg); }
 }
 
 .animate-float {

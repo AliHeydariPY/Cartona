@@ -19,7 +19,7 @@ const Home = () => {
     <>
       <Navbar />
 
-<section className="hero-section">
+      <section className="hero-section">
         {/* افکت‌های پس‌زمینه */}
         <div className="hero-bg-effect">
           <div className="hero-bubble-1"></div>

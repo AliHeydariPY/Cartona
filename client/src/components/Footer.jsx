@@ -11,7 +11,7 @@ import { FiHeart } from "react-icons/fi";
 const Footer = () => {
   return (
     <footer className="bg-gradient-to-br from-blue-900 to-cyan-800 pt-20 pb-12 px-4 relative overflow-hidden">
-      {/* Glowing particles background */}
+
       <div className="absolute inset-0 overflow-hidden">
         {[...Array(20)].map((_, i) => (
           <div
@@ -28,12 +28,10 @@ const Footer = () => {
         ))}
       </div>
 
-      {/* Animated gradient waves */}
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAwIDEyMCI+PHBhdGggZmlsbD0id2hpdGUiIGZpbGwtb3BhY2l0eT0iMC4xIiBkPSJNMCA2MGMwLTE2IDI3LTQ4IDcyLTQ4czcyIDMyIDcyIDQ4LTI3IDQ4LTcyIDQ4UzAgNzYgMCA2MHoiLz48L3N2Zz4=')] bg-repeat-x opacity-60 animate-wave"></div>
 
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-          {/* Brand Column */}
           <div className="space-y-6">
             <div className="flex items-center">
               <h3 className="text-3xl font-bold bg-gradient-to-r from-cyan-300 to-white bg-clip-text text-transparent">
@@ -70,7 +68,6 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Quick Links */}
           <div className="space-y-6">
             <h4 className="text-xl font-semibold text-white flex items-center">
               <span className="w-3 h-3 bg-cyan-400 rounded-full mr-2"></span>
@@ -93,7 +90,6 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Support */}
           <div className="space-y-6">
             <h4 className="text-xl font-semibold text-white flex items-center">
               <span className="w-3 h-3 bg-cyan-400 rounded-full mr-2"></span>
@@ -114,7 +110,6 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Newsletter */}
           <div className="space-y-6">
             <h4 className="text-xl font-semibold text-white">Stay Updated</h4>
             <p className="text-blue-100/80">Subscribe for exclusive offers</p>
@@ -137,7 +132,6 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Copyright */}
         <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-blue-100/60 text-sm flex items-center">
             <FiHeart className="mr-2 text-rose-400" />©{" "}
