@@ -47,17 +47,23 @@ const Navbar = () => {
 
           <div className="hidden md:block col-span-2">
             <div className="flex items-center justify-end md:justify-center space-x-4 md:space-x-6 lg:space-x-10 xl:space-x-15">
-              <div className="relative group flex flex-col items-center cursor-pointer w-8 h-8 mt-2">
+              <div
+                onClick={() => navigate("/account/favorites")}
+                className="relative group flex flex-col items-center cursor-pointer w-8 h-8 mt-2"
+              >
                 <FaRegHeart className="absolute inset-0 text-2xl text-blue-600 opacity-100 group-hover:opacity-0 scale-100 group-hover:scale-0 transition-all duration-300" />
 
                 <FaHeart className="absolute inset-0 text-2xl text-blue-600 opacity-0 group-hover:opacity-100 scale-0 group-hover:scale-100 transition-all duration-300" />
 
-                <div className="absolute -bottom-6 left-2/5 transform -translate-x-1/2 bg-blue-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+                <div className="absolute -bottom-5.5 left-2/5 transform -translate-x-1/2 bg-blue-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
                   Favorite
                 </div>
               </div>
 
-              <div className="relative group flex flex-col items-center cursor-pointer w-8 h-8 mt-1">
+              <div
+                onClick={() => navigate("/account/orders")}
+                className="relative group flex flex-col items-center cursor-pointer w-8 h-8 mt-1"
+              >
                 <IoCartOutline className="absolute inset-0 text-3xl text-blue-600 opacity-100 group-hover:opacity-0 scale-100 group-hover:scale-0 transition-all duration-300" />
 
                 <IoCart className="absolute inset-0 text-3xl text-blue-600 opacity-0 group-hover:opacity-100 scale-0 group-hover:scale-100 transition-all duration-300" />
@@ -71,13 +77,13 @@ const Navbar = () => {
                 </span>
               </div>
 
-              <div className="relative group flex flex-col items-center cursor-pointer w-8 h-8 mt-0.5">
+              <div
+                onClick={() => navigate("/account/profile")}
+                className="relative group flex flex-col items-center cursor-pointer w-8 h-8 mt-0.5"
+              >
                 <UserCircleIcon className="absolute inset-0 text-3xl text-blue-600 opacity-100 group-hover:opacity-0 scale-100 group-hover:scale-0 transition-all duration-300" />
 
-                <UserCircleSolid
-                  onClick={() => navigate("/account/profile")}
-                  className="absolute inset-0 text-3xl text-blue-600 opacity-0 group-hover:opacity-100 scale-0 group-hover:scale-100 transition-all duration-300"
-                />
+                <UserCircleSolid className="absolute inset-0 text-3xl text-blue-600 opacity-0 group-hover:opacity-100 scale-0 group-hover:scale-100 transition-all duration-300" />
 
                 <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
                   Your Account

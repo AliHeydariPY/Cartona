@@ -1,10 +1,15 @@
 import { Routes, Route } from "react-router-dom";
-import { Toaster } from 'react-hot-toast';
+import { Toaster } from "react-hot-toast";
 
 import Home from "./pages/Home";
 import CreateAccountForm from "./pages/CreateAccountForm";
 import UpgradeToSeller from "./pages/UpgradeToSeller";
 import UserDashboard from "./pages/UserDashboard";
+
+import Profile from "./pages/user dashboard/Profile";
+import Favorites from "./pages/user dashboard/Favorites";
+import Orders from "./pages/user dashboard/Orders";
+import Payments from "./pages/user dashboard/Payments";
 
 function App() {
   return (
@@ -22,9 +27,15 @@ function App() {
       />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/account/profile" element={<UserDashboard />} />
-        <Route path="/account/profile/upgradeToSeller" element={<UpgradeToSeller />} />
+        
+        <Route path="/account" element={<UserDashboard />}>
+          <Route path="profile" element={<Profile />} />
+          <Route path="orders" element={<Orders />} />
+          <Route path="favorites" element={<Favorites />} />
+          <Route path="payments" element={<Payments />} />
+        </Route>
 
+        <Route path="/upgradeToSeller" element={<UpgradeToSeller />} />
       </Routes>
     </>
   );
