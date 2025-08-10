@@ -8,7 +8,7 @@ const Profile = () => {
       <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-lg p-5 sm:p-6 2xl:p-8 border border-blue-300 hover:shadow-2xl hover:shadow-blue-500/40 transition-all duration-300">
         <h2 className="text-xl sm:text-2xl font-bold text-blue-900 mb-6 sm:mb-8 flex items-center">
           <FiStar
-            className="ml-2 sm:ml-3 text-amber-400 animate-spin-slow"
+            className="mr-2 sm:mr-3 text-amber-400 animate-spin-slow"
             size={20}
           />{" "}
           Activity Summary

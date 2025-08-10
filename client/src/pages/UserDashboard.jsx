@@ -131,7 +131,7 @@ const UserDashboard = () => {
             </p>
             <button
               onClick={() => navigate("/upgradeToSeller")}
-              className="w-full cursor-pointer bg-gradient-to-r from-blue-700 via-cyan-600 to-teal-500 text-white py-2 sm:py-3 rounded-xl hover:shadow-xl hover:scale-103 transition-all duration-300 font-semibold text-sm sm:text-base"
+              className="w-full cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-500 text-white py-2 sm:py-3 rounded-xl hover:shadow-xl hover:scale-103 transition-all duration-300 font-semibold text-sm sm:text-base"
             >
               Upgrade
             </button>
