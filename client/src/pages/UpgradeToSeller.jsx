@@ -40,7 +40,7 @@ const UpgradeToSeller = () => {
           validationSchema={StoreSchema}
           onSubmit={(values, { setSubmitting }) => {
             const formData = new FormData();
-            formData.append("user", 13);
+            formData.append("user", 14);
             formData.append("store_name", values.storeName);
             formData.append("description", values.description);
             formData.append("address", values.address);
@@ -108,8 +108,9 @@ const UpgradeToSeller = () => {
                   Address
                 </label>
                 <Field
-                  type="text"
+                  as="textarea"
                   name="address"
+                  rows="3"
                   placeholder="Store address"
                   className="w-full px-4 py-3 bg-white/80 rounded-lg border border-blue-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent placeholder-blue-400 text-blue-950"
                 />

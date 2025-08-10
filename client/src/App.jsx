@@ -14,7 +14,7 @@ function App() {
         position="top-center"
         gutter={12}
         containerStyle={{
-          marginTop: "15px",
+          marginTop: "0px",
         }}
         toastOptions={{
           duration: 60000,

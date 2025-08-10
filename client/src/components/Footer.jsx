@@ -44,12 +44,12 @@ const Footer = () => {
             <p className="text-blue-100/80 text-lg">
               Your ultimate shopping destination
             </p>
-            <div className="flex space-x-5">
+            <div className="flex space-x-5 justify-start md:justify-between items-center flex-wrap xl:space-x-5 xl:justify-start">
               {[FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaYoutube].map(
                 (Icon, i) => (
                   <button
                     key={i}
-                    className="relative p-2 group cursor-pointer"
+                    className="relative p-1 group cursor-pointer"
                     aria-label={`Follow us on ${
                       [
                         "Facebook",
