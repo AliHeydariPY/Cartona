@@ -3,6 +3,7 @@ import { Toaster } from 'react-hot-toast';
 
 import Home from "./pages/Home";
 import CreateAccountForm from "./pages/CreateAccountForm";
+import UpgradeToSeller from "./pages/UpgradeToSeller";
 import UserDashboard from "./pages/UserDashboard";
 
 function App() {
@@ -13,15 +14,17 @@ function App() {
         position="top-center"
         gutter={12}
         containerStyle={{
-          marginTop: "40px",
+          marginTop: "15px",
         }}
         toastOptions={{
-          duration: 4000,
+          duration: 60000,
         }}
       />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/account/profile" element={<UserDashboard />} />
+        <Route path="/account/profile/upgradeToSeller" element={<UpgradeToSeller />} />
+
       </Routes>
     </>
   );

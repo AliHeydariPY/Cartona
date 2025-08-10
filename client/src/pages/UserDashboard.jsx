@@ -117,7 +117,7 @@ const UserDashboard = () => {
             <p className="text-xs sm:text-sm text-blue-800 mb-4 sm:mb-5">
               Upgrade to a seller account to sell your products on Cartona.
             </p>
-            <button className="w-full cursor-pointer bg-gradient-to-r from-blue-700 via-cyan-600 to-teal-500 text-white py-2 sm:py-3 rounded-xl hover:shadow-xl hover:scale-103 transition-all duration-300 font-semibold text-sm sm:text-base">
+            <button onClick={() => navigate("/account/profile/upgradeToSeller")} className="w-full cursor-pointer bg-gradient-to-r from-blue-700 via-cyan-600 to-teal-500 text-white py-2 sm:py-3 rounded-xl hover:shadow-xl hover:scale-103 transition-all duration-300 font-semibold text-sm sm:text-base">
               Upgrade
             </button>
           </div>

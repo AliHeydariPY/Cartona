@@ -112,9 +112,9 @@ WSGI_APPLICATION = 'store.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'store',
+        'NAME': 'Cartona_Store',
         'USER': 'root',
-        'PASSWORD': '1234',
+        'PASSWORD': '1388',
         'HOST': '127.0.0.1',
         'PORT': '3306',
     }
