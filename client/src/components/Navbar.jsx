@@ -28,7 +28,7 @@ const Navbar = () => {
               <input
                 type="text"
                 placeholder="Search products..."
-                className="rounded-l-full text-md text-blue-800 px-5 py-3.5 h-full w-full focus:outline-none border-r-0"
+                className="rounded-l-full text-md text-blue-900 px-5 py-3.5 h-full w-full focus:outline-none border-r-0"
               />
             </div>
             <div className="relative h-full flex items-center rounded-r-full my-0.25 mr-0.25 overflow-hidden cursor-pointer bg-white">
