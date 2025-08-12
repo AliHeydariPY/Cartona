@@ -10,6 +10,7 @@ import Profile from "./pages/user dashboard/Profile";
 import Favorites from "./pages/user dashboard/Favorites";
 import Orders from "./pages/user dashboard/Orders";
 import Payments from "./pages/user dashboard/Payments";
+import AddProduct from "./pages/user dashboard/AddProduct";
 
 function App() {
   return (
@@ -27,12 +28,13 @@ function App() {
       />
       <Routes>
         <Route path="/" element={<Home />} />
-        
+
         <Route path="/account" element={<UserDashboard />}>
           <Route path="profile" element={<Profile />} />
           <Route path="orders" element={<Orders />} />
           <Route path="favorites" element={<Favorites />} />
           <Route path="payments" element={<Payments />} />
+          <Route path="add-product" element={<AddProduct />} />
         </Route>
 
         <Route path="/upgradeToSeller" element={<UpgradeToSeller />} />

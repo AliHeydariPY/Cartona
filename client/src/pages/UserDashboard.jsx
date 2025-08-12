@@ -13,6 +13,7 @@ import {
   FiBarChart2,
   FiUsers,
   FiDollarSign,
+  FiPlusCircle,
 } from "react-icons/fi";
 
 const UserDashboard = () => {
@@ -32,16 +33,17 @@ const UserDashboard = () => {
           <div className="flex items-center">
             <div className="relative">
               <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gradient-to-br from-blue-700 to-teal-400 rounded-full flex items-center justify-center text-white text-2xl sm:text-3xl md:text-4xl shadow-lg ring-2 sm:ring-3 md:ring-4 ring-blue-300/60">
-                {isSeller? 
-                <div className="relative">
+                {isSeller ? (
+                  <div className="relative">
+                    <FiUser className="text-white" size={35} />
+                    <FiShield
+                      className="absolute -bottom-1 -right-2 text-white font-bold bg-blue-600 rounded-full p-0.5"
+                      size={20}
+                    />
+                  </div>
+                ) : (
                   <FiUser className="text-white" size={35} />
-                  <FiShield
-                    className="absolute -bottom-1 -right-2 text-white font-bold bg-blue-600 rounded-full p-0.5"
-                    size={20}
-                  />
-                </div> 
-                : <FiUser className="text-white" size={35}/>
-                }
+                )}
               </div>
               <div className="absolute bottom-0 right-0 bg-green-500 w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 rounded-full border-2 border-white shadow-lg animate-bounce"></div>
             </div>
@@ -117,14 +119,14 @@ const UserDashboard = () => {
                       label: "My Products",
                     },
                     {
-                      id: "analytics",
+                      id: "add-product",
                       icon: (
-                        <FiBarChart2
-                          className="ml-3 text-purple-600"
+                        <FiPlusCircle
+                          className="ml-3 text-green-500"
                           size={18}
                         />
                       ),
-                      label: "Analytics",
+                      label: "Add Product",
                     },
                     {
                       id: "customers",
@@ -169,8 +171,8 @@ const UserDashboard = () => {
                     navigate("/account/payments");
                   } else if (item.id == "products") {
                     navigate("/account/products");
-                  } else if (item.id == "analytics") {
-                    navigate("/account/analytics");
+                  } else if (item.id == "add-product") {
+                    navigate("/account/add-product");
                   } else if (item.id == "customers") {
                     navigate("/account/customers");
                   } else if (item.id == "earnings") {
