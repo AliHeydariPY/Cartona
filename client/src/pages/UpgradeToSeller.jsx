@@ -22,8 +22,8 @@ const UpgradeToSeller = () => {
   });
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-200 to-cyan-200 p-4">
-      <div className="w-full max-w-md bg-white/20 backdrop-blur-lg rounded-2xl shadow-xl overflow-hidden border border-white/30">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-300 to-cyan-100 p-4">
+      <div className="w-full max-w-md bg-white/20 backdrop-blur-lg rounded-2xl shadow-xl overflow-hidden">
         <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-6 text-center">
           <h2 className="text-3xl font-bold text-white">Register Your Store</h2>
           <p className="text-blue-100 mt-1">Complete your store information</p>

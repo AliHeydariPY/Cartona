@@ -9,7 +9,7 @@ const Profile = () => {
         <h2 className="text-xl sm:text-2xl font-bold text-blue-900 mb-6 sm:mb-8 flex items-center">
           <FiStar
             className="mr-2 sm:mr-3 text-amber-400 animate-spin-slow"
-            size={20}
+            size={22}
           />{" "}
           Activity Summary
         </h2>

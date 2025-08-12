@@ -17,7 +17,7 @@ const Favorites = () => {
             <span>
               <FiHeart
                 className="mr-2 sm:mr-3 text-rose-500 fill-current"
-                size={18}
+                size={22}
               />{" "}
             </span>
             Your Favorites
@@ -117,7 +117,7 @@ const Favorites = () => {
                     )}
                   </div>
                   <button className="text-rose-500 hover:text-rose-700 cursor-pointer transition-colors">
-                    <FaHeart size={16} />
+                    <FaHeart size={19} />
                   </button>
                 </div>
               </div>

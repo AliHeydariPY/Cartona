@@ -156,13 +156,31 @@ const Home = () => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              {[1, 2, 3, 4].map((item) => (
+              {[
+                {
+                  id: 1,
+                  img: "https://dkstatics-public.digikala.com/digikala-products/9c7ef6413a251ce440b1086d1c12c08a9e5b37c6_1700306862.jpg?x-oss-process=image/resize,m_lfit,h_300,w_300/format,webp/quality,q_80",
+                },
+                {
+                  id: 2,
+                  img: "https://dkstatics-public.digikala.com/digikala-products/fbb88bb17b99181c61beb9a725467a9ca1ecb3a7_1657267311.jpg?x-oss-process=image/resize,m_lfit,h_300,w_300/format,webp/quality,q_80",
+                },
+                {
+                  id: 3,
+                  img: "https://dkstatics-public.digikala.com/digikala-products/440588a89e2641001b4257aad70e8361edb72cef_1752426612.jpg?x-oss-process=image/resize,m_lfit,h_300,w_300/format,webp/quality,q_80",
+                },
+                {
+                  id: 4,
+                  img: "https://dkstatics-public.digikala.com/digikala-products/135df93e0c68205dc94b23d4a8c3db10534ef351_1690386197.jpg?x-oss-process=image/resize,m_lfit,h_300,w_300/format,webp/quality,q_80",
+                },
+              ].map((item) => (
                 <div
-                  key={item}
+                  key={item.id}
                   className="group relative bg-white rounded-xl shadow-lg hover:shadow-xl overflow-hidden transition-all duration-500"
                 >
                   <div className="relative h-60 bg-blue-50 flex items-center justify-center">
                     <div className="w-40 h-40 bg-gradient-to-br from-blue-100 to-white rounded-full"></div>
+                    {/* <img src={`${item.img}`} alt="" /> */}
                     <div className="absolute top-4 right-4">
                       <button className="p-2 cursor-pointer bg-white rounded-full shadow-md hover:bg-rose-100 transition-colors">
                         <FiHeart className="text-rose-400" />
@@ -177,7 +195,7 @@ const Home = () => {
                   <div className="p-5">
                     <div className="flex justify-between items-start mb-2">
                       <h3 className="font-medium text-blue-800">
-                        Premium Product {item}
+                        Premium Product {item.id}
                       </h3>
                       <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
                         New
@@ -194,7 +212,7 @@ const Home = () => {
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="font-bold text-blue-900">
-                        ${(199 + item * 50).toFixed(2)}
+                        ${(199 + item.id * 50).toFixed(2)}
                       </span>
                       <button className="p-2 cursor-pointer bg-blue-600 hover:bg-cyan-500 rounded-full text-white transition-colors">
                         <IoCartOutline className="text-lg m-0.5" />
