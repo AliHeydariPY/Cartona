@@ -1,3 +1,6 @@
+import { motion } from "framer-motion";
+
+
 import {
   FiHeart,
   FiShoppingCart,
@@ -9,9 +12,15 @@ import { FaHeart } from "react-icons/fa";
 
 const Favorites = () => {
   return (
-    <div className="lg:col-span-3 space-y-4 sm:space-y-7 lg:space-y-5 xl:space-y-9">
+    <motion.div
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }} 
+      transition={{ duration: 0.4 }} 
+      className="lg:col-span-3"
+    >
+    <div className="space-y-4 sm:space-y-7 lg:space-y-5 xl:space-y-9">
       {/* Wishlist Header */}
-      <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-lg p-4 sm:p-6 2xl:p-8 border border-blue-300 hover:shadow-2xl hover:shadow-blue-500/40 transition-all duration-300">
+      <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-lg p-4 sm:p-6 2xl:p-8 border border-blue-400 hover:shadow-2xl hover:shadow-blue-500/40 transition-all duration-300">
         <div className="flex justify-between flex-wrap">
           <h2 className="text-lg sm:text-2xl font-bold text-blue-900 mb-4 sm:mb-8 w-full sm:w-5/10 flex items-center">
             <span>
@@ -151,6 +160,7 @@ const Favorites = () => {
         </div>
       </div>
     </div>
+    </motion.div>
   );
 };
 
