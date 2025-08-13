@@ -1,4 +1,8 @@
 import { motion } from "framer-motion";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
+
+import { addNewProduct } from "../../services/userAPIService";
 
 import {
   FiPlusCircle,
@@ -39,9 +43,29 @@ const AddProduct = () => {
     });
   };
 
+  const StoreSchema = Yup.object().shape({
+    image: Yup.mixed().required("Please select an image"),
+    // category: Yup.string()
+    //   .min(3, "at least 3 characters")
+    //   .max(30, "at most 30 characters")
+    //   .required("required"),
+    productName: Yup.string()
+      .min(3, "at least 3 characters")
+      .max(50, "at most 50 characters")
+      .required("required"),
+    price: Yup.string().max(200, "at most 200 characters").required("required"),
+    stockQuantity: Yup.string()
+      .min(1, "at least 10 characters")
+      .required("required"),
+    description: Yup.string()
+      .min(3, "at least 3 characters")
+      .max(200, "at most 30 characters")
+      .required("required"),
+  });
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 50 }} 
+      initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
       className="lg:col-span-3"
@@ -52,291 +76,357 @@ const AddProduct = () => {
           Add New Product
         </h2>
 
-        <form className="space-y-6">
-          {/* بخش تصویر محصول */}
-          <div className="space-y-2">
-            <label className="flex items-center text-blue-900 font-medium">
-              <FiImage className="mr-2" /> Product Images (Max 5)
-            </label>
-            <div className="flex flex-wrap gap-4">
-              {/* اسلات‌های تصویر */}
-              {[1, 2, 3, 4, 5].map((item) => (
-                <div key={item} className="relative group">
-                  <label
-                    className={`block w-24 h-24 ${
-                      !images[item]
-                        ? "border-2 border-dashed border-blue-400 cursor-pointer"
-                        : "border border-blue-200"
-                    } rounded-lg flex items-center justify-center overflow-hidden hover:bg-blue-50 transition-colors duration-300`}
-                  >
-                    {images[item] ? (
-                      <>
-                        <img
-                          src={URL.createObjectURL(images[item])}
-                          alt={`Preview ${item}`}
-                          className="w-full h-full object-cover"
-                        />
-                        <button
-                          type="button"
-                          className="absolute cursor-pointer top-0 right-0 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors duration-300"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRemoveImage(item);
-                          }}
-                        >
-                          <FiTrash2 size={12} />
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <FiPlusCircle
-                          className="text-blue-500 group-hover:text-blue-700"
-                          size={28}
-                        />
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => handleImageUpload(e, item)}
-                        />
-                      </>
-                    )}
-                  </label>
-                </div>
-              ))}
-            </div>
-          </div>
+        <Formik
+          initialValues={{
+            image: null,
+            productName: "",
+            category: "",
+            price: "",
+            stockQuantity: "",
+            description: "",
+          }}
+          validationSchema={StoreSchema}
+          onSubmit={(values) => {
+            
+            const formData = new FormData();
+            formData.append("image", values.image);
+            formData.append("storekeeper", 1);
+            formData.append("name", values.productName);
+            formData.append("category", 1);
+            formData.append("price", values.price);
+            formData.append("stock_quantity", values.stockQuantity);
+            formData.append("description", values.description);
 
-          {/* نام محصول */}
-          <div className="space-y-2">
-            <label className="flex items-center text-blue-900 font-medium">
-              <FiTag className="mr-2" /> Product Name*
-            </label>
-            <input
-              type="text"
-              required
-              className="w-full px-4 py-3 text-blue-900 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
-              placeholder="Enter product name"
-            />
-          </div>
+            console.log(Object.fromEntries(formData.entries()));
 
-          {/* دسته‌بندی */}
-          <div className="space-y-2">
-            <label className="flex items-center text-blue-900 font-medium">
-              <FiPackage className="mr-2" /> Category*
-            </label>
+            addNewProduct(formData);
+          }}
 
-            <div className="relative group w-full">
-              <button
-                type="button"
-                className="flex justify-between w-full items-center bg-white border border-blue-300 rounded-lg px-4 py-3 text-blue-900 hover:border-blue-400 transition-colors duration-300 text-left"
-                onClick={() => setIsCategoryOpen(!isCategoryOpen)}
-              >
-                <span>{selectedCategory || "Select a category"}</span>
-                <FiChevronDown
-                  className={`ml-2 transform ${
-                    isCategoryOpen ? "rotate-180" : ""
-                  } transition-transform duration-300`}
-                  size={16}
-                />
-              </button>
-
-              {isCategoryOpen && (
-                <div className="absolute w-full z-20 mt-1 bg-white rounded-lg shadow-xl border border-blue-200">
-                  {[
-                    "Electronics",
-                    "Fashion",
-                    "Home & Garden",
-                    "Beauty",
-                    "Sports",
-                  ].map((category) => (
-                    <button
-                      key={category}
-                      type="button"
-                      className="w-full cursor-pointer text-left px-4 py-2 hover:bg-blue-50 text-blue-900 transition-colors duration-200"
-                      onClick={() => {
-                        setSelectedCategory(category);
-                        setIsCategoryOpen(false);
-                      }}
-                    >
-                      {category}
-                    </button>
+          
+        >
+          {({ setFieldValue }) => (
+            <Form className="space-y-6 px-0.5">
+              {/* بخش تصویر محصول */}
+              <div className="space-y-2">
+                <label className="flex items-center text-blue-800 font-medium">
+                  <FiImage className="mr-2" /> Product Image
+                </label>
+                <div className="flex flex-wrap gap-4">
+                  {/* اسلات‌های تصویر */}
+                  {[1].map((item) => (
+                    <div key={item} className="relative group">
+                      <label
+                        className={`block w-24 h-24 ${
+                          !images[item]
+                            ? "border-2 border-dashed border-blue-400 cursor-pointer"
+                            : "border border-blue-200"
+                        } rounded-lg flex items-center justify-center overflow-hidden hover:bg-blue-50 transition-colors duration-300`}
+                      >
+                        {images[item] ? (
+                          <>
+                            <img
+                              src={URL.createObjectURL(images[item])}
+                              alt={`Preview ${item}`}
+                              className="w-full h-full object-cover"
+                            />
+                            <button
+                              type="button"
+                              className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors duration-300"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRemoveImage(item);
+                              }}
+                            >
+                              <FiTrash2 size={12} />
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <FiPlusCircle
+                              className="text-blue-500 group-hover:text-blue-700"
+                              size={28}
+                            />
+                            <input
+                              id="image"
+                              name="image"
+                              type="file"
+                              accept="image/*"
+                              onChange={(event) => {
+                                handleImageUpload(event, item);
+                                setFieldValue(
+                                  "image",
+                                  event.currentTarget.files[0]
+                                );
+                              }}
+                              className="hidden"
+                            />
+                          </>
+                        )}
+                      </label>
+                      <ErrorMessage
+                        name="image"
+                        component="div"
+                        className="text-red-500 text-sm ml-0.5 mt-2"
+                      />
+                    </div>
                   ))}
                 </div>
-              )}
-            </div>
-          </div>
+              </div>
 
-          {/* قیمت‌ها */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* قیمت اصلی */}
-            <div className="space-y-2">
-              <label className="flex items-center text-blue-900 font-medium">
-                <FiDollarSign className="mr-2" /> Price*
-              </label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500">
-                  $
-                </span>
-                <input
-                  type="number"
-                  required
-                  step="0.01"
-                  min="0"
-                  className="w-full pl-8 text-blue-900 pr-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
-                  placeholder="0.00"
+              {/* نام محصول */}
+              <div className="space-y-2">
+                <label className="flex items-center text-blue-900 font-medium">
+                  <FiTag className="mr-2" /> Product Name*
+                </label>
+                <Field
+                  name="productName"
+                  type="text"
+                  className="w-full px-4 py-3 text-blue-900 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                  placeholder="Enter product name"
+                />
+                <ErrorMessage
+                  name="productName"
+                  component="div"
+                  className="text-red-500 text-sm ml-0.5"
                 />
               </div>
-            </div>
 
-            {/* تخفیف */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
+              {/* دسته‌بندی */}
+              <div className="space-y-2">
                 <label className="flex items-center text-blue-900 font-medium">
-                  <FiPercent className="mr-2" /> Discount
+                  <FiPackage className="mr-2" /> Category*
                 </label>
-                <label className="inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="sr-only peer"
-                    checked={hasDiscount}
-                    onChange={() => setHasDiscount(!hasDiscount)}
-                  />
-                  <div className="relative w-11 h-6 text-blue-900 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                </label>
+
+                <div className="relative group w-full">
+                  <button
+                    type="button"
+                    className="flex justify-between w-full items-center bg-white border border-blue-300 rounded-lg px-4 py-3 text-blue-900 hover:border-blue-400 transition-colors duration-300 text-left"
+                    onClick={() => setIsCategoryOpen(!isCategoryOpen)}
+                  >
+                    <span>{selectedCategory || "Select a category"}</span>
+                    <FiChevronDown
+                      className={`ml-2 transform ${
+                        isCategoryOpen ? "rotate-180" : ""
+                      } transition-transform duration-300`}
+                      size={16}
+                    />
+                  </button>
+
+                  {isCategoryOpen && (
+                    <div className="absolute w-full z-20 mt-1 bg-white rounded-lg shadow-xl border border-blue-200">
+                      {[
+                        "Electronics",
+                        "Fashion",
+                        "Home & Garden",
+                        "Beauty",
+                        "Sports",
+                      ].map((category) => (
+                        <button
+                          key={category}
+                          type="button"
+                          className="w-full cursor-pointer text-left px-4 py-2 hover:bg-blue-50 text-blue-900 transition-colors duration-200"
+                          onClick={() => {
+                            setSelectedCategory(category);
+                            setIsCategoryOpen(false);
+                          }}
+                        >
+                          {category}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-              {hasDiscount && (
-                <>
+
+              {/* قیمت‌ها */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* قیمت اصلی */}
+                <div className="space-y-2">
+                  <label className="flex items-center text-blue-900 font-medium">
+                    <FiDollarSign className="mr-2" /> Price*
+                  </label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500">
                       $
                     </span>
-                    <input
+                    <Field
+                      name="price"
                       type="number"
                       step="0.01"
                       min="0"
                       className="w-full pl-8 text-blue-900 pr-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
-                      placeholder="Discounted price"
+                      placeholder="0.00"
                     />
                   </div>
-                  <div className="flex items-center space-x-4">
-                    <div className="flex-1">
-                      <input
-                        type="number"
-                        step="1"
-                        min="0"
-                        max="100"
-                        className="w-full pl-4 text-blue-900 pr-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
-                        placeholder="Discount %"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <div className="relative">
-                        <FiClock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500" />
-                        <input
-                          type="text"
-                          className="w-full pl-10 text-blue-900 pr-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
-                          placeholder="Period"
-                          onFocus={(e) => (e.target.type = "date")}
-                          onBlur={(e) => (e.target.type = "text")}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* موجودی */}
-            <div className="space-y-2">
-              <label className="flex items-center text-blue-900 font-medium">
-                <FiLayers className="mr-2" /> Stock Quantity*
-              </label>
-              <input
-                type="number"
-                required
-                min="0"
-                className="w-full px-4 py-3 text-blue-900 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
-                placeholder="100"
-              />
-            </div>
-          </div>
-
-          {/* پیشنهاد ویژه */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="flex items-center text-blue-900 font-medium">
-                <FiZap className="mr-2 text-amber-500" /> Amazing Offer
-              </label>
-              <label className="inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="sr-only peer text-blue-900"
-                  checked={isAmazingOffer}
-                  onChange={() => setIsAmazingOffer(!isAmazingOffer)}
-                />
-                <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
-              </label>
-            </div>
-            {isAmazingOffer && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-3 text-blue-900 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
-                    placeholder="Offer title"
+                  <ErrorMessage
+                    name="price"
+                    component="div"
+                    className="text-red-500 text-sm ml-0.5"
                   />
                 </div>
-                <div className="relative">
-                  <FiClock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500" />
-                  <input
-                    type="text"
-                    className="w-full pl-10 pr-4 py-3 text-blue-900 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
-                    placeholder="Offer period"
-                    onFocus={(e) => (e.target.type = "date")}
-                    onBlur={(e) => (e.target.type = "text")}
+
+                {/* تخفیف */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="flex items-center text-blue-900 font-medium">
+                      <FiPercent className="mr-2" /> Discount
+                    </label>
+                    <label className="inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="sr-only peer"
+                        checked={hasDiscount}
+                        onChange={() => setHasDiscount(!hasDiscount)}
+                      />
+                      <div className="relative w-11 h-6 text-blue-900 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                  </div>
+                  {hasDiscount && (
+                    <>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500">
+                          $
+                        </span>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          className="w-full pl-8 text-blue-900 pr-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                          placeholder="Discounted price"
+                        />
+                      </div>
+                      <div className="flex items-center space-x-4">
+                        <div className="flex-1">
+                          <input
+                            type="number"
+                            step="1"
+                            min="0"
+                            max="100"
+                            className="w-full pl-4 text-blue-900 pr-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                            placeholder="Discount %"
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <div className="relative">
+                            <FiClock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500" />
+                            <input
+                              type="text"
+                              className="w-full pl-10 text-blue-900 pr-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                              placeholder="Period"
+                              onFocus={(e) => (e.target.type = "date")}
+                              onBlur={(e) => (e.target.type = "text")}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {/* موجودی */}
+                <div className="space-y-2">
+                  <label className="flex items-center text-blue-900 font-medium">
+                    <FiLayers className="mr-2" /> Stock Quantity*
+                  </label>
+                  <Field
+                    name="stockQuantity"
+                    type="number"
+                    min="0"
+                    className="w-full px-4 py-3 text-blue-900 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                    placeholder="100"
+                  />
+                  <ErrorMessage
+                    name="stockQuantity"
+                    component="div"
+                    className="text-red-500 text-sm ml-0.5"
                   />
                 </div>
               </div>
-            )}
-          </div>
 
-          {/* توضیحات */}
-          <div className="space-y-2">
-            <label className="flex items-center text-blue-900 font-medium">
-              <FiAlignLeft className="mr-2" /> Description*
-            </label>
-            <textarea
-              rows={6}
-              required
-              className="w-full px-4 py-3 text-blue-900 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
-              placeholder="Detailed product description..."
-            ></textarea>
-          </div>
+              {/* پیشنهاد ویژه */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center text-blue-900 font-medium">
+                    <FiZap className="mr-2 text-amber-500" /> Amazing Offer
+                  </label>
+                  <label className="inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="sr-only peer text-blue-900"
+                      checked={isAmazingOffer}
+                      onChange={() => setIsAmazingOffer(!isAmazingOffer)}
+                    />
+                    <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                  </label>
+                </div>
+                {isAmazingOffer && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <input
+                        type="text"
+                        className="w-full px-4 py-3 text-blue-900 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                        placeholder="Offer title"
+                      />
+                    </div>
+                    <div className="relative">
+                      <FiClock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500" />
+                      <input
+                        type="text"
+                        className="w-full pl-10 pr-4 py-3 text-blue-900 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                        placeholder="Offer period"
+                        onFocus={(e) => (e.target.type = "date")}
+                        onBlur={(e) => (e.target.type = "text")}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
 
-          {/* دکمه‌های اقدام */}
-          <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 pt-4">
-            <button
-              type="submit"
-              className="px-6 py-3 cursor-pointer bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white rounded-lg hover:shadow-lg transition-colors duration-300 font-medium flex items-center justify-center"
-            >
-              <FiPlusCircle className="mr-2" />
-              Publish Product
-            </button>
-            <button
-              type="button"
-              className="px-6 py-3 cursor-pointer bg-white border border-blue-400 text-blue-700 rounded-lg hover:bg-blue-50 transition-colors duration-300"
-            >
-              Save as Draft
-            </button>
-            <button
-              type="button"
-              className="px-6 py-3 cursor-pointer bg-white border border-rose-400 text-rose-700 rounded-lg hover:bg-rose-50 transition-colors duration-300 sm:ml-auto"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
+              {/* توضیحات */}
+              <div className="space-y-2">
+                <label className="flex items-center text-blue-900 font-medium">
+                  <FiAlignLeft className="mr-2" /> Description*
+                </label>
+                <Field
+                  name="description"
+                  as="textarea"
+                  rows={6}
+                  className="w-full px-4 py-3 text-blue-900 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                  placeholder="Detailed product description..."
+                />
+                <ErrorMessage
+                  name="description"
+                  component="div"
+                  className="text-red-500 text-sm ml-0.5"
+                />
+              </div>
+
+              {/* دکمه‌های اقدام */}
+              <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 pt-4">
+                <button
+                  type="submit"
+                  className="px-6 py-3 cursor-pointer bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white rounded-lg hover:shadow-lg transition-colors duration-300 font-medium flex items-center justify-center"
+                >
+                  <FiPlusCircle className="mr-2" />
+                  Publish Product
+                </button>
+                <button
+                  type="button"
+                  className="px-6 py-3 cursor-pointer bg-white border border-blue-400 text-blue-700 rounded-lg hover:bg-blue-50 transition-colors duration-300"
+                >
+                  Save as Draft
+                </button>
+                <button
+                  type="reset"
+                  onClick={() => setImages({})}
+                  className="px-6 py-3 cursor-pointer bg-white border border-rose-400 text-rose-700 rounded-lg hover:bg-rose-50 transition-colors duration-300 sm:ml-auto"
+                >
+                  Cancel
+                </button>
+              </div>
+            </Form>
+          )}
+        </Formik>
       </div>
     </motion.div>
   );

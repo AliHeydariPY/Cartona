@@ -23,7 +23,7 @@ function App() {
           marginTop: "0px",
         }}
         toastOptions={{
-          duration: 60000,
+          duration: 3000,
         }}
       />
       <Routes>
@@ -36,7 +36,7 @@ function App() {
           <Route path="payments" element={<Payments />} />
           <Route path="add-product" element={<AddProduct />} />
         </Route>
-
+        <Route path="/create-account" element={<CreateAccountForm/>}/>
         <Route path="/upgradeToSeller" element={<UpgradeToSeller />} />
       </Routes>
     </>

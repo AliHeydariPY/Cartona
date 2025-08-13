@@ -38,13 +38,15 @@ const UpgradeToSeller = () => {
           validationSchema={StoreSchema}
           onSubmit={(values, { setSubmitting }) => {
             const formData = new FormData();
-            formData.append("user", 14);
+            formData.append("user", 22);
             formData.append("store_name", values.storeName);
             formData.append("description", values.description);
             formData.append("address", values.address);
             formData.append("image", values.image);
+            
+            console.log(Object.fromEntries(formData.entries()));
 
-            upgradeToSeller(formData)
+            upgradeToSeller(formData);
           }}
         >
           {({ setFieldValue }) => (
