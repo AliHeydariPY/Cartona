@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Formik, Form, Field, ErrorMessage, FieldArray } from "formik";
+import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 
 import { addNewProduct } from "../../services/userAPIService";
@@ -28,6 +28,8 @@ const AddProduct = () => {
   const [hasDiscount, setHasDiscount] = useState(false);
   const [isAmazingOffer, setIsAmazingOffer] = useState(false);
 
+  // const { setFieldValue } = useFormikContext();
+
   const handleImageUpload = (e, slot) => {
     const file = e.target.files[0];
     if (file) {
@@ -41,6 +43,14 @@ const AddProduct = () => {
       delete newImages[slot];
       return newImages;
     });
+  };
+
+  const handleAmazingOfferToggle = () => {
+    if (isAmazingOffer) {
+      setFieldValue("amazingOffer", "");
+      setFieldValue("amazingOfferPeriod", "");
+    }
+    setIsAmazingOffer(!isAmazingOffer);
   };
 
   const StoreSchema = Yup.object()
@@ -164,7 +174,7 @@ const AddProduct = () => {
       className="lg:col-span-3"
     >
       <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-xl p-5 sm:p-6 2xl:p-8 border border-blue-400 hover:shadow-lg hover:shadow-blue-400/50 transition-all duration-300">
-        <h2 className="text-xl sm:text-2xl font-bold text-blue-900 mb-6 sm:mb-8 flex items-center">
+        <h2 className="text-xl sm:text-2xl font-bold text-blue-800 mb-6 sm:mb-8 flex items-center">
           <FiPlusCircle className="mr-2 sm:mr-3 text-green-500" size={24} />
           Add New Product
         </h2>
@@ -208,7 +218,7 @@ const AddProduct = () => {
             <Form className="space-y-6 px-0.5">
               {/* بخش تصویر محصول */}
               <div className="space-y-2">
-                <label className="flex items-center text-blue-900 font-medium">
+                <label className="flex items-center text-blue-800 font-medium">
                   <FiImage className="mr-2" /> Product Image
                 </label>
                 <div className="flex flex-wrap gap-4">
@@ -275,13 +285,13 @@ const AddProduct = () => {
 
               {/* نام محصول */}
               <div className="space-y-2">
-                <label className="flex items-center text-blue-900 font-medium">
+                <label className="flex items-center text-blue-800 font-medium">
                   <FiTag className="mr-2" /> Product Name*
                 </label>
                 <Field
                   name="productName"
                   type="text"
-                  className="w-full px-4 py-3 text-blue-900 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                  className="w-full px-4 py-3 text-blue-800 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
                   placeholder="Enter product name"
                 />
                 <ErrorMessage
@@ -293,14 +303,14 @@ const AddProduct = () => {
 
               {/* دسته‌بندی */}
               <div className="space-y-2">
-                <label className="flex items-center text-blue-900 font-medium">
+                <label className="flex items-center text-blue-800 font-medium">
                   <FiPackage className="mr-2" /> Category*
                 </label>
 
                 <div className="relative group w-full">
                   <button
                     type="button"
-                    className="flex justify-between w-full items-center bg-white border border-blue-300 rounded-lg px-4 py-3 text-blue-900 hover:border-blue-400 transition-colors duration-300 text-left"
+                    className="flex justify-between w-full items-center bg-white border border-blue-300 rounded-lg px-4 py-3 text-blue-800 hover:border-blue-400 transition-colors duration-300 text-left"
                     onClick={() => setIsCategoryOpen(!isCategoryOpen)}
                   >
                     <span>{selectedCategory || "Select a category"}</span>
@@ -324,7 +334,7 @@ const AddProduct = () => {
                         <button
                           key={category}
                           type="button"
-                          className="w-full cursor-pointer text-left px-4 py-2 hover:bg-blue-50 text-blue-900 transition-colors duration-200"
+                          className="w-full cursor-pointer text-left px-4 py-2 hover:bg-blue-50 text-blue-800 transition-colors duration-200"
                           onClick={() => {
                             setSelectedCategory(category);
                             setIsCategoryOpen(false);
@@ -342,7 +352,7 @@ const AddProduct = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* قیمت اصلی */}
                 <div className="space-y-2">
-                  <label className="flex items-center text-blue-900 font-medium">
+                  <label className="flex items-center text-blue-800 font-medium">
                     <FiDollarSign className="mr-2" /> Price*
                   </label>
                   <div className="relative">
@@ -354,7 +364,7 @@ const AddProduct = () => {
                       type="number"
                       step="0.01"
                       min="0"
-                      className="w-full pl-8.5 text-blue-900 pr-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                      className="w-full pl-8.5 text-blue-800 pr-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
                       placeholder="0.00"
                     />
                   </div>
@@ -367,14 +377,14 @@ const AddProduct = () => {
 
                 {/* موجودی */}
                 <div className="space-y-2">
-                  <label className="flex items-center text-blue-900 font-medium">
+                  <label className="flex items-center text-blue-800 font-medium">
                     <FiLayers className="mr-2" /> Stock Quantity*
                   </label>
                   <Field
                     name="stockQuantity"
                     type="number"
                     min="0"
-                    className="w-full px-4 py-3 text-blue-900 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                    className="w-full px-4 py-3 text-blue-800 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
                     placeholder="100"
                   />
                   <ErrorMessage
@@ -388,7 +398,7 @@ const AddProduct = () => {
               {/* تخفیف */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="flex items-center text-blue-900 font-medium">
+                  <label className="flex items-center text-blue-800 font-medium">
                     <FiPercent className="mr-2" /> Discount
                   </label>
                   <label className="inline-flex items-center cursor-pointer">
@@ -396,9 +406,16 @@ const AddProduct = () => {
                       type="checkbox"
                       className="sr-only peer"
                       checked={hasDiscount}
-                      onChange={() => setHasDiscount(!hasDiscount)}
+                      onChange={() => {
+                        if (hasDiscount) {
+                          setFieldValue("discountPrice", "");
+                          setFieldValue("discountPercentage", "");
+                          setFieldValue("discountPeriod", "");
+                        }
+                        setHasDiscount(!hasDiscount);
+                      }}
                     />
-                    <div className="relative w-11 h-6 text-blue-900 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    <div className="relative w-11 h-6 text-blue-800 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                   </label>
                 </div>
                 {hasDiscount && (
@@ -413,7 +430,7 @@ const AddProduct = () => {
                           type="number"
                           step="0.01"
                           min="0"
-                          className="w-full pl-8.5 text-blue-900 pr-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                          className="w-full pl-8.5 text-blue-800 pr-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
                           placeholder="Discounted price"
                         />
                       </div>
@@ -431,7 +448,7 @@ const AddProduct = () => {
                           step="1"
                           min="0"
                           max="100"
-                          className="w-full pl-4 text-blue-900 pr-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                          className="w-full pl-4 text-blue-800 pr-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
                           placeholder="Discount %"
                         />
                         <ErrorMessage
@@ -446,7 +463,7 @@ const AddProduct = () => {
                           <Field
                             name="discountPeriod"
                             type="text"
-                            className="w-full pl-9 text-blue-900 pr-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                            className="w-full pl-9 text-blue-800 pr-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
                             placeholder="Period"
                             onFocus={(e) => (e.target.type = "date")}
                             onBlur={(e) => (e.target.type = "text")}
@@ -466,15 +483,21 @@ const AddProduct = () => {
               {/* پیشنهاد ویژه */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="flex items-center text-blue-900 font-medium">
+                  <label className="flex items-center text-blue-800 font-medium">
                     <FiZap className="mr-2 text-amber-500" /> Amazing Offer
                   </label>
                   <label className="inline-flex items-center cursor-pointer">
                     <input
                       type="checkbox"
-                      className="sr-only peer text-blue-900"
+                      className="sr-only peer text-blue-800"
                       checked={isAmazingOffer}
-                      onChange={() => setIsAmazingOffer(!isAmazingOffer)}
+                      onChange={() => {
+                        if (isAmazingOffer) {
+                          setFieldValue("amazingOffer", "");
+                          setFieldValue("amazingOfferPeriod", "");
+                        }
+                        setIsAmazingOffer(!isAmazingOffer);
+                      }}
                     />
                     <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
                   </label>
@@ -485,7 +508,7 @@ const AddProduct = () => {
                       <Field
                         name="amazingOffer"
                         type="text"
-                        className="w-full px-4 py-3 text-blue-900 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                        className="w-full px-4 py-3 text-blue-800 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
                         placeholder="Offer title"
                       />
                       <ErrorMessage
@@ -500,7 +523,7 @@ const AddProduct = () => {
                         <Field
                           name="amazingOfferPeriod"
                           type="text"
-                          className="w-full pl-10 pr-4 py-3 text-blue-900 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                          className="w-full pl-10 pr-4 py-3 text-blue-800 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
                           placeholder="Offer period"
                           onFocus={(e) => (e.target.type = "date")}
                           onBlur={(e) => (e.target.type = "text")}
@@ -518,14 +541,14 @@ const AddProduct = () => {
 
               {/* توضیحات */}
               <div className="space-y-2">
-                <label className="flex items-center text-blue-900 font-medium">
+                <label className="flex items-center text-blue-800 font-medium">
                   <FiAlignLeft className="mr-2" /> Description*
                 </label>
                 <Field
                   name="description"
                   as="textarea"
                   rows={6}
-                  className="w-full px-4 py-3 text-blue-900 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                  className="w-full px-4 py-3 text-blue-800 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
                   placeholder="Detailed product description..."
                 />
                 <ErrorMessage
@@ -544,12 +567,12 @@ const AddProduct = () => {
                   <FiPlusCircle className="mr-2" />
                   Publish Product
                 </button>
-                <button
+                {/* <button
                   type="button"
                   className="px-6 py-3 cursor-pointer bg-white border border-blue-400 text-blue-700 rounded-lg hover:bg-blue-50 transition-colors duration-300"
                 >
                   Save as Draft
-                </button>
+                </button> */}
                 <button
                   type="reset"
                   onClick={() => setImages({})}
