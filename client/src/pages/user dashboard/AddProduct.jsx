@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { Formik, Form, Field, ErrorMessage, FieldArray } from "formik";
 import * as Yup from "yup";
 
 import { addNewProduct } from "../../services/userAPIService";
@@ -43,25 +43,87 @@ const AddProduct = () => {
     });
   };
 
-  const StoreSchema = Yup.object().shape({
-    image: Yup.mixed().required("Please select an image"),
-    // category: Yup.string()
-    //   .min(3, "at least 3 characters")
-    //   .max(30, "at most 30 characters")
-    //   .required("required"),
-    productName: Yup.string()
-      .min(3, "at least 3 characters")
-      .max(50, "at most 50 characters")
-      .required("required"),
-    price: Yup.string().max(200, "at most 200 characters").required("required"),
-    stockQuantity: Yup.string()
-      .min(1, "at least 10 characters")
-      .required("required"),
-    description: Yup.string()
-      .min(3, "at least 3 characters")
-      .max(200, "at most 30 characters")
-      .required("required"),
-  });
+  const StoreSchema = Yup.object()
+    .shape({
+      image: Yup.mixed().required("Please select an image"),
+      // category: Yup.string()
+      //   .min(3, "at least 3 characters")
+      //   .max(30, "at most 30 characters")
+      //   .required("required"),
+      productName: Yup.string()
+        .min(3, "at least 3 characters")
+        .max(50, "at most 50 characters")
+        .required("required"),
+      price: Yup.number()
+        // .max(200, "at most 200 characters")
+        .required("required"),
+      stockQuantity: Yup.string()
+        .min(1, "at least 1 characters")
+        .max(4, "at most 50 characters")
+        .required("required"),
+      description: Yup.string()
+        .min(3, "at least 3 characters")
+        .max(200, "at most 30 characters")
+        .required("required"),
+
+      discountPrice: Yup.number()
+        .nullable()
+        .transform((v, o) => (o === "" ? null : v))
+        .min(0, "must not be negative")
+        .typeError("Enter a valid number"),
+      discountPercentage: Yup.number()
+        .nullable()
+        .transform((v, o) => (o === "" ? null : v))
+        .min(0, "must not be less than 0")
+        .max(100, "must not be greater than 100")
+        .typeError("Enter a valid number"),
+      discountPeriod: Yup.string()
+        .nullable()
+        .transform((v, o) => (o === "" ? null : v)),
+    })
+    .test("discount-rules", null, function (values) {
+      const { discountPrice, discountPercentage, discountPeriod } =
+        values || {};
+      const hasPrice = discountPrice != null && discountPrice !== "";
+      const hasPercent =
+        discountPercentage != null && discountPercentage !== "";
+      const hasPeriod = !!discountPeriod;
+
+      const errors = [];
+
+      // Only one of price/percentage must be filled
+      if (hasPrice && hasPercent) {
+        errors.push(
+          this.createError({
+            path: "discountPercentage",
+            message:
+              "Please enter only one of discount price or discount percentage",
+          })
+        );
+      }
+
+      // If one is filled, period is mandatory
+      if ((hasPrice || hasPercent) && !hasPeriod) {
+        errors.push(
+          this.createError({
+            path: "discountPeriod",
+            message: "When entering a discount, a discount period is required",
+          })
+        );
+      }
+
+      // If period is filled, one of price/percentage must be filled
+      if (hasPeriod && !hasPrice && !hasPercent) {
+        const msg =
+          "When entering a discount period, the discount price or discount percentage also fill in";
+        errors.push(this.createError({ path: "discountPrice", message: msg }));
+        errors.push(
+          this.createError({ path: "discountPercentage", message: msg })
+        );
+      }
+
+      return errors.length ? new Yup.ValidationError(errors) : true;
+    });
 
   return (
     <motion.div
@@ -84,27 +146,30 @@ const AddProduct = () => {
             price: "",
             stockQuantity: "",
             description: "",
+            discountPrice: "",
+            discountPercentage: "",
+            discountPeriod: "",
           }}
           validationSchema={StoreSchema}
-          onSubmit={(values) => {
-            
+          onSubmit={(values, onSubmitProps) => {
             const formData = new FormData();
             formData.append("image", values.image);
             formData.append("storekeeper", 1);
             formData.append("name", values.productName);
             formData.append("category", 1);
             formData.append("price", values.price);
+            formData.append("discounted_price", values.discountPrice);
+            formData.append("discount_percentage", values.discountPercentage);
+            formData.append("discount_period", values.discountPeriod);
             formData.append("stock_quantity", values.stockQuantity);
             formData.append("description", values.description);
 
             console.log(Object.fromEntries(formData.entries()));
 
-            addNewProduct(formData);
+            addNewProduct(formData, onSubmitProps, setImages);
           }}
-
-          
         >
-          {({ setFieldValue }) => (
+          {({ setFieldValue}) => (
             <Form className="space-y-6 px-0.5">
               {/* بخش تصویر محصول */}
               <div className="space-y-2">
@@ -239,14 +304,14 @@ const AddProduct = () => {
               </div>
 
               {/* قیمت‌ها */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* قیمت اصلی */}
                 <div className="space-y-2">
                   <label className="flex items-center text-blue-900 font-medium">
                     <FiDollarSign className="mr-2" /> Price*
                   </label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500">
+                    <span className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-blue-500">
                       $
                     </span>
                     <Field
@@ -254,7 +319,7 @@ const AddProduct = () => {
                       type="number"
                       step="0.01"
                       min="0"
-                      className="w-full pl-8 text-blue-900 pr-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                      className="w-full pl-8.5 text-blue-900 pr-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
                       placeholder="0.00"
                     />
                   </div>
@@ -263,64 +328,6 @@ const AddProduct = () => {
                     component="div"
                     className="text-red-500 text-sm ml-0.5"
                   />
-                </div>
-
-                {/* تخفیف */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label className="flex items-center text-blue-900 font-medium">
-                      <FiPercent className="mr-2" /> Discount
-                    </label>
-                    <label className="inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="sr-only peer"
-                        checked={hasDiscount}
-                        onChange={() => setHasDiscount(!hasDiscount)}
-                      />
-                      <div className="relative w-11 h-6 text-blue-900 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                    </label>
-                  </div>
-                  {hasDiscount && (
-                    <>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500">
-                          $
-                        </span>
-                        <input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          className="w-full pl-8 text-blue-900 pr-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
-                          placeholder="Discounted price"
-                        />
-                      </div>
-                      <div className="flex items-center space-x-4">
-                        <div className="flex-1">
-                          <input
-                            type="number"
-                            step="1"
-                            min="0"
-                            max="100"
-                            className="w-full pl-4 text-blue-900 pr-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
-                            placeholder="Discount %"
-                          />
-                        </div>
-                        <div className="flex-1">
-                          <div className="relative">
-                            <FiClock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500" />
-                            <input
-                              type="text"
-                              className="w-full pl-10 text-blue-900 pr-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
-                              placeholder="Period"
-                              onFocus={(e) => (e.target.type = "date")}
-                              onBlur={(e) => (e.target.type = "text")}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </>
-                  )}
                 </div>
 
                 {/* موجودی */}
@@ -343,6 +350,84 @@ const AddProduct = () => {
                 </div>
               </div>
 
+              {/* تخفیف */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center text-blue-900 font-medium">
+                    <FiPercent className="mr-2" /> Discount
+                  </label>
+                  <label className="inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="sr-only peer"
+                      checked={hasDiscount}
+                      onChange={() => setHasDiscount(!hasDiscount)}
+                    />
+                    <div className="relative w-11 h-6 text-blue-900 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                  </label>
+                </div>
+                {hasDiscount && (
+                  <>
+                    <div>
+                      <div className="relative">
+                        <span className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-blue-500">
+                          $
+                        </span>
+                        <Field
+                          name="discountPrice"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          className="w-full pl-8.5 text-blue-900 pr-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                          placeholder="Discounted price"
+                        />
+                      </div>
+                      <ErrorMessage
+                        name="discountPrice"
+                        component="div"
+                        className="text-red-500 text-sm ml-0.5"
+                      />
+                    </div>
+                    <div className="space-y-2 sm:flex sm:space-x-6">
+                      <div className="sm:flex-1">
+                        <Field
+                          name="discountPercentage"
+                          type="number"
+                          step="1"
+                          min="0"
+                          max="100"
+                          className="w-full pl-4 text-blue-900 pr-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                          placeholder="Discount %"
+                        />
+                        <ErrorMessage
+                          name="discountPercentage"
+                          component="div"
+                          className="text-red-500 text-sm ml-0.5"
+                        />
+                      </div>
+                      <div className="sm:flex-1">
+                        <div className="relative">
+                          <FiClock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500" />
+                          <Field
+                            name="discountPeriod"
+                            type="text"
+                            className="w-full pl-9 text-blue-900 pr-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                            placeholder="Period"
+                            onFocus={(e) => (e.target.type = "date")}
+                            onBlur={(e) => (e.target.type = "text")}
+                          />
+                        </div>
+                        <ErrorMessage
+                          name="discountPeriod"
+                          component="div"
+                          className="text-red-500 text-sm ml-0.5"
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+
               {/* پیشنهاد ویژه */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
@@ -360,7 +445,7 @@ const AddProduct = () => {
                   </label>
                 </div>
                 {isAmazingOffer && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 space-y-2 sm:gap-6">
                     <div>
                       <input
                         type="text"

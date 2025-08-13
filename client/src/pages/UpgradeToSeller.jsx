@@ -44,8 +44,7 @@ const UpgradeToSeller = () => {
             formData.append("address", values.address);
             formData.append("image", values.image);
             
-            console.log(Object.fromEntries(formData.entries()));
-
+            // console.log(Object.fromEntries(formData.entries()));
             upgradeToSeller(formData);
           }}
         >

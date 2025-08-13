@@ -73,7 +73,7 @@ export const upgradeToSeller = (formData) => {
     });
 };
 
-export const addNewProduct = (formData) => {
+export const addNewProduct = (formData, onSubmitProps, setImages) => {
   const url = `${SERVER_URL}product-api/products/`;
   return axios
     .post(url, formData, {
@@ -83,6 +83,8 @@ export const addNewProduct = (formData) => {
     })
     .then((res) => {
       console.log(res.data);
+      onSubmitProps.resetForm()
+      setImages({})
       toast.custom((t) => (
         <div
           className={`${t.visible ? "animate-enter" : "animate-leave"} 
