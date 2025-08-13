@@ -190,7 +190,7 @@ const UserDashboard = () => {
 
           {/* بخش ارتقا به فروشنده (فقط برای کاربران عادی) */}
           {!isSeller && (
-            <div className="mt-6 sm:mt-8 md:mt-10 bg-gradient-to-br from-blue-700/20 via-cyan-600/20 to-teal-500/20 p-4 sm:p-5 md:p-6 rounded-2xl border border-blue-300/70 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300">
+            <div className="mt-4 bg-gradient-to-br from-blue-700/20 via-cyan-600/20 to-teal-500/20 p-4 sm:p-5 md:p-6 rounded-2xl border border-blue-300/70 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300">
               <div className="flex items-center mb-3 sm:mb-4">
                 <span>
                   <FiShield className="text-blue-700 mr-2" size={20} />

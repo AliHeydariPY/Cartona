@@ -46,17 +46,11 @@ const AddProduct = () => {
   const StoreSchema = Yup.object()
     .shape({
       image: Yup.mixed().required("Please select an image"),
-      // category: Yup.string()
-      //   .min(3, "at least 3 characters")
-      //   .max(30, "at most 30 characters")
-      //   .required("required"),
       productName: Yup.string()
         .min(3, "at least 3 characters")
         .max(50, "at most 50 characters")
         .required("required"),
-      price: Yup.number()
-        // .max(200, "at most 200 characters")
-        .required("required"),
+      price: Yup.number().required("required"),
       stockQuantity: Yup.string()
         .min(1, "at least 1 characters")
         .max(4, "at most 50 characters")
@@ -80,7 +74,15 @@ const AddProduct = () => {
       discountPeriod: Yup.string()
         .nullable()
         .transform((v, o) => (o === "" ? null : v)),
+
+      amazingOffer: Yup.string()
+        .nullable()
+        .transform((v, o) => (o === "" ? null : v)),
+      amazingOfferPeriod: Yup.string()
+        .nullable()
+        .transform((v, o) => (o === "" ? null : v)),
     })
+    // قوانین تخفیف
     .test("discount-rules", null, function (values) {
       const { discountPrice, discountPercentage, discountPeriod } =
         values || {};
@@ -91,7 +93,7 @@ const AddProduct = () => {
 
       const errors = [];
 
-      // Only one of price/percentage must be filled
+      // فقط یکی از price/percentage باید پر باشه
       if (hasPrice && hasPercent) {
         errors.push(
           this.createError({
@@ -102,7 +104,7 @@ const AddProduct = () => {
         );
       }
 
-      // If one is filled, period is mandatory
+      // اگر یکی پر شد، period اجباریه
       if ((hasPrice || hasPercent) && !hasPeriod) {
         errors.push(
           this.createError({
@@ -112,13 +114,42 @@ const AddProduct = () => {
         );
       }
 
-      // If period is filled, one of price/percentage must be filled
+      // اگر period پر شد، یکی از price/percentage هم باید پر بشه
       if (hasPeriod && !hasPrice && !hasPercent) {
         const msg =
-          "When entering a discount period, the discount price or discount percentage also fill in";
+          "When entering a discount period, also fill in the discount price or discount percentage";
         errors.push(this.createError({ path: "discountPrice", message: msg }));
         errors.push(
           this.createError({ path: "discountPercentage", message: msg })
+        );
+      }
+
+      return errors.length ? new Yup.ValidationError(errors) : true;
+    })
+    // قوانین بخش "amazing offer"
+    .test("amazing-offer-rules", null, function (values) {
+      const { amazingOffer, amazingOfferPeriod } = values || {};
+      const hasOffer = !!amazingOffer;
+      const hasOfferPeriod = !!amazingOfferPeriod;
+
+      const errors = [];
+
+      // اگر یکی پر شد، اون یکی هم باید پر باشه
+      if (hasOffer && !hasOfferPeriod) {
+        errors.push(
+          this.createError({
+            path: "amazingOfferPeriod",
+            message: "When entering an offer title, offer period is required",
+          })
+        );
+      }
+
+      if (hasOfferPeriod && !hasOffer) {
+        errors.push(
+          this.createError({
+            path: "amazingOffer",
+            message: "When entering an offer period, offer title is required",
+          })
         );
       }
 
@@ -149,6 +180,8 @@ const AddProduct = () => {
             discountPrice: "",
             discountPercentage: "",
             discountPeriod: "",
+            amazingOffer: "",
+            amazingOfferPeriod: "",
           }}
           validationSchema={StoreSchema}
           onSubmit={(values, onSubmitProps) => {
@@ -162,6 +195,8 @@ const AddProduct = () => {
             formData.append("discount_percentage", values.discountPercentage);
             formData.append("discount_period", values.discountPeriod);
             formData.append("stock_quantity", values.stockQuantity);
+            formData.append("amazing_offer", values.amazingOffer);
+            formData.append("amazing_offer_period", values.amazingOfferPeriod);
             formData.append("description", values.description);
 
             console.log(Object.fromEntries(formData.entries()));
@@ -169,11 +204,11 @@ const AddProduct = () => {
             addNewProduct(formData, onSubmitProps, setImages);
           }}
         >
-          {({ setFieldValue}) => (
+          {({ setFieldValue }) => (
             <Form className="space-y-6 px-0.5">
               {/* بخش تصویر محصول */}
               <div className="space-y-2">
-                <label className="flex items-center text-blue-800 font-medium">
+                <label className="flex items-center text-blue-900 font-medium">
                   <FiImage className="mr-2" /> Product Image
                 </label>
                 <div className="flex flex-wrap gap-4">
@@ -385,7 +420,7 @@ const AddProduct = () => {
                       <ErrorMessage
                         name="discountPrice"
                         component="div"
-                        className="text-red-500 text-sm ml-0.5"
+                        className="text-red-500 text-sm ml-0.5 mt-2"
                       />
                     </div>
                     <div className="space-y-2 sm:flex sm:space-x-6">
@@ -402,7 +437,7 @@ const AddProduct = () => {
                         <ErrorMessage
                           name="discountPercentage"
                           component="div"
-                          className="text-red-500 text-sm ml-0.5"
+                          className="text-red-500 text-sm ml-0.5 mt-2"
                         />
                       </div>
                       <div className="sm:flex-1">
@@ -420,7 +455,7 @@ const AddProduct = () => {
                         <ErrorMessage
                           name="discountPeriod"
                           component="div"
-                          className="text-red-500 text-sm ml-0.5"
+                          className="text-red-500 text-sm ml-0.5 mt-2"
                         />
                       </div>
                     </div>
@@ -445,22 +480,36 @@ const AddProduct = () => {
                   </label>
                 </div>
                 {isAmazingOffer && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 space-y-2 sm:gap-6">
+                  <div className="space-y-2 sm:space-y-0 grid grid-cols-1 md:grid-cols-2 sm:gap-6">
                     <div>
-                      <input
+                      <Field
+                        name="amazingOffer"
                         type="text"
                         className="w-full px-4 py-3 text-blue-900 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
                         placeholder="Offer title"
                       />
+                      <ErrorMessage
+                        name="amazingOffer"
+                        component="div"
+                        className="text-red-500 text-sm ml-0.5 mt-2"
+                      />
                     </div>
-                    <div className="relative">
-                      <FiClock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500" />
-                      <input
-                        type="text"
-                        className="w-full pl-10 pr-4 py-3 text-blue-900 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
-                        placeholder="Offer period"
-                        onFocus={(e) => (e.target.type = "date")}
-                        onBlur={(e) => (e.target.type = "text")}
+                    <div>
+                      <div className="relative">
+                        <FiClock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500" />
+                        <Field
+                          name="amazingOfferPeriod"
+                          type="text"
+                          className="w-full pl-10 pr-4 py-3 text-blue-900 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                          placeholder="Offer period"
+                          onFocus={(e) => (e.target.type = "date")}
+                          onBlur={(e) => (e.target.type = "text")}
+                        />
+                      </div>
+                      <ErrorMessage
+                        name="amazingOfferPeriod"
+                        component="div"
+                        className="text-red-500 text-sm ml-0.5 mt-2"
                       />
                     </div>
                   </div>
