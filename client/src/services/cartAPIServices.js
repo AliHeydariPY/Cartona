@@ -11,3 +11,8 @@ export const getCartProducts = () => {
   const url = `${SERVER_URL}/cart-api/cart-items/`;
   return axios.get(url);
 };
+
+export const editCartProduct = (payload) => {
+  const url = `${SERVER_URL}/cart-api/cart-items/${payload.id}/`;
+  return axios.put(url, payload)
+};
