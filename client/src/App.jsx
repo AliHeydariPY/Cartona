@@ -8,7 +8,7 @@ import UserDashboard from "./pages/UserDashboard";
 
 import Profile from "./pages/user dashboard/Profile";
 import Favorites from "./pages/user dashboard/Favorites";
-import Orders from "./pages/user dashboard/Orders";
+import Cart from "./pages/user dashboard/Cart";
 import Payments from "./pages/user dashboard/Payments";
 import AddProduct from "./pages/user dashboard/AddProduct";
 
@@ -45,7 +45,7 @@ function App() {
 
         <Route path="/account" element={<UserDashboard />}>
           <Route path="profile" element={<Profile />} />
-          <Route path="orders" element={<Orders />} />
+          <Route path="cart" element={<Cart />} />
           <Route
             path="favorites"
             element={<Favorites setShowPopup={setShowPopup} />}

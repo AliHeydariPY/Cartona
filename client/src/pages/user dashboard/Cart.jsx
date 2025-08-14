@@ -1,7 +1,7 @@
 const Orders = () => {
     return(
         <div>
-            Orders
+            Cart
         </div>
     )
 }

@@ -1,5 +1,6 @@
 import { useNavigate, useLocation, Outlet } from "react-router-dom";
 import { useState } from "react";
+
 import {
   FiUser,
   FiShoppingBag,
@@ -10,11 +11,13 @@ import {
   FiHome,
   FiShield,
   FiPackage,
-  FiBarChart2,
+  FiShoppingCart,
   FiUsers,
   FiDollarSign,
   FiPlusCircle,
 } from "react-icons/fi";
+
+import { MdStorefront, MdOutlineWorkspacePremium } from "react-icons/md";
 
 const UserDashboard = () => {
   const navigate = useNavigate();
@@ -36,7 +39,7 @@ const UserDashboard = () => {
                 {isSeller ? (
                   <div className="relative">
                     <FiUser className="text-white" size={35} />
-                    <FiShield
+                    <MdStorefront
                       className="absolute -bottom-1 -right-2 text-white font-bold bg-blue-600 rounded-full p-0.5"
                       size={20}
                     />
@@ -54,7 +57,11 @@ const UserDashboard = () => {
                 </h1>
                 {isSeller && (
                   <span className="ml-2 px-2 py-1 bg-gradient-to-r from-blue-600 to-cyan-500 text-white text-xs font-bold rounded-full flex items-center">
-                    <FiShield className="mr-1" size={12} /> SELLER
+                    <MdOutlineWorkspacePremium
+                      className="mr-1 mb-0.25"
+                      size={15}
+                    />{" "}
+                    SELLER
                   </span>
                 )}
               </div>
@@ -91,11 +98,11 @@ const UserDashboard = () => {
                 label: "My Profile",
               },
               {
-                id: "orders",
+                id: "cart",
                 icon: (
-                  <FiShoppingBag className="ml-3 text-blue-700" size={18} />
+                  <FiShoppingCart className="ml-3 text-blue-700" size={18} />
                 ),
-                label: "My Orders",
+                label: "Cart",
               },
               {
                 id: "favorites",
@@ -163,8 +170,8 @@ const UserDashboard = () => {
                 onClick={() => {
                   if (item.id == "profile") {
                     navigate("/account/profile");
-                  } else if (item.id == "orders") {
-                    navigate("/account/orders");
+                  } else if (item.id == "cart") {
+                    navigate("/account/cart");
                   } else if (item.id == "favorites") {
                     navigate("/account/favorites");
                   } else if (item.id == "payments") {
@@ -192,7 +199,10 @@ const UserDashboard = () => {
             <div className="mt-4 2xl:mt-6 bg-gradient-to-br from-blue-700/20 via-cyan-600/20 to-teal-500/20 p-4 sm:p-5 md:p-6 rounded-2xl border border-blue-300/70 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300">
               <div className="flex items-center mb-3 sm:mb-4">
                 <span>
-                  <FiShield className="text-blue-700 mr-2" size={20} />
+                  <MdStorefront
+                    className="text-blue-700 mr-2 mb-0.5"
+                    size={21}
+                  />
                 </span>
                 <h3 className="font-bold text-blue-900 text-base sm:text-lg">
                   Seller Account
