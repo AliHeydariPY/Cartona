@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 
+import RemoveFromCartPopup from "../../components/RemoveFromCartPopup";
+
 import {
   getCartProducts,
   editCartProduct,
@@ -20,7 +22,7 @@ import {
   FiX,
 } from "react-icons/fi";
 
-const Cart = () => {
+const Cart = ({ setRremoveFromCartPopup, setSelectedProduct }) => {
   const [cartItems, setCartItems] = useState([]);
 
   const removeItem = (id) => {
@@ -28,46 +30,43 @@ const Cart = () => {
   };
 
   const updateQuantity = async (id, newQuantity) => {
-  if (newQuantity < 1) return;
+    if (newQuantity < 1) return;
 
-  const item = cartItems.find((p) => p.id === id);
-  if (!item) return;
+    const item = cartItems.find((p) => p.id === id);
+    if (!item) return;
 
-  const payload = {
-    id: item.id,
-    product: item.product,
-    quantity: newQuantity,
-    cart: 1,
+    const payload = {
+      id: item.id,
+      product: item.product,
+      quantity: newQuantity,
+      cart: 1,
+    };
+
+    try {
+      // منتظر بمان تا ریکوئست بره و جواب بیاد
+      await editCartProduct(payload);
+
+      // فقط وقتی موفق بود مقدار رو تغییر بده
+      setCartItems((prev) =>
+        prev.map((p) => (p.id === id ? { ...p, quantity: newQuantity } : p))
+      );
+    } catch (error) {
+      toast.custom((t) => (
+        <div
+          className={`${
+            t.visible ? "animate-enter" : "animate-leave"
+          } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
+          style={{ fontFamily: "Roboto" }}
+        >
+          <FiX className="text-xl shrink-0" />
+          <span className="font-medium">
+            {error.response?.data?.non_field_errors?.[0] ||
+              "You can't have more than 10"}
+          </span>
+        </div>
+      ));
+    }
   };
-
-  try {
-    // منتظر بمان تا ریکوئست بره و جواب بیاد
-    await editCartProduct(payload);
-
-    // فقط وقتی موفق بود مقدار رو تغییر بده
-    setCartItems((prev) =>
-      prev.map((p) =>
-        p.id === id ? { ...p, quantity: newQuantity } : p
-      )
-    );
-  } catch (error) {
-    toast.custom((t) => (
-      <div
-        className={`${
-          t.visible ? "animate-enter" : "animate-leave"
-        } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
-        style={{ fontFamily: "Roboto" }}
-      >
-        <FiX className="text-xl shrink-0" />
-        <span className="font-medium">
-          {error.response?.data?.non_field_errors?.[0] ||
-            "You can't have more than 10"}
-        </span>
-      </div>
-    ));
-  }
-};
-
 
   const subtotal = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -182,7 +181,12 @@ const Cart = () => {
                             {item.name}
                           </h3>
                           <button
-                            onClick={() => removeItem(item.id)}
+                            onClick={() => {
+                              setRremoveFromCartPopup(true);
+                              console.log(item);
+                              setSelectedProduct(item);
+                              //   removeItem(item.id);
+                            }}
                             className="text-blue-500 cursor-pointer hover:text-rose-500 transition-colors duration-200"
                           >
                             <FiTrash2 size={18} />
@@ -199,7 +203,6 @@ const Cart = () => {
                         <div className="flex items-center mt-4">
                           <button
                             onClick={() => {
-                              console.log("mew");
                               updateQuantity(item.id, item.quantity - 1);
                             }}
                             className="p-2 cursor-pointer bg-blue-100 hover:bg-blue-200 rounded-lg text-blue-700 transition-colors duration-200"

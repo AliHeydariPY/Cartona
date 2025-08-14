@@ -11,7 +11,7 @@ import {
 } from "react-icons/fi";
 import { FaHeart } from "react-icons/fa";
 
-const Favorites = ({ setShowPopup }) => {
+const Favorites = ({ setAddToCartPopup }) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 50 }}
@@ -87,12 +87,12 @@ const Favorites = ({ setShowPopup }) => {
                     <button
                       onClick={() => {
                         const response = addToCart({
-                          product: 10,
+                          product: 11,
                           quantity: 1,
                           cart: 1,
                         });
                         response.then(() => {
-                          setShowPopup(true);
+                          setAddToCartPopup(true);
                         });
                       }}
                       className="p-1 sm:p-2 cursor-pointer bg-white rounded-full shadow-md hover:bg-blue-600 hover:text-white transition-colors"

@@ -13,15 +13,18 @@ import Payments from "./pages/user dashboard/Payments";
 import AddProduct from "./pages/user dashboard/AddProduct";
 
 import AddedToCartPopup from "./components/AddedToCartPopup";
+import RemoveFromCartPopup from "./components/RemoveFromCartPopup";
 
 import { useState } from "react";
 
 function App() {
-  const [showPopup, setShowPopup] = useState(false);
+  const [removeFromCartPopup, setRremoveFromCartPopup] = useState(false);
+  const [addToCartPopup, setAddToCartPopup] = useState(false);
+
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   return (
     <>
-      {/* <Navbar /> */}
       <Toaster
         position="top-center"
         gutter={12}
@@ -33,10 +36,17 @@ function App() {
         }}
       />
 
-      {showPopup && (
+      {removeFromCartPopup && (
+        <RemoveFromCartPopup
+          onClose={() => setRremoveFromCartPopup(false)}
+          product={selectedProduct}
+        />
+      )}
+
+      {addToCartPopup && (
         <AddedToCartPopup
-          onClose={() => setShowPopup(false)}
-          product={{ name: "Product X", price: 249.99 }}
+          onClose={() => setAddToCartPopup(false)}
+          product={selectedProduct}
         />
       )}
 
@@ -45,10 +55,18 @@ function App() {
 
         <Route path="/account" element={<UserDashboard />}>
           <Route path="profile" element={<Profile />} />
-          <Route path="cart" element={<Cart />} />
+          <Route
+            path="cart"
+            element={
+              <Cart
+                setRremoveFromCartPopup={setRremoveFromCartPopup}
+                setSelectedProduct={setSelectedProduct}
+              />
+            }
+          />
           <Route
             path="favorites"
-            element={<Favorites setShowPopup={setShowPopup} />}
+            element={<Favorites setAddToCartPopup={setAddToCartPopup} />}
           />
           <Route path="payments" element={<Payments />} />
           <Route path="add-product" element={<AddProduct />} />
