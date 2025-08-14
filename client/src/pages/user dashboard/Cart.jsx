@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
+import { getCartProducts } from "../../services/cartAPIServices";
+import { getCartProduct } from "../../services/productAPIServices";
 import {
   FiShoppingCart,
   FiTrash2,
@@ -14,35 +16,7 @@ import {
 
 const Cart = () => {
   // نمونه داده‌های سبد خرید
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 1,
-      name: "Premium Wireless Headphones",
-      price: 249.99,
-      quantity: 1,
-      image: "headphones",
-      color: "Black",
-      inStock: true,
-    },
-    {
-      id: 2,
-      name: "Smart Watch Series 5",
-      price: 199.99,
-      quantity: 2,
-      image: "smartwatch",
-      color: "Space Gray",
-      inStock: true,
-    },
-    {
-      id: 3,
-      name: "Phone Protection Case",
-      price: 29.99,
-      quantity: 1,
-      image: "case",
-      color: "Transparent",
-      inStock: false,
-    },
-  ]);
+  const [cartItems, setCartItems] = useState([]);
 
   const removeItem = (id) => {
     setCartItems(cartItems.filter((item) => item.id !== id));
@@ -61,9 +35,45 @@ const Cart = () => {
     (sum, item) => sum + item.price * item.quantity,
     0
   );
+
   const shipping = 15.0;
   const tax = subtotal * 0.08;
   const total = subtotal + shipping + tax;
+
+  useEffect(() => {
+    const fetchCartItems = async () => {
+      const cartProductsRes = await getCartProducts();
+
+      const productsData = await Promise.all(
+        cartProductsRes.data.map(async (item) => {
+          if (item.cart === 1) {
+            const productRes = await getCartProduct(item.product);
+            const productData = productRes.data;
+
+            return {
+              id: productData.id,
+              product: item.product,
+              name: productData.name,
+              price: parseFloat(productData.price),
+              quantity: item.quantity,
+              image: productData.image,
+              color: "black",
+            };
+          }
+          return null; // اگه شرط برقرار نبود
+        })
+      );
+
+      // حذف null یا undefined
+      setCartItems(productsData.filter(Boolean));
+    };
+
+    fetchCartItems();
+  }, []);
+
+  useEffect(() => {
+    console.log(cartItems);
+  }, [cartItems]);
 
   return (
     <motion.div
@@ -87,9 +97,9 @@ const Cart = () => {
             </span>
           </div>
 
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 gap-8">
             {/* لیست محصولات */}
-            <div className="xl:col-span-2 space-y-6">
+            <div className="space-y-6">
               {cartItems.length === 0 ? (
                 <div className="bg-white/95 backdrop-blur-xl rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-200">
                   <h3 className="text-lg sm:text-xl font-bold text-blue-800 mb-2">
@@ -110,8 +120,8 @@ const Cart = () => {
                       className="flex flex-col sm:flex-row border-b border-blue-100 last:border-0 pb-6 mb-6 last:mb-0 group"
                     >
                       {/* تصویر محصول */}
-                      <div className="w-full sm:w-32 h-32 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg flex items-center justify-center mb-4 sm:mb-0 relative">
-                        <div
+                      <div className="w-full sm:w-32 h-32  rounded-lg flex items-center justify-center mb-4 sm:mb-0 relative overflow-hidden">
+                        {/* <div
                           className={`w-24 h-24 bg-gradient-to-br ${
                             item.image === "headphones"
                               ? "from-blue-300 via-cyan-200 to-white"
@@ -119,13 +129,12 @@ const Cart = () => {
                               ? "from-gray-300 via-gray-200 to-white"
                               : "from-white via-gray-100 to-white"
                           } rounded-full shadow-inner`}
-                        ></div>
-
-                        {!item.inStock && (
-                          <span className="absolute top-2 left-2 bg-rose-100 text-rose-800 text-xs px-2 py-1 rounded">
-                            Out of Stock
-                          </span>
-                        )}
+                        ></div> */}
+                        <img
+                          src={item.image}
+                          alt=""
+                          className="max-w-full max-h-full object-contain"
+                        />
                       </div>
 
                       {/* اطلاعات محصول */}
@@ -146,7 +155,7 @@ const Cart = () => {
                           Color: {item.color}
                         </p>
                         <p className="text-base sm:text-lg font-bold text-blue-800 mt-2">
-                          ${item.price.toFixed(2)}
+                          ${item.price}
                         </p>
 
                         <div className="flex items-center mt-4">
