@@ -1,6 +1,9 @@
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { upgradeToSeller } from "../services/userAPIService";
+import { upgradeToSeller } from "../services/userAPIServices";
+
+import toast from "react-hot-toast";
+import { FiCheckCircle, FiX } from "react-icons/fi";
 
 const UpgradeToSeller = () => {
   const StoreSchema = Yup.object().shape({
@@ -38,14 +41,57 @@ const UpgradeToSeller = () => {
           validationSchema={StoreSchema}
           onSubmit={(values, { setSubmitting }) => {
             const formData = new FormData();
-            formData.append("user", 22);
+            formData.append("user", 23);
             formData.append("store_name", values.storeName);
             formData.append("description", values.description);
             formData.append("address", values.address);
             formData.append("image", values.image);
-            
+
             // console.log(Object.fromEntries(formData.entries()));
-            upgradeToSeller(formData);
+            const response = upgradeToSeller(formData);
+            response
+              .then((res) => {
+                console.log(res.data);
+                toast.custom((t) => (
+                  <div
+                    className={`${
+                      t.visible ? "animate-enter" : "animate-leave"
+                    } 
+      transform transition-all duration-300`}
+                  >
+                    <div className="bg-gradient-to-r from-green-500 to-cyan-400 text-white px-6 py-3 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-3">
+                      <div className="bg-blue-500/20 p-2 rounded-full">
+                        <FiCheckCircle className="text-xl text-white" />
+                      </div>
+                      <div>
+                        <p className="font-medium">
+                          Account upgraded to seller successfully!
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ));
+              })
+              .catch((err) => {
+                console.error(err);
+
+                toast.custom((t) => (
+                  <div
+                    className={`${
+                      t.visible ? "animate-enter" : "animate-leave"
+                    } 
+      transform transition-all duration-300`}
+                  >
+                    <div className="bg-gradient-to-r from-red-600 to-rose-500 text-white px-6 py-4 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-3">
+                      <FiX className="text-xl shrink-0" />
+                      <span className="font-medium">
+                        {err.response?.data?.message ||
+                          "Upgrade failed. Please try again."}
+                      </span>
+                    </div>
+                  </div>
+                ));
+              });
           }}
         >
           {({ setFieldValue }) => (

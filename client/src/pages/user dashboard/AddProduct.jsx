@@ -2,7 +2,9 @@ import { motion } from "framer-motion";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 
-import { addNewProduct } from "../../services/userAPIService";
+import { addNewProduct } from "../../services/productAPIServices";
+import toast from "react-hot-toast";
+import { FiCheckCircle, FiX } from "react-icons/fi";
 
 import {
   FiPlusCircle,
@@ -211,7 +213,28 @@ const AddProduct = () => {
 
             console.log(Object.fromEntries(formData.entries()));
 
-            addNewProduct(formData, onSubmitProps, setImages);
+            const response = addNewProduct(formData, onSubmitProps, setImages);
+
+            response.then((res) => {
+              console.log(res.data);
+              onSubmitProps.resetForm();
+              setImages({});
+              toast.custom((t) => (
+                <div
+                  className={`${t.visible ? "animate-enter" : "animate-leave"} 
+      transform transition-all duration-300`}
+                >
+                  <div className="bg-gradient-to-r from-green-500 to-cyan-400 text-white px-6 py-3 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-3">
+                    <div className="bg-blue-500/20 p-2 rounded-full">
+                      <FiCheckCircle className="text-xl text-white" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Product added successfully</p>
+                    </div>
+                  </div>
+                </div>
+              ));
+            });
           }}
         >
           {({ setFieldValue }) => (
