@@ -46,15 +46,7 @@ const AddProduct = () => {
       return newImages;
     });
   };
-
-  const handleAmazingOfferToggle = () => {
-    if (isAmazingOffer) {
-      setFieldValue("amazingOffer", "");
-      setFieldValue("amazingOfferPeriod", "");
-    }
-    setIsAmazingOffer(!isAmazingOffer);
-  };
-
+  
   const StoreSchema = Yup.object()
     .shape({
       image: Yup.mixed().required("Please select an image"),
