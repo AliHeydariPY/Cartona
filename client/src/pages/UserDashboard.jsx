@@ -68,7 +68,7 @@ const UserDashboard = () => {
               <p className="text-sm sm:text-base text-blue-800 font-semibold mt-1">
                 Member since: 2023/08/03
                 {isSeller && (
-                  <span className="ml-2 text-green-600">• Verified Store</span>
+                  <span className="inline-block ml-2 text-green-600">• Verified Store</span>
                 )}
               </p>
             </div>
@@ -200,11 +200,11 @@ const UserDashboard = () => {
               <div className="flex items-center mb-3 sm:mb-4">
                 <span>
                   <MdStorefront
-                    className="text-blue-700 mr-2 mb-0.5"
-                    size={21}
+                    className="text-blue-700 mr-2 lg:mr-1 xl:mr-2"
+                    size={20}
                   />
                 </span>
-                <h3 className="font-bold text-blue-900 text-base sm:text-lg">
+                <h3 className="font-bold text-blue-900 text-base sm:text-lg lg:text-base xl:text-lg">
                   Seller Account
                 </h3>
               </div>
