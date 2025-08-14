@@ -10,7 +10,7 @@ import {
 } from "react-icons/fi";
 import { FaHeart } from "react-icons/fa";
 
-const Favorites = () => {
+const Favorites = ({setShowPopup}) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 50 }}
@@ -80,8 +80,8 @@ const Favorites = () => {
 
                 {/* دکمه‌های اکشن */}
                 <div className="absolute bottom-2 sm:bottom-3 right-2 sm:right-3 flex space-x-1 sm:space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <button className="p-1 sm:p-2 cursor-pointer bg-white rounded-full shadow-md hover:bg-blue-600 hover:text-white transition-colors">
-                    <FiShoppingCart size={14} />
+                  <button onClick={() => setShowPopup(true)} className="p-1 sm:p-2 cursor-pointer bg-white rounded-full shadow-md hover:bg-blue-600 hover:text-white transition-colors">
+                    <FiShoppingCart size={13} className="mr-0.25"/>
                   </button>
                   <button className="p-1 sm:p-2 cursor-pointer bg-white rounded-full shadow-md hover:bg-rose-500 hover:text-white transition-colors">
                     <FiTrash2 size={14} />

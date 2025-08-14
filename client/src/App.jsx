@@ -12,7 +12,13 @@ import Orders from "./pages/user dashboard/Orders";
 import Payments from "./pages/user dashboard/Payments";
 import AddProduct from "./pages/user dashboard/AddProduct";
 
+import AddedToCartPopup from "./components/AddedToCartPopup";
+
+import { useState } from "react";
+
 function App() {
+  const [showPopup, setShowPopup] = useState(false);
+
   return (
     <>
       {/* <Navbar /> */}
@@ -26,17 +32,28 @@ function App() {
           duration: 3000,
         }}
       />
+
+      {showPopup && (
+        <AddedToCartPopup
+          onClose={() => setShowPopup(false)}
+          product={{ name: "Product X", price: 249.99 }}
+        />
+      )}
+
       <Routes>
         <Route path="/" element={<Home />} />
 
         <Route path="/account" element={<UserDashboard />}>
           <Route path="profile" element={<Profile />} />
           <Route path="orders" element={<Orders />} />
-          <Route path="favorites" element={<Favorites />} />
+          <Route
+            path="favorites"
+            element={<Favorites setShowPopup={setShowPopup} />}
+          />
           <Route path="payments" element={<Payments />} />
           <Route path="add-product" element={<AddProduct />} />
         </Route>
-        <Route path="/create-account" element={<CreateAccountForm/>}/>
+        <Route path="/create-account" element={<CreateAccountForm />} />
         <Route path="/upgradeToSeller" element={<UpgradeToSeller />} />
       </Routes>
     </>
