@@ -45,7 +45,7 @@ const AddToCartPopup = ({ onClose, product }) => {
           {/* هدر پاپ‌آپ */}
           <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-6 text-white">
             <div className="flex justify-between items-center">
-              <h3 className="text-xl font-bold flex items-center">
+              <h3 className="text-xl font-bold flex items-center ">
                 <FiCheck
                   className="mr-2 bg-white text-green-500 rounded-full p-0.5"
                   size={22}
@@ -56,7 +56,7 @@ const AddToCartPopup = ({ onClose, product }) => {
                 onClick={handleClose}
                 className="p-1 cursor-pointer rounded-full hover:bg-white/20 transition-colors duration-200"
               >
-                <FiX size={22} />
+                <FiX size={22}/>
               </button>
             </div>
           </div>
@@ -96,7 +96,7 @@ const AddToCartPopup = ({ onClose, product }) => {
                 <FiChevronRight className="ml-2" />
               </button>
 
-              <button className="w-full cursor-pointer bg-white border border-blue-300 text-blue-700 py-3 rounded-lg font-medium flex items-center justify-center hover:bg-blue-50 transition-colors duration-300">
+              <button onClick={handleClose} className="w-full cursor-pointer bg-white border border-blue-300 text-blue-700 py-3 rounded-lg font-medium flex items-center justify-center hover:bg-blue-50 transition-colors duration-300">
                 Continue Shopping
               </button>
             </div>
