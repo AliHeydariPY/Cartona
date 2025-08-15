@@ -49,7 +49,8 @@ function App() {
       {addToCartPopup && (
         <AddedToCartPopup
           onClose={() => setAddToCartPopup(false)}
-          product={selectedProduct}
+          // product={selectedProduct}
+          product={{ name: "Product X", price: 249.99 }}
         />
       )}
 
@@ -71,7 +72,12 @@ function App() {
           />
           <Route
             path="favorites"
-            element={<Favorites setAddToCartPopup={setAddToCartPopup} />}
+            element={
+              <Favorites
+                setAddToCartPopup={setAddToCartPopup}
+                setSelectedProduct={setSelectedProduct}
+              />
+            }
           />
           <Route path="payments" element={<Payments />} />
           <Route path="add-product" element={<AddProduct />} />

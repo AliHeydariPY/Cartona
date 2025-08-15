@@ -11,7 +11,7 @@ import {
 } from "react-icons/fi";
 import { FaHeart } from "react-icons/fa";
 
-const Favorites = ({ setAddToCartPopup }) => {
+const Favorites = ({ setAddToCartPopup, setSelectedProduct }) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 50 }}
@@ -86,8 +86,9 @@ const Favorites = ({ setAddToCartPopup }) => {
                   <div className="absolute bottom-2 sm:bottom-3 right-2 sm:right-3 flex space-x-1 sm:space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <button
                       onClick={() => {
+                        // setSelectedProduct(product) // SOON...
                         const response = addToCart({
-                          product: 11,
+                          product: 16,
                           quantity: 1,
                           cart: 1,
                         });
