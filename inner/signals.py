@@ -3,13 +3,11 @@ from django.db.models.signals import pre_delete, pre_save
 from django.dispatch import receiver
 from .models import Product, Images
 
-# حذف فایل تصویر محصول در زمان حذف محصول
 @receiver(pre_delete, sender=Product)
 def delete_product_image(sender, instance, **kwargs):
     if instance.image and hasattr(instance.image, 'delete'):
         instance.image.delete(save=False)
 
-# حذف تصویر‌های مرتبط در زمان حذف رکورد از Images
 @receiver(pre_delete, sender=Images)
 def delete_images_image(sender, instance, **kwargs):
     if instance.image and hasattr(instance.image, 'delete'):

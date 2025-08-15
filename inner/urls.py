@@ -6,7 +6,8 @@ from .views import (
     TypesViewSet,
     FeatureViewSet,
     FAQViewSet,
-    ProductReadOnlyViewSet)
+    ProductReadOnlyViewSet,
+    CategoryViewSet)
 
 router = DefaultRouter()
 router.register(r'products', ProductViewSet, basename='product')
@@ -15,6 +16,7 @@ router.register(r'types', TypesViewSet, basename='type')
 router.register(r'features', FeatureViewSet, basename='feature')
 router.register(r'faqs', FAQViewSet, basename='faq')
 router.register(r'list-products', ProductReadOnlyViewSet, basename='list-products')
+router.register(r'categories', CategoryViewSet, basename='category')
 
 urlpatterns = [
     path('product-api/', include(router.urls)),

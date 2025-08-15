@@ -1,7 +1,23 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from user.models import StoreKeeper
-from categories.models import ProductCategory
+
+class Category(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField()
+    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='children')
+
+    def save(self, *args, **kwargs):
+        if self.name:
+            self.name = self.name.strip()
+        if self.description:
+            self.description = self.description.strip()
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = "category"
+        verbose_name_plural = "categories"
+        db_table = "categories"
 
 class Product(models.Model):
     name = models.TextField()
@@ -11,7 +27,7 @@ class Product(models.Model):
     discount_period = models.DateTimeField(blank=True, null=True)
     stock_quantity = models.IntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(10000)],
-        help_text="موجودی باید بین 0 تا 10000 باشد")
+        help_text="Inventory must be between 0 and 10,000.")
     image = models.ImageField(upload_to='products/%Y/%m/%d')
     description = models.TextField()
     amazing_offer = models.TextField(blank=True, null=True)
@@ -19,15 +35,15 @@ class Product(models.Model):
     created_time = models.DateTimeField(auto_now_add=True)
     updated_time = models.DateTimeField(auto_now=True)
     storekeeper = models.ForeignKey(StoreKeeper, on_delete=models.CASCADE)
-    category = models.ForeignKey(ProductCategory, on_delete=models.CASCADE, related_name='products')
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
 
     def save(self, *args, **kwargs):
         if self.name:
-            self.name = self.name.lstrip()
+            self.name = self.name.strip()
         if self.description:
-            self.description = self.description.lstrip()
+            self.description = self.description.strip()
         if self.amazing_offer:
-            self.amazing_offer = self.amazing_offer.lstrip()
+            self.amazing_offer = self.amazing_offer.strip()
 
         if self.stock_quantity == 0:
             self.price = None
@@ -58,7 +74,7 @@ class Types(models.Model):
 
     def save(self, *args, **kwargs):
         if self.type_name:
-            self.type_name = self.type_name.lstrip()
+            self.type_name = self.type_name.strip()
         super().save(*args, **kwargs)
 
     class Meta:
@@ -72,13 +88,13 @@ class TypesValues(models.Model):
 
     def save(self, *args, **kwargs):
         if self.type_value:
-            self.type_value = self.type_value.lstrip()
+            self.type_value = self.type_value.strip()
         super().save(*args, **kwargs)
 
     class Meta:
-        verbose_name = "TypesValue"
-        verbose_name_plural = "TypesValues"
-        db_table = "TypesValues"
+        verbose_name = "Types_Value"
+        verbose_name_plural = "Types_Values"
+        db_table = "Types_Values"
 
 class Features(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
@@ -87,9 +103,9 @@ class Features(models.Model):
 
     def save(self, *args, **kwargs):
         if self.feature_name:
-            self.feature_name = self.feature_name.lstrip()
+            self.feature_name = self.feature_name.strip()
         if self.feature_value:
-            self.feature_value = self.feature_value.lstrip()
+            self.feature_value = self.feature_value.strip()
         super().save(*args, **kwargs)
 
     class Meta:
@@ -104,12 +120,12 @@ class FrequentlyAskedQuestions(models.Model):
 
     def save(self, *args, **kwargs):
         if self.frequently_asked_question:
-            self.frequently_asked_question = self.frequently_asked_question.lstrip()
+            self.frequently_asked_question = self.frequently_asked_question.strip()
         if self.frequently_asked_question_answer:
-            self.frequently_asked_question_answer = self.frequently_asked_question_answer.lstrip()
+            self.frequently_asked_question_answer = self.frequently_asked_question_answer.strip()
         super().save(*args, **kwargs)
 
     class Meta:
-        verbose_name = "FrequentlyAskedQuestion"
-        verbose_name_plural = "FrequentlyAskedQuestions"
-        db_table = "FrequentlyAskedQuestions"
+        verbose_name = "Frequently_Asked_Question"
+        verbose_name_plural = "Frequently_Asked_Questions"
+        db_table = "Frequently_Asked_Questions"

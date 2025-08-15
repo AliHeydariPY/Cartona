@@ -34,20 +34,20 @@ class CartItem(models.Model):
         return self.product.price * self.quantity
 
     class Meta:
-        verbose_name = "CartItem"
-        verbose_name_plural = "CartItems"
-        db_table = "CartItems"
+        verbose_name = "Cart_Item"
+        verbose_name_plural = "Cart_Items"
+        db_table = "Cart_Items"
         constraints = [
             models.UniqueConstraint(fields=['cart', 'product'], name='unique_product_per_cart')]
 
 def generate_fake_second_password():
-    return str(random.randint(100000, 999999))  # رمز دوم ۶ رقمی
+    return str(random.randint(100000, 999999))
 
 def generate_fake_cvv():
-    return str(random.randint(100, 999))  # CVV سه‌رقمی
+    return str(random.randint(100, 999))
 
 def generate_fake_expiry():
-    future_date = datetime.now() + timedelta(days=random.randint(365, 1460))  # بین 1 تا 4 سال آینده
+    future_date = datetime.now() + timedelta(days=random.randint(365, 1460))
     return future_date.strftime("%m/%y")
 
 def generate_fake_card_number():
@@ -58,9 +58,9 @@ def generate_fake_card_number():
 class ProductPayment(models.Model):
     cart = models.ForeignKey(
         Cart,
-        on_delete=models.CASCADE,  # حذف سبد باعث حذف پرداخت بشه
+        on_delete=models.CASCADE,
         related_name='product_payments',
-        help_text="سبدی که این پرداخت جزئی مربوط به آن است"
+        help_text="The basket to which this partial payment relates."
     )
     cart_item = models.ForeignKey(
         CartItem,
@@ -74,20 +74,20 @@ class ProductPayment(models.Model):
         null=True,
         blank=True,
         related_name='product_payments')
-    quantity = models.PositiveIntegerField(default=1, help_text="تعداد پرداخت‌شده از محصول")
+    quantity = models.PositiveIntegerField(default=1, help_text="Paid quantity of the product")
     total_price = models.PositiveIntegerField(
-        help_text="تعداد × قیمت واحد محصول",
+        help_text="Quantity × Unit price of product",
         editable=False)
     fake_card_number = models.CharField(max_length=19, default=generate_fake_card_number)
     fake_card_second_password = models.CharField(max_length=8, default=generate_fake_second_password)
     fake_card_cvv = models.CharField(max_length=4, default=generate_fake_cvv)
     fake_card_expiry = models.CharField(max_length=5, default=generate_fake_expiry)
     paid_at = models.DateTimeField(default=timezone.now)
-    address = models.TextField(help_text="آدرس پرداخت‌کننده")
+    address = models.TextField(help_text="Payer's address")
     is_successful = models.BooleanField(default=False)
     is_delivered = models.BooleanField(
         default=False,
-        help_text="آیا محصول به دست خریدار رسیده است؟"
+        help_text="Has the product reached the buyer?"
     )
     delivered_at = models.DateTimeField(null=True, blank=True)
 
@@ -108,19 +108,19 @@ class ProductPayment(models.Model):
 class Payment(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='payments')
     amount = models.PositiveIntegerField(
-        help_text="مبلغ نهایی پرداخت‌شده برای کل سبد خرید",
+        help_text="Final amount paid for the entire shopping cart",
         editable=False)
     product_payments = models.ManyToManyField(
         ProductPayment,
         related_name='main_payment',
         blank=True,
-        help_text="لیست پرداخت‌های جزئی مربوط به این پرداخت کلی")
+        help_text="List of partial payments related to this overall payment")
     fake_card_number = models.CharField(max_length=19, default=generate_fake_card_number)
     fake_card_second_password = models.CharField(max_length=8, default=generate_fake_second_password)
     fake_card_cvv = models.CharField(max_length=4, default=generate_fake_cvv)
     fake_card_expiry = models.CharField(max_length=5, default=generate_fake_expiry)
     paid_at = models.DateTimeField(default=timezone.now)
-    address = models.TextField(help_text="آدرس پرداخت‌کننده")
+    address = models.TextField(help_text="Payer's address")
     is_successful = models.BooleanField(default=False)
 
     def process_product_payments(self):
@@ -139,7 +139,7 @@ class Payment(models.Model):
 
     def save(self, *args, **kwargs):
         if self.address:
-            self.address = self.address.lstrip()
+            self.address = self.address.strip()
 
         if not self.pk:
             super().save(*args, **kwargs)

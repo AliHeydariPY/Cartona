@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from .models import Comment, CommentReply, ProductQuestion, ProductPurchase, PurchaseChat
+from .models import (Comment, CommentReply, ProductQuestion,
+    ProductPurchase, PurchaseChat, StoreNotificationSubscription, Notification)
 from inner.models import Product
 from user.models import StoreKeeper
 from cart.models import ProductPayment
@@ -16,7 +17,7 @@ class CommentReplySerializer(serializers.ModelSerializer):
 
     def validate_text(self, value):
         if not value.strip():
-            raise serializers.ValidationError("متن پاسخ نمی‌تواند خالی باشد.")
+            raise serializers.ValidationError("The response text cannot be empty.")
         return value
 
     def validate(self, data):
@@ -24,9 +25,9 @@ class CommentReplySerializer(serializers.ModelSerializer):
         comment = data.get('comment')
 
         if not user or not user.is_authenticated:
-            raise serializers.ValidationError("برای ارسال پاسخ باید وارد حساب کاربری شوید.")
+            raise serializers.ValidationError("You must be logged in to post a reply.")
         if not comment:
-            raise serializers.ValidationError("کامنت معتبر نیست.")
+            raise serializers.ValidationError("The comment is not valid.")
         return data
 
     def create(self, validated_data):
@@ -35,7 +36,7 @@ class CommentReplySerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         user = validated_data.get('user')
         if user != instance.user:
-            raise serializers.ValidationError("شما نمی‌توانید پاسخ کاربر دیگری را ویرایش کنید.")
+            raise serializers.ValidationError("You cannot edit another user's reply.")
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
@@ -57,10 +58,10 @@ class CommentSerializer(serializers.ModelSerializer):
         product = data.get("product")
 
         if not user or not user.is_authenticated:
-            raise serializers.ValidationError("برای ثبت کامنت باید وارد حساب کاربری شوید.")
+            raise serializers.ValidationError("You must be logged in to post a comment.")
 
         if not product:
-            raise serializers.ValidationError("محصول نامعتبر است.")
+            raise serializers.ValidationError("The product is invalid.")
 
         return data
 
@@ -69,28 +70,26 @@ class CommentSerializer(serializers.ModelSerializer):
         product_id = self.initial_data.get("product")
 
         if not user_id or not product_id:
-            return value  # اگر اطلاعات ناقص بود، ولش می‌کنیم
+            return value
 
         try:
             user_instance = User.objects.get(pk=user_id)
         except User.DoesNotExist:
-            raise serializers.ValidationError("کاربر معتبر نیست.")
+            raise serializers.ValidationError("The user is not valid.")
 
         has_commented = Comment.objects.filter(user=user_instance, product_id=product_id).exists()
 
         if self.instance:
-            # حالت آپدیت: فقط اجازه داریم امتیاز قبلی رو تغییر بدیم
             original_rating = self.instance.rating
             if original_rating is None and value is not None:
-                raise serializers.ValidationError("نمی‌توانید برای کامنتی که قبلاً امتیاز نداشته، امتیاز ثبت کنید.")
+                raise serializers.ValidationError("You cannot rate a comment that has not already been rated.")
             return value
 
-        # حالت ساخت (create):
         if has_commented and value is not None:
             raise serializers.ValidationError(
-                "شما قبلاً برای این محصول کامنت داده‌اید و نمی‌توانید دوباره امتیاز دهید.")
+                "You have already commented on this product and cannot rate it again.")
         if not has_commented and value is None:
-            raise serializers.ValidationError("برای اولین کامنت، امتیاز دادن الزامی است.")
+            raise serializers.ValidationError("Rating is required for the first comment.")
 
         return value
 
@@ -106,18 +105,16 @@ class CommentSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         user = validated_data.get("user")
         if user != instance.user:
-            raise serializers.ValidationError("شما نمی‌توانید کامنت کاربر دیگری را ویرایش کنید.")
+            raise serializers.ValidationError("You cannot edit another user's comment.")
 
         rating = validated_data.get("rating")
         if rating is not None and not (1 <= rating <= 5):
-            raise serializers.ValidationError("امتیاز باید عددی بین ۱ تا ۵ باشد.")
+            raise serializers.ValidationError("The score must be a number between 1 and 5.")
 
         replies_data = validated_data.pop('replies', [])
 
-        # ابتدا کامنت اصلی را آپدیت می‌کنیم
         comment = super().update(instance, validated_data)
 
-        # سپس ریپلای‌ها را هندل می‌کنیم
         for reply_data in replies_data:
             reply_id = reply_data.get('id')
             if reply_id:
@@ -127,7 +124,7 @@ class CommentSerializer(serializers.ModelSerializer):
                         setattr(reply_instance, attr, value)
                     reply_instance.save()
                 except CommentReply.DoesNotExist:
-                    continue  # یا می‌تونی به جای این، ریپلای جدید بسازی
+                    continue
             else:
                 CommentReply.objects.create(comment=comment, **reply_data)
 
@@ -145,7 +142,7 @@ class ProductQuestionSerializer(serializers.ModelSerializer):
 
     def validate_question_text(self, value):
         if not value.strip():
-            raise serializers.ValidationError("متن سوال نمی‌تواند خالی باشد.")
+            raise serializers.ValidationError("The question text cannot be empty.")
         return value
 
     def create(self, validated_data):
@@ -153,7 +150,7 @@ class ProductQuestionSerializer(serializers.ModelSerializer):
         user = validated_data.get('user')
 
         if product.storekeeper.user == user:
-            raise serializers.ValidationError("فروشنده نمی‌تواند برای محصول خودش سوال ثبت کند.")
+            raise serializers.ValidationError("The seller cannot register a question for their own product.")
 
         return ProductQuestion.objects.create(**validated_data)
 
@@ -162,7 +159,7 @@ class ProductQuestionSerializer(serializers.ModelSerializer):
         product_storekeeper = instance.product.storekeeper
 
         if storekeeper != product_storekeeper:
-            raise serializers.ValidationError("فقط فروشنده محصول می‌تواند به سوال پاسخ دهد.")
+            raise serializers.ValidationError("Only the product seller can answer the question.")
 
         answer = validated_data.get('answer_text')
         if answer is not None:
@@ -190,17 +187,17 @@ class ProductPurchaseSerializer(serializers.ModelSerializer):
         payment = data.get('payment')
 
         if buyer == storekeeper.user:
-            raise serializers.ValidationError("خریدار نمی‌تواند همان فروشنده باشد.")
+            raise serializers.ValidationError("The buyer cannot be the same as the seller.")
 
         if ProductPurchase.objects.filter(
             buyer=buyer,
             product=product,
             storekeeper=storekeeper
         ).exists():
-            raise serializers.ValidationError("این خرید قبلاً ثبت شده است.")
+            raise serializers.ValidationError("This purchase has already been registered.")
 
         if payment.cart.user != buyer:
-            raise serializers.ValidationError("پرداخت انتخاب‌شده متعلق به این خریدار نیست.")
+            raise serializers.ValidationError("The selected payment does not belong to this buyer.")
 
         return data
 
@@ -227,20 +224,18 @@ class PurchaseChatSerializer(serializers.ModelSerializer):
 
     def validate_message(self, value):
         if not value.strip():
-            raise serializers.ValidationError("متن پیام نمی‌تواند خالی باشد.")
+            raise serializers.ValidationError("The message text cannot be empty.")
         return value
 
     def validate(self, data):
         purchase = data.get('purchase')
         sender = data.get('sender')
 
-        # بررسی فعال بودن چت
         if not purchase.chat_enabled:
-            raise serializers.ValidationError("چت برای این خرید غیرفعال شده است.")
+            raise serializers.ValidationError("Chat has been disabled for this purchase.")
 
-        # بررسی مجاز بودن ارسال‌کننده
         if sender != purchase.buyer and sender != purchase.storekeeper.user:
-            raise serializers.ValidationError("فقط خریدار یا فروشنده می‌تواند پیام ارسال کند.")
+            raise serializers.ValidationError("Only the buyer or seller can send messages.")
 
         return data
 
@@ -251,3 +246,38 @@ class PurchaseChatSerializer(serializers.ModelSerializer):
         instance.message = validated_data.get('message', instance.message).strip()
         instance.save()
         return instance
+
+class StoreNotificationSubscriptionSerializer(serializers.ModelSerializer):
+    storekeeper = serializers.PrimaryKeyRelatedField(queryset=StoreKeeper.objects.all())
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+
+    class Meta:
+        model = StoreNotificationSubscription
+        fields = ['id', 'user', 'storekeeper']
+
+    def validate(self, attrs):
+        user = attrs.get('user')
+        storekeeper = attrs.get('storekeeper')
+
+        if StoreNotificationSubscription.objects.filter(user=user, storekeeper=storekeeper).exists():
+            raise serializers.ValidationError("You have already subscribed to this store.")
+
+        return attrs
+
+    def create(self, validated_data):
+        return StoreNotificationSubscription.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.storekeeper = validated_data.get('storekeeper', instance.storekeeper)
+        instance.user = validated_data.get('user', instance.user)
+        instance.save()
+        return instance
+
+class NotificationSerializer(serializers.ModelSerializer):
+    notification = serializers.PrimaryKeyRelatedField(read_only=True)
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    class Meta:
+        model = Notification
+        fields = ['id', 'user', 'notification', 'message', 'storekeeper_id', 'product_id']
+        read_only_fields = ['user', 'notification', 'message', 'storekeeper_id', 'product_id']

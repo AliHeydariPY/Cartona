@@ -3,19 +3,16 @@ from django.db.models.signals import pre_delete, pre_save
 from django.dispatch import receiver
 from .models import StoreKeeper, Images
 
-# حذف تصویر StoreKeeper هنگام حذف رکورد
 @receiver(pre_delete, sender=StoreKeeper)
 def delete_storekeeper_image(sender, instance, **kwargs):
     if instance.image and hasattr(instance.image, 'delete'):
         instance.image.delete(save=False)
 
-# حذف تصویر مرتبط با رکورد Images هنگام حذف خودش
 @receiver(pre_delete, sender=Images)
 def delete_store_image(sender, instance, **kwargs):
     if instance.image and hasattr(instance.image, 'delete'):
         instance.image.delete(save=False)
 
-# حذف تصویر قبلی StoreKeeper در صورت تغییر
 @receiver(pre_save, sender=StoreKeeper)
 def delete_old_storekeeper_image_on_change(sender, instance, **kwargs):
     if not instance.pk:
@@ -36,7 +33,6 @@ def delete_old_storekeeper_image_on_change(sender, instance, **kwargs):
             except Exception:
                 pass
 
-# حذف تصویر قبلی Images در صورت تغییر عکس
 @receiver(pre_save, sender=Images)
 def delete_old_store_image_on_change(sender, instance, **kwargs):
     if not instance.pk:

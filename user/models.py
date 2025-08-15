@@ -12,17 +12,17 @@ class StoreKeeper(models.Model):
 
     def save(self, *args, **kwargs):
         if self.store_name:
-            self.store_name = self.store_name.lstrip()
+            self.store_name = self.store_name.strip()
         if self.description:
-            self.description = self.description.lstrip()
+            self.description = self.description.strip()
         if self.address:
-            self.address = self.address.lstrip()
+            self.address = self.address.strip()
         super().save(*args, **kwargs)
 
     class Meta:
-        verbose_name = "StoreKeeper"
-        verbose_name_plural = "StoreKeepers"
-        db_table = "StoreKeepers"
+        verbose_name = "Store_Keeper"
+        verbose_name_plural = "Store_Keepers"
+        db_table = "Store_Keepers"
 
 class Images(models.Model):
     storekeeper = models.ForeignKey(StoreKeeper, on_delete=models.CASCADE, related_name='images')
@@ -31,7 +31,7 @@ class Images(models.Model):
     class Meta:
         verbose_name = "Image"
         verbose_name_plural = "Images"
-        db_table = "StoreImages"
+        db_table = "Store_Images"
 
 class Features(models.Model):
     storekeeper = models.ForeignKey(StoreKeeper, on_delete=models.CASCADE, related_name='features')
@@ -40,15 +40,15 @@ class Features(models.Model):
 
     def save(self, *args, **kwargs):
         if self.feature_name:
-            self.feature_name = self.feature_name.lstrip()
+            self.feature_name = self.feature_name.strip()
         if self.feature_value:
-            self.feature_value = self.feature_value.lstrip()
+            self.feature_value = self.feature_value.strip()
         super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Feature"
         verbose_name_plural = "Features"
-        db_table = "StoreFeatures"
+        db_table = "Store_Features"
 
 class FrequentlyAskedQuestions(models.Model):
     storekeeper = models.ForeignKey(StoreKeeper, on_delete=models.CASCADE, related_name='faqs')
@@ -57,36 +57,36 @@ class FrequentlyAskedQuestions(models.Model):
 
     def save(self, *args, **kwargs):
         if self.frequently_asked_question:
-            self.frequently_asked_question = self.frequently_asked_question.lstrip()
+            self.frequently_asked_question = self.frequently_asked_question.strip()
         if self.frequently_asked_question_answer:
-            self.frequently_asked_question_answer = self.frequently_asked_question_answer.lstrip()
+            self.frequently_asked_question_answer = self.frequently_asked_question_answer.strip()
         super().save(*args, **kwargs)
 
     class Meta:
-        verbose_name = "FrequentlyAskedQuestion"
-        verbose_name_plural = "FrequentlyAskedQuestions"
-        db_table = "StoreFrequentlyAskedQuestions"
+        verbose_name = "Frequently_Asked_Question"
+        verbose_name_plural = "Frequently_Asked_Questions"
+        db_table = "Store_Frequently_Asked_Questions"
 
 class ProductDeliveryStatus(models.Model):
     payment = models.OneToOneField(
         'cart.ProductPayment',
         on_delete=models.CASCADE,
         related_name='delivery_status',
-        help_text="پرداختی که وضعیت ارسال آن ثبت شده"
+        help_text="Payment with a registered sending status"
     )
     is_sent = models.BooleanField(
         default=False,
-        help_text="آیا محصول توسط فروشنده ارسال شده است؟"
+        help_text="Was the product shipped by the seller?"
     )
     sent_at = models.DateTimeField(
         null=True,
         blank=True,
-        help_text="زمان ارسال محصول (در صورت وجود)"
+        help_text="Product delivery time (if applicable)"
     )
     note = models.TextField(
         blank=True,
         null=True,
-        help_text="توضیحات اختیاری فروشنده درباره ارسال"
+        help_text="Optional seller description about shipping"
     )
 
     def save(self, *args, **kwargs):

@@ -1,4 +1,5 @@
 import re
+from django.utils import timezone
 from django.contrib.auth.models import User
 from django.db.models import Avg
 from django.contrib.auth.hashers import check_password
@@ -6,8 +7,9 @@ from rest_framework import serializers
 from .models import StoreKeeper, Features, Images, FrequentlyAskedQuestions, ProductDeliveryStatus
 from inner.models import Product
 from comments.models import Comment
-from cart.models import ProductPayment, Payment
+from cart.models import ProductPayment
 from cart.models import Cart
+from inner.serializers import ProductReadOnlySerializer
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=False)
@@ -16,33 +18,46 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'password', 'old_password']
+        extra_kwargs = {
+            'username': {
+                'help_text': 'Required. 4 to 50 characters. Letters, digits and @/./+/-/_ only.',
+                'max_length': 50,
+            }
+        }
+
+    def validate_username(self, value):
+        if len(value) < 5:
+            raise serializers.ValidationError("Username must be at least 5 characters long.")
+        if len(value) > 50:
+            raise serializers.ValidationError("Username must not exceed 50 characters.")
+        return value
 
     def validate_password(self, value):
         if len(value) < 8:
-            raise serializers.ValidationError("رمز عبور باید حداقل ۸ کاراکتر باشد.")
+            raise serializers.ValidationError("The password must be at least 8 characters long.")
         if not re.search(r'[a-z]', value):
-            raise serializers.ValidationError("رمز عبور باید حداقل یک حرف کوچک انگلیسی داشته باشد.")
+            raise serializers.ValidationError("The password must contain at least one lowercase English letter.")
         if not re.search(r'[A-Z]', value):
-            raise serializers.ValidationError("رمز عبور باید حداقل یک حرف بزرگ انگلیسی داشته باشد.")
+            raise serializers.ValidationError("The password must contain at least one uppercase English letter.")
         if not re.search(r'\d', value):
-            raise serializers.ValidationError("رمز عبور باید حداقل یک عدد داشته باشد.")
+            raise serializers.ValidationError("The password must contain at least one number.")
         if re.search(r'\s', value):
-            raise serializers.ValidationError("رمز عبور نباید شامل فاصله (space) باشد.")
-        if ' ' in value:
-            raise serializers.ValidationError("رمز عبور نباید شامل فاصله (space) باشد.")
+            raise serializers.ValidationError("The password should not contain spaces.")
         return value
 
     def create(self, validated_data):
         validated_data.pop('old_password', None)
         password = validated_data.get('password')
         if not password:
-            raise serializers.ValidationError({'password': 'رمز عبور الزامی است برای ساخت حساب کاربری.'})
+            raise serializers.ValidationError({'password': 'A password is required to create an account.'})
         self.validate_password(password)
         return User.objects.create_user(**validated_data)
 
     def update(self, instance, validated_data):
-        if 'username' in validated_data:
-            instance.username = validated_data['username']
+        username = validated_data.get('username')
+        if username:
+            self.validate_username(username)
+            instance.username = username
 
         new_password = validated_data.get('password')
         old_password = validated_data.pop('old_password', None)
@@ -51,9 +66,9 @@ class UserSerializer(serializers.ModelSerializer):
             self.validate_password(new_password)
 
             if not old_password:
-                raise serializers.ValidationError({'old_password': 'برای تغییر رمز عبور، وارد کردن رمز قبلی الزامی است.'})
+                raise serializers.ValidationError({'old_password': 'To change the password, it is required to enter the previous password.'})
             if not check_password(old_password, instance.password):
-                raise serializers.ValidationError({'old_password': 'رمز عبور قبلی اشتباه است.'})
+                raise serializers.ValidationError({'old_password': 'The old password is incorrect.'})
             instance.set_password(new_password)
 
         instance.save()
@@ -69,7 +84,7 @@ class StoreImageSerializer(serializers.ModelSerializer):
 
     def validate_image(self, image):
         if image.size > 5 * 1024 * 1024:
-            raise serializers.ValidationError("حجم تصویر نباید بیشتر از ۵ مگابایت باشد.")
+            raise serializers.ValidationError("The image size should not exceed 5 MB.")
         return image
 
     def create(self, validated_data):
@@ -135,14 +150,14 @@ class StoreKeeperSerializer(serializers.ModelSerializer):
 
     def validate_image(self, image):
         if image.size > 5 * 1024 * 1024:
-            raise serializers.ValidationError("حجم تصویر فروشگاه نباید بیشتر از ۵ مگابایت باشد.")
+            raise serializers.ValidationError("The size of the store image should not exceed 5 MB.")
         return image
 
     def validate_store_name(self, value):
         request = self.context.get('request')
         store_id = self.instance.id if self.instance else None
         if StoreKeeper.objects.filter(store_name=value).exclude(id=store_id).exists():
-            raise serializers.ValidationError("نام فروشگاه باید منحصر به‌فرد باشد.")
+            raise serializers.ValidationError("The store name must be unique.")
         return value
 
     def create(self, validated_data):
@@ -186,13 +201,12 @@ class StoreKeeperSerializer(serializers.ModelSerializer):
 
         return instance
 
-from inner.serializers import ProductReadOnlySerializer
 class StoreKeeperReadOnlySerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True)
     features = StoreFeatureSerializer(many=True, read_only=True)
     faqs = StoreFAQSerializer(many=True, read_only=True)
     images = StoreImageSerializer(many=True, read_only=True)
-    products = ProductReadOnlySerializer(many=True, read_only=True)  # اگر related_name='products' باشد
+    products = ProductReadOnlySerializer(many=True, read_only=True)
     image = serializers.ImageField(use_url=True, read_only=True)
     created_time = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
     average_rating = serializers.SerializerMethodField()
@@ -211,7 +225,7 @@ class StoreKeeperReadOnlySerializer(serializers.ModelSerializer):
             'features',
             'faqs',
             'images',
-            'products',  # اگر مرتبط باشد
+            'products',
         ]
 
     def get_average_rating(self, obj):
@@ -245,11 +259,25 @@ class DeliveryStatusSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         is_sent = attrs.get('is_sent')
         sent_at = attrs.get('sent_at')
+        payment = attrs.get('payment')
+
+        now = timezone.now()
 
         if is_sent and not sent_at:
-            raise serializers.ValidationError("زمان ارسال باید مشخص شود.")
+            raise serializers.ValidationError({'sent_at': 'The delivery time must be specified.'})
         if not is_sent and sent_at:
-            raise serializers.ValidationError("نمی‌توان زمان ارسال را برای محصولی که ارسال نشده ثبت کرد.")
+            raise serializers.ValidationError({'sent_at': 'Cannot set delivery time if not sent.'})
+
+        if self.instance is None:
+            if ProductDeliveryStatus.objects.filter(payment=payment).exists():
+                raise serializers.ValidationError({'payment': 'Delivery status for this payment already exists.'})
+
+        if is_sent and sent_at:
+            if sent_at < payment.paid_at:
+                raise serializers.ValidationError({'sent_at': 'Delivery time cannot be before payment time.'})
+            if sent_at > now:
+                raise serializers.ValidationError({'sent_at': 'Delivery time cannot be in the future.'})
+
         return attrs
 
 class StoreRelatedPaymentSerializer(serializers.ModelSerializer):

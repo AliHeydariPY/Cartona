@@ -1,7 +1,6 @@
 from rest_framework import serializers
-from .models import Product, Images, Types, TypesValues, Features, FrequentlyAskedQuestions
+from .models import Product, Images, Types, TypesValues, Features, FrequentlyAskedQuestions, Category
 from user.models import StoreKeeper
-from categories.models import ProductCategory
 
 class ImageSerializer(serializers.ModelSerializer):
     product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
@@ -14,7 +13,7 @@ class ImageSerializer(serializers.ModelSerializer):
     def validate_image(self, image):
         max_size = 5 * 1024 * 1024
         if image.size > max_size:
-            raise serializers.ValidationError("حجم تصویر نباید بیشتر از ۵ مگابایت باشد.")
+            raise serializers.ValidationError("The image size should not exceed 5 MB.")
         return image
 
     def create(self, validated_data):
@@ -54,7 +53,6 @@ class TypesSerializer(serializers.ModelSerializer):
         type_obj = Types.objects.create(**validated_data)
 
         for value in values_data:
-            # هماهنگ با تغییر فیلد به type
             TypesValues.objects.create(type=type_obj, type_value=value['type_value'])
 
         return type_obj
@@ -62,12 +60,10 @@ class TypesSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         values_data = validated_data.pop('typesvalues_set', [])
 
-        # به‌روزرسانی خود مدل Types
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
 
-        # حذف مقادیر قبلی و ایجاد مقادیر جدید مرتبط با instance به‌عنوان type
         instance.typesvalues_set.all().delete()
         for value in values_data:
             TypesValues.objects.create(type=instance, type_value=value['type_value'])
@@ -115,7 +111,7 @@ class ProductSerializer(serializers.ModelSerializer):
     updated_time = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
     image = serializers.ImageField(use_url=True)
     storekeeper = serializers.PrimaryKeyRelatedField(queryset=StoreKeeper.objects.all())
-    category = serializers.PrimaryKeyRelatedField(queryset=ProductCategory.objects.all())
+    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
     average_rating = serializers.SerializerMethodField()
     comment_count = serializers.SerializerMethodField()
     user_commented = serializers.SerializerMethodField()
@@ -127,12 +123,12 @@ class ProductSerializer(serializers.ModelSerializer):
     def validate_image(self, image):
         max_size = 5 * 1024 * 1024
         if image.size > max_size:
-            raise serializers.ValidationError("حجم تصویر نباید بیشتر از ۵ مگابایت باشد.")
+            raise serializers.ValidationError("The image size should not exceed 5 MB.")
         return image
 
     def validate_stock_quantity(self, value):
         if value < 0 or value > 10000:
-            raise serializers.ValidationError("مقدار موجودی باید بین ۰ تا ۱۰٬۰۰۰ باشد.")
+            raise serializers.ValidationError("The inventory value must be between 0 and 10,000.")
         return value
 
     def get_average_rating(self, obj):
@@ -160,13 +156,13 @@ class ProductSerializer(serializers.ModelSerializer):
         errors = {}
 
         if discounted_price and discount_percentage:
-            errors['discount_conflict'] = "فقط یکی از 'قیمت تخفیف‌خورده' یا 'درصد تخفیف' باید وارد شود."
+            errors['discount_conflict'] = "Only one of 'Discounted Price' or 'Discount Percentage' must be entered."
 
         if discount_period and not (discounted_price or discount_percentage):
-            errors['discount_period'] = "برای ثبت 'دوره تخفیف' باید یکی از فیلدهای تخفیف مشخص شده باشد."
+            errors['discount_period'] = "To register a 'discount period', one of the discount fields must be specified."
 
         if amazing_offer_period and not amazing_offer:
-            errors['amazing_offer_period'] = "ابتدا باید متن پیشنهاد وارد شود تا مدت آن معتبر باشد."
+            errors['amazing_offer_period'] = "The offer text must first be entered for its validity period."
 
         if price:
             if discount_percentage and not discounted_price:
@@ -181,7 +177,7 @@ class ProductSerializer(serializers.ModelSerializer):
             for field in ['price', 'discounted_price', 'discount_percentage',
                           'discount_period', 'amazing_offer', 'amazing_offer_period']:
                 if data.get(field) is not None:
-                    errors[field] = "وقتی موجودی صفر است نباید اطلاعات قیمت یا تخفیف وارد شود."
+                    errors[field] = "When the inventory is zero, no price or discount information should be entered."
 
         return data
 
@@ -271,3 +267,15 @@ class ProductReadOnlySerializer(serializers.ModelSerializer):
         if request and request.user.is_authenticated:
             return obj.comments.filter(user=request.user).exists()
         return False
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['id', 'name', 'description', 'parent']
+
+class CategoryWithFullProductsSerializer(serializers.ModelSerializer):
+    products = ProductReadOnlySerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Category
+        fields = ['id', 'name', 'description', 'parent', 'products']

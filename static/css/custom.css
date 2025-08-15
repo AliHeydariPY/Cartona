@@ -1,4 +1,3 @@
-/* پایه: چپ‌چین بودن زبان انگلیسی */
 body {
   direction: ltr !important;
   text-align: left !important;
@@ -106,7 +105,6 @@ body {
   transform: none !important;
 }
 
-/* فقط در صفحه ورود (login) */
 /*
 body.jazzmin-login-page img {
   width: 150px !important;
