@@ -16,3 +16,8 @@ export const editCartProduct = (payload) => {
   const url = `${SERVER_URL}/cart-api/cart-items/${payload.id}/`;
   return axios.put(url, payload)
 };
+
+export const deleteCartProduct = (productID) => {
+    const url = `${SERVER_URL}/cart-api/cart-items/${productID}/`;
+  return axios.delete(url)
+}

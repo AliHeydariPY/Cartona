@@ -23,6 +23,8 @@ function App() {
 
   const [selectedProduct, setSelectedProduct] = useState(null);
 
+  const [removeInDOM, setRemoveInDOM] = useState(null);
+
   return (
     <>
       <Toaster
@@ -40,6 +42,7 @@ function App() {
         <RemoveFromCartPopup
           onClose={() => setRremoveFromCartPopup(false)}
           product={selectedProduct}
+          setRemoveInDOM={setRemoveInDOM}
         />
       )}
 
@@ -61,6 +64,8 @@ function App() {
               <Cart
                 setRremoveFromCartPopup={setRremoveFromCartPopup}
                 setSelectedProduct={setSelectedProduct}
+                removeInDOM={removeInDOM}
+                setRemoveInDOM={setRemoveInDOM}
               />
             }
           />

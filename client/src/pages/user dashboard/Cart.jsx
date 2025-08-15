@@ -22,7 +22,12 @@ import {
   FiX,
 } from "react-icons/fi";
 
-const Cart = ({ setRremoveFromCartPopup, setSelectedProduct }) => {
+const Cart = ({
+  setRremoveFromCartPopup,
+  setSelectedProduct,
+  removeInDOM,
+  setRemoveInDOM,
+}) => {
   const [cartItems, setCartItems] = useState([]);
 
   const removeItem = (id) => {
@@ -76,6 +81,14 @@ const Cart = ({ setRremoveFromCartPopup, setSelectedProduct }) => {
   const shipping = 15.0;
   const tax = subtotal * 0.08;
   const total = subtotal + shipping + tax;
+
+  useEffect(() => {
+    if (removeInDOM) {
+      removeItem(removeInDOM);
+      console.log(removeInDOM);
+      setRemoveInDOM(null);
+    }
+  }, [removeInDOM]);
 
   useEffect(() => {
     const fetchCartItems = async () => {

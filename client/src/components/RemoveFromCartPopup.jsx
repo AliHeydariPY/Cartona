@@ -1,8 +1,11 @@
 import { Portal } from "react-portal";
-import { FiX, FiTrash2, FiShoppingCart } from "react-icons/fi";
 import { useEffect, useState } from "react";
 
-const RemoveFromCartPopup = ({ onClose, product, onConfirm }) => {
+import { deleteCartProduct } from "../services/cartAPIServices";
+
+import { FiX, FiTrash2 } from "react-icons/fi";
+
+const RemoveFromCartPopup = ({ onClose, product , setRemoveInDOM}) => {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -15,7 +18,8 @@ const RemoveFromCartPopup = ({ onClose, product, onConfirm }) => {
   };
 
   const handleConfirm = () => {
-    onConfirm();
+    deleteCartProduct(product.id);
+    setRemoveInDOM(product.id)
     handleClose();
   };
 
