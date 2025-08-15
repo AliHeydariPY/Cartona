@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { FiCheckCircle, FiX } from "react-icons/fi";
 
 import { createUser } from "../services/userAPIServices";
+import { createCart } from "../services/cartAPIServices";
 
 const CreateAccountForm = () => {
   const SignupSchema = Yup.object().shape({
@@ -64,6 +65,11 @@ const CreateAccountForm = () => {
                     </div>
                   </div>
                 ));
+                createCart({user:1})
+                .then((res) => {
+                  console.log(res)
+                  localStorage.setItem("userCartID", 1)
+                })
               })
               .catch((error) => {
                 toast.custom((t) => (
