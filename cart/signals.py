@@ -1,6 +1,7 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from .models import ProductPayment, Payment
+from django.contrib.auth import get_user_model
+from .models import ProductPayment, Payment, Cart
 
 @receiver(post_save, sender=ProductPayment)
 def delete_cart_item_when_payment_successful(sender, instance, created, **kwargs):
@@ -12,3 +13,10 @@ def delete_cart_item_when_payment_successful(sender, instance, created, **kwargs
 
         if payment:
             cart_item.delete()
+
+User = get_user_model()
+
+@receiver(post_save, sender=User)
+def create_cart_for_new_user(sender, instance, created, **kwargs):
+    if created:
+        Cart.objects.get_or_create(user=instance)

@@ -1,7 +1,8 @@
 import django_filters
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import Http404
-from django.db.models import Avg, Count, Case, When, F
+from django.db.models import Avg, Count, Case, When, F, Q
+from django.core.exceptions import ValidationError
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -246,17 +247,90 @@ class FAQViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
 class ProductFilter(django_filters.FilterSet):
-    min_rating = django_filters.NumberFilter(field_name='average_rating', lookup_expr='gte')
-    max_rating = django_filters.NumberFilter(field_name='average_rating', lookup_expr='lte')
+    min_rating = django_filters.CharFilter(
+        method='filter_min_rating',
+        label='Minimum Rating'
+    )
+    max_rating = django_filters.CharFilter(
+        method='filter_max_rating',
+        label='Maximum Rating'
+    )
 
-    min_comments = django_filters.NumberFilter(field_name='comment_count', lookup_expr='gte')
-    max_comments = django_filters.NumberFilter(field_name='comment_count', lookup_expr='lte')
+    min_comments = django_filters.NumberFilter(
+        field_name='comment_count',
+        lookup_expr='gte',
+        label='Minimum Comment Count'
+    )
+    max_comments = django_filters.NumberFilter(
+        field_name='comment_count',
+        lookup_expr='lte',
+        label='Maximum Comment Count'
+    )
 
-    min_price = django_filters.NumberFilter(method='filter_min_price')
-    max_price = django_filters.NumberFilter(method='filter_max_price')
+    min_price = django_filters.NumberFilter(
+        method='filter_min_price',
+        label='Minimum Price'
+    )
+    max_price = django_filters.NumberFilter(
+        method='filter_max_price',
+        label='Maximum Price'
+    )
 
-    category = django_filters.NumberFilter(field_name='category_id')
-    storekeeper = django_filters.NumberFilter(field_name='storekeeper_id')
+    category = django_filters.NumberFilter(
+        field_name='category_id',
+        label='Category'
+    )
+    storekeeper = django_filters.NumberFilter(
+        field_name='storekeeper_id',
+        label='Storekeeper'
+    )
+
+    def filter_min_rating(self, queryset, name, value):
+        max_rating_value = self.data.get('max_rating')
+
+        if value == 'null':
+            if max_rating_value and max_rating_value != 'null':
+                try:
+                    max_rating = float(max_rating_value)
+                    if not (1.0 <= max_rating <= 5.0):
+                        raise ValidationError("max_rating must be between 1.0 and 5.0.")
+                    return queryset.filter(Q(average_rating__isnull=True) | Q(average_rating__lte=max_rating))
+                except ValueError:
+                    raise ValidationError("max_rating must be a number or 'null'.")
+            else:
+                return queryset.filter(average_rating__isnull=True)
+
+        try:
+            min_rating = float(value)
+            if not (1.0 <= min_rating <= 5.0):
+                raise ValidationError("min_rating must be between 1.0 and 5.0.")
+            if max_rating_value and max_rating_value != 'null':
+                try:
+                    max_rating = float(max_rating_value)
+                    if not (1.0 <= max_rating <= 5.0):
+                        raise ValidationError("max_rating must be between 1.0 and 5.0.")
+                    return queryset.filter(average_rating__gte=min_rating, average_rating__lte=max_rating)
+                except ValueError:
+                    raise ValidationError("max_rating must be a number or 'null'.")
+            return queryset.filter(average_rating__gte=min_rating)
+        except ValueError:
+            raise ValidationError("min_rating must be a number or 'null'.")
+
+    def filter_max_rating(self, queryset, name, value):
+        min_rating_value = self.data.get('min_rating')
+        if min_rating_value:
+            return queryset
+
+        if value == 'null':
+            return queryset.filter(average_rating__isnull=True)
+
+        try:
+            max_rating = float(value)
+            if not (1.0 <= max_rating <= 5.0):
+                raise ValidationError("max_rating must be between 1.0 and 5.0.")
+            return queryset.filter(Q(average_rating__lte=max_rating))
+        except ValueError:
+            raise ValidationError("max_rating must be a number or 'null'.")
 
     def filter_min_price(self, queryset, name, value):
         return queryset.annotate(
@@ -276,7 +350,12 @@ class ProductFilter(django_filters.FilterSet):
 
     class Meta:
         model = Product
-        fields = ['category', 'storekeeper']
+        fields = [
+            'min_rating', 'max_rating',
+            'min_comments', 'max_comments',
+            'min_price', 'max_price',
+            'category', 'storekeeper'
+        ]
 
 class ProductReadOnlyViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ProductReadOnlySerializer
@@ -294,15 +373,27 @@ class ProductReadOnlyViewSet(viewsets.ReadOnlyModelViewSet):
             )
         )
 
+    def handle_exception(self, exc):
+        if isinstance(exc, ValidationError):
+            return Response(
+                {"detail": exc.messages},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        return super().handle_exception(exc)
+
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Category.objects.all().order_by('-id')
     serializer_class = CategorySerializer
     filter_backends = [SearchFilter]
     search_fields = ['name', 'description']
 
-    @action(detail=False, url_path='parent/(?P<parent_id>\d+)(?:/(?P<index>\d+))?', methods=['get'])
+    @action(detail=False, url_path='parent/(?P<parent_id>[^/]+)(?:/(?P<index>\d+))?', methods=['get'])
     def by_parent(self, request, parent_id=None, index=None):
-        categories = Category.objects.filter(parent_id=parent_id).order_by('-id')
+        if parent_id == "null":
+            categories = Category.objects.filter(parent__isnull=True).order_by('-id')
+        else:
+            categories = Category.objects.filter(parent_id=parent_id).order_by('-id')
+
         if not categories.exists():
             raise Http404("No categories found.")
 

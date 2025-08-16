@@ -34,12 +34,8 @@ class CommentViewSet(viewsets.ModelViewSet):
             comment = None
 
         if request.method == 'GET':
-            if index:
-                serializer = self.get_serializer(comment)
-                return Response(serializer.data)
-            else:
-                serializer = self.get_serializer(comments, many=True)
-                return Response(serializer.data)
+            serializer = self.get_serializer(comment if index else comments, many=not index)
+            return Response(serializer.data)
 
         elif request.method in ['PUT', 'PATCH']:
             serializer = self.get_serializer(comment, data=request.data, partial=(request.method == 'PATCH'))
@@ -59,6 +55,28 @@ class CommentViewSet(viewsets.ModelViewSet):
     @action(detail=False, url_path='user/(?P<user_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
     def by_user(self, request, user_id=None, index=None):
         comments = Comment.objects.filter(user_id=user_id)
+        return self._handle_filtered_request(request, comments, index)
+
+    @action(detail=False, url_path='rating/(?P<rating>([0-9]+|null))(?:/(?P<index>\d+))?',
+            methods=['get', 'put', 'patch', 'delete'])
+    def by_rating(self, request, rating=None, index=None):
+        if rating == 'null':
+            comments = Comment.objects.filter(rating__isnull=True)
+        else:
+            try:
+                rating_value = int(rating)
+                if rating_value < 1 or rating_value > 5:
+                    return Response(
+                        {"detail": "Rating must be between 1 and 5 or 'null'."},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                comments = Comment.objects.filter(rating=rating_value)
+            except ValueError:
+                return Response(
+                    {"detail": "Rating must be a number between 1 and 5 or 'null'."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
         return self._handle_filtered_request(request, comments, index)
 
 class CommentReplyViewSet(viewsets.ModelViewSet):
@@ -158,9 +176,21 @@ class ProductQuestionViewSet(viewsets.ModelViewSet):
         questions = ProductQuestion.objects.filter(user_id=user_id)
         return self._handle_filtered_request(request, questions, index)
 
-    @action(detail=False, url_path='storekeeper/(?P<storekeeper_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
+    @action(detail=False, url_path='storekeeper/(?P<storekeeper_id>([0-9]+|null))(?:/(?P<index>\d+))?',
+            methods=['get', 'put', 'patch', 'delete'])
     def by_storekeeper(self, request, storekeeper_id=None, index=None):
-        questions = ProductQuestion.objects.filter(storekeeper_id=storekeeper_id)
+        if storekeeper_id == 'null':
+            questions = ProductQuestion.objects.filter(storekeeper__isnull=True)
+        else:
+            try:
+                storekeeper_id = int(storekeeper_id)
+                questions = ProductQuestion.objects.filter(storekeeper_id=storekeeper_id)
+            except ValueError:
+                return Response(
+                    {"detail": "Storekeeper must be a number or 'null'."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
         return self._handle_filtered_request(request, questions, index)
 
     @action(detail=False, url_path='product/(?P<product_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
@@ -369,22 +399,22 @@ class NotificationViewSet(
             notification.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=False, url_path='by-user/(?P<user_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'delete'])
+    @action(detail=False, url_path='user/(?P<user_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'delete'])
     def by_user(self, request, user_id=None, index=None):
         notifications = Notification.objects.filter(user_id=user_id)
         return self._handle_filtered_request(request, notifications, index)
 
-    @action(detail=False, url_path='by-storekeeper/(?P<storekeeper_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'delete'])
+    @action(detail=False, url_path='storekeeper-id/(?P<storekeeper_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'delete'])
     def by_storekeeper(self, request, storekeeper_id=None, index=None):
         notifications = Notification.objects.filter(storekeeper_id=storekeeper_id)
         return self._handle_filtered_request(request, notifications, index)
 
-    @action(detail=False, url_path='by-product/(?P<product_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'delete'])
+    @action(detail=False, url_path='product-id/(?P<product_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'delete'])
     def by_product(self, request, product_id=None, index=None):
         notifications = Notification.objects.filter(product_id=product_id)
         return self._handle_filtered_request(request, notifications, index)
 
-    @action(detail=False, url_path='by-notification/(?P<notification_id>[^/]+)(?:/(?P<index>\d+))?', methods=['get', 'delete'])
+    @action(detail=False, url_path='notification/(?P<notification_id>[^/]+)(?:/(?P<index>\d+))?', methods=['get', 'delete'])
     def by_notification(self, request, notification_id=None, index=None):
         if notification_id == 'null':
             notifications = Notification.objects.filter(notification__isnull=True)

@@ -249,8 +249,15 @@ class MinimalCartSerializer(serializers.ModelSerializer):
         fields = ['user']
 
 class DeliveryStatusSerializer(serializers.ModelSerializer):
-    payment = serializers.PrimaryKeyRelatedField(queryset=ProductPayment.objects.all())
-    sent_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", required=False)
+    payment = serializers.PrimaryKeyRelatedField(
+        queryset=ProductPayment.objects.filter(is_successful=True)
+    )
+    sent_at = serializers.DateTimeField(
+        format="%Y-%m-%d %H:%M:%S",
+        required=True
+    )
+    is_sent = serializers.BooleanField(required=True)
+    note = serializers.CharField(required=False, allow_blank=True, allow_null=True)
 
     class Meta:
         model = ProductDeliveryStatus
@@ -265,6 +272,7 @@ class DeliveryStatusSerializer(serializers.ModelSerializer):
 
         if is_sent and not sent_at:
             raise serializers.ValidationError({'sent_at': 'The delivery time must be specified.'})
+
         if not is_sent and sent_at:
             raise serializers.ValidationError({'sent_at': 'Cannot set delivery time if not sent.'})
 
