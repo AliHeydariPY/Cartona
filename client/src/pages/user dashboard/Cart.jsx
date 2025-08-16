@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 import RemoveFromCartPopup from "../../components/RemoveFromCartPopup";
 
@@ -7,7 +8,7 @@ import {
   getCartProducts,
   editCartProduct,
 } from "../../services/cartAPIServices";
-import { getCartProduct } from "../../services/productAPIServices";
+import { getProduct } from "../../services/productAPIServices";
 
 import toast from "react-hot-toast";
 
@@ -29,6 +30,7 @@ const Cart = ({
   setRemoveInDOM,
 }) => {
   const [cartItems, setCartItems] = useState([]);
+  const navigate = useNavigate();
 
   const removeItem = (id) => {
     setCartItems(cartItems.filter((item) => item.id !== id));
@@ -92,22 +94,24 @@ const Cart = ({
 
   useEffect(() => {
     const fetchCartItems = async () => {
-      const cartProductsRes = await getCartProducts(localStorage.getItem("userID"));
+      const cartProductsRes = await getCartProducts(
+        localStorage.getItem("userID")
+      );
 
       const productsData = await Promise.all(
         cartProductsRes.data.items.map(async (item) => {
-            const productRes = await getCartProduct(item.product);
-            const productData = productRes.data;
+          const productRes = await getProduct(item.product);
+          const productData = productRes.data;
 
-            return {
-              id: item.id,
-              product: item.product,
-              name: productData.name,
-              price: parseFloat(productData.price),
-              quantity: item.quantity,
-              image: productData.image,
-              color: "black",
-            };
+          return {
+            id: item.id,
+            product: item.product,
+            name: productData.name,
+            price: parseFloat(productData.price),
+            quantity: item.quantity,
+            image: productData.image,
+            color: ["black", "red", "white", "green", "blue", "pink"],
+          };
         })
       );
 
@@ -166,7 +170,12 @@ const Cart = ({
                       className="flex flex-col sm:flex-row border-b border-blue-100 last:border-0 pb-6 mb-6 last:mb-0 group"
                     >
                       {/* تصویر محصول */}
-                      <div className="w-full sm:w-32 h-32  rounded-lg flex items-center justify-center mb-4 sm:mb-0 relative overflow-hidden">
+                      <div
+                        onClick={() => {
+                          navigate(`/products/${item.product}`);
+                        }}
+                        className="w-full sm:w-32 h-32 cursor-pointer rounded-lg flex items-center justify-center mb-4 sm:mb-0 relative overflow-hidden"
+                      >
                         {/* <div
                           className={`w-24 h-24 bg-gradient-to-br ${
                             item.image === "headphones"
@@ -179,7 +188,7 @@ const Cart = ({
                         <img
                           src={item.image}
                           alt=""
-                          className="max-w-full max-h-full object-contain"
+                          className="max-w-full max-h-full object-contain rounded-md"
                         />
                       </div>
 

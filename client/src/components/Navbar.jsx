@@ -61,7 +61,7 @@ const Navbar = () => {
               </div>
 
               <div
-                onClick={() => navigate("/account/orders")}
+                onClick={() => navigate("/account/cart")}
                 className="relative group flex flex-col items-center cursor-pointer w-8 h-8 mt-1"
               >
                 <IoCartOutline className="absolute inset-0 text-3xl text-blue-600 opacity-100 group-hover:opacity-0 scale-100 group-hover:scale-0 transition-all duration-300" />

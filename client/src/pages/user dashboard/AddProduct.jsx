@@ -4,7 +4,7 @@ import * as Yup from "yup";
 
 import { addNewProduct } from "../../services/productAPIServices";
 import toast from "react-hot-toast";
-import { FiCheckCircle, FiX } from "react-icons/fi";
+import { FiCheckCircle } from "react-icons/fi";
 
 import {
   FiPlusCircle,

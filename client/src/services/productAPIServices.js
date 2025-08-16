@@ -13,7 +13,7 @@ export const addNewProduct = (formData) => {
 };
 
 
-export const getCartProduct = (id) =>{
+export const getProduct = (id) =>{
   const url = `${SERVER_URL}/product-api/products/${id}`;
   return axios.get(url)
 }

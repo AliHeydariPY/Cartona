@@ -1,4 +1,7 @@
+import { useEffect, useState } from "react";
 import { Portal } from "react-portal";
+import { useNavigate } from "react-router-dom";
+
 import {
   FiCheck,
   FiX,
@@ -6,10 +9,11 @@ import {
   FiChevronRight,
   FiStar,
 } from "react-icons/fi";
-import { useEffect, useState } from "react";
 
 const AddToCartPopup = ({ onClose, product }) => {
   const [show, setShow] = useState(false);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     setTimeout(() => setShow(true), 10);
@@ -19,7 +23,7 @@ const AddToCartPopup = ({ onClose, product }) => {
     setShow(false);
     setTimeout(() => {
       onClose();
-    }, 300); 
+    }, 300);
   };
 
   const stopPropagation = (e) => e.stopPropagation();
@@ -36,9 +40,7 @@ const AddToCartPopup = ({ onClose, product }) => {
         {/* محتوای پاپ‌آپ */}
         <div
           className={`bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-md relative overflow-hidden transform transition-all duration-300 ${
-            show
-              ? "opacity-100 scale-100"
-              : "opacity-0 scale-95"
+            show ? "opacity-100 scale-100" : "opacity-0 scale-95"
           }`}
           onClick={stopPropagation}
         >
@@ -56,7 +58,7 @@ const AddToCartPopup = ({ onClose, product }) => {
                 onClick={handleClose}
                 className="p-1 cursor-pointer rounded-full hover:bg-white/20 transition-colors duration-200"
               >
-                <FiX size={22}/>
+                <FiX size={22} />
               </button>
             </div>
           </div>
@@ -97,13 +99,22 @@ const AddToCartPopup = ({ onClose, product }) => {
 
             {/* دکمه‌های اقدام */}
             <div className="space-y-3">
-              <button className="w-full cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-500 text-white py-3 rounded-lg font-semibold flex items-center justify-center hover:shadow-lg transition-all duration-300">
+              <button
+                onClick={() => {
+                  handleClose();
+                  navigate("/account/cart");
+                }}
+                className="w-full cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-500 text-white py-3 rounded-lg font-semibold flex items-center justify-center hover:shadow-lg transition-all duration-300"
+              >
                 <FiShoppingCart className="mr-2 mb-0.5" />
                 View Cart & Checkout
                 <FiChevronRight className="ml-2" />
               </button>
 
-              <button onClick={handleClose} className="w-full cursor-pointer bg-white border border-blue-300 text-blue-700 py-3 rounded-lg font-medium flex items-center justify-center hover:bg-blue-50 transition-colors duration-300">
+              <button
+                onClick={handleClose}
+                className="w-full cursor-pointer bg-white border border-blue-300 text-blue-700 py-3 rounded-lg font-medium flex items-center justify-center hover:bg-blue-50 transition-colors duration-300"
+              >
                 Continue Shopping
               </button>
             </div>
