@@ -245,7 +245,50 @@ const ProductDetails = () => {
             </div>
 
             {/* reviews & rating */}
-            
+            <div className="mt-12">
+              <h3 className="text-xl font-bold text-blue-900 mb-6">
+                Customer Reviews ({product.comment_count})
+              </h3>
+
+              
+
+              {/* reviews list */}
+              <div className="space-y-3">
+                {productComments.map((comment, inx) => {
+                  return (
+                    <div key={inx} className="space-y-6">
+                      <div className="p-4 bg-blue-50/60 rounded-xl border border-blue-200 shadow-sm">
+                        <div className="flex justify-between">
+                          <div className="flex items-center mb-2">
+                            <span className="font-semibold text-blue-800 mr-2">
+                              User {comment.user}
+                            </span>
+                            <div className="flex">
+                              {[...Array(5)].map((_, i) => (
+                                <FiStar
+                                  key={i}
+                                  size={16}
+                                  className={`cursor-pointer transition-colors ${
+                                    i < comment.rating
+                                      ? "text-yellow-500 fill-yellow-500"
+                                      : "text-gray-300 fill-gray-300"
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                          <span className="text-xs ml-3 text-blue-500">
+                            {comment.updated_time}
+                          </span>
+                        </div>
+
+                        <p className="text-blue-700 text-sm">{comment.text}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
       </motion.div>
