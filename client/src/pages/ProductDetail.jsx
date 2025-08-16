@@ -120,7 +120,26 @@ const ProductDetails = () => {
               </span>
             </div>
 
-            
+            <div className="mb-8 p-4 bg-blue-50 rounded-xl border border-blue-200">
+              <h3 className="text-lg font-semibold text-blue-800 mb-3">
+                Seller Information
+              </h3>
+              <div className="flex items-center">
+                <div className="w-13 h-13 rounded-full bg-blue-100 mr-3 ring-2 ring-blue-500">
+                  {/* <FiUser className="text-blue-600" size={20} /> */}
+                  <img src={`${seller.image}`} alt="" className="rounded-4xl" />
+                </div>
+                <div>
+                  <p className="font-medium text-blue-900">
+                    {seller.store_name}
+                  </p>
+                  <p className="text-sm text-blue-600">
+                    Member since:{" "}
+                    {new Date(seller.created_time).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+            </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Product Image Gallery */}
