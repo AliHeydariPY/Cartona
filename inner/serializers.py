@@ -272,10 +272,3 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ['id', 'name', 'description', 'parent']
-
-class CategoryWithFullProductsSerializer(serializers.ModelSerializer):
-    products = ProductReadOnlySerializer(many=True, read_only=True)
-
-    class Meta:
-        model = Category
-        fields = ['id', 'name', 'description', 'parent', 'products']

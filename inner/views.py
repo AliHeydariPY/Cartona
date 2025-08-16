@@ -16,7 +16,7 @@ from .serializers import (
     FAQSerializer,
     ProductReadOnlySerializer,
     CategorySerializer,
-    CategoryWithFullProductsSerializer)
+)
 
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all().order_by('-created_time')
@@ -300,11 +300,6 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = [SearchFilter]
     search_fields = ['name', 'description']
 
-    def get_serializer_class(self):
-        if self.action == 'with_products' or self.request.query_params.get('with_products') == 'true':
-            return CategoryWithFullProductsSerializer
-        return CategorySerializer
-
     @action(detail=False, url_path='parent/(?P<parent_id>\d+)(?:/(?P<index>\d+))?', methods=['get'])
     def by_parent(self, request, parent_id=None, index=None):
         categories = Category.objects.filter(parent_id=parent_id).order_by('-id')
@@ -323,10 +318,4 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
             return Response(serializer.data)
 
         serializer = self.get_serializer(categories, many=True)
-        return Response(serializer.data)
-
-    @action(detail=False, methods=['get'], url_path='with-products')
-    def with_products(self, request):
-        categories = Category.objects.all().order_by('-id')
-        serializer = CategoryWithFullProductsSerializer(categories, many=True, context={'request': request})
         return Response(serializer.data)
