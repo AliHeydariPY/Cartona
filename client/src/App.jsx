@@ -11,7 +11,7 @@ import Favorites from "./pages/user dashboard/Favorites";
 import Cart from "./pages/user dashboard/Cart";
 import Payments from "./pages/user dashboard/Payments";
 import AddProduct from "./pages/user dashboard/AddProduct";
-// import ProductDetail from "./pages/ProductDetail";
+import ProductDetail from "./pages/ProductDetail";
 
 import AddedToCartPopup from "./components/AddedToCartPopup";
 import RemoveFromCartPopup from "./components/RemoveFromCartPopup";
@@ -83,7 +83,7 @@ function App() {
           <Route path="payments" element={<Payments />} />
           <Route path="add-product" element={<AddProduct />} />
         </Route>
-        {/* <Route path="/products/:id" element={<ProductDetail/>} /> */}
+        <Route path="/products/:id" element={<ProductDetail/>} />
         <Route path="/create-account" element={<CreateAccountForm />} />
         <Route path="/upgradeToSeller" element={<UpgradeToSeller />} />
       </Routes>
