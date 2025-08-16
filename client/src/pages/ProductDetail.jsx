@@ -250,7 +250,92 @@ const ProductDetails = () => {
                 Customer Reviews ({product.comment_count})
               </h3>
 
-              
+              {/* leave a review */}
+              <div className="mb-10 bg-white/80 border border-blue-200 p-6 rounded-2xl shadow-lg">
+                <h4 className="text-lg font-semibold text-blue-800 mb-4">
+                  Leave a Review
+                </h4>
+                <div className="flex items-center mb-4 space-x-1">
+                  {[...Array(5)].map((_, i) => (
+                    <FiStar
+                      key={i}
+                      size={22}
+                      onMouseOver={() => setSelectedStars(i + 1)}
+                      className={`cursor-pointer transition-colors ${
+                        i < selectedStars
+                          ? "text-yellow-500 fill-yellow-500"
+                          : "text-gray-300 fill-gray-300"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <textarea
+                  rows={4}
+                  value={commentText}
+                  onChange={(e) => {
+                    setCommentText(e.target.value);
+                  }}
+                  placeholder="Write your comment..."
+                  className="w-full p-4 border border-blue-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:outline-none text-blue-900"
+                />
+                <button
+                  onClick={() => {
+                    if (commentText.split(" ").join("") != "") {
+                      console.log(commentText.split(" ").join(""));
+                      const res = sendComment({
+                        user: 5,
+                        text: commentText,
+                        rating: selectedStars,
+                        product: id,
+                      });
+                      res
+                        .then(() => {
+                          setCommentText("");
+                          setSelectedStars(1);
+                          toast.custom((t) => (
+                            <div
+                              className={`${
+                                t.visible ? "animate-enter" : "animate-leave"
+                              } 
+      transform transition-all duration-300`}
+                            >
+                              <div className="bg-gradient-to-r from-green-500 to-cyan-400 text-white px-6 py-3 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-3">
+                                <div className="bg-blue-500/20 p-2 rounded-full">
+                                  <FiCheckCircle className="text-xl text-white" />
+                                </div>
+                                <div>
+                                  <p className="font-medium">
+                                    Your comment was successfully sent
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          ));
+                        })
+                        .catch((err) => {
+                          toast.custom((t) => (
+                            <div
+                              className={`${
+                                t.visible ? "animate-enter" : "animate-leave"
+                              } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
+                              style={{ fontFamily: "Roboto" }}
+                            >
+                              <FiX className="text-xl shrink-0" />
+                              <span className="font-medium">
+                                {err.response.data.rating[0]}
+                              </span>
+                            </div>
+                          ));
+                        });
+                    } else {
+                      showValidationError();
+                    }
+                  }}
+                  className="mt-4 cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white px-6 py-2 rounded-md font-medium transition-colors duration-300"
+                >
+                  Submit Review
+                </button>
+              </div>
 
               {/* reviews list */}
               <div className="space-y-3">
