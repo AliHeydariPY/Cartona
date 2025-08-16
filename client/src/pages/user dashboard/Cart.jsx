@@ -44,7 +44,7 @@ const Cart = ({
       id: item.id,
       product: item.product,
       quantity: newQuantity,
-      cart: 1,
+      cart: localStorage.getItem("userID"),
     };
 
     try {
@@ -92,11 +92,10 @@ const Cart = ({
 
   useEffect(() => {
     const fetchCartItems = async () => {
-      const cartProductsRes = await getCartProducts();
+      const cartProductsRes = await getCartProducts(localStorage.getItem("userID"));
 
       const productsData = await Promise.all(
-        cartProductsRes.data.map(async (item) => {
-          if (item.cart === 1) {
+        cartProductsRes.data.items.map(async (item) => {
             const productRes = await getCartProduct(item.product);
             const productData = productRes.data;
 
@@ -109,13 +108,10 @@ const Cart = ({
               image: productData.image,
               color: "black",
             };
-          }
-          return null; // اگه شرط برقرار نبود
         })
       );
 
-      // حذف null یا undefined
-      setCartItems(productsData.filter(Boolean));
+      setCartItems(productsData);
     };
 
     fetchCartItems();

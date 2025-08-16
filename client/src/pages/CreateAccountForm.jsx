@@ -5,7 +5,6 @@ import toast from "react-hot-toast";
 import { FiCheckCircle, FiX } from "react-icons/fi";
 
 import { createUser } from "../services/userAPIServices";
-import { createCart } from "../services/cartAPIServices";
 
 const CreateAccountForm = () => {
   const SignupSchema = Yup.object().shape({
@@ -29,7 +28,6 @@ const CreateAccountForm = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-200 to-cyan-200 p-4">
       <div className="w-full max-w-md bg-white/20 backdrop-blur-lg rounded-2xl shadow-xl overflow-hidden border border-white/30">
-        {/* هدر فرم */}
         <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-6 text-center">
           <h2 className="text-3xl font-bold text-white">Join Cartona</h2>
           <p className="text-blue-100 mt-1">Create your account in seconds</p>
@@ -46,6 +44,9 @@ const CreateAccountForm = () => {
             response
               .then((response) => {
                 console.log(response);
+                localStorage.setItem("username", response.data.username);
+                localStorage.setItem("userID", response.data.id);
+
                 toast.custom((t) => (
                   <div
                     className={`${
@@ -65,11 +66,6 @@ const CreateAccountForm = () => {
                     </div>
                   </div>
                 ));
-                createCart({user:1})
-                .then((res) => {
-                  console.log(res)
-                  localStorage.setItem("userCartID", 1)
-                })
               })
               .catch((error) => {
                 toast.custom((t) => (
@@ -89,7 +85,6 @@ const CreateAccountForm = () => {
           }}
         >
           <Form className="p-6 space-y-5">
-            {/* یوزرنیم */}
             <div className="space-y-1">
               <label className="block text-sm font-medium text-blue-800">
                 User Name
@@ -107,7 +102,6 @@ const CreateAccountForm = () => {
               />
             </div>
 
-            {/* پسورد */}
             <div className="space-y-1">
               <label className="block text-sm font-medium text-blue-800">
                 Password
@@ -125,7 +119,6 @@ const CreateAccountForm = () => {
               />
             </div>
 
-            {/* دکمه */}
             <button
               type="submit"
               className="w-full cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-semibold py-3 px-4 rounded-lg shadow-lg hover:shadow-cyan-500/40 transition-colors duration-700 mt-2"
@@ -133,7 +126,6 @@ const CreateAccountForm = () => {
               Create Account
             </button>
 
-            {/* لینک لاگین */}
             <div className="text-center">
               <p className="text-sm text-blue-800">
                 Already have an account?{" "}

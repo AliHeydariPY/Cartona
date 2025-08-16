@@ -4,8 +4,12 @@ import { upgradeToSeller } from "../services/userAPIServices";
 
 import toast from "react-hot-toast";
 import { FiCheckCircle, FiX } from "react-icons/fi";
+import { useState } from "react";
 
 const UpgradeToSeller = () => {
+  const [user, setUser] = useState(localStorage.getItem("username") || "")
+
+
   const StoreSchema = Yup.object().shape({
     user: Yup.string()
       .min(3, "at least 3 characters")
@@ -32,7 +36,7 @@ const UpgradeToSeller = () => {
 
         <Formik
           initialValues={{
-            user: "",
+            user: user,
             storeName: "",
             description: "",
             address: "",
@@ -41,13 +45,12 @@ const UpgradeToSeller = () => {
           validationSchema={StoreSchema}
           onSubmit={(values, { setSubmitting }) => {
             const formData = new FormData();
-            formData.append("user", 23);
+            formData.append("user", localStorage.getItem("userID"));
             formData.append("store_name", values.storeName);
             formData.append("description", values.description);
             formData.append("address", values.address);
             formData.append("image", values.image);
 
-            // console.log(Object.fromEntries(formData.entries()));
             const response = upgradeToSeller(formData);
             response
               .then((res) => {

@@ -53,7 +53,7 @@ const UserDashboard = () => {
             <div className="ml-3 sm:ml-4 md:ml-5">
               <div className="flex items-center">
                 <h1 className="text-lg sm:text-2xl md:text-3xl font-extrabold text-blue-900 drop-shadow-md">
-                  Adel_Nouri
+                  {localStorage.getItem("username")}
                 </h1>
                 {isSeller && (
                   <span className="ml-2 px-2 py-1 bg-gradient-to-r from-blue-600 to-cyan-500 text-white text-xs font-bold rounded-full flex items-center">
