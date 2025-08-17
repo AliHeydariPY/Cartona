@@ -16,6 +16,7 @@ import {
   FiHelpCircle,
   FiEdit3,
 } from "react-icons/fi";
+import { LuReply } from "react-icons/lu";
 
 import toast from "react-hot-toast";
 
@@ -25,6 +26,8 @@ import {
   sendComment,
   getProductQuestions,
   sendProductQuestion,
+  getCommentReplies,
+  sendCommentReply,
 } from "../services/commentAPIServices";
 import { getShopkeeper } from "../services/userAPIServices";
 
@@ -45,19 +48,31 @@ const ProductDetails = ({ setShowAnswerPopup, setQuestion }) => {
   const [selectedStars, setSelectedStars] = useState(1);
 
   const [currentImage, setCurrentImage] = useState(null);
-  const [activeTab, setActiveTab] = useState("reviews"); // reviews | questions
+
+  const [activeTab, setActiveTab] = useState("reviews");
+
+  const [replyingTo, setReplyingTo] = useState(null); 
+  const [replyText, setReplyText] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
       const selectedProduct = await getProduct(id);
       setProduct(selectedProduct.data);
 
-      const allComments = await getComments();
-      const comments = allComments.data.map((comment) => {
-        return comment.product == id ? comment : null;
-      });
+      const comments = await getComments(id);
 
-      console.log(comments);
+      const commentsWithReplies = await Promise.all(
+        comments.data.map(async (comment) => {
+          try {
+            const repliesResponse = await getCommentReplies(comment.id);
+            console.log(repliesResponse);
+            const replies = repliesResponse.data;
+            return { ...comment, replies };
+          } catch {
+            return { ...comment };
+          }
+        })
+      );
 
       const seller = getShopkeeper(selectedProduct.data.storekeeper);
       seller.then((res) => {
@@ -72,21 +87,38 @@ const ProductDetails = ({ setShowAnswerPopup, setQuestion }) => {
       console.log(questions);
 
       setProductQuestions(questions.filter(Boolean));
-      setProductComments(comments.filter(Boolean));
+      setProductComments(commentsWithReplies);
       console.log(selectedProduct.data);
     };
     fetchData();
   }, [id]);
 
-  // const handleSubmitReview = (e) => {
-  //   e.preventDefault();
-  //   if (comment.trim() !== "" && rating > 0) {
-  //     const newReview = { text: comment, rating };
-  //     setReviews([newReview, ...reviews]);
-  //     setComment("");
-  //     setRating(0);
-  //   }
-  // };
+  useEffect(() => {
+    console.log(productComments);
+  }, [productComments]);
+
+  const handleReply = (commentId) => {
+    if (replyingTo === commentId) {
+      setReplyingTo(null);
+      setReplyText("");
+    } else {
+      setReplyingTo(commentId);
+    }
+  };
+
+  const sendReply = (commentId) => {
+    if (!replyText.trim()) return;
+    // sendReplyToComment({ parent: commentId, text: replyText, user: userID })
+    sendCommentReply({
+      comment: commentId,
+      user: localStorage.getItem("userID"),
+      text: replyText,
+    }).then(() => {
+      setReplyText("");
+      setReplyingTo(null);
+    });
+    console.log("Reply sent to comment:", commentId, "text:", replyText);
+  };
 
   const showValidationError = (context) => {
     toast.custom((t) => (
@@ -347,7 +379,7 @@ const ProductDetails = ({ setShowAnswerPopup, setQuestion }) => {
                         setCommentText(e.target.value);
                       }}
                       placeholder="Write your comment..."
-                      className="w-full p-4 border border-blue-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:outline-none text-blue-900"
+                      className="w-full p-4 border border-blue-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:outline-none text-blue-900 transition-all duration-300"
                     />
                     <button
                       onClick={() => {
@@ -412,42 +444,107 @@ const ProductDetails = ({ setShowAnswerPopup, setQuestion }) => {
                   </div>
 
                   {/* reviews list */}
-                  <div className="space-y-3">
-                    {productComments.map((comment, inx) => {
-                      return (
-                        <div key={inx} className="space-y-6">
-                          <div className="p-4 bg-blue-50/60 rounded-xl border border-blue-200 shadow-sm">
-                            <div className="flex justify-between">
-                              <div className="flex items-center mb-2">
-                                <span className="font-semibold text-blue-800 mr-2">
-                                  User {comment.user}
-                                </span>
-                                <div className="flex">
-                                  {[...Array(5)].map((_, i) => (
-                                    <FiStar
-                                      key={i}
-                                      size={16}
-                                      className={`cursor-pointer transition-colors ${
-                                        i < comment.rating
-                                          ? "text-yellow-500 fill-yellow-500"
-                                          : "text-gray-300 fill-gray-300"
-                                      }`}
-                                    />
-                                  ))}
-                                </div>
-                              </div>
-                              <span className="text-xs ml-3 text-blue-500">
-                                {comment.updated_time}
+                  <div className="space-y-4">
+                    {productComments.map((comment) => (
+                      <div key={comment.id} className="space-y-2">
+                        {/* کامنت اصلی */}
+                        <div className="p-4 bg-blue-50/60 rounded-xl border border-blue-200 shadow-sm">
+                          {/* هدر کامنت */}
+                          <div className="flex justify-between">
+                            <div className="flex items-center mb-2">
+                              <span className="font-semibold text-blue-800 mr-2">
+                                User {comment.user}
                               </span>
+                              <div className="flex">
+                                {[...Array(5)].map((_, i) => (
+                                  <FiStar
+                                    key={i}
+                                    size={16}
+                                    className={`${
+                                      i < comment.rating
+                                        ? "text-yellow-500 fill-yellow-500"
+                                        : "text-gray-300 fill-gray-300"
+                                    }`}
+                                  />
+                                ))}
+                              </div>
                             </div>
-
-                            <p className="text-blue-700 text-sm">
-                              {comment.text}
-                            </p>
+                            <span className="text-xs ml-3 text-blue-500">
+                              {comment.updated_time}
+                            </span>
                           </div>
+
+                          {/* متن کامنت */}
+                          <p className="text-blue-700 text-sm">
+                            {comment.text}
+                          </p>
+
+                          {/* آیکون ریپلای */}
+                          <button
+                            onClick={() => handleReply(comment.id)}
+                            className="mt-2 cursor-pointer flex items-center text-blue-600 text-sm hover:text-blue-800 transition-colors"
+                          >
+                            <LuReply
+                              className="mr-1"
+                              size={16}
+                              style={{ transform: "rotate(180deg)" }}
+                            />{" "}
+                            Reply
+                          </button>
                         </div>
-                      );
-                    })}
+
+                        {/* فرم ریپلای */}
+                        {replyingTo === comment.id && (
+                          <div className="ml-6 mt-2 bg-white border border-blue-200 rounded-lg p-3 shadow-md">
+                            <textarea
+                              rows={2}
+                              value={replyText}
+                              onChange={(e) => setReplyText(e.target.value)}
+                              placeholder="Write your reply..."
+                              className="w-full p-2 border border-blue-300 rounded-lg focus:ring-1 focus:ring-blue-400 focus:outline-none text-blue-900 transition-all duration-300"
+                            />
+                            <div className="flex justify-end mt-2 space-x-2">
+                              <button
+                                onClick={() => setReplyingTo(null)}
+                                className="px-3 py-1 cursor-pointer rounded-md border border-gray-300 text-gray-600 hover:bg-gray-100 text-sm transition-colors duration-300"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                onClick={() => sendReply(comment.id)}
+                                className="px-4 py-1 cursor-pointer rounded-md bg-gradient-to-r from-blue-600 to-cyan-500 text-white hover:from-blue-700 hover:to-cyan-600 text-sm  transition-colors duration-300"
+                              >
+                                Send
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* لیست ریپلای‌ها */}
+                        {comment.replies && comment.replies.length > 0 && (
+                          <div className="ml-6 space-y-2 mt-2">
+                            {comment.replies.map((reply) => (
+                              <div
+                                key={reply.id}
+                                className="p-3 bg-white border border-blue-200 rounded-lg shadow-sm"
+                              >
+                                <div className="flex justify-between mb-1">
+                                  <span className="font-medium text-blue-700 text-sm">
+                                    User {reply.user}
+                                  </span>
+                                  <span className="text-xs text-blue-400">
+                                    {reply.updated_time}
+                                  </span>
+                                </div>
+                                <p className="text-blue-800 text-sm">
+                                  {reply.text}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
@@ -467,7 +564,7 @@ const ProductDetails = ({ setShowAnswerPopup, setQuestion }) => {
                         }}
                         type="text"
                         placeholder="Type your question here..."
-                        className="flex-1 border border-blue-300 rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="flex-1 border border-blue-300 rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-300"
                       />
                       <button
                         onClick={() => {
@@ -567,8 +664,11 @@ const ProductDetails = ({ setShowAnswerPopup, setQuestion }) => {
                                   className="p-2 cursor-pointer rounded-full hover:bg-blue-100 text-blue-600 transition-colors duration-300"
                                   onClick={() => {
                                     setShowAnswerPopup(true);
-                                    console.log(faq.id)
-                                    setQuestion({questionText:faq.question_text, questionID:faq.id});
+                                    console.log(faq.id);
+                                    setQuestion({
+                                      questionText: faq.question_text,
+                                      questionID: faq.id,
+                                    });
                                   }}
                                 >
                                   <FiEdit3 size={18} />

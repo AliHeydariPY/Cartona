@@ -8,6 +8,7 @@ const SERVER_URL = "http://127.0.0.1:8000";
 // };
 
 export const getCartProducts = (cartID) => {
+  // const url = `${SERVER_URL}/cart-api/cart/${cartID}/`;
   const url = `${SERVER_URL}/cart-api/cart/4/`;
   return axios.get(url);
 };
