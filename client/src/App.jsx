@@ -15,6 +15,7 @@ import ProductDetail from "./pages/ProductDetail";
 
 import AddedToCartPopup from "./components/AddedToCartPopup";
 import RemoveFromCartPopup from "./components/RemoveFromCartPopup";
+import AnswerQuestionPopup from "./components/AnswerQuestionPopup";
 
 import { useState } from "react";
 
@@ -25,6 +26,9 @@ function App() {
   const [selectedProduct, setSelectedProduct] = useState(null);
 
   const [removeInDOM, setRemoveInDOM] = useState(null);
+
+  const [showAnswerPopup, setShowAnswerPopup] = useState(false);
+  const [question, setQuestion] = useState("");
 
   return (
     <>
@@ -52,6 +56,13 @@ function App() {
           onClose={() => setAddToCartPopup(false)}
           // product={selectedProduct}
           product={{ name: "Product X", price: 249.99 }}
+        />
+      )}
+
+      {showAnswerPopup && (
+        <AnswerQuestionPopup
+          onClose={() => setShowAnswerPopup(false)}
+          question={question}
         />
       )}
 
@@ -83,7 +94,15 @@ function App() {
           <Route path="payments" element={<Payments />} />
           <Route path="add-product" element={<AddProduct />} />
         </Route>
-        <Route path="/products/:id" element={<ProductDetail/>} />
+        <Route
+          path="/products/:id"
+          element={
+            <ProductDetail
+              setShowAnswerPopup={setShowAnswerPopup}
+              setQuestion={setQuestion}
+            />
+          }
+        />
         <Route path="/create-account" element={<CreateAccountForm />} />
         <Route path="/upgradeToSeller" element={<UpgradeToSeller />} />
       </Routes>

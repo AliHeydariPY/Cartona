@@ -88,7 +88,7 @@ const Favorites = ({ setAddToCartPopup, setSelectedProduct }) => {
                       onClick={() => {
                         // setSelectedProduct(product) // SOON...
                         const response = addToCart({
-                          product: 1,
+                          product: 2,
                           quantity: 1,
                           cart: localStorage.getItem("userID"),
                         });

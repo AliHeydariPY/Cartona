@@ -582,12 +582,6 @@ const AddProduct = () => {
                   <FiPlusCircle className="mr-2" />
                   Publish Product
                 </button>
-                {/* <button
-                  type="button"
-                  className="px-6 py-3 cursor-pointer bg-white border border-blue-400 text-blue-700 rounded-lg hover:bg-blue-50 transition-colors duration-300"
-                >
-                  Save as Draft
-                </button> */}
                 <button
                   type="reset"
                   onClick={() => setImages({})}
