@@ -12,3 +12,8 @@ export const sendComment = (comment) => {
   const url = `${SERVER_URL}/comments-api/comments/`;
   return axios.post(url, comment);
 }
+
+export const getProductQuestions = () => {
+  const url = `${SERVER_URL}/comments-api/product-questions/`;
+  return axios.get(url);
+};
