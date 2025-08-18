@@ -5,8 +5,9 @@ import Reviews from "./product-tabs/Reviews";
 import Questions from "./product-tabs/Questions";
 
 import { MdOutlineDescription } from "react-icons/md";
+import { IoInformationCircleOutline } from "react-icons/io5";
 
-import { FiMessageSquare, FiHelpCircle } from "react-icons/fi";
+import { FiMessageSquare, FiHelpCircle,FiInfo  } from "react-icons/fi";
 
 const ProductDetailTabs = ({
   setShowAnswerPopup,
@@ -33,8 +34,8 @@ const ProductDetailTabs = ({
           }`}
           onClick={() => setActiveTab("description")}
         >
-          <MdOutlineDescription size={18} className="mb-0.5" />
-          Description
+          <FiInfo size={18} className=""/>
+          Information
         </button>
         <button
           onClick={() => setActiveTab("reviews")}
@@ -44,7 +45,7 @@ const ProductDetailTabs = ({
               : "text-blue-400 hover:text-blue-600"
           }`}
         >
-          <FiMessageSquare /> Reviews ({product.comment_count})
+          <FiMessageSquare size={18}/> Reviews ({product.comment_count})
         </button>
         <button
           onClick={() => setActiveTab("questions")}
@@ -54,7 +55,7 @@ const ProductDetailTabs = ({
               : "text-blue-400 hover:text-blue-600"
           }`}
         >
-          <FiHelpCircle /> Questions ({productQuestions.length})
+          <FiHelpCircle size={19}/> Questions ({productQuestions.length})
         </button>
       </div>
 

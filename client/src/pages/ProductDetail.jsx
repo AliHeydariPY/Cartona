@@ -34,8 +34,6 @@ const ProductDetails = ({
   const [productQuestions, setProductQuestions] = useState(null);
   const [seller, setSeller] = useState(null);
 
-
-
   useEffect(() => {
     const fetchData = async () => {
       const selectedProduct = await getProduct(id);
@@ -47,7 +45,6 @@ const ProductDetails = ({
         comments.data.map(async (comment) => {
           try {
             const repliesResponse = await getCommentReplies(comment.id);
-            console.log(repliesResponse);
             const replies = repliesResponse.data;
             return { ...comment, replies };
           } catch {
@@ -66,18 +63,13 @@ const ProductDetails = ({
       const questions = allQuestions.data.map((qus) => {
         return qus.product == id ? qus : null;
       });
-      console.log(questions);
+      console.log(selectedProduct.data);
 
       setProductQuestions(questions.filter(Boolean));
       setProductComments(commentsWithReplies);
-      console.log(selectedProduct.data);
     };
     fetchData();
   }, [id, reloadComponent]);
-
-  useEffect(() => {
-    console.log(productComments);
-  }, [productComments]);
 
   if (!product || !productComments || !seller || !productQuestions)
     return <p className="text-center mt-10">Loading...</p>;

@@ -1,9 +1,8 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   containerVariants,
   itemVariants,
-  questionItemAnimation,
-} from "../../../untils/animations";
+} from "../../../utils/animations";
 import { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 
@@ -84,12 +83,12 @@ const Reviews = ({
       initial="hidden"
       animate="visible"
       variants={containerVariants}
-      className="mt-4 sm:mt-6"
+      className="space-y-5 sm:space-y-6 mt-5 sm:mt-6"
     >
       {/* Leave a Review */}
       <motion.div
         variants={itemVariants}
-        className="mb-6 sm:mb-10 bg-white/80 border border-blue-200 p-3 sm:p-6 rounded-lg sm:rounded-2xl shadow-lg"
+        className="bg-white/80 border border-blue-200 p-3 sm:p-6 rounded-lg sm:rounded-2xl shadow-lg"
       >
         <h4 className="text-lg font-semibold text-blue-800 mb-2 sm:mb-4">
           Leave a Review
@@ -176,10 +175,8 @@ const Reviews = ({
 
       {/* Reviews List */}
       <motion.div variants={itemVariants} className="space-y-3 sm:space-y-4">
-        <AnimatePresence>
           {productComments.map((comment) => (
-            <motion.div
-              {...questionItemAnimation}
+            <div
               key={comment.id}
               className="space-y-1 sm:space-y-2"
             >
@@ -271,9 +268,8 @@ const Reviews = ({
                   ))}
                 </div>
               )}
-            </motion.div>
+            </div>
           ))}
-        </AnimatePresence>
       </motion.div>
     </motion.div>
   );

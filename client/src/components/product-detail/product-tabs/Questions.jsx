@@ -1,9 +1,8 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   containerVariants,
   itemVariants,
-  questionItemAnimation,
-} from "../../../untils/animations";
+} from "../../../utils/animations";
 
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -51,7 +50,7 @@ const Questions = ({
       initial="hidden"
       animate="visible"
       variants={containerVariants}
-      className="space-y-3 sm:space-y-4 mt-3 sm:mt-4"
+      className="space-y-5 sm:space-y-6 mt-5 sm:mt-6"
     >
       {/* Ask a Question */}
       <motion.div
@@ -128,24 +127,20 @@ const Questions = ({
       </motion.div>
 
       {/* Questions List */}
-      <motion.div variants={itemVariants} className="space-y-3 sm:space-y-4">
-        <AnimatePresence>
+      <motion.div variants={itemVariants} className="space-y-3">
           {productQuestions.length === 0 && (
-            <motion.div
-              key={i}
-              {...questionItemAnimation}
+            <div
               className="text-blue-600"
             >
               No questions have been asked yet.
-            </motion.div>
+            </div>
           )}
 
           {productQuestions.map((faq, i) => {
             const isUserQuestion = faq.user == userID;
             return (
-              <motion.div
+              <div
                 key={i}
-                {...questionItemAnimation}
                 className={`p-3 sm:p-4 border rounded-lg sm:rounded-xl shadow space-y-1 sm:space-y-2 transition ${
                   isUserQuestion
                     ? "bg-blue-100/50 border-blue-400 ring-2 ring-blue-300"
@@ -195,10 +190,9 @@ const Questions = ({
                     </p>
                   </div>
                 )}
-              </motion.div>
+              </div>
             );
           })}
-        </AnimatePresence>
       </motion.div>
     </motion.div>
   );
