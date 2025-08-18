@@ -49,6 +49,7 @@ const AddToCartPopup = ({ onClose, product }) => {
             <div className="flex justify-between items-center">
               <h3 className="text-xl font-bold flex items-center ">
                 <FiCheck
+                strokeWidth={4}
                   className="mr-2 bg-white text-green-500 rounded-full p-0.5"
                   size={22}
                 />
@@ -78,9 +79,9 @@ const AddToCartPopup = ({ onClose, product }) => {
               </div> */}
               <div className="ml-3">
                 <h4 className="font-bold text-blue-900">
-                  Premium {product.name}
+                  {product.name}
                 </h4>
-                <p className="text-blue-600">${product.price.toFixed(2)}</p>
+                <p className="text-blue-600">${Number(product.discounted_price).toFixed(2)}</p>
                 <div className="flex items-center mt-1">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <FiStar

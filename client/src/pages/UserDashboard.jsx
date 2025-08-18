@@ -68,7 +68,9 @@ const UserDashboard = () => {
               <p className="text-sm sm:text-base text-blue-800 font-semibold mt-1">
                 Member since: 2023/08/03
                 {isSeller && (
-                  <span className="inline-block ml-2 text-green-600">• Verified Store</span>
+                  <span className="inline-block ml-2 text-green-600">
+                    • Verified Store
+                  </span>
                 )}
               </p>
             </div>
@@ -97,17 +99,18 @@ const UserDashboard = () => {
                 icon: <FiUser className="ml-3 text-blue-700" size={18} />,
                 label: "My Profile",
               },
+
+              {
+                id: "favorites",
+                icon: <FiHeart className="ml-3 text-rose-500" size={18} />,
+                label: "Favorites",
+              },
               {
                 id: "cart",
                 icon: (
                   <FiShoppingCart className="ml-3 text-blue-700" size={18} />
                 ),
                 label: "Cart",
-              },
-              {
-                id: "favorites",
-                icon: <FiHeart className="ml-3 text-rose-500" size={18} />,
-                label: "Favorites",
               },
               {
                 id: "payments",

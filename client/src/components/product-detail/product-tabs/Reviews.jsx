@@ -1,8 +1,5 @@
 import { motion } from "framer-motion";
-import {
-  containerVariants,
-  itemVariants,
-} from "../../../utils/animations";
+import { containerVariants, itemVariants } from "../../../utils/animations";
 import { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 
@@ -77,6 +74,8 @@ const Reviews = ({
     });
     console.log("Reply sent to comment:", commentId, "text:", replyText);
   };
+
+  if (!productComments) return <p className="text-center mt-10">Loading...</p>;
 
   return (
     <motion.div
@@ -175,101 +174,98 @@ const Reviews = ({
 
       {/* Reviews List */}
       <motion.div variants={itemVariants} className="space-y-3 sm:space-y-4">
-          {productComments.map((comment) => (
-            <div
-              key={comment.id}
-              className="space-y-1 sm:space-y-2"
-            >
-              <div className="p-3 sm:p-4 bg-blue-50/60 rounded-lg sm:rounded-xl border border-blue-200 shadow-sm">
-                <div className="flex justify-between mb-1 sm:mb-2">
-                  <div className="flex items-center">
-                    <span className="font-semibold text-blue-800 mr-2">
-                      User {comment.user}
-                    </span>
-                    <div className="flex">
-                      {[...Array(5)].map((_, i) => (
-                        <FiStar
-                          key={i}
-                          size={16}
-                          className={`${
-                            i < comment.rating
-                              ? "text-yellow-500 fill-yellow-500"
-                              : "text-gray-300 fill-gray-300"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  <span className="text-xs ml-2 text-blue-500">
-                    {comment.updated_time}
+        {productComments.map((comment) => (
+          <div key={comment.id} className="space-y-1 sm:space-y-2">
+            <div className="p-3 sm:p-4 bg-blue-50/60 rounded-lg sm:rounded-xl border border-blue-200 shadow-sm">
+              <div className="flex justify-between mb-1 sm:mb-2">
+                <div className="flex items-center">
+                  <span className="font-semibold text-blue-800 mr-2">
+                    User {comment.user}
                   </span>
-                </div>
-                <p className="text-blue-700 text-sm">{comment.text}</p>
-                <button
-                  onClick={() => handleReply(comment.id)}
-                  className="mt-1 sm:mt-2 cursor-pointer flex items-center text-blue-600 text-sm hover:text-blue-800 transition-colors"
-                >
-                  <LuReply
-                    className="mr-1"
-                    size={16}
-                    style={{ transform: "rotate(180deg)" }}
-                  />{" "}
-                  Reply
-                </button>
-              </div>
-
-              {replyingTo === comment.id && (
-                <div className="ml-3 sm:ml-6 mt-1 sm:mt-2 bg-white border border-blue-200 rounded-lg sm:rounded-lg p-2 sm:p-3 shadow-md">
-                  <textarea
-                    ref={replyInputRef}
-                    rows={2}
-                    value={replyText}
-                    onChange={(e) => setReplyText(e.target.value)}
-                    placeholder="Write your reply..."
-                    className="w-full p-1 sm:p-2 border border-blue-300 rounded-lg sm:rounded-lg focus:ring-1 focus:ring-blue-400 focus:outline-none text-blue-900 transition-all duration-300"
-                  />
-                  <div className="flex justify-end mt-1 sm:mt-2 space-x-1 sm:space-x-2">
-                    <button
-                      onClick={() => setReplyingTo(null)}
-                      className="px-2 py-1 cursor-pointer rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100 text-xs sm:text-sm transition-colors duration-300"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={() => {
-                        sendReply(comment.id);
-                        setReloadComponent(!reloadComponent);
-                      }}
-                      className="px-3 py-1 cursor-pointer rounded-lg bg-gradient-to-r from-blue-600 to-cyan-500 text-white hover:from-blue-700 hover:to-cyan-600 text-xs sm:text-sm transition-colors duration-300"
-                    >
-                      Send
-                    </button>
+                  <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                      <FiStar
+                        key={i}
+                        size={16}
+                        className={`${
+                          i < comment.rating
+                            ? "text-yellow-500 fill-yellow-500"
+                            : "text-gray-300 fill-gray-300"
+                        }`}
+                      />
+                    ))}
                   </div>
                 </div>
-              )}
-
-              {comment.replies && comment.replies.length > 0 && (
-                <div className="ml-3 sm:ml-6 space-y-1 sm:space-y-2 mt-1 sm:mt-2">
-                  {comment.replies.map((reply) => (
-                    <div
-                      key={reply.id}
-                      className="p-2 sm:p-3 bg-white border border-blue-200 rounded-lg sm:rounded-lg shadow-sm"
-                    >
-                      <div className="flex justify-between mb-1">
-                        <span className="font-medium text-blue-700 text-xs sm:text-sm">
-                          User {reply.user}
-                        </span>
-                        <span className="text-xs text-blue-400">
-                          {reply.updated_time}
-                        </span>
-                      </div>
-                      <p className="text-blue-800 text-sm">{reply.text}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
+                <span className="text-xs ml-2 text-blue-500">
+                  {comment.updated_time}
+                </span>
+              </div>
+              <p className="text-blue-700 text-sm">{comment.text}</p>
+              <button
+                onClick={() => handleReply(comment.id)}
+                className="mt-1 sm:mt-2 cursor-pointer flex items-center text-blue-600 text-sm hover:text-blue-800 transition-colors"
+              >
+                <LuReply
+                  className="mr-1"
+                  size={16}
+                  style={{ transform: "rotate(180deg)" }}
+                />{" "}
+                Reply
+              </button>
             </div>
-          ))}
+
+            {replyingTo === comment.id && (
+              <div className="ml-3 sm:ml-6 mt-1 sm:mt-2 bg-white border border-blue-200 rounded-lg sm:rounded-lg p-2 sm:p-3 shadow-md">
+                <textarea
+                  ref={replyInputRef}
+                  rows={2}
+                  value={replyText}
+                  onChange={(e) => setReplyText(e.target.value)}
+                  placeholder="Write your reply..."
+                  className="w-full p-1 sm:p-2 border border-blue-300 rounded-lg sm:rounded-lg focus:ring-1 focus:ring-blue-400 focus:outline-none text-blue-900 transition-all duration-300"
+                />
+                <div className="flex justify-end mt-1 sm:mt-2 space-x-1 sm:space-x-2">
+                  <button
+                    onClick={() => setReplyingTo(null)}
+                    className="px-2 py-1 cursor-pointer rounded-md border border-gray-300 text-gray-600 hover:bg-gray-100 text-xs sm:text-sm transition-colors duration-300"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      sendReply(comment.id);
+                      setReloadComponent(!reloadComponent);
+                    }}
+                    className="px-3 py-1 cursor-pointer rounded-md bg-gradient-to-r from-blue-600 to-cyan-500 text-white hover:from-blue-700 hover:to-cyan-600 text-xs sm:text-sm transition-colors duration-300"
+                  >
+                    Send
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {comment.replies && comment.replies.length > 0 && (
+              <div className="ml-3 sm:ml-6 space-y-1 sm:space-y-2 mt-1 sm:mt-2">
+                {comment.replies.map((reply) => (
+                  <div
+                    key={reply.id}
+                    className="p-2 sm:p-3 bg-white border border-blue-200 rounded-lg sm:rounded-lg shadow-sm"
+                  >
+                    <div className="flex justify-between mb-1">
+                      <span className="font-medium text-blue-700 text-xs sm:text-sm">
+                        User {reply.user}
+                      </span>
+                      <span className="text-xs text-blue-400">
+                        {reply.updated_time}
+                      </span>
+                    </div>
+                    <p className="text-blue-800 text-sm">{reply.text}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
       </motion.div>
     </motion.div>
   );

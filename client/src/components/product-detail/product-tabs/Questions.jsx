@@ -55,7 +55,7 @@ const Questions = ({
       {/* Ask a Question */}
       <motion.div
         variants={itemVariants}
-        className="p-3 sm:p-4 bg-white/90 border border-blue-200 rounded-lg sm:rounded-xl shadow"
+        className="p-3 sm:p-4 bg-white/90 border border-blue-200 rounded-lg sm:rounded-xl shadow-lg"
       >
         <h3 className="text-lg font-semibold text-blue-900 mb-2">
           Ask a Question
@@ -67,7 +67,7 @@ const Questions = ({
             onChange={(e) => setQuestionText(e.target.value)}
             type="text"
             placeholder="Type your question here..."
-            className="flex-1 border border-blue-300 rounded-lg sm:rounded-xl px-2 sm:px-3 py-1 sm:py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-300"
+            className="flex-1 border border-blue-300 rounded-lg px-2 sm:px-3 py-1 sm:py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-300"
           />
           <button
             onClick={() => {
@@ -119,7 +119,7 @@ const Questions = ({
                 );
               }
             }}
-            className="px-2 sm:px-4 py-1 sm:py-2 bg-blue-600 text-white rounded-lg sm:rounded-xl hover:bg-blue-700 transition"
+            className="px-2 sm:px-4 py-1 sm:py-2 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-lg cursor-pointer sm:rounded-lg transition-colors duration-300"
           >
             Ask
           </button>

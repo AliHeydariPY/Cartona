@@ -53,7 +53,7 @@ const Cart = ({
 
       // فقط وقتی موفق بود مقدار رو تغییر بده
       setCartItems((prev) =>
-        prev.map((p) => (p.id === id ? { ...p, quantity: newQuantity } : p))
+        prev.map((p) => (p.id === id ? { ...p, stock_quantity: newQuantity } : p))
       );
     } catch (error) {
       toast.custom((t) => (
@@ -74,7 +74,7 @@ const Cart = ({
   };
 
   const subtotal = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
+    (sum, item) => sum + item.price * item.stock_quantity,
     0
   );
 
@@ -106,7 +106,7 @@ const Cart = ({
             product: item.product,
             name: productData.name,
             price: parseFloat(productData.price),
-            quantity: item.quantity,
+            stock_quantity: item.quantity,
             image: productData.image,
             color: ["black", "red", "white", "green", "blue", "pink"],
           };
@@ -199,7 +199,6 @@ const Cart = ({
                           <button
                             onClick={() => {
                               setRremoveFromCartPopup(true);
-                              console.log(item);
                               setSelectedProduct(item);
                               //   removeItem(item.id);
                             }}
@@ -219,18 +218,18 @@ const Cart = ({
                         <div className="flex items-center mt-4">
                           <button
                             onClick={() => {
-                              updateQuantity(item.id, item.quantity - 1);
+                              updateQuantity(item.id, item.stock_quantity - 1);
                             }}
                             className="p-2 cursor-pointer bg-blue-100 hover:bg-blue-200 rounded-lg text-blue-700 transition-colors duration-200"
                           >
                             <FiMinus size={16} />
                           </button>
                           <span className="mx-4 font-medium text-base sm:text-lg text-blue-900">
-                            {item.quantity}
+                            {item.stock_quantity}
                           </span>
                           <button
                             onClick={() => {
-                              updateQuantity(item.id, item.quantity + 1);
+                              updateQuantity(item.id, item.stock_quantity + 1);
                             }}
                             className="p-2 cursor-pointer bg-blue-100 hover:bg-blue-200 rounded-lg text-blue-700 transition-colors duration-200"
                           >

@@ -6,9 +6,7 @@ import ProductDetailTabs from "../components/product-detail/ProductDetailTabs";
 import ProductDisplay from "../components/product-detail/ProductDisplay";
 import ProductSeller from "../components/product-detail/ProductSeller";
 
-import {
-  FiShoppingCart,
-} from "react-icons/fi";
+import { FiShoppingCart } from "react-icons/fi";
 
 import { getProduct } from "../services/productAPIServices";
 import {
@@ -23,6 +21,9 @@ const ProductDetails = ({
   setQuestion,
   reloadComponent,
   setReloadComponent,
+  setAddToCartPopup,
+  setSelectedProduct,
+  setRremoveFromCartPopup
 }) => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -40,7 +41,6 @@ const ProductDetails = ({
       setProduct(selectedProduct.data);
 
       const comments = await getComments(id);
-
       const commentsWithReplies = await Promise.all(
         comments.data.map(async (comment) => {
           try {
@@ -66,7 +66,7 @@ const ProductDetails = ({
       console.log(selectedProduct.data);
 
       setProductQuestions(questions.filter(Boolean));
-      setProductComments(commentsWithReplies);
+      setProductComments(commentsWithReplies ? commentsWithReplies : []);
     };
     fetchData();
   }, [id, reloadComponent]);
@@ -96,9 +96,16 @@ const ProductDetails = ({
             </span>
           </div>
 
-          <ProductDisplay product={product}/>
+          <ProductDisplay
+            product={product}
+            reloadComponent={reloadComponent}
+            setReloadComponent={setReloadComponent}
+            setAddToCartPopup={setAddToCartPopup}
+            setSelectedProduct={setSelectedProduct}
+            setRremoveFromCartPopup={setRremoveFromCartPopup}
+          />
 
-          <ProductSeller seller={seller}/>
+          <ProductSeller seller={seller} />
 
           <ProductDetailTabs
             setShowAnswerPopup={setShowAnswerPopup}

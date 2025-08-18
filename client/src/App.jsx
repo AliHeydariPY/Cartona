@@ -51,6 +51,7 @@ function App() {
           onClose={() => setRremoveFromCartPopup(false)}
           product={selectedProduct}
           setRemoveInDOM={setRemoveInDOM}
+          setReloadComponent={setReloadComponent}
         />
       )}
 
@@ -107,6 +108,9 @@ function App() {
               setQuestion={setQuestion}
               reloadComponent={reloadComponent}
               setReloadComponent={setReloadComponent}
+              setAddToCartPopup={setAddToCartPopup}
+              setSelectedProduct={setSelectedProduct}
+              setRremoveFromCartPopup={setRremoveFromCartPopup}
             />
           }
         />

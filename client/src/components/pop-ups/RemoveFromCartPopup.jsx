@@ -5,7 +5,12 @@ import { deleteCartProduct } from "../../services/cartAPIServices";
 
 import { FiX, FiTrash2 } from "react-icons/fi";
 
-const RemoveFromCartPopup = ({ onClose, product , setRemoveInDOM}) => {
+const RemoveFromCartPopup = ({
+  onClose,
+  product,
+  setRemoveInDOM,
+  setReloadComponent,
+}) => {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -18,9 +23,12 @@ const RemoveFromCartPopup = ({ onClose, product , setRemoveInDOM}) => {
   };
 
   const handleConfirm = () => {
-    deleteCartProduct(product.id);
-    setRemoveInDOM(product.id)
-    handleClose();
+    console.log(product.id);
+    deleteCartProduct(product.id).then(() => {
+      setReloadComponent((prev) => !prev);
+      setRemoveInDOM(product.id);
+      handleClose();
+    });
   };
 
   const stopPropagation = (e) => e.stopPropagation();
@@ -68,9 +76,11 @@ const RemoveFromCartPopup = ({ onClose, product , setRemoveInDOM}) => {
               </div>
               <div className="ml-3">
                 <h4 className="font-bold text-blue-900">{product.name}</h4>
-                <p className="text-rose-600">${product.price.toFixed(2)}</p>
+                <p className="text-rose-600">
+                  ${Number(product.price).toFixed(2)}
+                </p>
                 <p className="text-sm text-gray-500 mt-1">
-                  Qty: {product.quantity}
+                  Qty: {product.stock_quantity}
                 </p>
               </div>
             </div>
