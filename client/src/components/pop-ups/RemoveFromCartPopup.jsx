@@ -1,7 +1,7 @@
 import { Portal } from "react-portal";
 import { useEffect, useState } from "react";
 
-import { deleteCartProduct } from "../services/cartAPIServices";
+import { deleteCartProduct } from "../../services/cartAPIServices";
 
 import { FiX, FiTrash2 } from "react-icons/fi";
 

@@ -6,16 +6,17 @@ import CreateAccountForm from "./pages/CreateAccountForm";
 import UpgradeToSeller from "./pages/UpgradeToSeller";
 import UserDashboard from "./pages/UserDashboard";
 
-import Profile from "./pages/user dashboard/Profile";
-import Favorites from "./pages/user dashboard/Favorites";
-import Cart from "./pages/user dashboard/Cart";
-import Payments from "./pages/user dashboard/Payments";
-import AddProduct from "./pages/user dashboard/AddProduct";
+import Profile from "./pages/user-dashboard/Profile";
+import Favorites from "./pages/user-dashboard/Favorites";
+import Cart from "./pages/user-dashboard/Cart";
+import Payments from "./pages/user-dashboard/Payments";
+import AddProduct from "./pages/user-dashboard/AddProduct";
+
 import ProductDetail from "./pages/ProductDetail";
 
-import AddedToCartPopup from "./components/AddedToCartPopup";
-import RemoveFromCartPopup from "./components/RemoveFromCartPopup";
-import AnswerQuestionPopup from "./components/AnswerQuestionPopup";
+import AddedToCartPopup from "./components/pop-ups/AddedToCartPopup";
+import RemoveFromCartPopup from "./components/pop-ups/RemoveFromCartPopup";
+import AnswerQuestionPopup from "./components/pop-ups/AnswerQuestionPopup";
 
 import { useState } from "react";
 

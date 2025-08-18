@@ -3,7 +3,7 @@ import { Portal } from "react-portal";
 
 import { FiX, FiMessageSquare, FiSend } from "react-icons/fi";
 
-import { answerProductQuestion } from "../services/commentAPIServices";
+import { answerProductQuestion } from "../../services/commentAPIServices";
 
 export default function AnswerQuestionPopup({
   onClose,
