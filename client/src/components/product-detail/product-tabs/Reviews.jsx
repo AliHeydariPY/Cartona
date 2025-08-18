@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import { containerVariants, itemVariants } from "../../../utils/animations";
 import { useState, useEffect, useRef } from "react";
+import { useParams } from "react-router-dom";
+
 import toast from "react-hot-toast";
 
 import {
@@ -8,15 +10,16 @@ import {
   sendCommentReply,
 } from "../../../services/commentAPIServices";
 
-import { FiStar, FiX, FiCheckCircle } from "react-icons/fi";
+import { FiStar, FiX, FiCheckCircle, FiAlertCircle } from "react-icons/fi";
 import { LuReply } from "react-icons/lu";
 
 const Reviews = ({
   productComments,
   setReloadComponent,
   reloadComponent,
-  id,
+  seller,
 }) => {
+  const { id } = useParams();
   const [commentText, setCommentText] = useState("");
   const [selectedStars, setSelectedStars] = useState(1);
 
@@ -30,6 +33,10 @@ const Reviews = ({
       replyInputRef.current.focus();
     }
   }, [replyingTo]);
+
+  useEffect(() => {
+    console.log(productComments);
+  }, [productComments]);
 
   const showValidationError = (context) => {
     toast.custom((t) => (
@@ -75,8 +82,6 @@ const Reviews = ({
     console.log("Reply sent to comment:", commentId, "text:", replyText);
   };
 
-  if (!productComments) return <p className="text-center mt-10">Loading...</p>;
-
   return (
     <motion.div
       initial="hidden"
@@ -115,13 +120,23 @@ const Reviews = ({
         />
         <button
           onClick={() => {
-            if (commentText.trim() !== "") {
+            console.log(seller.user);
+            if (seller.user == localStorage.getItem("userID")) {
+              showValidationError("The seller cannot leave comments.");
+              setCommentText("");
+              setSelectedStars(1);
+            } else if (commentText.trim() == "") {
+              showValidationError(
+                "Please write your comment before submitting"
+              );
+            } else {
               const res = sendComment({
                 user: localStorage.getItem("userID"),
                 text: commentText,
                 rating: selectedStars,
                 product: id,
               });
+
               res
                 .then(() => {
                   setCommentText("");
@@ -147,6 +162,7 @@ const Reviews = ({
                   ));
                 })
                 .catch((err) => {
+                  console.log(err);
                   toast.custom((t) => (
                     <div
                       className={`${
@@ -160,10 +176,6 @@ const Reviews = ({
                     </div>
                   ));
                 });
-            } else {
-              showValidationError(
-                "Please write your comment before submitting"
-              );
             }
           }}
           className="mt-2 sm:mt-4 cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white px-4 sm:px-6 py-2 rounded-lg sm:rounded-lg font-medium transition-colors duration-300"
@@ -174,6 +186,10 @@ const Reviews = ({
 
       {/* Reviews List */}
       <motion.div variants={itemVariants} className="space-y-3 sm:space-y-4">
+        {productComments.length === 0 && (
+          <p className="text-blue-600">No comment have been asked yet.</p>
+        )}
+
         {productComments.map((comment) => (
           <div key={comment.id} className="space-y-1 sm:space-y-2">
             <div className="p-3 sm:p-4 bg-blue-50/60 rounded-lg sm:rounded-xl border border-blue-200 shadow-sm">

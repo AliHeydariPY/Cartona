@@ -20,7 +20,6 @@ const ProductDisplay = ({
   const { id } = useParams();
 
   useEffect(() => {
-    console.log("mew mew");
     const fetchCartItems = async () => {
       const cartProductsRes = await getCartProducts(
         localStorage.getItem("userID")
@@ -105,7 +104,7 @@ const ProductDisplay = ({
           <div className="flex items-center bg-blue-100 px-2 py-1 rounded-full">
             <FiStar className="text-yellow-500 fill-yellow-500 mr-1" />
             <span className="font-medium text-blue-800">
-              {product.average_rating?.toFixed(1) || "N/A"}
+              {product.average_rating?.toFixed(1) || "0"}
             </span>
           </div>
           <span className="text-sm text-blue-600">
@@ -115,9 +114,9 @@ const ProductDisplay = ({
 
         <div className="flex items-center mb-4 md:mb-6 flex-wrap gap-3">
           <span className="text-2xl sm:text-3xl font-bold text-blue-900">
-            ${product.discounted_price}
+            ${product.discounted_price || product.price}
           </span>
-          {product.discounted_price !== product.price && (
+          {product.discounted_price &&  (
             <span className="text-lg text-blue-500 line-through ml-1">
               ${product.price}
             </span>
@@ -130,18 +129,18 @@ const ProductDisplay = ({
         </div>
 
         {/* Stock Status */}
-        {/* <div className="mb-4 flex items-center">
+        <div className="mb-4 flex items-center">
           <span
             className={`inline-block w-2 h-2 rounded-full mr-2 ${
-              product.in_stock ? "bg-green-500" : "bg-red-500"
+              product.stock_quantity > 0 ? "bg-green-500" : "bg-red-500"
             }`}
           ></span>
           <span className="text-sm">
-            {product.in_stock
+            {product.stock_quantity > 0
               ? `In Stock (${product.stock_quantity} available)`
               : "Out of Stock"}
           </span>
-        </div> */}
+        </div>
 
         {product.amazing_offer && (
           <div className="mb-4 md:mb-6 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-gradient-to-r from-blue-100 to-cyan-100 border border-blue-200">

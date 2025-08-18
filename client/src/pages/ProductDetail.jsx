@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 import ProductDetailTabs from "../components/product-detail/ProductDetailTabs";
 import ProductDisplay from "../components/product-detail/ProductDisplay";
@@ -23,10 +23,9 @@ const ProductDetails = ({
   setReloadComponent,
   setAddToCartPopup,
   setSelectedProduct,
-  setRremoveFromCartPopup
+  setRremoveFromCartPopup,
 }) => {
   const { id } = useParams();
-  const navigate = useNavigate();
 
   const userID = localStorage.getItem("userID");
 
@@ -40,18 +39,26 @@ const ProductDetails = ({
       const selectedProduct = await getProduct(id);
       setProduct(selectedProduct.data);
 
-      const comments = await getComments(id);
-      const commentsWithReplies = await Promise.all(
-        comments.data.map(async (comment) => {
-          try {
-            const repliesResponse = await getCommentReplies(comment.id);
-            const replies = repliesResponse.data;
-            return { ...comment, replies };
-          } catch {
-            return { ...comment };
-          }
+      const comments = getComments(id);
+      comments
+        .then(async (res) => {
+          const commentsWithReplies = await Promise.all(
+            res.data.map(async (comment) => {
+              try {
+                const repliesResponse = await getCommentReplies(comment.id);
+                const replies = repliesResponse.data;
+                return { ...comment, replies };
+              } catch {
+                return { ...comment };
+              }
+            })
+          );
+          console.log(commentsWithReplies);
+          setProductComments(commentsWithReplies);
         })
-      );
+        .catch(() => {
+          setProductComments([]);
+        });
 
       const seller = getShopkeeper(selectedProduct.data.storekeeper);
       seller.then((res) => {
@@ -66,7 +73,6 @@ const ProductDetails = ({
       console.log(selectedProduct.data);
 
       setProductQuestions(questions.filter(Boolean));
-      setProductComments(commentsWithReplies ? commentsWithReplies : []);
     };
     fetchData();
   }, [id, reloadComponent]);

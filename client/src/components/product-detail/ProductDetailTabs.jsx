@@ -67,6 +67,7 @@ const ProductDetailTabs = ({
           productComments={productComments}
           setReloadComponent={setReloadComponent}
           reloadComponent={reloadComponent}
+          seller={seller}
         />
       )}
 
