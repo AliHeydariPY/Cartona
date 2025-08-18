@@ -30,6 +30,8 @@ function App() {
   const [showAnswerPopup, setShowAnswerPopup] = useState(false);
   const [question, setQuestion] = useState("");
 
+  const [reloadComponent, setReloadComponent] = useState(false);
+
   return (
     <>
       <Toaster
@@ -63,6 +65,8 @@ function App() {
         <AnswerQuestionPopup
           onClose={() => setShowAnswerPopup(false)}
           question={question}
+          reloadComponent={reloadComponent}
+          setReloadComponent={setReloadComponent}
         />
       )}
 
@@ -100,6 +104,8 @@ function App() {
             <ProductDetail
               setShowAnswerPopup={setShowAnswerPopup}
               setQuestion={setQuestion}
+              reloadComponent={reloadComponent}
+              setReloadComponent={setReloadComponent}
             />
           }
         />

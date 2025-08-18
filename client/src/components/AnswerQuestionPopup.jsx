@@ -1,15 +1,18 @@
 import { useState, useEffect } from "react";
 import { Portal } from "react-portal";
-// import { useNavigate } from "react-router-dom";
 
 import { FiX, FiMessageSquare, FiSend } from "react-icons/fi";
 
 import { answerProductQuestion } from "../services/commentAPIServices";
 
-export default function AnswerQuestionPopup({ onClose, question }) {
+export default function AnswerQuestionPopup({
+  onClose,
+  question,
+  reloadComponent,
+  setReloadComponent,
+}) {
   const [answer, setAnswer] = useState("");
   const [show, setShow] = useState(false);
-  // const naviagate = useNavigate()
 
   useEffect(() => {
     setTimeout(() => setShow(true), 10);
@@ -26,12 +29,15 @@ export default function AnswerQuestionPopup({ onClose, question }) {
   const handleSubmit = () => {
     if (answer.trim() === "") return;
     answerProductQuestion(
-      { answer_text: answer, storekeeper: 1 },
+      {
+        answer_text: answer,
+        storekeeper: localStorage.getItem("storekeeperID"),
+      },
       question.questionID
     ).then(() => {
       setAnswer("");
       onClose();
-      // naviagate(0)
+      setReloadComponent(!reloadComponent);
     });
   };
 

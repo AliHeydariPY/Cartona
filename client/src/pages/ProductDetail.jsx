@@ -31,7 +31,12 @@ import {
 } from "../services/commentAPIServices";
 import { getShopkeeper } from "../services/userAPIServices";
 
-const ProductDetails = ({ setShowAnswerPopup, setQuestion }) => {
+const ProductDetails = ({
+  setShowAnswerPopup,
+  setQuestion,
+  reloadComponent,
+  setReloadComponent,
+}) => {
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -51,7 +56,7 @@ const ProductDetails = ({ setShowAnswerPopup, setQuestion }) => {
 
   const [activeTab, setActiveTab] = useState("reviews");
 
-  const [replyingTo, setReplyingTo] = useState(null); 
+  const [replyingTo, setReplyingTo] = useState(null);
   const [replyText, setReplyText] = useState("");
 
   useEffect(() => {
@@ -91,7 +96,7 @@ const ProductDetails = ({ setShowAnswerPopup, setQuestion }) => {
       console.log(selectedProduct.data);
     };
     fetchData();
-  }, [id]);
+  }, [id, reloadComponent]);
 
   useEffect(() => {
     console.log(productComments);
@@ -145,147 +150,139 @@ const ProductDetails = ({ setShowAnswerPopup, setQuestion }) => {
     return <p className="text-center mt-10">Loading...</p>;
 
   return (
-    <div className="bg-blue-100">
+    <div className="min-h-screen bg-blue-100 flex justify-center p-0 sm:p-4">
       <motion.div
-        initial={{ opacity: 0, y: 50 }}
+        initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="lg:col-span-3 sm:px-5 sm:py-5 lg:px-0 lg:flex lg:justify-center"
+        className="w-full max-w-6xl"
       >
-        <div className="bg-white/95 backdrop-blur-xl sm:rounded-3xl shadow-lg p-5 sm:p-6 2xl:p-8 border border-blue-400 hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300">
-          <div className="max-w-6xl mx-auto">
-            {/* header */}
-            <div className="sm:flex sm:items-center mb-6">
-              <div className="flex items-center mb-3 sm:mb-0">
-                <FiShoppingCart className="text-blue-600 mr-3" size={22} />
-                <h1 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
-                  {product.name}
-                </h1>
-              </div>
-              <span className="ml-auto bg-blue-600 text-white px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
-                {product.stock_quantity > 0 ? "In Stock" : "Out of Stock"}
-              </span>
+        <div className="bg-white/95 backdrop-blur-xl shadow-lg border border-blue-400 transition-all duration-300 p-4 sm:p-6 md:p-8 sm:rounded-xl md:rounded-2xl lg:rounded-3xl">
+          {/* header */}
+          <div className="flex flex-row items-center justify-between mb-6 sm:mb-8">
+            <div className="flex items-center mb-0">
+              <FiShoppingCart className="text-blue-600 mr-3" size={22} />
+              <h1 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
+                {product.name}
+              </h1>
             </div>
+            <span className="ml-auto bg-blue-600 text-white px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
+              {product.stock_quantity > 0 ? "In Stock" : "Out of Stock"}
+            </span>
+          </div>
 
-            <div className="md:flex mb-8 gap-8">
-              {/* Product Image Gallery */}
-              <div className="flex flex-col">
-                {/* Main Image */}
-                <div className="flex justify-center items-center bg-blue-50/70 p-6 rounded-2xl border border-blue-200 shadow-inner mb-4 h-[200px] md:w-[400px] md:h-[400px]">
+          <div className="grid md:grid-cols-2 gap-4 md:gap-8 mb-6 md:mb-8">
+            {/* Product Image Gallery */}
+            <div className="flex flex-col items-center">
+              <div className="flex justify-center items-center bg-blue-50/70 p-4 md:p-6 rounded-lg sm:rounded-2xl border border-blue-200 shadow-inner mb-4 w-full h-[260px] md:min-w-[360px] md:h-[360px]">
+                <img
+                  src={currentImage || product.image}
+                  alt={product.name}
+                  className="min-w-40 max-w-full max-h-full object-contain rounded-xl sm:rounded-xl"
+                />
+              </div>
+
+              <div className="flex flex-wrap gap-2 py-2 w-full">
+                <div
+                  key="main-image"
+                  onClick={() => setCurrentImage(product.image)}
+                  className={`flex-shrink-0 w-14 h-14 md:w-18 md:h-18 cursor-pointer overflow-hidden rounded-lg border-2 ${
+                    currentImage === product.image || !currentImage
+                      ? "border-blue-500"
+                      : "border-blue-300"
+                  }`}
+                >
                   <img
-                    src={currentImage || product.image}
-                    alt={product.name}
-                    className="max-w-full max-h-full w-auto h-auto object-contain rounded-xl"
+                    src={product.image}
+                    alt={`Product Main`}
+                    className="w-full h-full object-cover"
                   />
                 </div>
 
-                {/* Thumbnails */}
-                <div className="flex flex-wrap gap-2 overflow-x-auto py-2">
-                  {/* ابتدا تصویر اصلی را نمایش می‌دهیم */}
+                {product.images_set.map((img, index) => (
                   <div
-                    key="main-image"
-                    onClick={() => setCurrentImage(product.image)}
-                    className={`flex-shrink-0 w-14 h-14 lg:w-18 lg:h-18 cursor-pointer rounded-lg border-2 ${
-                      currentImage === product.image || !currentImage
+                    key={img.id}
+                    onClick={() => setCurrentImage(img.image)}
+                    className={`flex-shrink-0 w-14 h-14 md:w-18 md:h-18 cursor-pointer overflow-hidden rounded-lg border-2 ${
+                      currentImage === img.image
                         ? "border-blue-500"
                         : "border-blue-300"
                     }`}
                   >
                     <img
-                      src={product.image}
-                      alt={`Product Main`}
-                      className="w-full h-full object-cover rounded-md"
+                      src={img.image}
+                      alt={`Product ${index + 1}`}
+                      className="w-full h-full object-cover"
                     />
                   </div>
-
-                  {/* سپس بقیه تصاویر را نمایش می‌دهیم */}
-                  {product.images_set.map((img, index) => (
-                    <div
-                      key={img.id}
-                      onClick={() => setCurrentImage(img.image)}
-                      className={`flex-shrink-0 w-14 h-14 lg:w-18 lg:h-18 cursor-pointer rounded-lg border-2 ${
-                        currentImage === img.image
-                          ? "border-blue-500"
-                          : "border-blue-300"
-                      }`}
-                    >
-                      <img
-                        src={img.image}
-                        alt={`Product ${index + 1}`}
-                        className="w-full h-full object-cover rounded-md"
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* product details */}
-              <div className="flex flex-col">
-                <h2 className="text-2xl font-bold text-blue-900 mb-3">
-                  {product.name}
-                </h2>
-                <p className="text-blue-700 mb-4">{product.description}</p>
-
-                {/* price */}
-                <div className="flex items-center mb-6">
-                  <span className="text-3xl font-bold text-blue-900">
-                    ${product.discounted_price}
-                  </span>
-                  {product.discounted_price !== product.price && (
-                    <span className="text-lg text-blue-500 line-through ml-3">
-                      ${product.price}
-                    </span>
-                  )}
-                  {product.discount_percentage && (
-                    <span className="ml-3 text-sm font-medium bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-3 py-1 rounded-full">
-                      {product.discount_percentage}% OFF
-                    </span>
-                  )}
-                </div>
-
-                {/* amazing offer */}
-                {product.amazing_offer && (
-                  <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-blue-100 to-cyan-100 border border-blue-200">
-                    <p className="text-blue-800 font-semibold">
-                      {product.amazing_offer}
-                    </p>
-                    <p className="text-sm text-blue-600">
-                      Valid until:{" "}
-                      {new Date(
-                        product.amazing_offer_period
-                      ).toLocaleDateString()}
-                    </p>
-                  </div>
-                )}
-
-                {/* CTA buttons */}
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <button className="flex-1 bg-gradient-to-r from-blue-600 to-cyan-500 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center">
-                    <FiShoppingCart className="mr-2" /> Add to Cart
-                  </button>
-                  <button className="flex-1 bg-white border border-blue-300 text-blue-700 py-3 rounded-xl font-medium hover:bg-blue-50 transition-colors duration-300 flex items-center justify-center">
-                    <FiHeart className="mr-2 text-rose-500" /> Add to Wishlist
-                  </button>
-                </div>
+                ))}
               </div>
             </div>
 
-            <div className="mb-8 p-6 bg-blue-100 rounded-2xl border border-blue-300 shadow-md">
-              <h3 className="text-xl font-bold text-blue-900 mb-5 border-b border-blue-300 pb-2">
+            {/* Product Details */}
+            <div className="flex flex-col">
+              <h2 className="text-2xl font-bold text-blue-900 mb-3">
+                {product.name}
+              </h2>
+              <p className="text-blue-700 mb-4">{product.description}</p>
+
+              <div className="flex items-center mb-4 md:mb-6 flex-wrap gap-3">
+                <span className="text-2xl sm:text-3xl font-bold text-blue-900">
+                  ${product.discounted_price}
+                </span>
+                {product.discounted_price !== product.price && (
+                  <span className="text-lg text-blue-500 line-through ml-2 sm:ml-3">
+                    ${product.price}
+                  </span>
+                )}
+                {product.discount_percentage && (
+                  <span className="ml-2 sm:ml-3 text-sm font-medium bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-2 sm:px-3 py-1 rounded-full">
+                    {product.discount_percentage}% OFF
+                  </span>
+                )}
+              </div>
+
+              {product.amazing_offer && (
+                <div className="mb-4 md:mb-6 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-gradient-to-r from-blue-100 to-cyan-100 border border-blue-200">
+                  <p className="text-blue-800 font-semibold">
+                    {product.amazing_offer}
+                  </p>
+                  <p className="text-sm text-blue-600">
+                    Valid until:{" "}
+                    {new Date(
+                      product.amazing_offer_period
+                    ).toLocaleDateString()}
+                  </p>
+                </div>
+              )}
+
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <button className="flex-1 bg-gradient-to-r from-blue-600 to-cyan-500 text-white py-3 rounded-lg sm:rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center">
+                  <FiShoppingCart className="mr-2" /> Add to Cart
+                </button>
+                <button className="flex-1 bg-white border border-blue-300 text-blue-700 py-3 rounded-lg sm:rounded-xl font-medium hover:bg-blue-50 transition-colors duration-300 flex items-center justify-center">
+                  <FiHeart className="mr-2 text-rose-500" /> Add to Wishlist
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="mb-6 md:mb-12">
+            {/* Seller Info & Tabs */}
+            {/* Seller Card */}
+            <div className="p-4 sm:p-6 bg-blue-100 rounded-lg sm:rounded-2xl border border-blue-300 shadow-md">
+              <h3 className="text-xl font-bold text-blue-900 mb-4 border-b border-blue-300 pb-2">
                 Seller Information
               </h3>
 
-              <div className="flex items-center gap-4 mb-4">
-                {/* Seller Avatar */}
-                <div className="w-16 h-16 rounded-full overflow-hidden ring-2 ring-blue-500 shadow">
+              <div className="flex items-center gap-3 sm:gap-4 mb-3">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full overflow-hidden ring-2 ring-blue-500 shadow">
                   <img
                     src={seller.image}
                     alt={seller.store_name}
                     className="w-full h-full object-cover"
                   />
                 </div>
-
-                {/* Seller Name + Join Date */}
                 <div>
                   <p className="text-lg font-semibold text-blue-900">
                     {seller.store_name}
@@ -300,22 +297,17 @@ const ProductDetails = ({ setShowAnswerPopup, setQuestion }) => {
                 </div>
               </div>
 
-              {/* Description */}
               {seller.description && (
-                <p className="text-blue-800 text-sm mb-3 italic">
+                <p className="text-blue-800 text-sm mb-2 italic">
                   "{seller.description}"
                 </p>
               )}
-
-              {/* Address */}
               {seller.address && (
-                <div className="flex items-center gap-2 text-blue-900 text-sm mb-3">
+                <div className="flex items-center gap-1 text-blue-900 text-sm mb-2">
                   <span className="font-semibold">📍 Address:</span>
                   <span>{seller.address}</span>
                 </div>
               )}
-
-              {/* Rating */}
               <div className="flex items-center gap-2">
                 <span className="font-semibold text-blue-900">⭐ Rating:</span>
                 <span className="text-blue-800">
@@ -323,379 +315,351 @@ const ProductDetails = ({ setShowAnswerPopup, setQuestion }) => {
                 </span>
               </div>
             </div>
-
-            {/* reviews & rating */}
-            <div className="mt-12">
-              {/* Tabs Header */}
-              <div className="flex gap-6 border-b border-blue-300 mb-6">
+          </div>
+          {/* Tabs Header */}
+          <div className="flex gap-4 sm:gap-6 border-b border-blue-300 mt-4 sm:mt-6">
+            <button
+              onClick={() => setActiveTab("reviews")}
+              className={`pb-2 cursor-pointer flex items-center gap-1 sm:gap-2 font-semibold transition-colors ${
+                activeTab === "reviews"
+                  ? "text-blue-700 border-b-2 border-blue-600"
+                  : "text-blue-400 hover:text-blue-600"
+              }`}
+            >
+              <FiMessageSquare /> Reviews ({product.comment_count})
+            </button>
+            <button
+              onClick={() => setActiveTab("questions")}
+              className={`pb-2 cursor-pointer flex items-center gap-1 sm:gap-2 font-semibold transition-colors ${
+                activeTab === "questions"
+                  ? "text-blue-700 border-b-2 border-blue-600"
+                  : "text-blue-400 hover:text-blue-600"
+              }`}
+            >
+              <FiHelpCircle /> Questions ({productQuestions.length})
+            </button>
+          </div>
+          {/* Reviews Section */}
+          {activeTab === "reviews" && (
+            <div className="mt-4 sm:mt-6">
+              {/* Leave a Review */}
+              <div className="mb-6 sm:mb-10 bg-white/80 border border-blue-200 p-3 sm:p-6 rounded-lg sm:rounded-2xl shadow-lg">
+                <h4 className="text-lg font-semibold text-blue-800 mb-2 sm:mb-4">
+                  Leave a Review
+                </h4>
+                <div className="flex items-center mb-2 sm:mb-4 space-x-1">
+                  {[...Array(5)].map((_, i) => (
+                    <FiStar
+                      key={i}
+                      size={22}
+                      onMouseOver={() => setSelectedStars(i + 1)}
+                      className={`cursor-pointer transition-colors ${
+                        i < selectedStars
+                          ? "text-yellow-500 fill-yellow-500"
+                          : "text-gray-300 fill-gray-300"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <textarea
+                  rows={3}
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  placeholder="Write your comment..."
+                  className="w-full p-2 sm:p-4 border border-blue-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-400 focus:outline-none text-blue-900 transition-all duration-300"
+                />
                 <button
-                  onClick={() => setActiveTab("reviews")}
-                  className={`pb-2 cursor-pointer flex items-center gap-2 font-semibold transition-colors ${
-                    activeTab === "reviews"
-                      ? "text-blue-700 border-b-2 border-blue-600"
-                      : "text-blue-400 hover:text-blue-600"
-                  }`}
+                  onClick={() => {
+                    if (commentText.trim() !== "") {
+                      const res = sendComment({
+                        user: localStorage.getItem("userID"),
+                        text: commentText,
+                        rating: selectedStars,
+                        product: id,
+                      });
+                      res
+                        .then(() => {
+                          setCommentText("");
+                          setSelectedStars(1);
+                          setReloadComponent(!reloadComponent);
+                          toast.custom((t) => (
+                            <div
+                              className={`${
+                                t.visible ? "animate-enter" : "animate-leave"
+                              } transform transition-all duration-300`}
+                            >
+                              <div className="bg-gradient-to-r from-green-500 to-cyan-400 text-white px-6 py-3 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-3">
+                                <div className="bg-blue-500/20 p-2 rounded-full">
+                                  <FiCheckCircle className="text-xl text-white" />
+                                </div>
+                                <div>
+                                  <p className="font-medium">
+                                    Your comment was successfully sent
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          ));
+                        })
+                        .catch((err) => {
+                          toast.custom((t) => (
+                            <div
+                              className={`${
+                                t.visible ? "animate-enter" : "animate-leave"
+                              } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
+                            >
+                              <FiX className="text-xl shrink-0" />
+                              <span className="font-medium">
+                                {err.response.data.rating[0]}
+                              </span>
+                            </div>
+                          ));
+                        });
+                    } else {
+                      showValidationError(
+                        "Please write your comment before submitting"
+                      );
+                    }
+                  }}
+                  className="mt-2 sm:mt-4 cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white px-4 sm:px-6 py-2 rounded-lg sm:rounded-lg font-medium transition-colors duration-300"
                 >
-                  <FiMessageSquare /> Reviews ({product.comment_count})
-                </button>
-                <button
-                  onClick={() => setActiveTab("questions")}
-                  className={`pb-2 flex cursor-pointer items-center gap-2 font-semibold transition-colors ${
-                    activeTab === "questions"
-                      ? "text-blue-700 border-b-2 border-blue-600"
-                      : "text-blue-400 hover:text-blue-600"
-                  }`}
-                >
-                  <FiHelpCircle /> Questions ({productQuestions.length})
+                  Submit Review
                 </button>
               </div>
 
-              {/* Reviews Section */}
-              {activeTab === "reviews" && (
-                <div>
-                  {/* leave a review */}
-                  <div className="mb-10 bg-white/80 border border-blue-200 p-6 rounded-2xl shadow-lg">
-                    <h4 className="text-lg font-semibold text-blue-800 mb-4">
-                      Leave a Review
-                    </h4>
-                    <div className="flex items-center mb-4 space-x-1">
-                      {[...Array(5)].map((_, i) => (
-                        <FiStar
-                          key={i}
-                          size={22}
-                          onMouseOver={() => setSelectedStars(i + 1)}
-                          className={`cursor-pointer transition-colors ${
-                            i < selectedStars
-                              ? "text-yellow-500 fill-yellow-500"
-                              : "text-gray-300 fill-gray-300"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <textarea
-                      rows={4}
-                      value={commentText}
-                      onChange={(e) => {
-                        setCommentText(e.target.value);
-                      }}
-                      placeholder="Write your comment..."
-                      className="w-full p-4 border border-blue-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:outline-none text-blue-900 transition-all duration-300"
-                    />
-                    <button
-                      onClick={() => {
-                        if (commentText.split(" ").join("") != "") {
-                          const res = sendComment({
-                            user: 5,
-                            text: commentText,
-                            rating: selectedStars,
-                            product: id,
-                          });
-                          res
-                            .then(() => {
-                              setCommentText("");
-                              setSelectedStars(1);
-                              toast.custom((t) => (
-                                <div
-                                  className={`${
-                                    t.visible
-                                      ? "animate-enter"
-                                      : "animate-leave"
-                                  } transform transition-all duration-300`}
-                                >
-                                  <div className="bg-gradient-to-r from-green-500 to-cyan-400 text-white px-6 py-3 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-3">
-                                    <div className="bg-blue-500/20 p-2 rounded-full">
-                                      <FiCheckCircle className="text-xl text-white" />
-                                    </div>
-                                    <div>
-                                      <p className="font-medium">
-                                        Your comment was successfully sent
-                                      </p>
-                                    </div>
-                                  </div>
-                                </div>
-                              ));
-                            })
-                            .catch((err) => {
-                              toast.custom((t) => (
-                                <div
-                                  className={`${
-                                    t.visible
-                                      ? "animate-enter"
-                                      : "animate-leave"
-                                  } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
-                                >
-                                  <FiX className="text-xl shrink-0" />
-                                  <span className="font-medium">
-                                    {err.response.data.rating[0]}
-                                  </span>
-                                </div>
-                              ));
-                            });
-                        } else {
-                          showValidationError(
-                            "Please write your comment before submitting"
-                          );
-                        }
-                      }}
-                      className="mt-4 cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white px-6 py-2 rounded-md font-medium transition-colors duration-300"
-                    >
-                      Submit Review
-                    </button>
-                  </div>
-
-                  {/* reviews list */}
-                  <div className="space-y-4">
-                    {productComments.map((comment) => (
-                      <div key={comment.id} className="space-y-2">
-                        {/* کامنت اصلی */}
-                        <div className="p-4 bg-blue-50/60 rounded-xl border border-blue-200 shadow-sm">
-                          {/* هدر کامنت */}
-                          <div className="flex justify-between">
-                            <div className="flex items-center mb-2">
-                              <span className="font-semibold text-blue-800 mr-2">
-                                User {comment.user}
-                              </span>
-                              <div className="flex">
-                                {[...Array(5)].map((_, i) => (
-                                  <FiStar
-                                    key={i}
-                                    size={16}
-                                    className={`${
-                                      i < comment.rating
-                                        ? "text-yellow-500 fill-yellow-500"
-                                        : "text-gray-300 fill-gray-300"
-                                    }`}
-                                  />
-                                ))}
-                              </div>
-                            </div>
-                            <span className="text-xs ml-3 text-blue-500">
-                              {comment.updated_time}
-                            </span>
-                          </div>
-
-                          {/* متن کامنت */}
-                          <p className="text-blue-700 text-sm">
-                            {comment.text}
-                          </p>
-
-                          {/* آیکون ریپلای */}
-                          <button
-                            onClick={() => handleReply(comment.id)}
-                            className="mt-2 cursor-pointer flex items-center text-blue-600 text-sm hover:text-blue-800 transition-colors"
-                          >
-                            <LuReply
-                              className="mr-1"
-                              size={16}
-                              style={{ transform: "rotate(180deg)" }}
-                            />{" "}
-                            Reply
-                          </button>
-                        </div>
-
-                        {/* فرم ریپلای */}
-                        {replyingTo === comment.id && (
-                          <div className="ml-6 mt-2 bg-white border border-blue-200 rounded-lg p-3 shadow-md">
-                            <textarea
-                              rows={2}
-                              value={replyText}
-                              onChange={(e) => setReplyText(e.target.value)}
-                              placeholder="Write your reply..."
-                              className="w-full p-2 border border-blue-300 rounded-lg focus:ring-1 focus:ring-blue-400 focus:outline-none text-blue-900 transition-all duration-300"
-                            />
-                            <div className="flex justify-end mt-2 space-x-2">
-                              <button
-                                onClick={() => setReplyingTo(null)}
-                                className="px-3 py-1 cursor-pointer rounded-md border border-gray-300 text-gray-600 hover:bg-gray-100 text-sm transition-colors duration-300"
-                              >
-                                Cancel
-                              </button>
-                              <button
-                                onClick={() => sendReply(comment.id)}
-                                className="px-4 py-1 cursor-pointer rounded-md bg-gradient-to-r from-blue-600 to-cyan-500 text-white hover:from-blue-700 hover:to-cyan-600 text-sm  transition-colors duration-300"
-                              >
-                                Send
-                              </button>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* لیست ریپلای‌ها */}
-                        {comment.replies && comment.replies.length > 0 && (
-                          <div className="ml-6 space-y-2 mt-2">
-                            {comment.replies.map((reply) => (
-                              <div
-                                key={reply.id}
-                                className="p-3 bg-white border border-blue-200 rounded-lg shadow-sm"
-                              >
-                                <div className="flex justify-between mb-1">
-                                  <span className="font-medium text-blue-700 text-sm">
-                                    User {reply.user}
-                                  </span>
-                                  <span className="text-xs text-blue-400">
-                                    {reply.updated_time}
-                                  </span>
-                                </div>
-                                <p className="text-blue-800 text-sm">
-                                  {reply.text}
-                                </p>
-                              </div>
+              {/* Reviews List */}
+              <div className="space-y-3 sm:space-y-4">
+                {productComments.map((comment) => (
+                  <div key={comment.id} className="space-y-1 sm:space-y-2">
+                    <div className="p-3 sm:p-4 bg-blue-50/60 rounded-lg sm:rounded-xl border border-blue-200 shadow-sm">
+                      <div className="flex justify-between mb-1 sm:mb-2">
+                        <div className="flex items-center">
+                          <span className="font-semibold text-blue-800 mr-2">
+                            User {comment.user}
+                          </span>
+                          <div className="flex">
+                            {[...Array(5)].map((_, i) => (
+                              <FiStar
+                                key={i}
+                                size={16}
+                                className={`${
+                                  i < comment.rating
+                                    ? "text-yellow-500 fill-yellow-500"
+                                    : "text-gray-300 fill-gray-300"
+                                }`}
+                              />
                             ))}
                           </div>
-                        )}
+                        </div>
+                        <span className="text-xs ml-2 text-blue-500">
+                          {comment.updated_time}
+                        </span>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {activeTab === "questions" && (
-                <div className="space-y-6">
-                  {/* Input for asking a new question */}
-                  <div className="p-4 bg-white/90 border border-blue-200 rounded-xl shadow">
-                    <h3 className="text-lg font-semibold text-blue-900 mb-2">
-                      Ask a Question
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      <input
-                        value={questionText}
-                        onChange={(e) => {
-                          setQuestionText(e.target.value);
-                        }}
-                        type="text"
-                        placeholder="Type your question here..."
-                        className="flex-1 border border-blue-300 rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-300"
-                      />
+                      <p className="text-blue-700 text-sm">{comment.text}</p>
                       <button
-                        onClick={() => {
-                          if (questionText.split(" ").join("") != "") {
-                            sendProductQuestion({
-                              product: id,
-                              user: userID,
-                              question_text: questionText,
-                            })
-                              .then(() => {
-                                setQuestionText("");
-                                toast.custom((t) => (
-                                  <div
-                                    className={`${
-                                      t.visible
-                                        ? "animate-enter"
-                                        : "animate-leave"
-                                    } transform transition-all duration-300`}
-                                  >
-                                    <div className="bg-gradient-to-r from-green-500 to-cyan-400 text-white px-6 py-3 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-3">
-                                      <div className="bg-blue-500/20 p-2 rounded-full">
-                                        <FiCheckCircle className="text-xl text-white" />
-                                      </div>
-                                      <div>
-                                        <p className="font-medium">
-                                          Your question was successfully sent
-                                        </p>
-                                      </div>
-                                    </div>
-                                  </div>
-                                ));
-                              })
-                              .catch((err) => {
-                                toast.custom((t) => (
-                                  <div
-                                    className={`${
-                                      t.visible
-                                        ? "animate-enter"
-                                        : "animate-leave"
-                                    } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
-                                  >
-                                    <FiX className="text-xl shrink-0" />
-                                    <span className="font-medium">
-                                      {err.response.data[0]}
-                                    </span>
-                                  </div>
-                                ));
-                              });
-                          } else {
-                            showValidationError(
-                              "Please write your question before submitting"
-                            );
-                          }
-                        }}
-                        className="px-4 cursor-pointer py-2.25 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition"
+                        onClick={() => handleReply(comment.id)}
+                        className="mt-1 sm:mt-2 cursor-pointer flex items-center text-blue-600 text-sm hover:text-blue-800 transition-colors"
                       >
-                        Ask
+                        <LuReply
+                          className="mr-1"
+                          size={16}
+                          style={{ transform: "rotate(180deg)" }}
+                        />{" "}
+                        Reply
                       </button>
                     </div>
-                  </div>
 
-                  {/* Questions list */}
-                  <div className="space-y-4">
-                    {productQuestions.length === 0 && (
-                      <p className="text-blue-600">
-                        No questions have been asked yet.
-                      </p>
+                    {replyingTo === comment.id && (
+                      <div className="ml-3 sm:ml-6 mt-1 sm:mt-2 bg-white border border-blue-200 rounded-lg sm:rounded-lg p-2 sm:p-3 shadow-md">
+                        <textarea
+                          rows={2}
+                          value={replyText}
+                          onChange={(e) => setReplyText(e.target.value)}
+                          placeholder="Write your reply..."
+                          className="w-full p-1 sm:p-2 border border-blue-300 rounded-lg sm:rounded-lg focus:ring-1 focus:ring-blue-400 focus:outline-none text-blue-900 transition-all duration-300"
+                        />
+                        <div className="flex justify-end mt-1 sm:mt-2 space-x-1 sm:space-x-2">
+                          <button
+                            onClick={() => setReplyingTo(null)}
+                            className="px-2 py-1 cursor-pointer rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100 text-xs sm:text-sm transition-colors duration-300"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={() => {
+                              sendReply(comment.id);
+                              setReloadComponent(!reloadComponent);
+                            }}
+                            className="px-3 py-1 cursor-pointer rounded-lg bg-gradient-to-r from-blue-600 to-cyan-500 text-white hover:from-blue-700 hover:to-cyan-600 text-xs sm:text-sm transition-colors duration-300"
+                          >
+                            Send
+                          </button>
+                        </div>
+                      </div>
                     )}
 
-                    {productQuestions.map((faq, i) => {
-                      const isUserQuestion = faq.user == userID;
-                      return (
-                        <div
-                          key={i}
-                          className={`p-4 border rounded-xl shadow space-y-2 transition 
-          ${
-            isUserQuestion
-              ? "bg-blue-100/50 border-blue-400 ring-2 ring-blue-300"
-              : "bg-blue-50/60 border-blue-200"
-          }`}
-                        >
-                          {/* User Question */}
-                          <div className="flex items-center justify-between">
-                            <p className="font-semibold text-blue-900">
-                              Q: {faq.question_text}
-                            </p>
-
-                            <div className="flex items-center gap-2">
-                              {isUserQuestion && (
-                                <span className="px-2 py-1 text-xs font-bold rounded-full bg-blue-600 text-white">
-                                  Your Question
-                                </span>
-                              )}
-
-                              {userID == seller.user && !faq.answer_text ? (
-                                <button
-                                  className="p-2 cursor-pointer rounded-full hover:bg-blue-100 text-blue-600 transition-colors duration-300"
-                                  onClick={() => {
-                                    setShowAnswerPopup(true);
-                                    console.log(faq.id);
-                                    setQuestion({
-                                      questionText: faq.question_text,
-                                      questionID: faq.id,
-                                    });
-                                  }}
-                                >
-                                  <FiEdit3 size={18} />
-                                </button>
-                              ) : null}
-                            </div>
-                          </div>
-
-                          {/* Storekeeper Answer */}
-                          {faq.answer_text && (
-                            <div className="flex items-start gap-2 mt-2">
-                              <span className="px-2 py-1 text-xs font-semibold bg-blue-200 text-blue-800 rounded-lg">
-                                Storekeeper
+                    {comment.replies && comment.replies.length > 0 && (
+                      <div className="ml-3 sm:ml-6 space-y-1 sm:space-y-2 mt-1 sm:mt-2">
+                        {comment.replies.map((reply) => (
+                          <div
+                            key={reply.id}
+                            className="p-2 sm:p-3 bg-white border border-blue-200 rounded-lg sm:rounded-lg shadow-sm"
+                          >
+                            <div className="flex justify-between mb-1">
+                              <span className="font-medium text-blue-700 text-xs sm:text-sm">
+                                User {reply.user}
                               </span>
-                              <p className="text-blue-700 text-sm mt-0.5">
-                                {faq.answer_text}
-                              </p>
+                              <span className="text-xs text-blue-400">
+                                {reply.updated_time}
+                              </span>
                             </div>
+                            <p className="text-blue-800 text-sm">
+                              {reply.text}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {activeTab === "questions" && (
+            <div className="space-y-4 sm:space-y-6 mt-3 sm:mt-4">
+              {/* Ask a Question */}
+              <div className="p-3 sm:p-4 bg-white/90 border border-blue-200 rounded-lg sm:rounded-xl shadow">
+                <h3 className="text-lg font-semibold text-blue-900 mb-2">
+                  Ask a Question
+                </h3>
+                <div className="flex items-center gap-2">
+                  <input
+                    value={questionText}
+                    onChange={(e) => setQuestionText(e.target.value)}
+                    type="text"
+                    placeholder="Type your question here..."
+                    className="flex-1 border border-blue-300 rounded-lg sm:rounded-xl px-2 sm:px-3 py-1 sm:py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-300"
+                  />
+                  <button
+                    onClick={() => {
+                      if (questionText.trim() !== "") {
+                        sendProductQuestion({
+                          product: id,
+                          user: userID,
+                          question_text: questionText,
+                        })
+                          .then(() => {
+                            setQuestionText("");
+                            setReloadComponent(!reloadComponent);
+                            toast.custom((t) => (
+                              <div
+                                className={`${
+                                  t.visible ? "animate-enter" : "animate-leave"
+                                } transform transition-all duration-300`}
+                              >
+                                <div className="bg-gradient-to-r from-green-500 to-cyan-400 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-2 sm:space-x-3">
+                                  <div className="bg-blue-500/20 p-2 rounded-full">
+                                    <FiCheckCircle className="text-xl text-white" />
+                                  </div>
+                                  <div>
+                                    <p className="font-medium">
+                                      Your question was successfully sent
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            ));
+                          })
+                          .catch((err) => {
+                            toast.custom((t) => (
+                              <div
+                                className={`${
+                                  t.visible ? "animate-enter" : "animate-leave"
+                                } bg-gradient-to-r from-red-500 to-rose-600 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-2 sm:space-x-3 rtl:space-x-reverse`}
+                              >
+                                <FiX className="text-xl shrink-0" />
+                                <span className="font-medium">
+                                  {err.response.data[0]}
+                                </span>
+                              </div>
+                            ));
+                          });
+                      } else {
+                        showValidationError(
+                          "Please write your question before submitting"
+                        );
+                      }
+                    }}
+                    className="px-2 sm:px-4 py-1 sm:py-2 bg-blue-600 text-white rounded-lg sm:rounded-xl hover:bg-blue-700 transition"
+                  >
+                    Ask
+                  </button>
+                </div>
+              </div>
+
+              {/* Questions List */}
+              <div className="space-y-3 sm:space-y-4">
+                {productQuestions.length === 0 && (
+                  <p className="text-blue-600">
+                    No questions have been asked yet.
+                  </p>
+                )}
+
+                {productQuestions.map((faq, i) => {
+                  const isUserQuestion = faq.user == userID;
+                  return (
+                    <div
+                      key={i}
+                      className={`p-3 sm:p-4 border rounded-lg sm:rounded-xl shadow space-y-1 sm:space-y-2 transition ${
+                        isUserQuestion
+                          ? "bg-blue-100/50 border-blue-400 ring-2 ring-blue-300"
+                          : "bg-blue-50/60 border-blue-200"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <p className="font-semibold text-blue-900">
+                          Q: {faq.question_text}
+                        </p>
+                        <div className="flex items-center gap-2">
+                          {isUserQuestion && (
+                            <span className="px-2 py-1 text-xs font-bold rounded-full bg-blue-600 text-white">
+                              Your Question
+                            </span>
+                          )}
+                          {userID == seller.user && !faq.answer_text && (
+                            <button
+                              className="p-2 cursor-pointer rounded-full hover:bg-blue-100 text-blue-600 transition-colors duration-300"
+                              onClick={() => {
+                                setShowAnswerPopup(true);
+                                setQuestion({
+                                  questionText: faq.question_text,
+                                  questionID: faq.id,
+                                });
+                              }}
+                            >
+                              <FiEdit3 size={18} />
+                            </button>
                           )}
                         </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
+                      </div>
+
+                      {faq.answer_text && (
+                        <div className="flex items-start gap-2 mt-1 sm:mt-2">
+                          <span className="px-2 py-1 text-xs font-semibold bg-blue-200 text-blue-800 rounded-lg">
+                            Storekeeper
+                          </span>
+                          <p className="text-blue-700 text-sm mt-0.5">
+                            {faq.answer_text}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </motion.div>
     </div>

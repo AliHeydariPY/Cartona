@@ -55,6 +55,7 @@ const UpgradeToSeller = () => {
             response
               .then((res) => {
                 console.log(res.data);
+                localStorage.setItem("storekeeperID", res.data.id)
                 toast.custom((t) => (
                   <div
                     className={`${
