@@ -1,8 +1,5 @@
 import { motion } from "framer-motion";
-import {
-  containerVariants,
-  itemVariants,
-} from "../../../utils/animations";
+import { containerVariants, itemVariants } from "../../../utils/animations";
 
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -10,7 +7,8 @@ import { useParams } from "react-router-dom";
 
 import { sendProductQuestion } from "../../../services/commentAPIServices";
 
-import { FiX, FiCheckCircle, FiEdit3 } from "react-icons/fi";
+import { FiX, FiCheckCircle, FiEdit3, FiAlertCircle } from "react-icons/fi";
+import { FixedSizeList as List } from "react-window";
 
 const Questions = ({
   productQuestions,
@@ -43,6 +41,61 @@ const Questions = ({
         </button>
       </div>
     ));
+  };
+
+  // 👇 رندر هر آیتم برای react-window
+  const QuestionItem = ({ index, style }) => {
+    const faq = productQuestions[index];
+    const isUserQuestion = faq.user == userID;
+
+    return (
+      <div
+        style={{
+          ...style,
+          top: style.top, 
+          height: style.height - 14, 
+        }} 
+        className={`p-3 sm:p-4 border rounded-lg sm:rounded-xl shadow space-y-1 sm:space-y-2 transition ${
+          isUserQuestion
+            ? "bg-blue-100/50 border-blue-400 ring-2 ring-blue-300"
+            : "bg-blue-50/60 border-blue-200"
+        }`}
+      >
+        <div className="flex items-center justify-between">
+          <p className="font-semibold text-blue-900">Q: {faq.question_text}</p>
+          <div className="flex items-center gap-2">
+            {isUserQuestion && (
+              <span className="px-2 py-1 text-xs font-bold rounded-full bg-blue-600 text-white">
+                Your Question
+              </span>
+            )}
+            {userID == seller.user && !faq.answer_text && (
+              <button
+                className="p-2 cursor-pointer rounded-full hover:bg-blue-100 text-blue-600 transition-colors duration-300"
+                onClick={() => {
+                  setShowAnswerPopup(true);
+                  setQuestion({
+                    questionText: faq.question_text,
+                    questionID: faq.id,
+                  });
+                }}
+              >
+                <FiEdit3 size={18} />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {faq.answer_text && (
+          <div className="flex items-start gap-2 mt-1 sm:mt-2">
+            <span className="px-2 py-1 text-xs font-semibold bg-blue-200 text-blue-800 rounded-lg">
+              Storekeeper
+            </span>
+            <p className="text-blue-700 text-sm mt-0.5">{faq.answer_text}</p>
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -80,38 +133,12 @@ const Questions = ({
                   .then(() => {
                     setQuestionText("");
                     setReloadComponent(!reloadComponent);
-                    toast.custom((t) => (
-                      <div
-                        className={`${
-                          t.visible ? "animate-enter" : "animate-leave"
-                        } transform transition-all duration-300`}
-                      >
-                        <div className="bg-gradient-to-r from-green-500 to-cyan-400 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-2 sm:space-x-3">
-                          <div className="bg-blue-500/20 p-2 rounded-full">
-                            <FiCheckCircle className="text-xl text-white" />
-                          </div>
-                          <div>
-                            <p className="font-medium">
-                              Your question was successfully sent
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ));
+                    toast.success("Your question was successfully sent ✅");
                   })
                   .catch((err) => {
-                    toast.custom((t) => (
-                      <div
-                        className={`${
-                          t.visible ? "animate-enter" : "animate-leave"
-                        } bg-gradient-to-r from-red-500 to-rose-600 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-2 sm:space-x-3 rtl:space-x-reverse`}
-                      >
-                        <FiX className="text-xl shrink-0" />
-                        <span className="font-medium">
-                          {err.response.data[0]}
-                        </span>
-                      </div>
-                    ));
+                    toast.error(
+                      err.response.data[0] || "Something went wrong ❌"
+                    );
                   });
               } else {
                 showValidationError(
@@ -127,72 +154,20 @@ const Questions = ({
       </motion.div>
 
       {/* Questions List */}
-      <motion.div variants={itemVariants} className="space-y-3">
-          {productQuestions.length === 0 && (
-            <div
-              className="text-blue-600"
-            >
-              No questions have been asked yet.
-            </div>
-          )}
-
-          {productQuestions.map((faq, i) => {
-            const isUserQuestion = faq.user == userID;
-            return (
-              <div
-                key={i}
-                className={`p-3 sm:p-4 border rounded-lg sm:rounded-xl shadow space-y-1 sm:space-y-2 transition ${
-                  isUserQuestion
-                    ? "bg-blue-100/50 border-blue-400 ring-2 ring-blue-300"
-                    : "bg-blue-50/60 border-blue-200"
-                }`}
-              >
-                {productQuestions.length === 0 && (
-                  <p className="text-blue-600">
-                    No questions have been asked yet.
-                  </p>
-                )}
-
-                <div className="flex items-center justify-between">
-                  <p className="font-semibold text-blue-900">
-                    Q: {faq.question_text}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    {isUserQuestion && (
-                      <span className="px-2 py-1 text-xs font-bold rounded-full bg-blue-600 text-white">
-                        Your Question
-                      </span>
-                    )}
-                    {userID == seller.user && !faq.answer_text && (
-                      <button
-                        className="p-2 cursor-pointer rounded-full hover:bg-blue-100 text-blue-600 transition-colors duration-300"
-                        onClick={() => {
-                          setShowAnswerPopup(true);
-                          setQuestion({
-                            questionText: faq.question_text,
-                            questionID: faq.id,
-                          });
-                        }}
-                      >
-                        <FiEdit3 size={18} />
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {faq.answer_text && (
-                  <div className="flex items-start gap-2 mt-1 sm:mt-2">
-                    <span className="px-2 py-1 text-xs font-semibold bg-blue-200 text-blue-800 rounded-lg">
-                      Storekeeper
-                    </span>
-                    <p className="text-blue-700 text-sm mt-0.5">
-                      {faq.answer_text}
-                    </p>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+      <motion.div variants={itemVariants}>
+        {productQuestions.length === 0 ? (
+          <div className="text-blue-600">No questions have been asked yet.</div>
+        ) : (
+          <List
+            height={450} 
+            itemCount={productQuestions.length}
+            itemSize={116} 
+            width={"100%"}
+            className="custom-scrollbar"
+          >
+            {QuestionItem}
+          </List>
+        )}
       </motion.div>
     </motion.div>
   );

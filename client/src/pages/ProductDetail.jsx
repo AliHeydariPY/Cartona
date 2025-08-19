@@ -97,7 +97,11 @@ const ProductDetails = ({
                 {product.name}
               </h1>
             </div>
-            <span className="ml-auto bg-blue-600 text-white px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
+            <span
+              className={`ml-auto text-white px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${
+                product.stock_quantity > 0 ? "bg-blue-600" : "bg-red-600"
+              }`}
+            >
               {product.stock_quantity > 0 ? "In Stock" : "Out of Stock"}
             </span>
           </div>
