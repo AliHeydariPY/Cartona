@@ -13,6 +13,8 @@ import Payments from "./pages/user-dashboard/Payments";
 import AddProduct from "./pages/user-dashboard/AddProduct";
 import MyProducts from "./pages/user-dashboard/MyProducts";
 
+import ProductFeatures from "./pages/user-dashboard/my-products/ProductFeatures";
+
 import ProductDetail from "./pages/ProductDetail";
 
 import AddedToCartPopup from "./components/pop-ups/AddedToCartPopup";
@@ -100,7 +102,10 @@ function App() {
           />
           <Route path="payments" element={<Payments />} />
           <Route path="add-product" element={<AddProduct />} />
+
           <Route path="my-products" element={<MyProducts />} />
+          <Route path="my-products/features/:id" element={<ProductFeatures reloadComponent={reloadComponent} setReloadComponent={setReloadComponent}/>} />
+
         </Route>
         <Route
           path="/products/:id"
