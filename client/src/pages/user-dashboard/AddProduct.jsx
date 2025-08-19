@@ -220,7 +220,10 @@ const AddProduct = () => {
           onSubmit={(values, onSubmitProps) => {
             const formData = new FormData();
             formData.append("image", values.image);
-            formData.append("storekeeper", Number(localStorage.getItem('storekeeperID')));
+            formData.append(
+              "storekeeper",
+              Number(localStorage.getItem("storekeeperID"))
+            );
             formData.append("name", values.productName);
             formData.append("category", Number(selectedCategory.id));
             formData.append("price", values.price);
@@ -240,7 +243,7 @@ const AddProduct = () => {
               console.log(res.data);
               onSubmitProps.resetForm();
               setImages({});
-              setSelectedCategory(null)
+              setSelectedCategory(null);
               toast.custom((t) => (
                 <div
                   className={`${t.visible ? "animate-enter" : "animate-leave"} 
@@ -645,7 +648,10 @@ const AddProduct = () => {
                 </button>
                 <button
                   type="reset"
-                  onClick={() => setImages({})}
+                  onClick={() => {
+                    setSelectedCategory(null);
+                    setImages({});
+                  }}
                   className="px-6 py-3 cursor-pointer bg-white border border-rose-400 text-rose-700 rounded-lg hover:bg-rose-50 transition-colors duration-300 sm:ml-auto"
                 >
                   Cancel

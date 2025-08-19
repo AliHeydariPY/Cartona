@@ -122,7 +122,7 @@ const UserDashboard = () => {
               ...(isSeller
                 ? [
                     {
-                      id: "products",
+                      id: "my-products",
                       icon: (
                         <FiPackage className="ml-3 text-amber-600" size={18} />
                       ),
@@ -179,8 +179,8 @@ const UserDashboard = () => {
                     navigate("/account/favorites");
                   } else if (item.id == "payments") {
                     navigate("/account/payments");
-                  } else if (item.id == "products") {
-                    navigate("/account/products");
+                  } else if (item.id == "my-products") {
+                    navigate("/account/my-products");
                   } else if (item.id == "add-product") {
                     navigate("/account/add-product");
                   } else if (item.id == "customers") {

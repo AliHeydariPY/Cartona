@@ -12,6 +12,10 @@ export const addNewProduct = (formData) => {
     })
 };
 
+export const getStorekeeperProducts = (storekeeperID) => {
+  const url = `${SERVER_URL}/product-api/products/storekeeper/${storekeeperID}/`;
+  return axios.get(url)
+}
 
 export const getProduct = (id) =>{
   const url = `${SERVER_URL}/product-api/products/${id}`;
@@ -27,3 +31,4 @@ export const getSubCategories = (mainCategoriesID) => {
   const url = `${SERVER_URL}/product-api/categories/parent/${mainCategoriesID}/`
   return axios.get(url)
 }
+

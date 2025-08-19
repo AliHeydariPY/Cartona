@@ -11,6 +11,7 @@ import Favorites from "./pages/user-dashboard/Favorites";
 import Cart from "./pages/user-dashboard/Cart";
 import Payments from "./pages/user-dashboard/Payments";
 import AddProduct from "./pages/user-dashboard/AddProduct";
+import MyProducts from "./pages/user-dashboard/MyProducts";
 
 import ProductDetail from "./pages/ProductDetail";
 
@@ -99,6 +100,7 @@ function App() {
           />
           <Route path="payments" element={<Payments />} />
           <Route path="add-product" element={<AddProduct />} />
+          <Route path="my-products" element={<MyProducts />} />
         </Route>
         <Route
           path="/products/:id"
