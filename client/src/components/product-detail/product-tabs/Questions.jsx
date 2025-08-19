@@ -21,6 +21,7 @@ const Questions = ({
 }) => {
   const [questionText, setQuestionText] = useState("");
   const { id } = useParams();
+  const listHeight = Math.min(productQuestions.length * 116, 450);
 
   const showValidationError = (context) => {
     toast.custom((t) => (
@@ -43,7 +44,6 @@ const Questions = ({
     ));
   };
 
-  // 👇 رندر هر آیتم برای react-window
   const QuestionItem = ({ index, style }) => {
     const faq = productQuestions[index];
     const isUserQuestion = faq.user == userID;
@@ -52,9 +52,9 @@ const Questions = ({
       <div
         style={{
           ...style,
-          top: style.top, 
-          height: style.height - 14, 
-        }} 
+          top: style.top,
+          height: style.height - 14,
+        }}
         className={`p-3 sm:p-4 border rounded-lg sm:rounded-xl shadow space-y-1 sm:space-y-2 transition ${
           isUserQuestion
             ? "bg-blue-100/50 border-blue-400 ring-2 ring-blue-300"
@@ -133,12 +133,38 @@ const Questions = ({
                   .then(() => {
                     setQuestionText("");
                     setReloadComponent(!reloadComponent);
-                    toast.success("Your question was successfully sent ✅");
+                    toast.custom((t) => (
+                      <div
+                        className={`${
+                          t.visible ? "animate-enter" : "animate-leave"
+                        } transform transition-all duration-300`}
+                      >
+                        <div className="bg-gradient-to-r from-green-500 to-cyan-400 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-2 sm:space-x-3">
+                          <div className="bg-blue-500/20 p-2 rounded-full">
+                            <FiCheckCircle className="text-xl text-white" />
+                          </div>
+                          <div>
+                            <p className="font-medium">
+                              Your question was successfully sent
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ));
                   })
                   .catch((err) => {
-                    toast.error(
-                      err.response.data[0] || "Something went wrong ❌"
-                    );
+                    toast.custom((t) => (
+                      <div
+                        className={`${
+                          t.visible ? "animate-enter" : "animate-leave"
+                        } bg-gradient-to-r from-red-500 to-rose-600 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-2 sm:space-x-3 rtl:space-x-reverse`}
+                      >
+                        <FiX className="text-xl shrink-0" />
+                        <span className="font-medium">
+                          {err.response.data[0]}
+                        </span>
+                      </div>
+                    ));
                   });
               } else {
                 showValidationError(
@@ -159,9 +185,9 @@ const Questions = ({
           <div className="text-blue-600">No questions have been asked yet.</div>
         ) : (
           <List
-            height={450} 
+            height={listHeight}
             itemCount={productQuestions.length}
-            itemSize={116} 
+            itemSize={116}
             width={"100%"}
             className="custom-scrollbar"
           >
