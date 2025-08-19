@@ -17,3 +17,13 @@ export const getProduct = (id) =>{
   const url = `${SERVER_URL}/product-api/products/${id}`;
   return axios.get(url)
 }
+
+export const getMainCategories = () => {
+  const url = `${SERVER_URL}/product-api/categories/parent/null/`
+  return axios.get(url)
+}
+
+export const getSubCategories = (mainCategoriesID) => {
+  const url = `${SERVER_URL}/product-api/categories/parent/${mainCategoriesID}/`
+  return axios.get(url)
+}

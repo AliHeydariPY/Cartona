@@ -1,11 +1,19 @@
 import { motion } from "framer-motion";
+
+import { useState, useEffect } from "react";
+
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 
-import { addNewProduct } from "../../services/productAPIServices";
-import toast from "react-hot-toast";
-import { FiCheckCircle } from "react-icons/fi";
+import {
+  addNewProduct,
+  getMainCategories,
+  getSubCategories,
+} from "../../services/productAPIServices";
 
+import toast from "react-hot-toast";
+
+import { BiCategory } from "react-icons/bi";
 import {
   FiPlusCircle,
   FiImage,
@@ -14,23 +22,42 @@ import {
   FiAlignLeft,
   FiLayers,
   FiTrash2,
-  FiPackage,
   FiClock,
   FiPercent,
   FiZap,
   FiChevronDown,
+  FiCheckCircle,
+  FiChevronLeft,
 } from "react-icons/fi";
 
-import { useState } from "react";
-
 const AddProduct = () => {
-  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState("");
   const [images, setImages] = useState({});
   const [hasDiscount, setHasDiscount] = useState(false);
   const [isAmazingOffer, setIsAmazingOffer] = useState(false);
-
   // const { setFieldValue } = useFormikContext();
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+  const [selectedMainCategory, setSelectedMainCategory] = useState(null); // دسته اصلی
+  const [selectedCategory, setSelectedCategory] = useState(null); // دسته نهایی (زیرمجموعه یا اصلی)
+  const [mainCategories, setMainCategories] = useState([]);
+  const [subCategories, setSubCategories] = useState([]);
+
+  useEffect(() => {
+    if (!selectedMainCategory) return;
+
+    const fetchSubCategories = async () => {
+      const categories = await getSubCategories(selectedMainCategory.id);
+      setSubCategories(categories.data);
+    };
+
+    fetchSubCategories();
+  }, [selectedMainCategory]);
+
+  useEffect(() => {
+    getMainCategories().then((res) => {
+      console.log(res.data);
+      setMainCategories(res.data);
+    });
+  }, []);
 
   const handleImageUpload = (e, slot) => {
     const file = e.target.files[0];
@@ -46,7 +73,7 @@ const AddProduct = () => {
       return newImages;
     });
   };
-  
+
   const StoreSchema = Yup.object()
     .shape({
       image: Yup.mixed().required("Please select an image"),
@@ -160,6 +187,8 @@ const AddProduct = () => {
       return errors.length ? new Yup.ValidationError(errors) : true;
     });
 
+  // if(subCategories) return <p>loading...</p>
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 50 }}
@@ -191,9 +220,9 @@ const AddProduct = () => {
           onSubmit={(values, onSubmitProps) => {
             const formData = new FormData();
             formData.append("image", values.image);
-            formData.append("storekeeper", 1);
+            formData.append("storekeeper", Number(localStorage.getItem('storekeeperID')));
             formData.append("name", values.productName);
-            formData.append("category", 1);
+            formData.append("category", Number(selectedCategory.id));
             formData.append("price", values.price);
             formData.append("discounted_price", values.discountPrice);
             formData.append("discount_percentage", values.discountPercentage);
@@ -211,6 +240,7 @@ const AddProduct = () => {
               console.log(res.data);
               onSubmitProps.resetForm();
               setImages({});
+              setSelectedCategory(null)
               toast.custom((t) => (
                 <div
                   className={`${t.visible ? "animate-enter" : "animate-leave"} 
@@ -319,16 +349,21 @@ const AddProduct = () => {
               {/* دسته‌بندی */}
               <div className="space-y-2">
                 <label className="flex items-center text-blue-800 font-medium">
-                  <FiPackage className="mr-2" /> Category*
+                  <BiCategory size={18} className="mr-2" /> Category*
                 </label>
 
                 <div className="relative group w-full">
+                  {/* دکمه بازکردن */}
                   <button
                     type="button"
                     className="flex justify-between w-full items-center bg-white border border-blue-300 rounded-lg px-4 py-3 text-blue-800 hover:border-blue-400 transition-colors duration-300 text-left"
                     onClick={() => setIsCategoryOpen(!isCategoryOpen)}
                   >
-                    <span>{selectedCategory || "Select a category"}</span>
+                    <span>
+                      {selectedCategory
+                        ? selectedCategory.name
+                        : "Select a category"}
+                    </span>
                     <FiChevronDown
                       className={`ml-2 transform ${
                         isCategoryOpen ? "rotate-180" : ""
@@ -337,27 +372,53 @@ const AddProduct = () => {
                     />
                   </button>
 
+                  {/* لیست دسته‌ها */}
                   {isCategoryOpen && (
-                    <div className="absolute w-full z-20 mt-1 bg-white rounded-lg shadow-xl border border-blue-200">
-                      {[
-                        "Electronics",
-                        "Fashion",
-                        "Home & Garden",
-                        "Beauty",
-                        "Sports",
-                      ].map((category) => (
-                        <button
-                          key={category}
-                          type="button"
-                          className="w-full cursor-pointer text-left px-4 py-2 hover:bg-blue-50 text-blue-800 transition-colors duration-200"
-                          onClick={() => {
-                            setSelectedCategory(category);
-                            setIsCategoryOpen(false);
-                          }}
-                        >
-                          {category}
-                        </button>
-                      ))}
+                    <div className="absolute w-full z-20 mt-1 bg-white rounded-lg shadow-xl border border-blue-200 max-h-64 overflow-y-auto">
+                      {/* اگر دسته اصلی انتخاب نشده → لیست ۱۰ تا اصلی */}
+                      {!selectedMainCategory &&
+                        mainCategories.reverse().map((category) => (
+                          <button
+                            key={category.id}
+                            type="button"
+                            className="w-full cursor-pointer text-left px-4 py-2 hover:bg-blue-50 text-blue-800 transition-colors duration-200"
+                            onClick={() => setSelectedMainCategory(category)}
+                          >
+                            {category.name}
+                          </button>
+                        ))}
+
+                      {/* اگر دسته اصلی انتخاب شد → لیست زیرمجموعه‌ها */}
+                      {selectedMainCategory && (
+                        <>
+                          <div className="flex items-center px-4 py-2 border-b border-blue-100">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedMainCategory(null)}
+                              className="flex items-center cursor-pointer text-blue-600 hover:text-blue-800 transition-colors"
+                            >
+                              <FiChevronLeft className="mr-1 mb-0.5 " /> Back
+                            </button>
+                            <span className="ml-2 font-semibold text-blue-700">
+                              {selectedMainCategory.name}
+                            </span>
+                          </div>
+                          {subCategories.map((sub) => (
+                            <button
+                              key={sub.id}
+                              type="button"
+                              className="w-full cursor-pointer text-left px-4 py-2 hover:bg-blue-50 text-blue-800 transition-colors duration-200"
+                              onClick={() => {
+                                setSelectedCategory(sub);
+                                setIsCategoryOpen(false);
+                                setSelectedMainCategory(null);
+                              }}
+                            >
+                              {sub.name}
+                            </button>
+                          ))}
+                        </>
+                      )}
                     </div>
                   )}
                 </div>
