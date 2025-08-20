@@ -19,13 +19,14 @@ import {
   FiMinus,
   FiShield,
   FiX,
+  FiStar,
 } from "react-icons/fi";
 
 const Cart = ({
   setRremoveFromCartPopup,
   setSelectedProduct,
   reloadComponent,
-  setIsRemoveCartItem
+  setIsRemoveCartItem,
 }) => {
   const [cartItems, setCartItems] = useState([]);
   const navigate = useNavigate();
@@ -35,20 +36,18 @@ const Cart = ({
       const cartProductsRes = await getCartProducts(
         localStorage.getItem("userID")
       );
-
       const productsData = await Promise.all(
         cartProductsRes.data.items.map(async (item) => {
           const productRes = await getProduct(item.product);
           const productData = productRes.data;
+          console.log(productRes.data)
 
           return {
+            ...productData,
             id: item.id,
             product: item.product,
-            name: productData.name,
             price: parseFloat(productData.price),
             stock_quantity: item.quantity,
-            image: productData.image,
-            color: ["black", "red", "white", "green", "blue", "pink"],
           };
         })
       );
@@ -58,10 +57,6 @@ const Cart = ({
 
     fetchCartItems();
   }, [reloadComponent]);
-
-  useEffect(() => {
-    console.log(cartItems);
-  }, [cartItems]);
 
   const updateQuantity = async (id, newQuantity) => {
     if (newQuantity < 1) return;
@@ -152,70 +147,142 @@ const Cart = ({
                 </div>
               ) : (
                 <div className="bg-white/95 backdrop-blur-xl rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-200">
-                  {cartItems.map((item) => (
+                  {cartItems.map((product) => (
                     <div
-                      key={item.id}
+                      key={product.id}
                       className="flex flex-col sm:flex-row border-b border-blue-100 last:border-0 pb-6 mb-6 last:mb-0 group"
                     >
                       {/* تصویر محصول */}
                       <div
-                        onClick={() => {
-                          navigate(`/products/${item.product}`);
-                        }}
-                        className="w-full sm:w-32 h-32 cursor-pointer rounded-lg flex items-center justify-center mb-4 sm:mb-0 relative overflow-hidden"
+                        onClick={() => navigate(`/products/${product.product}`)}
+                        className="w-full sm:w-40 h-40 cursor-pointer rounded-lg flex items-center justify-center mb-4 sm:mb-0 relative overflow-hidden bg-gradient-to-br from-blue-50 to-cyan-50 p-4"
                       >
                         <img
-                          src={item.image}
-                          alt=""
+                          src={product.image}
+                          alt={product.name}
                           className="max-w-full max-h-full object-contain rounded-md"
                         />
                       </div>
 
-                      {/* اطلاعات محصول */}
-                      <div className="flex-1 sm:ml-6">
-                        <div className="flex justify-between">
-                          <h3 className="font-bold text-base sm:text-lg text-blue-900">
-                            {item.name}
-                          </h3>
+                      {/* اطلاعات کامل محصول */}
+                      <div className="flex-1 sm:ml-6 space-y-3">
+                        {/* هدر با نام محصول و دکمه حذف */}
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <h3 className="font-bold text-lg text-blue-900 mb-1">
+                              {product.name}
+                            </h3>
+
+                            {/* قیمت و تخفیف */}
+                            <div className="flex items-center flex-wrap gap-2 mb-2">
+                              <span className="text-xl font-bold text-blue-800">
+                                ${product.discounted_price || product.price}
+                              </span>
+                              {product.discounted_price && (
+                                <>
+                                  <span className="text-sm text-rose-500 line-through">
+                                    ${product.price}
+                                  </span>
+                                  {product.discount_percentage && (
+                                    <span className="text-xs bg-gradient-to-r from-rose-500 to-pink-500 text-white px-2 py-1 rounded-full">
+                                      {product.discount_percentage}% OFF
+                                    </span>
+                                  )}
+                                </>
+                              )}
+                            </div>
+                          </div>
+
                           <button
                             onClick={() => {
                               setRremoveFromCartPopup(true);
-                              setSelectedProduct(item);
-                              setIsRemoveCartItem(true)
+                              setSelectedProduct(product);
+                              setIsRemoveCartItem(true);
                             }}
-                            className="text-blue-500 cursor-pointer hover:text-rose-500 transition-colors duration-200"
+                            className="p-2 text-rose-500 cursor-pointer hover:bg-rose-50 rounded-lg transition-colors duration-200"
                           >
-                            <FiTrash2 size={18} />
+                            <FiTrash2 size={20} />
                           </button>
                         </div>
 
-                        <p className="text-sm sm:text-base text-blue-600 mt-1">
-                          Color: {item.color}
-                        </p>
-                        <p className="text-base sm:text-lg font-bold text-blue-800 mt-2">
-                          ${item.price}
+                        {/* امتیاز و نظرات */}
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center bg-blue-100 px-3 py-1 rounded-full">
+                            <FiStar
+                              className="text-amber-400 fill-amber-400 mr-1"
+                              size={14}
+                            />
+                            <span className="text-sm font-medium text-blue-800">
+                              {product.average_rating?.toFixed(1) || "0.0"}
+                            </span>
+                          </div>
+                          <span className="text-sm text-blue-600">
+                            ({product.comment_count || 0} reviews)
+                          </span>
+                        </div>
+
+                        {/* موجودی */}
+                        <p className="text-sm text-blue-700">
+                          <span className="font-medium">Stock:</span>{" "}
+                          {product.stock_quantity}
                         </p>
 
-                        <div className="flex items-center mt-4">
-                          <button
-                            onClick={() => {
-                              updateQuantity(item.id, item.stock_quantity - 1);
-                            }}
-                            className="p-2 cursor-pointer bg-blue-100 hover:bg-blue-200 rounded-lg text-blue-700 transition-colors duration-200"
-                          >
-                            <FiMinus size={16} />
-                          </button>
-                          <span className="mx-4 font-medium text-base sm:text-lg text-blue-900">
-                            {item.stock_quantity}
-                          </span>
-                          <button
-                            onClick={() => {
-                              updateQuantity(item.id, item.stock_quantity + 1);
-                            }}
-                            className="p-2 cursor-pointer bg-blue-100 hover:bg-blue-200 rounded-lg text-blue-700 transition-colors duration-200"
-                          >
-                            <FiPlus size={16} />
-                          </button>
+                        {/* انتخاب رنگ (اگر موجود باشد) */}
+                        {product.color && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-blue-800 font-medium">
+                              Color:
+                            </span>
+                            <div
+                              className="w-6 h-6 rounded-full border-2 border-blue-300"
+                              style={{ backgroundColor: product.color }}
+                              title={product.color}
+                            />
+                          </div>
+                        )}
+
+                        {/* کنترل تعداد */}
+                        <div className="flex items-center justify-between pt-3">
+                          <div className="flex items-center bg-blue-100 rounded-lg p-1">
+                            <button
+                              onClick={() =>
+                                updateQuantity(
+                                  product.id,
+                                  Math.max(1, product.stock_quantity - 1)
+                                )
+                              }
+                              className="w-8 h-8 flex items-center justify-center bg-white rounded-lg text-blue-700 hover:bg-blue-200 transition-colors duration-200"
+                              disabled={product.stock_quantity <= 1}
+                            >
+                              <FiMinus size={16} />
+                            </button>
+                            <span className="mx-4 font-bold text-lg text-blue-900 min-w-[30px] text-center">
+                              {product.stock_quantity}
+                            </span>
+                            <button
+                              onClick={() =>
+                                updateQuantity(
+                                  product.id,
+                                  product.stock_quantity + 1
+                                )
+                              }
+                              className="w-8 h-8 flex items-center justify-center bg-white rounded-lg text-blue-700 hover:bg-blue-200 transition-colors duration-200"
+                            >
+                              <FiPlus size={16} />
+                            </button>
+                          </div>
+
+                          {/* جمع کل برای این محصول */}
+                          <div className="text-right">
+                            <p className="text-sm text-gray-500">Subtotal</p>
+                            <p className="text-lg font-bold text-blue-800">
+                              $
+                              {(
+                                (product.discounted_price || product.price) *
+                                product.stock_quantity
+                              ).toFixed(2)}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>

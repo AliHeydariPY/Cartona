@@ -80,12 +80,12 @@ export default function MyProducts({
                       ${product.discounted_price || product.price}
                     </span>
                     {product.discounted_price && (
-                      <span className="text-sm text-blue-500 line-through ml-1">
+                      <span className="text-sm text-rose-500 line-through ml-1">
                         ${product.price}
                       </span>
                     )}
                     {product.discount_percentage && (
-                      <span className="ml-1 text-xs bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-2 sm:px-2 py-1 rounded-full">
+                      <span className="ml-1 text-xs bg-gradient-to-r from-rose-500 to-pink-500 text-white px-2 sm:px-2 py-1 rounded-full">
                         {product.discount_percentage}% OFF
                       </span>
                     )}
