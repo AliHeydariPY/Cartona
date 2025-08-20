@@ -31,7 +31,7 @@ import {
 } from "react-icons/fi";
 
 const AddProduct = () => {
-  const [images, setImages] = useState({});
+  const [image, setImage] = useState({});
   const [hasDiscount, setHasDiscount] = useState(false);
   const [isAmazingOffer, setIsAmazingOffer] = useState(false);
   // const { setFieldValue } = useFormikContext();
@@ -62,12 +62,12 @@ const AddProduct = () => {
   const handleImageUpload = (e, slot) => {
     const file = e.target.files[0];
     if (file) {
-      setImages((prev) => ({ ...prev, [slot]: file }));
+      setImage((prev) => ({ ...prev, [slot]: file }));
     }
   };
 
   const handleRemoveImage = (slot) => {
-    setImages((prev) => {
+    setImage((prev) => {
       const newImages = { ...prev };
       delete newImages[slot];
       return newImages;
@@ -237,12 +237,12 @@ const AddProduct = () => {
 
             console.log(Object.fromEntries(formData.entries()));
 
-            const response = addNewProduct(formData, onSubmitProps, setImages);
+            const response = addNewProduct(formData, onSubmitProps, setImage);
 
             response.then((res) => {
               console.log(res.data);
               onSubmitProps.resetForm();
-              setImages({});
+              setImage({});
               setSelectedCategory(null);
               toast.custom((t) => (
                 <div
@@ -269,65 +269,62 @@ const AddProduct = () => {
                 <label className="flex items-center text-blue-800 font-medium">
                   <FiImage className="mr-2" /> Product Image
                 </label>
-                <div className="flex flex-wrap gap-4">
-                  {/* اسلات‌های تصویر */}
-                  {[1].map((item) => (
-                    <div key={item} className="relative group">
-                      <label
-                        className={`block w-24 h-24 ${
-                          !images[item]
-                            ? "border-2 border-dashed border-blue-400 cursor-pointer"
-                            : "border border-blue-200"
-                        } rounded-lg flex items-center justify-center overflow-hidden hover:bg-blue-50 transition-colors duration-300`}
-                      >
-                        {images[item] ? (
-                          <>
-                            <img
-                              src={URL.createObjectURL(images[item])}
-                              alt={`Preview ${item}`}
-                              className="w-full h-full object-cover"
-                            />
-                            <button
-                              type="button"
-                              className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors duration-300"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleRemoveImage(item);
-                              }}
-                            >
-                              <FiTrash2 size={12} />
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <FiPlusCircle
-                              className="text-blue-500 group-hover:text-blue-700"
-                              size={28}
-                            />
-                            <input
-                              id="image"
-                              name="image"
-                              type="file"
-                              accept="image/*"
-                              onChange={(event) => {
-                                handleImageUpload(event, item);
-                                setFieldValue(
-                                  "image",
-                                  event.currentTarget.files[0]
-                                );
-                              }}
-                              className="hidden"
-                            />
-                          </>
-                        )}
-                      </label>
-                      <ErrorMessage
-                        name="image"
-                        component="div"
-                        className="text-red-500 text-sm ml-0.5 mt-2"
-                      />
-                    </div>
-                  ))}
+
+                <div className="relative group w-24 h-24 xl:w-28 xl:h-28">
+                  <label
+                    className={`block w-full h-full ${
+                      !image[0]
+                        ? "border-2 border-dashed border-blue-400 cursor-pointer"
+                        : "border border-blue-200"
+                    } rounded-lg flex items-center justify-center overflow-hidden hover:bg-blue-50 transition-colors duration-300`}
+                  >
+                    {image[0] ? (
+                      <>
+                        <img
+                          src={URL.createObjectURL(image[0])}
+                          alt="Preview"
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors duration-300"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveImage(0);
+                          }}
+                        >
+                          <FiTrash2 size={12} />
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <FiPlusCircle
+                          className="text-blue-500 group-hover:text-blue-700"
+                          size={28}
+                        />
+                        <input
+                          id="image"
+                          name="image"
+                          type="file"
+                          accept="image/*"
+                          onChange={(event) => {
+                            handleImageUpload(event, 0);
+                            setFieldValue(
+                              "image",
+                              event.currentTarget.files[0]
+                            );
+                          }}
+                          className="hidden"
+                        />
+                      </>
+                    )}
+                  </label>
+
+                  <ErrorMessage
+                    name="image"
+                    component="div"
+                    className="text-red-500 text-sm ml-0.5 mt-2"
+                  />
                 </div>
               </div>
 
@@ -650,7 +647,7 @@ const AddProduct = () => {
                   type="reset"
                   onClick={() => {
                     setSelectedCategory(null);
-                    setImages({});
+                    setImage({});
                   }}
                   className="px-6 py-3 cursor-pointer bg-white border border-rose-400 text-rose-700 rounded-lg hover:bg-rose-50 transition-colors duration-300 sm:ml-auto"
                 >

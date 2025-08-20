@@ -16,7 +16,7 @@ import toast from "react-hot-toast";
 import {
   getProduct,
   addFeature,
-  removeFeature,
+  deleteFeature,
 } from "../../../services/productAPIServices";
 import { FaArrowLeft } from "react-icons/fa6";
 
@@ -83,7 +83,7 @@ const ProductFeatures = ({ reloadComponent, setReloadComponent }) => {
   };
 
   const handleRemoveFeature = (featureID) => {
-    removeFeature(featureID).then(() => {
+    deleteFeature(featureID).then(() => {
       setReloadComponent(!reloadComponent);
       toast.custom((t) => (
         <div

@@ -48,7 +48,7 @@ const ProductDisplay = ({
           <img
             src={currentImage || product.image}
             alt={product.name}
-            className="min-w-40 max-w-full max-h-full object-contain rounded-xl sm:rounded-xl"
+            className="min-w-40 max-w-full max-h-full object-contain rounded-xl"
           />
         </div>
 

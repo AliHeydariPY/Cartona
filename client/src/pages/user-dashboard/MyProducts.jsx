@@ -46,8 +46,8 @@ export default function MyProducts() {
           </div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-            {products.map((product) => (
-              <div className="overflow-hidden rounded-2xl shadow-md hover:shadow-xl border border-gray-200 bg-white transition-all duration-300">
+            {products.map((product, inx) => (
+              <div key={inx} className="overflow-hidden rounded-2xl shadow-md hover:shadow-xl border border-gray-200 bg-white transition-all duration-300">
                 {/* Product Image */}
                 <div className="flex justify-center items-center bg-blue-50/70 p-4 md:p-6 rounded-lg sm:rounded-2xl border border-blue-200 shadow-inner w-full h-[260px] md:min-w-[260px] md:h-[260px]">
                   <img
@@ -104,9 +104,11 @@ export default function MyProducts() {
 
                     <button
                       className="flex cursor-pointer items-center justify-center p-2 bg-cyan-100 text-cyan-700 rounded-lg hover:bg-cyan-200 transition-colors duration-300"
-                      onClick={() => alert("Add / Edit Images")}
+                      onClick={() => {
+                        navigate(`images/${product.id}`);
+                      }}
                     >
-                      <FiImage className="w-4 h-4 mb-0.5" /> Images
+                      <FiImage className="w-4 h-4 mb-0.5 " /> Images
                     </button>
 
                     <button

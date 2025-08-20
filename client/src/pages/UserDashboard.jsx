@@ -166,7 +166,7 @@ const UserDashboard = () => {
               <button
                 key={idx}
                 className={`w-full flex cursor-pointer items-center p-3 sm:p-4 rounded-xl font-semibold text-sm sm:text-base transition-all duration-300 ${
-                  location.pathname == `/account/${item.id}`
+                  location.pathname.includes(`/account/${item.id}`)
                     ? "bg-gradient-to-r from-cyan-200 to-blue-400 text-blue-900 shadow-md"
                     : "hover:bg-gradient-to-r hover:from-cyan-100 hover:to-blue-200 text-blue-800 hover:shadow-sm"
                 }`}

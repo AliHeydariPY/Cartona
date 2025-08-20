@@ -36,7 +36,21 @@ export const addFeature = (feature) => {
   return axios.post(url, feature);
 };
 
-export const removeFeature = (featureID) => {
+export const deleteFeature = (featureID) => {
   const url = `${SERVER_URL}/product-api/features/${featureID}/`;
+  return axios.delete(url);
+};
+
+export const addImage = (image) => {
+  const url = `${SERVER_URL}/product-api/images/`;
+  return axios.post(url, image, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
+export const deleteImage = (imageID) => {
+  const url = `${SERVER_URL}/product-api/images/${imageID}/`;
   return axios.delete(url);
 };

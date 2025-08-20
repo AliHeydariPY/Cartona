@@ -14,6 +14,7 @@ import AddProduct from "./pages/user-dashboard/AddProduct";
 import MyProducts from "./pages/user-dashboard/MyProducts";
 
 import ProductFeatures from "./pages/user-dashboard/my-products/ProductFeatures";
+import ProductImages from "./pages/user-dashboard/my-products/ProductImages";
 
 import ProductDetail from "./pages/ProductDetail";
 
@@ -105,6 +106,7 @@ function App() {
 
           <Route path="my-products" element={<MyProducts />} />
           <Route path="my-products/features/:id" element={<ProductFeatures reloadComponent={reloadComponent} setReloadComponent={setReloadComponent}/>} />
+          <Route path="my-products/images/:id" element={<ProductImages reloadComponent={reloadComponent} setReloadComponent={setReloadComponent}/>} />
 
         </Route>
         <Route
