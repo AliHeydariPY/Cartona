@@ -20,7 +20,6 @@ import ProductDetail from "./pages/ProductDetail";
 
 import AddedToCartPopup from "./components/pop-ups/AddedToCartPopup";
 import RemoveFromCartPopup from "./components/pop-ups/RemoveFromCartPopup";
-import AnswerQuestionPopup from "./components/pop-ups/AnswerQuestionPopup";
 
 import { useState } from "react";
 
@@ -31,9 +30,6 @@ function App() {
   const [selectedProduct, setSelectedProduct] = useState(null);
 
   const [removeInDOM, setRemoveInDOM] = useState(null);
-
-  const [showAnswerPopup, setShowAnswerPopup] = useState(false);
-  const [question, setQuestion] = useState("");
 
   const [reloadComponent, setReloadComponent] = useState(false);
 
@@ -64,15 +60,6 @@ function App() {
           onClose={() => setAddToCartPopup(false)}
           // product={selectedProduct}
           product={{ name: "Product X", price: 249.99 }}
-        />
-      )}
-
-      {showAnswerPopup && (
-        <AnswerQuestionPopup
-          onClose={() => setShowAnswerPopup(false)}
-          question={question}
-          reloadComponent={reloadComponent}
-          setReloadComponent={setReloadComponent}
         />
       )}
 
@@ -113,8 +100,6 @@ function App() {
           path="/products/:id"
           element={
             <ProductDetail
-              setShowAnswerPopup={setShowAnswerPopup}
-              setQuestion={setQuestion}
               reloadComponent={reloadComponent}
               setReloadComponent={setReloadComponent}
               setAddToCartPopup={setAddToCartPopup}

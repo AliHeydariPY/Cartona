@@ -174,15 +174,6 @@ const Cart = ({
                         }}
                         className="w-full sm:w-32 h-32 cursor-pointer rounded-lg flex items-center justify-center mb-4 sm:mb-0 relative overflow-hidden"
                       >
-                        {/* <div
-                          className={`w-24 h-24 bg-gradient-to-br ${
-                            item.image === "headphones"
-                              ? "from-blue-300 via-cyan-200 to-white"
-                              : item.image === "smartwatch"
-                              ? "from-gray-300 via-gray-200 to-white"
-                              : "from-white via-gray-100 to-white"
-                          } rounded-full shadow-inner`}
-                        ></div> */}
                         <img
                           src={item.image}
                           alt=""

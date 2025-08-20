@@ -16,7 +16,6 @@ export default function AnswerQuestionPopup({
 
   useEffect(() => {
     setTimeout(() => setShow(true), 10);
-    console.log("aldkfj");
   }, []);
 
   const handleClose = () => {

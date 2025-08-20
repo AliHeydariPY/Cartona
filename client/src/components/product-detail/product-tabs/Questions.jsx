@@ -6,14 +6,13 @@ import toast from "react-hot-toast";
 import { useParams } from "react-router-dom";
 
 import { sendProductQuestion } from "../../../services/commentAPIServices";
+import AnswerQuestionPopup from "../../pop-ups/AnswerQuestionPopup";
 
 import { FiX, FiCheckCircle, FiEdit3, FiAlertCircle } from "react-icons/fi";
 import { FixedSizeList as List } from "react-window";
 
 const Questions = ({
   productQuestions,
-  setShowAnswerPopup,
-  setQuestion,
   userID,
   seller,
   setReloadComponent,
@@ -22,6 +21,8 @@ const Questions = ({
   const [questionText, setQuestionText] = useState("");
   const { id } = useParams();
   const listHeight = Math.min(productQuestions.length * 116, 450);
+  const [showAnswerPopup, setShowAnswerPopup] = useState(false);
+  const [question, setQuestion] = useState("");
 
   const showValidationError = (context) => {
     toast.custom((t) => (
@@ -195,6 +196,15 @@ const Questions = ({
           </List>
         )}
       </motion.div>
+
+      {showAnswerPopup && (
+        <AnswerQuestionPopup
+          onClose={() => setShowAnswerPopup(false)}
+          question={question}
+          reloadComponent={reloadComponent}
+          setReloadComponent={setReloadComponent}
+        />
+      )}
     </motion.div>
   );
 };
