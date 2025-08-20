@@ -11,6 +11,16 @@ export const addNewProduct = (formData) => {
   });
 };
 
+export const editProduct = (formData) => {
+  console.log(formData.get("id"))
+  const url = `${SERVER_URL}/product-api/products/${formData.get("id")}/`
+  return axios.patch(url, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+} 
+
 export const getStorekeeperProducts = (storekeeperID) => {
   const url = `${SERVER_URL}/product-api/products/storekeeper/${storekeeperID}/`;
   return axios.get(url);
@@ -18,6 +28,11 @@ export const getStorekeeperProducts = (storekeeperID) => {
 
 export const getProduct = (productID) => {
   const url = `${SERVER_URL}/product-api/products/${productID}`;
+  return axios.get(url);
+};
+
+export const getCategory = (categoryID) => {
+  const url = `${SERVER_URL}/product-api/categories/${categoryID}/`;
   return axios.get(url);
 };
 

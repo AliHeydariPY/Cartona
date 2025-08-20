@@ -1,5 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
+import { useState } from "react";
 
 import Home from "./pages/Home";
 import CreateAccountForm from "./pages/CreateAccountForm";
@@ -15,13 +16,12 @@ import MyProducts from "./pages/user-dashboard/MyProducts";
 
 import ProductFeatures from "./pages/user-dashboard/my-products/ProductFeatures";
 import ProductImages from "./pages/user-dashboard/my-products/ProductImages";
+import EditProduct from "./pages/user-dashboard/my-products/EditProduct";
 
 import ProductDetail from "./pages/ProductDetail";
 
 import AddedToCartPopup from "./components/pop-ups/AddedToCartPopup";
 import RemoveFromCartPopup from "./components/pop-ups/RemoveFromCartPopup";
-
-import { useState } from "react";
 
 function App() {
   const [removeFromCartPopup, setRremoveFromCartPopup] = useState(false);
@@ -92,9 +92,33 @@ function App() {
           <Route path="add-product" element={<AddProduct />} />
 
           <Route path="my-products" element={<MyProducts />} />
-          <Route path="my-products/features/:id" element={<ProductFeatures reloadComponent={reloadComponent} setReloadComponent={setReloadComponent}/>} />
-          <Route path="my-products/images/:id" element={<ProductImages reloadComponent={reloadComponent} setReloadComponent={setReloadComponent}/>} />
-
+          <Route
+            path="my-products/features/:id"
+            element={
+              <ProductFeatures
+                reloadComponent={reloadComponent}
+                setReloadComponent={setReloadComponent}
+              />
+            }
+          />
+          <Route
+            path="my-products/images/:id"
+            element={
+              <ProductImages
+                reloadComponent={reloadComponent}
+                setReloadComponent={setReloadComponent}
+              />
+            }
+          />
+          <Route
+            path="my-products/edit/:id"
+            element={
+              <EditProduct
+                // reloadComponent={reloadComponent}
+                // setReloadComponent={setReloadComponent}
+              />
+            }
+          />
         </Route>
         <Route
           path="/products/:id"

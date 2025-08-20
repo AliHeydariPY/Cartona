@@ -14,7 +14,8 @@ import {
   FiCheckCircle,
   FiX,
 } from "react-icons/fi";
-import { FaArrowLeft } from "react-icons/fa";
+import { FaArrowLeft } from "react-icons/fa6";
+
 import { useNavigate, useParams } from "react-router-dom";
 
 import {

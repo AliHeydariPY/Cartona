@@ -52,13 +52,15 @@ export default function MyProducts() {
                 className="overflow-hidden rounded-2xl shadow-md hover:shadow-xl border border-gray-200 bg-white transition-all duration-300"
               >
                 {/* Product Image */}
-                <div className="flex cursor-pointer justify-center items-center bg-blue-50/70 p-4 md:p-6 rounded-lg sm:rounded-2xl border border-blue-200 shadow-inner w-full h-[260px] md:min-w-[260px] md:h-[260px]">
+                <div
+                  onClick={() => {
+                    console.log(product);
+
+                    navigate(`/products/${product.id}`);
+                  }}
+                  className="flex cursor-pointer justify-center items-center bg-blue-50/70 p-4 md:p-6 rounded-lg sm:rounded-2xl border border-blue-200 shadow-inner w-full h-[260px] md:min-w-[260px] md:h-[260px]"
+                >
                   <img
-                    onClick={() => {
-                      console.log(product)
-                      
-                      navigate(`/products/${product.id}`);
-                    }}
                     src={product.image}
                     alt={product.name}
                     className="min-w-40 max-w-full max-h-full object-contain rounded-xl"
@@ -105,9 +107,11 @@ export default function MyProducts() {
                   <div className="flex flex-wrap gap-2 pt-2">
                     <button
                       className="flex cursor-pointer items-center justify-center p-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors duration-300"
-                      onClick={() => setSelectedProduct(product)}
+                      onClick={() => {
+                        navigate(`edit/${product.id}`);
+                      }}
                     >
-                      <FiEdit className="w-4 h-4 text-blue-600 4 mb-0.5" /> Edit
+                      <FiEdit className="w-4 h-4 mb-0.5" /> Edit
                     </button>
 
                     <button

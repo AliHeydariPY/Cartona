@@ -1,52 +1,77 @@
 import { motion } from "framer-motion";
-
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { Formik, Form, Field, ErrorMessage } from "formik";
-import { productFormSchema } from "../../validations/productForm";
+import { productFormSchema } from "../../../validations/productForm";
 
 import {
-  addNewProduct,
+  FiTag,
+  FiImage,
+  FiDollarSign,
+  FiLayers,
+  FiPercent,
+  FiClock,
+  FiZap,
+  FiAlignLeft,
+  FiChevronDown,
+  FiSave,
+  FiChevronLeft,
+  FiEdit,
+  FiPlusCircle,
+  FiTrash2,
+} from "react-icons/fi";
+import { BiCategory } from "react-icons/bi";
+
+import { FaArrowLeft } from "react-icons/fa6";
+
+import {
   getMainCategories,
   getSubCategories,
-} from "../../services/productAPIServices";
+  getProduct,
+  getCategory,
+  editProduct,
+} from "../../../services/productAPIServices";
 
-import toast from "react-hot-toast";
+// همون StoreSchema که ساختی:
+// import { StoreSchema } from "./validationSchema";
 
-import { BiCategory } from "react-icons/bi";
-import {
-  FiPlusCircle,
-  FiImage,
-  FiTag,
-  FiDollarSign,
-  FiAlignLeft,
-  FiLayers,
-  FiTrash2,
-  FiClock,
-  FiPercent,
-  FiZap,
-  FiChevronDown,
-  FiCheckCircle,
-  FiChevronLeft,
-} from "react-icons/fi";
+const EditProduct = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
 
-const AddProduct = () => {
-  const [image, setImage] = useState({});
-  const [hasDiscount, setHasDiscount] = useState(false);
-  const [isAmazingOffer, setIsAmazingOffer] = useState(false);
-  // const { setFieldValue } = useFormikContext();
+  const [product, setProduct] = useState(null);
+  const [image, setImage] = useState([]);
+  const [firstImage, setFirstImage] = useState(true);
+  const [hasDiscount, setHasDiscount] = useState();
+  const [isAmazingOffer, setIsAmazingOffer] = useState();
+
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
-  const [selectedMainCategory, setSelectedMainCategory] = useState(null); // دسته اصلی
-  const [selectedCategory, setSelectedCategory] = useState(null); // دسته نهایی (زیرمجموعه یا اصلی)
+  const [selectedMainCategory, setSelectedMainCategory] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [mainCategories, setMainCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
 
   useEffect(() => {
-    getMainCategories().then((res) => {
-      console.log(res.data);
-      setMainCategories(res.data);
-    });
-  }, []);
+    const fetchData = async () => {
+      const selectedProduct = await getProduct(id);
+      setProduct(selectedProduct.data);
+      if (selectedProduct.data.discount_period) {
+        setHasDiscount(true);
+      } else {
+        setHasDiscount(false);
+      }
+      if (selectedProduct.data.amazing_offer_period) {
+        setIsAmazingOffer(true);
+      } else {
+        setIsAmazingOffer(false);
+      }
+
+      const category = await getCategory(selectedProduct.data.category);
+      setSelectedCategory(category.data);
+    };
+    fetchData();
+  }, [id]);
 
   useEffect(() => {
     if (!selectedMainCategory) return;
@@ -58,6 +83,19 @@ const AddProduct = () => {
 
     fetchSubCategories();
   }, [selectedMainCategory]);
+
+  useEffect(() => {
+    if (!product) return;
+    if (product.image) {
+      setImage([product.image]);
+    }
+  }, [product]);
+
+  useEffect(() => {
+    getMainCategories().then((res) => {
+      setMainCategories(res.data);
+    });
+  }, []);
 
   const handleImageUpload = (e, slot) => {
     const file = e.target.files[0];
@@ -72,9 +110,28 @@ const AddProduct = () => {
       delete newImages[slot];
       return newImages;
     });
+    setFirstImage(false);
   };
 
-  // if(subCategories) return <p>loading...</p>
+  if (!product) return <p>Loading...</p>;
+
+  const initialValues = {
+    id: id,
+    image: image[0] || null,
+    name: product.name || "",
+    price: product.price || "",
+    stock_quantity: product.stock_quantity || "",
+    description: product.description || "",
+    discounted_price: product.discounted_price || "",
+    discount_percentage: product.discount_percentage || "",
+    discount_period: product.discount_period
+      ? new Date(product.discount_period).toISOString().split("T")[0]
+      : "",
+    amazing_offer: product.amazing_offer || "",
+    amazing_offer_period: product.amazing_offer_period
+      ? new Date(product.amazing_offer_period).toISOString().split("T")[0]
+      : "",
+  };
 
   return (
     <motion.div
@@ -84,29 +141,35 @@ const AddProduct = () => {
       className="lg:col-span-3"
     >
       <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-xl p-5 sm:p-6 2xl:p-8 border border-blue-400 hover:shadow-lg hover:shadow-blue-400/50 transition-all duration-300">
-        <h2 className="text-xl sm:text-2xl font-bold text-blue-800 mb-6 sm:mb-8 flex items-center">
-          <FiPlusCircle className="mr-2 sm:mr-3 text-green-500" size={24} />
-          Add New Product
-        </h2>
+        <div className="flex items-center gap-y-2 flex-wrap-reverse justify-between mb-4 sm:mb-6">
+          <div className="flex items-center">
+            <span>
+              <FiEdit className="text-blue-700 mr-1 sm:mr-3" size={24} />
+            </span>
+            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-blue-800">
+              Edit Product
+            </h2>
+          </div>
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center cursor-pointer sm:mb-0 gap-2 px-3 sm:px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors duration-300 text-sm sm:text-base"
+          >
+            <FaArrowLeft />
+            Back
+          </button>
+        </div>
 
         <Formik
-          initialValues={{
-            image: null,
-            name: "",
-            category: "",
-            price: "",
-            stock_quantity: "",
-            discounted_price: "",
-            discount_percentage: "",
-            discount_period: "",
-            amazing_offer: "",
-            amazing_offer_period: "",
-            description: "",
-          }}
+          initialValues={initialValues}
           validationSchema={productFormSchema}
+          enableReinitialize
           onSubmit={(values, onSubmitProps) => {
             const formData = new FormData();
-            formData.append("image", values.image);
+
+            formData.append("id", id);
+            if (image[0].name) {
+              formData.append("image", values.image);
+            }
             formData.append(
               "storekeeper",
               Number(localStorage.getItem("storekeeperID"))
@@ -115,7 +178,7 @@ const AddProduct = () => {
             formData.append("category", Number(selectedCategory.id));
             formData.append("price", values.price);
             formData.append("stock_quantity", values.stock_quantity);
-            formData.append("discounted_price", values.discounted_price);
+            formData.append("discounted_price", values.discounted_price)
             formData.append("discount_percentage", values.discount_percentage);
             formData.append("discount_period", values.discount_period);
             formData.append("amazing_offer", values.amazing_offer);
@@ -127,34 +190,18 @@ const AddProduct = () => {
 
             console.log(Object.fromEntries(formData.entries()));
 
-            const response = addNewProduct(formData, onSubmitProps, setImage);
-
-            response.then((res) => {
-              console.log(res.data);
-              onSubmitProps.resetForm();
-              setImage({});
-              setSelectedCategory(null);
-              toast.custom((t) => (
-                <div
-                  className={`${t.visible ? "animate-enter" : "animate-leave"} 
-      transform transition-all duration-300`}
-                >
-                  <div className="bg-gradient-to-r from-green-500 to-cyan-400 text-white px-6 py-3 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-3">
-                    <div className="bg-blue-500/20 p-2 rounded-full">
-                      <FiCheckCircle className="text-xl text-white" />
-                    </div>
-                    <div>
-                      <p className="font-medium">Product added successfully</p>
-                    </div>
-                  </div>
-                </div>
-              ));
-            });
+            editProduct(formData)
+              .then((res) => {
+                console.log("res", res);
+              })
+              .catch((err) => {
+                console.log("err", err);
+              });
           }}
         >
           {({ setFieldValue }) => (
-            <Form className="space-y-6 px-0.5">
-              {/* بخش تصویر محصول */}
+            <Form className="space-y-6">
+              {/* آپلود عکس */}
               <div className="space-y-2">
                 <label className="flex items-center text-blue-800 font-medium">
                   <FiImage className="mr-2" /> Product Image
@@ -171,7 +218,11 @@ const AddProduct = () => {
                     {image[0] ? (
                       <>
                         <img
-                          src={URL.createObjectURL(image[0])}
+                          src={
+                            firstImage
+                              ? image[0]
+                              : URL.createObjectURL(image[0])
+                          }
                           alt="Preview"
                           className="w-full h-full object-cover"
                         />
@@ -226,7 +277,7 @@ const AddProduct = () => {
                   name="name"
                   type="text"
                   className="w-full px-4 py-3 text-blue-800 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
-                  placeholder="Enter product name"
+                  placeholder="Product title"
                 />
                 <ErrorMessage
                   name="name"
@@ -237,6 +288,8 @@ const AddProduct = () => {
 
               {/* دسته‌بندی */}
               <div className="space-y-2">
+                {/* انتخاب دسته‌بندی */}
+
                 <label className="flex items-center text-blue-800 font-medium">
                   <BiCategory size={18} className="mr-2" /> Category*
                 </label>
@@ -373,9 +426,9 @@ const AddProduct = () => {
                       checked={hasDiscount}
                       onChange={() => {
                         if (hasDiscount) {
-                          setFieldValue("discountPrice", "");
-                          setFieldValue("discountPercentage", "");
-                          setFieldValue("discountPeriod", "");
+                          setFieldValue("discounted_price", "");
+                          setFieldValue("discount_percentage", "");
+                          setFieldValue("discount_period", "");
                         }
                         setHasDiscount(!hasDiscount);
                       }}
@@ -458,8 +511,8 @@ const AddProduct = () => {
                       checked={isAmazingOffer}
                       onChange={() => {
                         if (isAmazingOffer) {
-                          setFieldValue("amazingOffer", "");
-                          setFieldValue("amazingOfferPeriod", "");
+                          setFieldValue("amazing_offer", "");
+                          setFieldValue("amazing_offer_period", "");
                         }
                         setIsAmazingOffer(!isAmazingOffer);
                       }}
@@ -523,21 +576,17 @@ const AddProduct = () => {
                 />
               </div>
 
-              {/* دکمه‌های اقدام */}
+              {/* دکمه‌ها */}
               <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 pt-4">
                 <button
                   type="submit"
                   className="px-6 py-3 cursor-pointer bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white rounded-lg hover:shadow-lg transition-colors duration-300 font-medium flex items-center justify-center"
                 >
-                  <FiPlusCircle className="mr-2" />
-                  Publish Product
+                  <FiSave className="mr-2 mb-0.5" size={18} />
+                  Update Product
                 </button>
                 <button
                   type="reset"
-                  onClick={() => {
-                    setSelectedCategory(null);
-                    setImage({});
-                  }}
                   className="px-6 py-3 cursor-pointer bg-white border border-rose-400 text-rose-700 rounded-lg hover:bg-rose-50 transition-colors duration-300 sm:ml-auto"
                 >
                   Cancel
@@ -551,4 +600,4 @@ const AddProduct = () => {
   );
 };
 
-export default AddProduct;
+export default EditProduct;
