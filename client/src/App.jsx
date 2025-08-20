@@ -29,8 +29,7 @@ function App() {
 
   const [selectedProduct, setSelectedProduct] = useState(null);
 
-  const [removeInDOM, setRemoveInDOM] = useState(null);
-
+  const [isRemoveCartItem, setIsRemoveCartItem] = useState(true);
   const [reloadComponent, setReloadComponent] = useState(false);
 
   return (
@@ -50,8 +49,8 @@ function App() {
         <RemoveFromCartPopup
           onClose={() => setRremoveFromCartPopup(false)}
           product={selectedProduct}
-          setRemoveInDOM={setRemoveInDOM}
           setReloadComponent={setReloadComponent}
+          isRemoveCartItem={isRemoveCartItem}
         />
       )}
 
@@ -74,8 +73,8 @@ function App() {
               <Cart
                 setRremoveFromCartPopup={setRremoveFromCartPopup}
                 setSelectedProduct={setSelectedProduct}
-                removeInDOM={removeInDOM}
-                setRemoveInDOM={setRemoveInDOM}
+                reloadComponent={reloadComponent}
+                setIsRemoveCartItem={setIsRemoveCartItem}
               />
             }
           />
@@ -91,7 +90,17 @@ function App() {
           <Route path="payments" element={<Payments />} />
           <Route path="add-product" element={<AddProduct />} />
 
-          <Route path="my-products" element={<MyProducts />} />
+          <Route
+            path="my-products"
+            element={
+              <MyProducts
+                setRremoveFromCartPopup={setRremoveFromCartPopup}
+                setSelectedProduct={setSelectedProduct}
+                reloadComponent={reloadComponent}
+                setIsRemoveCartItem={setIsRemoveCartItem}
+              />
+            }
+          />
           <Route
             path="my-products/features/:id"
             element={
@@ -110,15 +119,7 @@ function App() {
               />
             }
           />
-          <Route
-            path="my-products/edit/:id"
-            element={
-              <EditProduct
-                // reloadComponent={reloadComponent}
-                // setReloadComponent={setReloadComponent}
-              />
-            }
-          />
+          <Route path="my-products/edit/:id" element={<EditProduct />} />
         </Route>
         <Route
           path="/products/:id"

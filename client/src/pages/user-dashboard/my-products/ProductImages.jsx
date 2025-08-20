@@ -118,11 +118,11 @@ const ProductImages = ({ reloadComponent, setReloadComponent }) => {
 
         {/* Product Info */}
         <div className="flex items-center gap-4 mb-6 sm:mb-8 p-2 sm:p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-200">
-          <div className="flex justify-center items-center p-2 bg-blue-50/70 rounded-lg sm:rounded-xl border border-blue-200 shadow-inner w-24 h-24">
+          <div className="flex justify-center items-center p-2 bg-white rounded-lg sm:rounded-xl border border-blue-200 shadow-inner w-24 h-24">
             <img
               src={product.image}
               alt={product.name}
-              className="w-full h-full object-contain rounded-xl"
+              className="max-w-full max-h-full object-contain rounded-md"
             />
           </div>
           <div>
@@ -185,7 +185,7 @@ const ProductImages = ({ reloadComponent, setReloadComponent }) => {
                     ) : (
                       <>
                         <FiPlusCircle
-                          className="text-blue-500 group-hover:text-blue-700"
+                          className="text-blue-500 group-hover:text-blue-700 transition-colors duration-300"
                           size={28}
                         />
                         <input

@@ -1,15 +1,17 @@
 import { Portal } from "react-portal";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 import { deleteCartProduct } from "../../services/cartAPIServices";
+import { deleteProduct } from "../../services/productAPIServices";
 
-import { FiX, FiTrash2 } from "react-icons/fi";
+import { FiX, FiTrash2, FiCheckCircle } from "react-icons/fi";
 
 const RemoveFromCartPopup = ({
   onClose,
   product,
-  setRemoveInDOM,
   setReloadComponent,
+  isRemoveCartItem,
 }) => {
   const [show, setShow] = useState(false);
 
@@ -23,12 +25,35 @@ const RemoveFromCartPopup = ({
   };
 
   const handleConfirm = () => {
-    console.log(product.id);
-    deleteCartProduct(product.id).then(() => {
-      setReloadComponent((prev) => !prev);
-      setRemoveInDOM(product.id);
-      handleClose();
-    });
+    if (isRemoveCartItem) {
+      deleteCartProduct(product.id).then(() => {
+        setReloadComponent((prev) => !prev);
+        handleClose();
+      });
+    } else {
+      deleteProduct(product.id).then(() => {
+        setReloadComponent((prev) => !prev);
+        handleClose();
+        toast.custom((t) => (
+          <div
+            className={`${
+              t.visible ? "animate-enter" : "animate-leave"
+            } transform transition-all duration-300`}
+          >
+            <div className="bg-gradient-to-r from-green-500 to-cyan-400 text-white px-6 py-3 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-3">
+              <div className="bg-blue-500/20 p-2 rounded-full">
+                <FiCheckCircle className="text-xl text-white" />
+              </div>
+              <div>
+                <p className="font-medium">
+                  Product successfully deleted
+                </p>
+              </div>
+            </div>
+          </div>
+        ));
+      });
+    }
   };
 
   const stopPropagation = (e) => e.stopPropagation();

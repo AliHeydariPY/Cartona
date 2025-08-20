@@ -127,7 +127,18 @@ const Reviews = ({
           onClick={() => {
             console.log(seller.user);
             if (seller.user == localStorage.getItem("userID")) {
-              showValidationError("The seller cannot leave comments.");
+              toast.custom((t) => (
+                <div
+                  className={`${
+                    t.visible ? "animate-enter" : "animate-leave"
+                  } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
+                >
+                  <FiX className="text-xl shrink-0" />
+                  <span className="font-medium">
+                    The seller cannot leave comments
+                  </span>
+                </div>
+              ));
               setCommentText("");
               setSelectedStars(1);
             } else if (commentText.trim() == "") {
@@ -290,10 +301,10 @@ const Reviews = ({
                 comment.replies &&
                 comment.replies.length > 0 && (
                   <motion.div
-                    initial={{ opacity: 0, y: -10 }} 
-                    animate={{ opacity: 1, y: 0 }} 
-                    exit={{ opacity: 0, y: -10 }} 
-                    transition={{ duration: 0.3 }} 
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3 }}
                     className="ml-3 sm:ml-6 space-y-1 sm:space-y-2 mt-1 sm:mt-2"
                   >
                     {comment.replies.map((reply) => (

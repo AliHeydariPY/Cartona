@@ -13,19 +13,22 @@ import {
   FiPackage,
 } from "react-icons/fi";
 
-export default function MyProducts() {
+export default function MyProducts({
+  setRremoveFromCartPopup,
+  setSelectedProduct,
+  reloadComponent,
+  setIsRemoveCartItem,
+}) {
   const [products, setProducts] = useState([]);
-  const [selectedProduct, setSelectedProduct] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     getStorekeeperProducts(localStorage.getItem("storekeeperID")).then(
       (res) => {
-        console.log(res.data);
         setProducts(res.data);
       }
     );
-  }, []);
+  }, [reloadComponent]);
 
   return (
     <motion.div
@@ -63,7 +66,7 @@ export default function MyProducts() {
                   <img
                     src={product.image}
                     alt={product.name}
-                    className="min-w-40 max-w-full max-h-full object-contain rounded-xl"
+                    className="max-w-full max-h-full object-contain rounded-md"
                   />
                 </div>
 
@@ -134,7 +137,11 @@ export default function MyProducts() {
 
                     <button
                       className="flex cursor-pointer items-center justify-center p-2 bg-rose-100 text-rose-700 rounded-lg hover:bg-rose-200 transition-colors duration-300"
-                      onClick={() => alert("Delete product")}
+                      onClick={() => {
+                        setRremoveFromCartPopup(true);
+                        setSelectedProduct(product);
+                        setIsRemoveCartItem(false);
+                      }}
                     >
                       <FiTrash2 className="w-4 h-4 4 mb-0.5" /> Delete
                     </button>

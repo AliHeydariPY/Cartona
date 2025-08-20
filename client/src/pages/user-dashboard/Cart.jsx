@@ -24,71 +24,11 @@ import {
 const Cart = ({
   setRremoveFromCartPopup,
   setSelectedProduct,
-  removeInDOM,
-  setRemoveInDOM,
+  reloadComponent,
+  setIsRemoveCartItem
 }) => {
   const [cartItems, setCartItems] = useState([]);
   const navigate = useNavigate();
-
-  const removeItem = (id) => {
-    setCartItems(cartItems.filter((item) => item.id !== id));
-  };
-
-  const updateQuantity = async (id, newQuantity) => {
-    if (newQuantity < 1) return;
-
-    const item = cartItems.find((p) => p.id === id);
-    if (!item) return;
-
-    const payload = {
-      id: item.id,
-      product: item.product,
-      quantity: newQuantity,
-      cart: localStorage.getItem("userID"),
-    };
-
-    try {
-      // منتظر بمان تا ریکوئست بره و جواب بیاد
-      await editCartProduct(payload);
-
-      // فقط وقتی موفق بود مقدار رو تغییر بده
-      setCartItems((prev) =>
-        prev.map((p) => (p.id === id ? { ...p, stock_quantity: newQuantity } : p))
-      );
-    } catch (error) {
-      toast.custom((t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
-          style={{ fontFamily: "Roboto" }}
-        >
-          <FiX className="text-xl shrink-0" />
-          <span className="font-medium">
-            {error.response?.data?.non_field_errors?.[0] ||
-              "You can't have more than 10"}
-          </span>
-        </div>
-      ));
-    }
-  };
-
-  const subtotal = cartItems.reduce(
-    (sum, item) => sum + item.price * item.stock_quantity,
-    0
-  );
-
-  const shipping = 15.0;
-  const tax = subtotal * 0.08;
-  const total = subtotal + shipping + tax;
-
-  useEffect(() => {
-    if (removeInDOM) {
-      removeItem(removeInDOM);
-      console.log(removeInDOM);
-      setRemoveInDOM(null);
-    }
-  }, [removeInDOM]);
 
   useEffect(() => {
     const fetchCartItems = async () => {
@@ -117,11 +57,61 @@ const Cart = ({
     };
 
     fetchCartItems();
-  }, []);
+  }, [reloadComponent]);
 
   useEffect(() => {
     console.log(cartItems);
   }, [cartItems]);
+
+  const updateQuantity = async (id, newQuantity) => {
+    if (newQuantity < 1) return;
+
+    const item = cartItems.find((p) => p.id === id);
+    if (!item) return;
+
+    const payload = {
+      id: item.id,
+      product: item.product,
+      quantity: newQuantity,
+      cart: localStorage.getItem("userID"),
+    };
+
+    try {
+      // منتظر بمان تا ریکوئست بره و جواب بیاد
+      await editCartProduct(payload);
+
+      // فقط وقتی موفق بود مقدار رو تغییر بده
+      setCartItems((prev) =>
+        prev.map((p) =>
+          p.id === id ? { ...p, stock_quantity: newQuantity } : p
+        )
+      );
+    } catch (error) {
+      toast.custom((t) => (
+        <div
+          className={`${
+            t.visible ? "animate-enter" : "animate-leave"
+          } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
+          style={{ fontFamily: "Roboto" }}
+        >
+          <FiX className="text-xl shrink-0" />
+          <span className="font-medium">
+            {error.response?.data?.non_field_errors?.[0] ||
+              "You can't have more than 10"}
+          </span>
+        </div>
+      ));
+    }
+  };
+
+  const subtotal = cartItems.reduce(
+    (sum, item) => sum + item.price * item.stock_quantity,
+    0
+  );
+
+  const shipping = 15.0;
+  const tax = subtotal * 0.08;
+  const total = subtotal + shipping + tax;
 
   return (
     <motion.div
@@ -191,7 +181,7 @@ const Cart = ({
                             onClick={() => {
                               setRremoveFromCartPopup(true);
                               setSelectedProduct(item);
-                              //   removeItem(item.id);
+                              setIsRemoveCartItem(true)
                             }}
                             className="text-blue-500 cursor-pointer hover:text-rose-500 transition-colors duration-200"
                           >

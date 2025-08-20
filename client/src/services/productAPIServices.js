@@ -11,6 +11,11 @@ export const addNewProduct = (formData) => {
   });
 };
 
+export const deleteProduct = (productID) => {
+  const url = `${SERVER_URL}/product-api/products/${productID}/`;
+  return axios.delete(url);
+};
+
 export const editProduct = (formData) => {
   console.log(formData.get("id"))
   const url = `${SERVER_URL}/product-api/products/${formData.get("id")}/`

@@ -109,11 +109,14 @@ const ProductFeatures = ({ reloadComponent, setReloadComponent }) => {
 
         {/* Product Info */}
         <div className="flex items-center gap-4 mb-6 sm:mb-8 p-2 sm:p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-200">
-          <img
-            src={product.image}
-            alt={product.name}
-            className="w-12 h-12 sm:w-16 sm:h-16 object-contain rounded-lg border border-blue-200 bg-white p-2"
-          />
+          <div className="flex justify-center items-center p-2 bg-white rounded-lg sm:rounded-xl border border-blue-200 shadow-inner w-24 h-24">
+            <img
+              src={product.image}
+              alt={product.name}
+              className="max-w-full max-h-full object-contain rounded-md"
+            />
+          </div>
+
           <div>
             <h3 className="text-base sm:text-lg md:text-xl font-semibold text-blue-900">
               {product.name}
@@ -214,7 +217,7 @@ const ProductFeatures = ({ reloadComponent, setReloadComponent }) => {
 
                   <button
                     onClick={() => {
-                      console.log(feature)
+                      console.log(feature);
                       setSelecetedFeature(feature);
                       setShowRemovePopup(true);
                     }}
