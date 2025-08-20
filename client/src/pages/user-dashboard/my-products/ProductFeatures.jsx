@@ -1,15 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Formik, Form, Field } from "formik";
-import {
-  FiTrash2,
-  FiPlus,
-  FiList,
-  FiCheckCircle,
-  FiAlertCircle,
-  FiX,
-} from "react-icons/fi";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
+import { FiTrash2, FiPlus, FiList, FiCheckCircle, FiX } from "react-icons/fi";
 
 import toast from "react-hot-toast";
 
@@ -20,10 +14,14 @@ import {
 } from "../../../services/productAPIServices";
 import { FaArrowLeft } from "react-icons/fa6";
 
+import RemoveFeaturePopup from "../../../components/pop-ups/RemoveFeaturePopup";
+
 const ProductFeatures = ({ reloadComponent, setReloadComponent }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
+  const [selectedFeature, setSelecetedFeature] = useState(null);
+  const [showRemovePopup, setShowRemovePopup] = useState(false);
 
   useEffect(() => {
     getProduct(id).then((res) => {
@@ -32,58 +30,35 @@ const ProductFeatures = ({ reloadComponent, setReloadComponent }) => {
   }, [reloadComponent]);
 
   const handleAddFeature = (values, resetForm) => {
-    if (values.feature_name.trim() != "" && values.feature_value.trim() != "") {
-      const feature = {
-        product: id,
-        feature_name: values.feature_name,
-        feature_value: values.feature_value,
-      };
-      addFeature(feature).then(() => {
-        resetForm();
-        setReloadComponent(!reloadComponent);
-        toast.custom((t) => (
-          <div
-            className={`${
-              t.visible ? "animate-enter" : "animate-leave"
-            } transform transition-all duration-300`}
-          >
-            <div className="bg-gradient-to-r from-green-500 to-cyan-400 text-white px-6 py-3 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-3">
-              <div className="bg-blue-500/20 p-2 rounded-full">
-                <FiCheckCircle className="text-xl text-white" />
-              </div>
-              <div>
-                <p className="font-medium">
-                  Your comment was successfully sent
-                </p>
-              </div>
-            </div>
-          </div>
-        ));
-      });
-    } else {
+    const feature = {
+      product: id,
+      feature_name: values.feature_name,
+      feature_value: values.feature_value,
+    };
+    addFeature(feature).then(() => {
+      resetForm();
+      setReloadComponent(!reloadComponent);
       toast.custom((t) => (
         <div
           className={`${
             t.visible ? "animate-enter" : "animate-leave"
-          } bg-gradient-to-r from-amber-500 to-amber-400 text-white px-6 py-4 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center gap-3 max-w-md`}
+          } transform transition-all duration-300`}
         >
-          <FiAlertCircle className="text-xl mb-0.5" />
-          <div>
-            <p className="text-md text-white">Please enter complete details </p>
+          <div className="bg-gradient-to-r from-green-500 to-cyan-400 text-white px-6 py-3 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-3">
+            <div className="bg-blue-500/20 p-2 rounded-full">
+              <FiCheckCircle className="text-xl text-white" />
+            </div>
+            <div>
+              <p className="font-medium">Feature successfully submitted</p>
+            </div>
           </div>
-          <button
-            onClick={() => toast.dismiss(t.id)}
-            className="ml-auto p-1 hover:bg-white/20 cursor-pointer rounded-full transition-colors"
-          >
-            <FiX />
-          </button>
         </div>
       ));
-    }
+    });
   };
 
-  const handleRemoveFeature = (featureID) => {
-    deleteFeature(featureID).then(() => {
+  const handleRemoveFeature = () => {
+    deleteFeature(selectedFeature.id).then(() => {
       setReloadComponent(!reloadComponent);
       toast.custom((t) => (
         <div
@@ -97,6 +72,11 @@ const ProductFeatures = ({ reloadComponent, setReloadComponent }) => {
       ));
     });
   };
+
+  const FeatureSchema = Yup.object().shape({
+    feature_name: Yup.string().required("Feature Name is required"),
+    feature_value: Yup.string().required("Feature Value is required"),
+  });
 
   if (!product) return <p>loading...</p>;
 
@@ -147,6 +127,7 @@ const ProductFeatures = ({ reloadComponent, setReloadComponent }) => {
         {/* Formik Form */}
         <Formik
           initialValues={{ feature_name: "", feature_value: "" }}
+          validationSchema={FeatureSchema}
           onSubmit={(values, { resetForm }) =>
             handleAddFeature(values, resetForm)
           }
@@ -163,7 +144,13 @@ const ProductFeatures = ({ reloadComponent, setReloadComponent }) => {
                     placeholder="e.g., Color, Size, Material"
                     className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white/80 rounded-lg border border-blue-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent placeholder-blue-400 text-blue-950 text-sm sm:text-base"
                   />
+                  <ErrorMessage
+                    name="feature_name"
+                    component="div"
+                    className="text-red-500 text-sm mt-1"
+                  />
                 </div>
+
                 <div>
                   <label className="block text-xs sm:text-sm md:text-base font-medium text-blue-800 mb-2">
                     Feature Value
@@ -172,6 +159,11 @@ const ProductFeatures = ({ reloadComponent, setReloadComponent }) => {
                     name="feature_value"
                     placeholder="e.g., Red, Large, Cotton"
                     className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white/80 rounded-lg border border-blue-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent placeholder-blue-400 text-blue-950 text-sm sm:text-base"
+                  />
+                  <ErrorMessage
+                    name="feature_value"
+                    component="div"
+                    className="text-red-500 text-sm mt-1"
                   />
                 </div>
               </div>
@@ -221,7 +213,11 @@ const ProductFeatures = ({ reloadComponent, setReloadComponent }) => {
                   </div>
 
                   <button
-                    onClick={() => handleRemoveFeature(feature.id)}
+                    onClick={() => {
+                      console.log(feature)
+                      setSelecetedFeature(feature);
+                      setShowRemovePopup(true);
+                    }}
                     className="ml-1 p-1.5 sm:p-2 bg-white/80 cursor-pointer rounded-lg border border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors duration-300"
                     title="Remove feature"
                   >
@@ -232,6 +228,14 @@ const ProductFeatures = ({ reloadComponent, setReloadComponent }) => {
             </div>
           )}
         </div>
+
+        {showRemovePopup && (
+          <RemoveFeaturePopup
+            onClose={() => setShowRemovePopup(false)}
+            feature={selectedFeature}
+            removeFeature={handleRemoveFeature}
+          />
+        )}
 
         {/* Quick Tips */}
         {product.features_set.length > 0 && (

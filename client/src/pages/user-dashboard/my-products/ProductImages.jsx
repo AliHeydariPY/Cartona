@@ -1,7 +1,19 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { Formik, Form, Field } from "formik";
-import { FiPlus, FiTrash2, FiImage, FiPlusCircle } from "react-icons/fi";
+
+import { Formik, Form, ErrorMessage } from "formik";
+import * as Yup from "yup";
+
+import toast from "react-hot-toast";
+
+import {
+  FiPlus,
+  FiTrash2,
+  FiImage,
+  FiPlusCircle,
+  FiCheckCircle,
+  FiX,
+} from "react-icons/fi";
 import { FaArrowLeft } from "react-icons/fa";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -11,11 +23,15 @@ import {
   deleteImage,
 } from "../../../services/productAPIServices";
 
+import RemoveImagePopup from "../../../components/pop-ups/RemoveImagePopup";
+
 const ProductImages = ({ reloadComponent, setReloadComponent }) => {
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [product, setProduct] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [showRemovePopup, setShowRemovePopup] = useState(false);
 
   useEffect(() => {
     getProduct(id).then((res) => {
@@ -24,50 +40,48 @@ const ProductImages = ({ reloadComponent, setReloadComponent }) => {
   }, [reloadComponent]);
 
   const handleAddImage = (values, resetForm, setFieldValue) => {
-    // const image = {
-    //   product: id,
-    //   image: values.
-    // };
     addImage(values).then(() => {
       resetForm();
       setFieldValue("image", null);
       setReloadComponent(!reloadComponent);
-      // toast.custom((t) => (
-      //   <div
-      //     className={`${
-      //       t.visible ? "animate-enter" : "animate-leave"
-      //     } transform transition-all duration-300`}
-      //   >
-      //     <div className="bg-gradient-to-r from-green-500 to-cyan-400 text-white px-6 py-3 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-3">
-      //       <div className="bg-blue-500/20 p-2 rounded-full">
-      //         <FiCheckCircle className="text-xl text-white" />
-      //       </div>
-      //       <div>
-      //         <p className="font-medium">
-      //           Your comment was successfully sent
-      //         </p>
-      //       </div>
-      //     </div>
-      //   </div>
-      // ));
+      toast.custom((t) => (
+        <div
+          className={`${
+            t.visible ? "animate-enter" : "animate-leave"
+          } transform transition-all duration-300`}
+        >
+          <div className="bg-gradient-to-r from-green-500 to-cyan-400 text-white px-6 py-3 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-3">
+            <div className="bg-blue-500/20 p-2 rounded-full">
+              <FiCheckCircle className="text-xl text-white" />
+            </div>
+            <div>
+              <p className="font-medium">The image was sent successfully</p>
+            </div>
+          </div>
+        </div>
+      ));
     });
   };
 
-  const handleRemoveImage = (imageID) => {
-    deleteImage(imageID).then(() => {
+  const handleRemoveImage = () => {
+    deleteImage(selectedImage.id).then(() => {
       setReloadComponent(!reloadComponent);
-      //   toast.custom((t) => (
-      //     <div
-      //       className={`${
-      //         t.visible ? "animate-enter" : "animate-leave"
-      //       } bg-gradient-to-r from-red-600 to-rose-500 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
-      //     >
-      //       <FiX className="text-xl shrink-0" />
-      //       <span className="font-medium">Feature successfully removed</span>
-      //     </div>
-      //   ));
+      toast.custom((t) => (
+        <div
+          className={`${
+            t.visible ? "animate-enter" : "animate-leave"
+          } bg-gradient-to-r from-red-600 to-rose-500 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
+        >
+          <FiX className="text-xl shrink-0" />
+          <span className="font-medium">Image successfully removed</span>
+        </div>
+      ));
     });
   };
+
+  const validationSchema = Yup.object({
+    image: Yup.mixed().required("Product image is required."),
+  });
 
   if (!product) return <p>loading...</p>;
 
@@ -123,6 +137,7 @@ const ProductImages = ({ reloadComponent, setReloadComponent }) => {
         {/* Upload Form */}
         <Formik
           initialValues={{ image: null }}
+          validationSchema={validationSchema}
           onSubmit={(values, { resetForm, setFieldValue }) => {
             if (values.image) {
               const formData = new FormData();
@@ -188,13 +203,12 @@ const ProductImages = ({ reloadComponent, setReloadComponent }) => {
                       </>
                     )}
                   </label>
-
-                  {/* <ErrorMessage
-                    name="image"
-                    component="div"
-                    className="text-red-500 text-sm ml-0.5 mt-2"
-                  /> */}
                 </div>
+                <ErrorMessage
+                  name="image"
+                  component="div"
+                  className="text-red-500 text-sm"
+                />
               </div>
 
               <button
@@ -244,7 +258,10 @@ const ProductImages = ({ reloadComponent, setReloadComponent }) => {
                   </div>
 
                   <button
-                    onClick={() => handleRemoveImage(img.id)}
+                    onClick={() => {
+                      setSelectedImage(img);
+                      setShowRemovePopup(true);
+                    }}
                     className="ml-1 p-1.5 sm:p-2 bg-white/80 cursor-pointer rounded-lg border border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors duration-300"
                     title="Remove image"
                   >
@@ -255,6 +272,14 @@ const ProductImages = ({ reloadComponent, setReloadComponent }) => {
             </div>
           )}
         </div>
+
+        {showRemovePopup && (
+          <RemoveImagePopup
+            onClose={() => setShowRemovePopup(false)}
+            image={selectedImage}
+            removeImage={handleRemoveImage}
+          />
+        )}
 
         {/* Quick Tips */}
         {product.images_set.length > 0 && (
