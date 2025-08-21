@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { FiSearch } from "react-icons/fi";
 import { FaRegHeart, FaHeart } from "react-icons/fa6";
@@ -11,7 +11,14 @@ import { UserCircleIcon as UserCircleSolid } from "@heroicons/react/24/solid";
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const [search, setSearch] = useState("");
+  const { query } = useParams();
+  const [search, setSearch] = useState(() => {
+    if (query) {
+      return query;
+    } else {
+      return "";
+    }
+  });
 
   return (
     <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-blue-100">
@@ -37,7 +44,6 @@ const Navbar = () => {
                   if (e.code === "Enter") {
                     if (search.trim()) {
                       navigate(`/search/${search}`);
-                      setSearch("");
                     }
                   }
                 }}

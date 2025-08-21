@@ -176,9 +176,6 @@ const ProductDisplay = ({
                   return payload;
                 });
                 setRremoveFromCartPopup(true);
-                // deleteCartProduct(isInCart.id).then(() => {
-                //   setReloadComponent(!reloadComponent);
-                // });
               }}
               className="flex-1 text-base md:text-sm lg:text-base cursor-pointer py-3 rounded-lg sm:rounded-xl font-semibold transition-colors duration-300 flex items-center justify-center bg-gradient-to-r from-rose-600 to-red-500 hover:from-rose-700 hover:to-red-600 text-white"
             >

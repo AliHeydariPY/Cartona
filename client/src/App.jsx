@@ -135,8 +135,18 @@ function App() {
         />
         <Route path="/create-account" element={<CreateAccountForm />} />
         <Route path="/upgradeToSeller" element={<UpgradeToSeller />} />
-        <Route path="/search/:query" element={<SearchPage />} />
-
+        <Route
+          path="/search/:query"
+          element={
+            <SearchPage
+              reloadComponent={reloadComponent}
+              setReloadComponent={setReloadComponent}
+              setAddToCartPopup={setAddToCartPopup}
+              setSelectedProduct={setSelectedProduct}
+              setRremoveFromCartPopup={setRremoveFromCartPopup}
+            />
+          }
+        />
       </Routes>
     </>
   );

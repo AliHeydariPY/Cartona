@@ -1,15 +1,16 @@
 import { motion } from "framer-motion";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 import { FiStar, FiShoppingCart, FiHeart, FiEye } from "react-icons/fi";
-import { FaHeart, FaRegHeart } from "react-icons/fa";
+import { FaHeart, FaRegHeart, FaClock } from "react-icons/fa";
 
 import Navbar from "../components/Navbar";
 import { searchProduct } from "../services/productAPIServices";
 
 export default function SearchPage() {
   const { query } = useParams();
+  const navigate = useNavigate()
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
@@ -35,7 +36,7 @@ export default function SearchPage() {
   return (
     <>
       <Navbar />
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 p-4 bg-blue-50">
         {products.map((product) => (
           <motion.div
             key={product.id}
@@ -46,11 +47,21 @@ export default function SearchPage() {
           >
             {/* تصویر محصول با افکت‌ها */}
             <div className="relative overflow-hidden">
-              <div className="aspect-square w-full bg-gradient-to-br from-blue-50 to-cyan-50 flex items-center justify-center p-6">
+              {/* <div className="aspect-square w-full h-80 border-b-1 border-blue-300 flex items-center justify-center p-6">
                 <img
                   src={product.image}
                   alt={product.name}
                   className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
+                />
+              </div> */}
+              <div
+                onClick={() => navigate(`/products/${product.id}`)}
+                className=" w-full h-80 cursor-pointer flex items-center justify-center border-b-1 border-blue-300 mb-4 sm:mb-0 relative overflow-hidden p-6"
+              >
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-105 rounded-lg"
                 />
               </div>
 
@@ -94,9 +105,6 @@ export default function SearchPage() {
                 <h3 className="font-bold text-blue-900 text-lg line-clamp-2 mb-1">
                   {product.name}
                 </h3>
-                <p className="text-blue-600 text-sm">
-                  Category #{product.category}
-                </p>
               </div>
 
               {/* قیمت‌ها */}
@@ -106,7 +114,7 @@ export default function SearchPage() {
                 </span>
 
                 {product.discounted_price && (
-                  <span className="text-sm text-gray-500 line-through">
+                  <span className="text-sm text-rose-500 line-through">
                     ${product.price}
                   </span>
                 )}
@@ -143,32 +151,14 @@ export default function SearchPage() {
                     : "Out of stock"}
                 </span>
               </div>
-
-              {/* توضیحات کوتاه */}
-              <p className="text-sm text-blue-700/80 line-clamp-2">
-                {product.description?.replace(/[\r\n]/g, " ").substring(0, 100)}
-                ...
-              </p>
-
-              {/* دکمه‌های اقدام */}
-              <div className="flex gap-2 pt-2">
-                <button className="flex-1 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-all duration-300 flex items-center justify-center">
-                  <FiShoppingCart className="mr-1" size={14} />
-                  Add to Cart
-                </button>
-
-                <button className="px-4 py-2 bg-white border border-blue-300 text-blue-700 rounded-lg hover:bg-blue-50 transition-colors duration-300 text-sm font-medium">
-                  View
-                </button>
-              </div>
             </div>
 
             {/* تایمر تخفیف (اگر وجود داشته باشد) */}
             {product.discount_period && (
-              <div className="px-4 pb-3">
-                <div className="bg-blue-50 rounded-lg p-2">
-                  <p className="text-xs text-blue-700 font-medium text-center">
-                    ⏰ Offer ends:{" "}
+              <div className="px-4 pb-4">
+                <div className="bg-blue-100 rounded-lg p-2">
+                  <p className="text-xs flex items-center justify-center text-blue-700 font-medium text-center">
+                    <FaClock className="mr-1 " size={16} /> Offer ends:{" "}
                     {new Date(product.discount_period).toLocaleDateString()}
                   </p>
                 </div>
