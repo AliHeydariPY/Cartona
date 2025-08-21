@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { FiSearch } from "react-icons/fi";
@@ -10,6 +11,7 @@ import { UserCircleIcon as UserCircleSolid } from "@heroicons/react/24/solid";
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const [search, setSearch] = useState("");
 
   return (
     <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-blue-100">
@@ -27,11 +29,31 @@ const Navbar = () => {
             <div className="w-full bg-white h-12 rounded-l-full ml-0.25">
               <input
                 type="text"
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                }}
+                onKeyDown={(e) => {
+                  if (e.code === "Enter") {
+                    if (search.trim()) {
+                      navigate(`/search/${search}`);
+                      setSearch("");
+                    }
+                  }
+                }}
                 placeholder="Search products..."
                 className="rounded-l-full text-md text-blue-900 px-5 py-3.5 h-full w-full focus:outline-none border-r-0"
               />
             </div>
-            <div className="relative h-full flex items-center rounded-r-full my-0.25 mr-0.25 overflow-hidden cursor-pointer bg-white">
+            <div
+              onClick={() => {
+                if (search.trim()) {
+                  navigate(`/search/${search}`);
+                  setSearch("");
+                }
+              }}
+              className="relative h-full flex items-center rounded-r-full my-0.25 mr-0.25 overflow-hidden cursor-pointer bg-white"
+            >
               <div className="bg-gradient-to-r from-blue-600 to-cyan-500 m-1 w-11 h-10 rounded-full flex items-center justify-center">
                 <FiSearch className="text-xl text-white relative z-10 " />
               </div>

@@ -74,3 +74,8 @@ export const deleteImage = (imageID) => {
   const url = `${SERVER_URL}/product-api/images/${imageID}/`;
   return axios.delete(url);
 };
+
+export const searchProduct = (query) => {
+  const url = `${SERVER_URL}/product-api/list-products/?search=${query}`;
+  return axios.get(url)
+}

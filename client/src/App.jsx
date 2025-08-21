@@ -13,12 +13,12 @@ import Cart from "./pages/user-dashboard/Cart";
 import Payments from "./pages/user-dashboard/Payments";
 import AddProduct from "./pages/user-dashboard/AddProduct";
 import MyProducts from "./pages/user-dashboard/MyProducts";
+import ProductDetail from "./pages/ProductDetail";
+import SearchPage from "./pages/SearchPage";
 
 import ProductFeatures from "./pages/user-dashboard/my-products/ProductFeatures";
 import ProductImages from "./pages/user-dashboard/my-products/ProductImages";
 import EditProduct from "./pages/user-dashboard/my-products/EditProduct";
-
-import ProductDetail from "./pages/ProductDetail";
 
 import AddedToCartPopup from "./components/pop-ups/AddedToCartPopup";
 import RemoveFromCartPopup from "./components/pop-ups/RemoveFromCartPopup";
@@ -135,6 +135,8 @@ function App() {
         />
         <Route path="/create-account" element={<CreateAccountForm />} />
         <Route path="/upgradeToSeller" element={<UpgradeToSeller />} />
+        <Route path="/search/:query" element={<SearchPage />} />
+
       </Routes>
     </>
   );
