@@ -30,6 +30,10 @@ export default function MyProducts({
     );
   }, [reloadComponent]);
 
+  const openInNewTab = (url) => {
+    window.open(url, "_blank", "noreferrer");
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 50 }}
@@ -59,9 +63,9 @@ export default function MyProducts({
                   onClick={() => {
                     console.log(product);
 
-                    navigate(`/products/${product.id}`);
+                    openInNewTab(`/products/${product.id}`);
                   }}
-                  className="flex cursor-pointer justify-center items-center bg-blue-50/70 p-4 md:p-6 rounded-lg sm:rounded-2xl border border-blue-200 shadow-inner w-full h-[260px] md:min-w-[260px] md:h-[260px]"
+                  className="flex cursor-pointer justify-center items-center p-4 md:p-6 rounded-xl sm:rounded-2xl border-2 border-blue-200 shadow-inner w-full h-[260px] md:min-w-[260px] md:h-[260px]"
                 >
                   <img
                     src={product.image}

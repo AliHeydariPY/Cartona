@@ -67,7 +67,7 @@ const RemoveFromCartPopup = ({
         onClick={handleClose}
       >
         <div
-          className={`bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-md relative overflow-hidden transform transition-all duration-300 ${
+          className={`bg-white backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-md relative overflow-hidden transform transition-all duration-300 ${
             show ? "opacity-100 scale-100" : "opacity-0 scale-95"
           }`}
           onClick={stopPropagation}
@@ -92,11 +92,11 @@ const RemoveFromCartPopup = ({
 
           <div className="p-6">
             <div className="flex items-center mb-6">
-              <div className="w-22 h-22 border-2 border-red-400 rounded-lg flex items-center justify-center mb-4 sm:mb-0 relative overflow-hidden">
+              <div className="w-22 h-22 border-2 border-red-400 rounded-lg flex items-center justify-center mb-4 sm:mb-0 relative overflow-hidden p-1">
                 <img
                   src={product.image}
                   alt=""
-                  className="max-w-full max-h-full object-contain"
+                  className="max-w-full max-h-full object-contain rounded-md"
                 />
               </div>
               <div className="ml-3">

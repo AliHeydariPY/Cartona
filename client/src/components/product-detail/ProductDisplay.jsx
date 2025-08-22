@@ -36,19 +36,15 @@ const ProductDisplay = ({
     fetchCartItems();
   }, [reloadComponent]);
 
-  useEffect(() => {
-    console.log(isInCart);
-  }, [isInCart]);
-
   return (
     <div className="grid md:grid-cols-2 gap-4 md:gap-8 mb-6 md:mb-8">
       {/* Product Image Gallery */}
       <div className="flex flex-col items-center">
-        <div className="flex justify-center items-center bg-blue-50/70 p-4 md:p-6 rounded-lg sm:rounded-2xl border border-blue-200 shadow-inner mb-4 w-full h-[260px] md:min-w-[360px] md:h-[360px]">
+        <div className="flex justify-center items-center p-3 sm:p-4 rounded-lg sm:rounded-2xl border border-blue-200 shadow-inner mb-4 w-full h-[260px] md:min-w-[360px] md:h-[360px]">
           <img
             src={currentImage || product.image}
             alt={product.name}
-            className="min-w-40 max-w-full max-h-full object-contain rounded-xl"
+            className="max-w-full max-h-full object-contain rounded-lg"
             // className="max-w-full max-h-full object-contain rounded-md" ?? check it !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
           />
         </div>

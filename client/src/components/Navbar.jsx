@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { FiSearch } from "react-icons/fi";
@@ -19,6 +19,16 @@ const Navbar = () => {
       return "";
     }
   });
+
+  useEffect(() => {
+    setSearch(() => {
+    if (query) {
+      return query;
+    } else {
+      return "";
+    }
+  })
+  }, [query])
 
   return (
     <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-blue-100">

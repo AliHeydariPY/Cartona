@@ -40,7 +40,7 @@ const Cart = ({
         cartProductsRes.data.items.map(async (item) => {
           const productRes = await getProduct(item.product);
           const productData = productRes.data;
-          console.log(productRes.data)
+          console.log(productRes.data);
 
           return {
             ...productData,
@@ -108,6 +108,10 @@ const Cart = ({
   const tax = subtotal * 0.08;
   const total = subtotal + shipping + tax;
 
+  const openInNewTab = (url) => {
+    window.open(url, "_blank", "noreferrer");
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 50 }}
@@ -154,8 +158,8 @@ const Cart = ({
                     >
                       {/* تصویر محصول */}
                       <div
-                        onClick={() => navigate(`/products/${product.product}`)}
-                        className="w-full sm:w-40 h-40 cursor-pointer rounded-lg flex items-center justify-center mb-4 sm:mb-0 relative overflow-hidden bg-gradient-to-br from-blue-50 to-cyan-50 p-4"
+                        onClick={() => openInNewTab(`/products/${product.product}`)}
+                        className="w-full sm:w-35 h-35 cursor-pointer rounded-xl flex items-center justify-center mb-4 sm:mb-0 relative overflow-hidden p-1"
                       >
                         <img
                           src={product.image}

@@ -10,7 +10,7 @@ import { searchProduct } from "../services/productAPIServices";
 
 export default function SearchPage() {
   const { query } = useParams();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
@@ -33,10 +33,11 @@ export default function SearchPage() {
     });
   };
 
+  
   return (
     <>
       <Navbar />
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 p-4 bg-blue-50">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5 p-4 bg-blue-50">
         {products.map((product) => (
           <motion.div
             key={product.id}
@@ -54,10 +55,7 @@ export default function SearchPage() {
                   className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
                 />
               </div> */}
-              <div
-                onClick={() => navigate(`/products/${product.id}`)}
-                className=" w-full h-80 cursor-pointer flex items-center justify-center border-b-1 border-blue-300 mb-4 sm:mb-0 relative overflow-hidden p-6"
-              >
+              <div className=" w-full h-80 flex items-center justify-center border-b-1 border-blue-300 mb-4 sm:mb-0 relative overflow-hidden p-7">
                 <img
                   src={product.image}
                   alt={product.name}
@@ -65,16 +63,9 @@ export default function SearchPage() {
                 />
               </div>
 
-              {/* بدج تخفیف */}
-              {product.discount_percentage && (
-                <div className="absolute top-3 left-3 bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg z-10">
-                  {product.discount_percentage}% OFF
-                </div>
-              )}
-
               {/* پیشنهاد شگفت‌انگیز */}
               {product.amazing_offer && (
-                <div className="absolute top-3 right-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg z-10">
+                <div className="absolute top-3 left-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg z-10">
                   ⚡ {product.amazing_offer}
                 </div>
               )}
@@ -83,17 +74,25 @@ export default function SearchPage() {
               <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <button
                   onClick={() => toggleFavorite(product.id)}
-                  className="p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-rose-100 transition-colors duration-200"
+                  className="p-2 cursor-pointer bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-rose-100 transition-colors duration-200"
                 >
                   {favorites.has(product.id) ? (
                     <FaHeart className="text-rose-500" size={16} />
                   ) : (
-                    <FaRegHeart className="text-blue-600" size={16} />
+                    <FiHeart className="text-rose-500" size={16} />
                   )}
                 </button>
 
-                <button className="p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-blue-100 transition-colors duration-200">
+                <button className="p-2 cursor-pointer bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-blue-100 transition-colors duration-200">
                   <FiEye className="text-blue-600" size={16} />
+                </button>
+              </div>
+              <div className="absolute bottom-4 left-0 right-0 flex justify-center">
+                <button
+                  onClick={() => openInNewTab(`/products/${product.id}`)}
+                  className="bg-white cursor-pointer px-6 py-2 rounded-full shadow-md shadow-blue-100 hover:bg-blue-500 hover:text-white transition-all duration-300 transform translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100"
+                >
+                  Quick View
                 </button>
               </div>
             </div>
@@ -108,15 +107,24 @@ export default function SearchPage() {
               </div>
 
               {/* قیمت‌ها */}
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xl font-bold text-blue-800">
-                  ${product.discounted_price || product.price}
-                </span>
-
-                {product.discounted_price && (
-                  <span className="text-sm text-rose-500 line-through">
-                    ${product.price}
+              <div className="flex items-center w-full justify-between gap-2 flex-wrap">
+                <div className="flex-wrap">
+                  <span className="text-xl font-bold text-blue-800">
+                    ${product.discounted_price || product.price}
                   </span>
+
+                  {product.discounted_price && (
+                    <span className="text-sm ml-2 text-rose-500 line-through">
+                      ${product.price}
+                    </span>
+                  )}
+                </div>
+
+                {/* بدج تخفیف */}
+                {product.discount_percentage && (
+                  <div className="right-3 bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg z-10">
+                    {product.discount_percentage}% OFF
+                  </div>
                 )}
               </div>
 
@@ -154,7 +162,7 @@ export default function SearchPage() {
             </div>
 
             {/* تایمر تخفیف (اگر وجود داشته باشد) */}
-            {product.discount_period && (
+            {product.discount_period ? (
               <div className="px-4 pb-4">
                 <div className="bg-blue-100 rounded-lg p-2">
                   <p className="text-xs flex items-center justify-center text-blue-700 font-medium text-center">
@@ -163,6 +171,8 @@ export default function SearchPage() {
                   </p>
                 </div>
               </div>
+            ) : (
+              <div className="h-12 w-full "></div>
             )}
           </motion.div>
         ))}

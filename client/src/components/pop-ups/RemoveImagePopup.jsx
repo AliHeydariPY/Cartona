@@ -57,11 +57,11 @@ const RemoveImagePopup = ({ onClose, image, removeImage }) => {
           {/* Body */}
           <div className="p-6">
             <div className="flex items-center mb-6">
-              <div className="w-24 h-24 sm:w-28 sm:h-28 border-2 border-red-400 rounded-lg flex items-center justify-center overflow-hidden">
+              <div className="w-24 h-24 sm:w-28 sm:h-28 border-2 border-red-400 rounded-lg flex items-center justify-center overflow-hidden p-2">
                 <img
                   src={image.image}
                   alt="Preview"
-                  className="max-w-full max-h-full object-contain"
+                  className="max-w-full max-h-full object-contain rounded-md"
                 />
               </div>
               <div className="ml-3 flex-1">

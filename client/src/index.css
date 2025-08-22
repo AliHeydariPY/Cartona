@@ -2,6 +2,7 @@
 
 body {
   font-family: 'Roboto', sans-serif;
+  background-color: oklch(97% 0.014 254.604);
 }
 
 /* انیمیشن‌های توست */
