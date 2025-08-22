@@ -94,8 +94,6 @@ export default function SearchPage() {
 
                 <button
                   onClick={() => {
-                    console.log([{product: product.id ,image: product.image} ,...product.images_set]);
-
                     setImages([{image: product.image} ,...product.images_set]);
                     setShowImages(true);
                   }}

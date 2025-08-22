@@ -8,12 +8,12 @@ const ProductImageCarousel = ({ images, onClose }) => {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-      setShow(true);
-      document.body.style.overflow = "hidden";
+    setShow(true);
+    //   document.body.style.overflow = "hidden";
   }, []);
 
   const handleClose = () => {
-    document.body.style.overflow = "unset"
+    // document.body.style.overflow = "unset";
     setShow(false);
     setTimeout(() => onClose(), 300);
   };
@@ -95,7 +95,7 @@ const ProductImageCarousel = ({ images, onClose }) => {
           </div>
 
           {/* شماره تصویر */}
-          <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-4 py-1 rounded-full text-xs backdrop-blur-sm">
+          <div className="absolute bottom-21 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-4 py-1 rounded-full text-xs backdrop-blur-sm">
             {currentIndex + 1} / {images.length}
           </div>
 

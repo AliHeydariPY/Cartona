@@ -6,6 +6,9 @@ import toast from "react-hot-toast";
 import { getCartProducts, addToCart } from "../../services/cartAPIServices";
 
 import { FiShoppingCart, FiHeart, FiStar, FiShare2 } from "react-icons/fi";
+import { BiSolidOffer } from "react-icons/bi";
+
+import ProductImageCarousel from "../ProductImageCarousel";
 
 const ProductDisplay = ({
   product,
@@ -15,9 +18,11 @@ const ProductDisplay = ({
   setSelectedProduct,
   setRremoveFromCartPopup,
 }) => {
+  const { id } = useParams();
   const [currentImage, setCurrentImage] = useState(null);
   const [isInCart, setIsInCart] = useState();
-  const { id } = useParams();
+  const [showImages, setShowImages] = useState(false);
+  const [images, setImages] = useState([]);
 
   useEffect(() => {
     const fetchCartItems = async () => {
@@ -40,7 +45,13 @@ const ProductDisplay = ({
     <div className="grid md:grid-cols-2 gap-4 md:gap-8 mb-6 md:mb-8">
       {/* Product Image Gallery */}
       <div className="flex flex-col items-center">
-        <div className="flex justify-center items-center p-3 sm:p-4 rounded-lg sm:rounded-2xl border border-blue-200 shadow-inner mb-4 w-full h-[260px] md:min-w-[360px] md:h-[360px]">
+        <div
+          onClick={() => {
+            setImages([{ image: product.image }, ...product.images_set]);
+            setShowImages(true);
+          }}
+          className="flex justify-center items-center cursor-pointer p-3 sm:p-4 rounded-lg sm:rounded-2xl border border-blue-300 shadow-inner mb-4 w-full h-[260px] md:min-w-[360px] md:h-[360px]"
+        >
           <img
             src={currentImage || product.image}
             alt={product.name}
@@ -50,13 +61,28 @@ const ProductDisplay = ({
         </div>
 
         <div className="flex flex-wrap gap-2 py-2 w-full">
-          <div
+          <button
+            key={"main-image"}
+            onClick={() => setCurrentImage(product.image)}
+            className={`w-14 h-14 md:w-18 md:h-18 cursor-pointer rounded-lg overflow-hidden ring-2 transition-all duration-200 ${
+              currentImage === product.image || !currentImage
+                ? "ring-blue-500 scale-105"
+                : "ring-transparent hover:ring-blue-300"
+            }`}
+          >
+            <img
+              src={product.image}
+              alt={`Thumbnail`}
+              className="w-full h-full object-cover"
+            />
+          </button>
+          {/* <div
             key="main-image"
             onClick={() => setCurrentImage(product.image)}
-            className={`flex-shrink-0 w-14 h-14 md:w-18 md:h-18 cursor-pointer overflow-hidden rounded-lg border-2 ${
+            className={`flex-shrink-0 w-14 h-14 md:w-18 md:h-18 cursor-pointer overflow-hidden rounded-lg ${
               currentImage === product.image || !currentImage
-                ? "border-blue-500"
-                : "border-blue-300"
+                ? "ring-2 ring-blue-400"
+                : ""
             }`}
           >
             <img
@@ -64,16 +90,31 @@ const ProductDisplay = ({
               alt={`Product Main`}
               className="w-full h-full object-cover"
             />
-          </div>
+          </div> */}
 
-          {product.images_set.map((img, index) => (
+          {product.images_set.map((image, index) => (
+            <button
+              key={image.id}
+              onClick={() => setCurrentImage(image.image)}
+              className={`w-14 h-14 md:w-18 md:h-18 cursor-pointer rounded-lg overflow-hidden ring-2 transition-all duration-200 ${
+                currentImage === image.image
+                  ? "ring-blue-500 scale-105"
+                  : "ring-transparent hover:ring-blue-300"
+              }`}
+            >
+              <img
+                src={image.image}
+                alt={`Thumbnail ${index + 1}`}
+                className="w-full h-full object-cover"
+              />
+            </button>
+          ))}
+          {/* {product.images_set.map((img, index) => (
             <div
               key={img.id}
               onClick={() => setCurrentImage(img.image)}
-              className={`flex-shrink-0 w-14 h-14 md:w-18 md:h-18 cursor-pointer overflow-hidden rounded-lg border-2 ${
-                currentImage === img.image
-                  ? "border-blue-500"
-                  : "border-blue-300"
+              className={`flex-shrink-0 w-14 h-14 md:w-18 md:h-18 cursor-pointer overflow-hidden rounded-lg ${
+                currentImage === img.image ? "ring-2 ring-blue-400" : ""
               }`}
             >
               <img
@@ -82,7 +123,7 @@ const ProductDisplay = ({
                 className="w-full h-full object-cover"
               />
             </div>
-          ))}
+          ))} */}
         </div>
       </div>
 
@@ -113,23 +154,30 @@ const ProductDisplay = ({
           <span className="text-2xl sm:text-3xl font-bold text-blue-900">
             ${product.discounted_price || product.price}
           </span>
-          {product.discounted_price &&  (
-            <span className="text-lg text-blue-500 line-through ml-1">
+          {product.discounted_price && (
+            <span className="text-lg text-rose-500 line-through ml-1">
               ${product.price}
             </span>
           )}
           {product.discount_percentage && (
-            <span className="ml-1 text-sm font-medium bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-2 sm:px-3 py-1 rounded-full">
-              {product.discount_percentage}% OFF
-            </span>
+            <div className="right-3 flex bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg z-10">
+              <span className="mt-0.25 mr-1">
+                {product.discount_percentage}{" "}
+              </span>
+              <BiSolidOffer className="" size={18} />
+            </div>
           )}
         </div>
 
         {/* Stock Status */}
         <div className="mb-4 flex items-center">
           <span
-            className={`inline-block w-2 h-2 rounded-full mr-2 ${
-              product.stock_quantity > 0 ? "bg-green-500" : "bg-red-500"
+            className={`inline-block w-2 h-2 rounded-full mr-2 mb-0.25 ${
+              product.stock_quantity > 10
+                ? "bg-green-500"
+                : product.stock_quantity > 0
+                ? "bg-amber-400"
+                : "bg-red-500"
             }`}
           ></span>
           <span className="text-sm">
@@ -230,10 +278,8 @@ const ProductDisplay = ({
             <button
               onClick={() => {
                 const currentUrl = window.location.href;
-                navigator.clipboard
-                  .writeText(currentUrl)
-                  .then(() => {
-                    toast.custom((t) => (
+                navigator.clipboard.writeText(currentUrl).then(() => {
+                  toast.custom((t) => (
                     <div
                       className={`${
                         t.visible ? "animate-enter" : "animate-leave"
@@ -241,14 +287,12 @@ const ProductDisplay = ({
                     >
                       <div className="bg-gradient-to-r from-green-500 to-cyan-400 text-white px-6 py-3 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-3">
                         <div>
-                          <p className="font-medium">
-                            Copied
-                          </p>
+                          <p className="font-medium">Copied</p>
                         </div>
                       </div>
                     </div>
                   ));
-                  })
+                });
               }}
               className="p-2 rounded-full bg-blue-100 text-blue-600 cursor-pointer hover:bg-blue-200 transition-colors duration-300"
             >
@@ -257,6 +301,12 @@ const ProductDisplay = ({
           </div>
         </div>
       </div>
+      {showImages && (
+        <ProductImageCarousel
+          images={images}
+          onClose={() => setShowImages(false)}
+        />
+      )}
     </div>
   );
 };
