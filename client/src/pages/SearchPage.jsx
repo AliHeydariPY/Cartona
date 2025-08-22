@@ -1,17 +1,22 @@
 import { motion } from "framer-motion";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 import { FiStar, FiShoppingCart, FiHeart, FiEye } from "react-icons/fi";
 import { FaHeart, FaRegHeart, FaClock } from "react-icons/fa";
 
+import { PiLightningFill } from "react-icons/pi";
+import { BiSolidOffer } from "react-icons/bi";
+
 import Navbar from "../components/Navbar";
+import ProductImageCarousel from "../components/ProductImageCarousel";
 import { searchProduct } from "../services/productAPIServices";
 
 export default function SearchPage() {
   const { query } = useParams();
-  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
+  const [showImages, setShowImages] = useState(false);
+  const [images, setImages] = useState([]);
 
   useEffect(() => {
     searchProduct(query).then((res) => {
@@ -33,7 +38,10 @@ export default function SearchPage() {
     });
   };
 
-  
+  const openInNewTab = (url) => {
+    window.open(url, "_blank", "noreferrer");
+  };
+
   return (
     <>
       <Navbar />
@@ -65,8 +73,9 @@ export default function SearchPage() {
 
               {/* پیشنهاد شگفت‌انگیز */}
               {product.amazing_offer && (
-                <div className="absolute top-3 left-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg z-10">
-                  ⚡ {product.amazing_offer}
+                <div className="absolute flex top-3 left-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg z-10">
+                  <PiLightningFill className="mt-0.25 mr-0.75" size={13} />
+                  {product.amazing_offer}
                 </div>
               )}
 
@@ -83,7 +92,15 @@ export default function SearchPage() {
                   )}
                 </button>
 
-                <button className="p-2 cursor-pointer bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-blue-100 transition-colors duration-200">
+                <button
+                  onClick={() => {
+                    console.log([{product: product.id ,image: product.image} ,...product.images_set]);
+
+                    setImages([{image: product.image} ,...product.images_set]);
+                    setShowImages(true);
+                  }}
+                  className="p-2 cursor-pointer bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-blue-100 transition-colors duration-200"
+                >
                   <FiEye className="text-blue-600" size={16} />
                 </button>
               </div>
@@ -122,8 +139,9 @@ export default function SearchPage() {
 
                 {/* بدج تخفیف */}
                 {product.discount_percentage && (
-                  <div className="right-3 bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg z-10">
-                    {product.discount_percentage}% OFF
+                  <div className="right-3 flex bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg z-10">
+                    <span className="mt-0.25 mr-1">{product.discount_percentage} </span>
+                    <BiSolidOffer className="" size={18} />
                   </div>
                 )}
               </div>
@@ -177,6 +195,12 @@ export default function SearchPage() {
           </motion.div>
         ))}
       </div>
+      {showImages && (
+        <ProductImageCarousel
+          images={images}
+          onClose={() => setShowImages(false)}
+        />
+      )}
     </>
   );
 }

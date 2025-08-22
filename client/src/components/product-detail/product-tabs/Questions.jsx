@@ -58,7 +58,7 @@ const Questions = ({
         }}
         className={`p-3 sm:p-4 border rounded-lg sm:rounded-xl shadow space-y-1 sm:space-y-2 transition ${
           isUserQuestion
-            ? "bg-blue-100/50 border-blue-400 ring-2 ring-blue-300"
+            ? "bg-blue-100/50 border-2 border-blue-400 "
             : "bg-blue-50/60 border-blue-200"
         }`}
       >

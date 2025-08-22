@@ -1,18 +1,54 @@
 @import "tailwindcss";
 
 body {
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   background-color: oklch(97% 0.014 254.604);
 }
 
+/* Global custom scrollbar */
+/* ::-webkit-scrollbar {
+  width: 9px; 
+}
+
+::-webkit-scrollbar-track {
+  background: oklch(97% 0.014 254.604); 
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    to bottom,
+    #2564eb,
+    #01aaff
+  ); 
+
+  transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    to bottom,
+    #1d4ed8,
+    #0284c7
+  ); 
+} */
+
 /* انیمیشن‌های توست */
 @keyframes enter {
-  from { transform: translateY(-20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 @keyframes leave {
-  to { transform: translateY(-20px); opacity: 0; }
+  to {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
 }
 
 .animate-enter {
@@ -23,21 +59,36 @@ body {
   animation: leave 0.2s ease-in forwards;
 }
 
-
 /* انیمیشن‌های اصلی */
 @keyframes float {
-  0%, 100% { transform: translateY(0) translateX(0); }
-  50% { transform: translateY(-20px) translateX(10px); }
+  0%,
+  100% {
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    transform: translateY(-20px) translateX(10px);
+  }
 }
 
 @keyframes pulse-slow {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.8; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* استایل‌های هیرو */
@@ -92,7 +143,6 @@ body {
   font-weight: 700;
   margin-bottom: 1rem;
   animation: fadeIn 1s ease-out;
-
 }
 
 @media (min-width: 768px) {
@@ -175,7 +225,8 @@ body {
 }
 
 @keyframes pulse-slow {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
   }
   50% {
@@ -191,10 +242,14 @@ body {
   transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.6, 1);
 }
 
-
 @keyframes float {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-20px) rotate(5deg); }
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(5deg);
+  }
 }
 
 /* انیمیشن‌های فوتر */
@@ -203,18 +258,33 @@ body {
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-20px) rotate(5deg); }
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(5deg);
+  }
 }
 
 @keyframes pulse {
-  0% { opacity: 0.3; transform: scale(0.95); }
-  100% { opacity: 0.8; transform: scale(1.1); }
+  0% {
+    opacity: 0.3;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
 }
 
 @keyframes wave {
-  0% { background-position-x: 0; }
-  100% { background-position-x: 1200px; }
+  0% {
+    background-position-x: 0;
+  }
+  100% {
+    background-position-x: 1200px;
+  }
 }
 
 .animate-float {

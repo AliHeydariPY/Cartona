@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 
 import {
   getCartProducts,
@@ -29,7 +28,6 @@ const Cart = ({
   setIsRemoveCartItem,
 }) => {
   const [cartItems, setCartItems] = useState([]);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCartItems = async () => {
