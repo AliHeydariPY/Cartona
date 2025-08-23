@@ -56,6 +56,7 @@ const EditProduct = () => {
     const fetchData = async () => {
       const selectedProduct = await getProduct(id);
       setProduct(selectedProduct.data);
+      console.log(selectedProduct.data);
       if (selectedProduct.data.discount_period) {
         setHasDiscount(true);
       } else {
@@ -131,6 +132,7 @@ const EditProduct = () => {
     amazing_offer_period: product.amazing_offer_period
       ? new Date(product.amazing_offer_period).toISOString().split("T")[0]
       : "",
+    images_set: product.images_set || [],
   };
 
   return (
@@ -178,7 +180,7 @@ const EditProduct = () => {
             formData.append("category", Number(selectedCategory.id));
             formData.append("price", values.price);
             formData.append("stock_quantity", values.stock_quantity);
-            formData.append("discounted_price", values.discounted_price)
+            formData.append("discounted_price", values.discounted_price);
             formData.append("discount_percentage", values.discount_percentage);
             formData.append("discount_period", values.discount_period);
             formData.append("amazing_offer", values.amazing_offer);
@@ -187,6 +189,8 @@ const EditProduct = () => {
               values.amazing_offer_period
             );
             formData.append("description", values.description);
+            formData.append("images_set", values.images_set);
+            console.log(values.images_set);
 
             console.log(Object.fromEntries(formData.entries()));
 

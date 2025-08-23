@@ -1,5 +1,6 @@
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import Category from "../components/Category";
 
 import { FiChevronRight } from "react-icons/fi";
 import { FiSmartphone } from "react-icons/fi";
@@ -71,55 +72,7 @@ const Home = () => {
 
         <div className="max-w-7xl mx-auto px-4 relative z-10">
           {/* Featured Categories */}
-          <div className="mb-20">
-            <div className="flex justify-between items-end mb-10">
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
-                Shop by Category
-              </h2>
-              <a
-                href="#"
-                className="flex items-center text-blue-600 hover:text-cyan-500 transition-colors"
-              >
-                View all <FiChevronRight className="ml-1" />
-              </a>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {[
-                {
-                  name: "Electronics",
-                  icon: FiSmartphone,
-                  color: "bg-blue-100",
-                },
-                { name: "Fashion", icon: FiShoppingBag, color: "bg-cyan-100" },
-                { name: "Home & Garden", icon: FiHome, color: "bg-blue-100" },
-                { name: "Beauty", icon: FiFeather, color: "bg-cyan-100" },
-              ].map((category, i) => (
-                <div
-                  key={i}
-                  className="group cursor-pointer relative overflow-hidden rounded-2xl bg-white shadow-lg hover:shadow-xl transition-all duration-500"
-                >
-                  <div
-                    className={`${category.color} h-32 flex items-center justify-center`}
-                  >
-                    <category.icon className="text-4xl text-blue-600 group-hover:text-cyan-500 transition-colors duration-500" />
-                  </div>
-                  <div className="p-5 bg-white">
-                    <h3 className="font-semibold text-lg text-blue-800 mb-2">
-                      {category.name}
-                    </h3>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-blue-500">
-                        200+ Products
-                      </span>
-                      <FiArrowRight className="text-blue-600 group-hover:text-cyan-500 transition-colors duration-300" />
-                    </div>
-                  </div>
-                  <div className="absolute inset-0 border-2 border-transparent group-hover:border-cyan-400 rounded-2xl transition-all duration-300 pointer-events-none"></div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <Category />
 
           {/* Promotional Banner */}
           <div className="mb-20 relative rounded-3xl overflow-hidden">
