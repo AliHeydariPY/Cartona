@@ -15,6 +15,7 @@ import AddProduct from "./pages/user-dashboard/AddProduct";
 import MyProducts from "./pages/user-dashboard/MyProducts";
 import ProductDetail from "./pages/ProductDetail";
 import SearchPage from "./pages/SearchPage";
+import SubCategory from "./pages/SubCategory";
 
 import ProductFeatures from "./pages/user-dashboard/my-products/ProductFeatures";
 import ProductImages from "./pages/user-dashboard/my-products/ProductImages";
@@ -147,6 +148,7 @@ function App() {
             />
           }
         />
+        <Route path="/category/:categoryId" element={<SubCategory />} />
       </Routes>
     </>
   );
