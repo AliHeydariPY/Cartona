@@ -122,6 +122,7 @@ function App() {
           />
           <Route path="my-products/edit/:id" element={<EditProduct />} />
         </Route>
+
         <Route
           path="/products/:id"
           element={
@@ -136,8 +137,21 @@ function App() {
         />
         <Route path="/create-account" element={<CreateAccountForm />} />
         <Route path="/upgradeToSeller" element={<UpgradeToSeller />} />
+
         <Route
           path="/search/:query"
+          element={
+            <SearchPage
+              reloadComponent={reloadComponent}
+              setReloadComponent={setReloadComponent}
+              setAddToCartPopup={setAddToCartPopup}
+              setSelectedProduct={setSelectedProduct}
+              setRremoveFromCartPopup={setRremoveFromCartPopup}
+            />
+          }
+        />
+        <Route
+          path="/search/category/:query"
           element={
             <SearchPage
               reloadComponent={reloadComponent}

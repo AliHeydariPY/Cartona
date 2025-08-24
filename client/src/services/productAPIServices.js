@@ -1,5 +1,6 @@
+import { CurrencyPoundIcon } from "@heroicons/react/24/outline";
 import axios from "axios";
-
+import { useParams } from "react-router-dom";
 const SERVER_URL = "http://127.0.0.1:8000";
 
 export const addNewProduct = (formData) => {
@@ -76,6 +77,8 @@ export const deleteImage = (imageID) => {
 };
 
 export const searchProduct = (query) => {
-  const url = `${SERVER_URL}/product-api/list-products/?search=${query}`;
+  const currentURL = window.location.href
+  const url = currentURL.includes("category") ? `${SERVER_URL}/product-api/list-products/?category=${query}` : `${SERVER_URL}/product-api/list-products/?search=${query}`;
+  console.log()
   return axios.get(url)
 }

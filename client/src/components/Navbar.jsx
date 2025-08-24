@@ -12,23 +12,20 @@ import { UserCircleIcon as UserCircleSolid } from "@heroicons/react/24/solid";
 const Navbar = () => {
   const navigate = useNavigate();
   const { query } = useParams();
-  const [search, setSearch] = useState(() => {
-    if (query) {
-      return query;
-    } else {
-      return "";
-    }
-  });
+  const [search, setSearch] = useState(() => {});
 
   useEffect(() => {
-    setSearch(() => {
-    if (query) {
-      return query;
-    } else {
-      return "";
+    const currentURL = window.location.href;
+    if (!currentURL.includes("category")) {
+      setSearch(() => {
+        if (query) {
+          return query;
+        } else {
+          return "";
+        }
+      });
     }
-  })
-  }, [query])
+  }, [query]);
 
   return (
     <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-blue-100">
@@ -65,7 +62,6 @@ const Navbar = () => {
               onClick={() => {
                 if (search.trim()) {
                   navigate(`/search/${search}`);
-                  setSearch("");
                 }
               }}
               className="relative h-full flex items-center rounded-r-full my-0.25 mr-0.25 overflow-hidden cursor-pointer bg-white"
