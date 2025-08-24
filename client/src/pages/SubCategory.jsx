@@ -42,6 +42,7 @@ const SubCategory = () => {
   useEffect(() => {
     console.log(subCategoryItmes);
   }, [subCategoryItmes]);
+  
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

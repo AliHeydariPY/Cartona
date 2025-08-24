@@ -20,10 +20,24 @@ export const addToCart = (data) => {
 
 export const editCartProduct = (payload) => {
   const url = `${SERVER_URL}/cart-api/cart-items/${payload.id}/`;
-  return axios.put(url, payload)
+  return axios.put(url, payload);
 };
 
 export const deleteCartProduct = (productID) => {
-    const url = `${SERVER_URL}/cart-api/cart-items/${productID}/`;
-  return axios.delete(url)
-}
+  const url = `${SERVER_URL}/cart-api/cart-items/${productID}/`;
+  return axios.delete(url);
+};
+
+export const totalCartPayment = (cartID) => {
+  const url = `${SERVER_URL}/cart-api/payments/`;
+  return axios.post(url, {
+    address: "ugd",
+    is_successful: true,
+    cart: cartID,
+  });
+};
+
+export const getPayments = (cartID) => {
+  const url = `${SERVER_URL}/cart-api/product-payments/cart/${cartID}/`;
+  return axios.get(url);
+};

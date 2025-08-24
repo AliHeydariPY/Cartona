@@ -1,0 +1,287 @@
+import { useState, useEffect } from "react";
+import { convertOffsetToTimes, motion } from "framer-motion";
+
+import { getPayments } from "../../services/cartAPIServices";
+import { getProduct } from "../../services/productAPIServices";
+import { getShopkeeper } from "../../services/userAPIServices";
+import {
+  FiPackage,
+  FiMessageSquare,
+  FiCheckCircle,
+  FiTruck,
+  FiClock,
+  FiBox,
+} from "react-icons/fi";
+
+const Orders = () => {
+  const [orders, setOrders] = useState([]);
+
+  useEffect(() => {
+    const fetchPaymentsData = async () => {
+      const res = await getPayments(localStorage.getItem("userID"));
+      const payments = await Promise.all(
+        res.data.map(async (payment) => {
+          const productRes = await getProduct(payment.product);
+          const storekeeperRes = await getShopkeeper(productRes.data.storekeeper);
+          console.log(storekeeperRes.data)
+          return {
+            ...payment,
+            product: productRes.data,
+            storekeeper: storekeeperRes.data.store_name,
+            status: payment.is_delivered ? "Delivered" : "Pending",
+          };
+        })
+      );
+      setOrders([
+        {
+          id: 2,
+          product: "Sports Running Shoes",
+          storekeeper: "FashionHub",
+          status: "Delivered",
+          total_price: 89.99,
+          paid_at: "2024-01-10",
+          delivered_at: "2024-01-14",
+          image: "/shoes.jpg",
+        },
+        {
+          id: 1,
+          product: "Premium Wireless Headphones",
+          storekeeper: "TechStore",
+          status: "Shipped",
+          total_price: 149.99,
+          paid_at: "2024-01-15",
+          estimatedDelivery: "2024-01-20",
+          image: "/headphones.jpg",
+        },
+
+        {
+          id: 3,
+          product: "Smart Watch Series 7",
+          storekeeper: "GadgetWorld",
+          status: "Pending",
+          total_price: 249.99,
+          paid_at: "2024-01-18",
+          estimatedDelivery: "2024-01-25",
+          image: "/watch.jpg",
+        },
+        ...payments,
+      ]);
+    };
+
+    fetchPaymentsData();
+  }, []);
+
+  //   const orders = [
+  // {
+  //   id: 1,
+  //   product: "Premium Wireless Headphones",
+  //   seller: "TechStore",
+  //   status: "Shipped",
+  //   price: "$149.99",
+  //   orderDate: "2024-01-15",
+  //   estimatedDelivery: "2024-01-20",
+  //   image: "/headphones.jpg"
+  // },
+  // {
+  //   id: 2,
+  //   product: "Sports Running Shoes",
+  //   seller: "FashionHub",
+  //   status: "Delivered",
+  //   price: "$89.99",
+  //   orderDate: "2024-01-10",
+  //   deliveredDate: "2024-01-14",
+  //   image: "/shoes.jpg"
+  // },
+  // {
+  //   id: 3,
+  //   product: "Smart Watch Series 7",
+  //   seller: "GadgetWorld",
+  //   status: "Pending",
+  //   price: "$249.99",
+  //   orderDate: "2024-01-18",
+  //   estimatedDelivery: "2024-01-25",
+  //   image: "/watch.jpg"
+  // }
+  //   ];
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case "Pending":
+        return <FiClock className="text-amber-500" size={18} />;
+      case "Shipped":
+        return <FiTruck className="text-blue-500" size={18} />;
+      case "Delivered":
+        return <FiCheckCircle className="text-green-500" size={18} />;
+      default:
+        return <FiPackage className="text-gray-500" size={18} />;
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Pending":
+        return "bg-amber-100 text-amber-800 border-amber-300";
+      case "Shipped":
+        return "bg-blue-100 text-blue-800 border-blue-300";
+      case "Delivered":
+        return "bg-green-100 text-green-800 border-green-300";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-300";
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="lg:col-span-3"
+    >
+      <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-lg p-5 sm:p-6 2xl:p-8 border border-blue-400 hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300">
+        {/* هدر */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center">
+            <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-3 rounded-full mr-4">
+              <FiPackage className="text-white" size={24} />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-blue-900">My Orders</h2>
+              <p className="text-blue-600 text-sm">
+                Track and manage your purchases
+              </p>
+            </div>
+          </div>
+
+          <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+            {orders.length} orders
+          </span>
+        </div>
+
+        {/* لیست سفارشات */}
+        <div className="space-y-6">
+          {orders.map((order) => (
+            <motion.div
+              key={order.id}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
+              className="bg-gradient-to-r from-blue-50/80 to-cyan-50/80 rounded-2xl p-6 border border-blue-200/60 hover:border-blue-300 hover:shadow-lg transition-all duration-300 group"
+            >
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* اطلاعات محصول */}
+                <div className="flex items-center space-x-4">
+                  {order.product.image ? (
+                    <div className="w-22 h-22 border-2 bg-white border-blue-400 rounded-lg flex items-center justify-center mb-4 sm:mb-0 relative overflow-hidden p-1">
+                      <img
+                        src={order.product.image}
+                        alt=""
+                        className="max-w-full max-h-full object-contain rounded-md"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-22 h-22 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <FiBox className="text-blue-600" size={30} />
+                    </div>
+                  )}
+                  <div>
+                    <h3 className="font-semibold text-blue-900 text-lg mb-1">
+                      {order.product.name}
+                    </h3>
+                    <p className="text-blue-600 text-sm">
+                      Sold by: {order.storekeeper}
+                    </p>
+                    <p className="text-blue-800 font-bold text-sm mt-1">
+                      ${order.total_price}
+                    </p>
+                  </div>
+                </div>
+
+                {/* وضعیت سفارش */}
+                <div className="flex flex-col justify-center space-y-2">
+                  <div className="flex items-center space-x-2">
+                    {getStatusIcon(order.status)}
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(
+                        order.status
+                      )}`}
+                    >
+                      {order.status}
+                    </span>
+                  </div>
+
+                  <div className="text-sm text-blue-600">
+                    {order.status === "Delivered" ? (
+                      <span>Delivered on {order.delivered_at}</span>
+                    ) : (
+                      <span>Est. delivery: {order.estimatedDelivery}</span>
+                    )}
+                  </div>
+
+                  <p className="text-xs text-blue-500">
+                    Ordered: {order.paid_at}
+                  </p>
+                </div>
+
+                {/* دکمه‌های اقدام */}
+                <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-row gap-3 justify-center items-start lg:items-end xl:items-center">
+                  <button className="flex items-center justify-center px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-lg hover:from-blue-700 hover:to-cyan-600 transition-all duration-300 text-sm font-semibold whitespace-nowrap min-w-[120px]">
+                    <FiMessageSquare className="mr-2" size={14} />
+                    Chat
+                  </button>
+
+                  {order.status === "Shipped" && (
+                    <button className="flex items-center justify-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all duration-300 text-sm font-semibold whitespace-nowrap min-w-[120px]">
+                      <FiCheckCircle className="mr-2" size={14} />
+                      Received
+                    </button>
+                  )}
+
+                  {order.status === "Delivered" && (
+                    <button className="flex items-center justify-center px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-300 text-sm font-semibold whitespace-nowrap min-w-[120px]">
+                      <FiCheckCircle className="mr-2" size={14} />
+                      Rate Product
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* نوار پیشرفت */}
+              <div className="mt-4 pt-4 border-t border-blue-200/50">
+                <div className="flex items-center justify-between text-xs text-blue-600 mb-2">
+                  <span>Order Progress</span>
+                  <span>{order.status}</span>
+                </div>
+                <div className="w-full bg-blue-200 rounded-full h-2">
+                  <div
+                    className={`h-2 rounded-full transition-all duration-1000 ${
+                      order.status === "Pending"
+                        ? "bg-amber-500 w-1/3"
+                        : order.status === "Shipped"
+                        ? "bg-blue-500 w-2/3"
+                        : "bg-green-500 w-full"
+                    }`}
+                  />
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* حالت خالی */}
+        {orders.length === 0 && (
+          <div className="text-center py-12 bg-blue-50/50 rounded-2xl border border-blue-200">
+            <FiPackage className="text-blue-400 mx-auto mb-4" size={48} />
+            <h3 className="text-lg font-semibold text-blue-800 mb-2">
+              No orders yet
+            </h3>
+            <p className="text-blue-600">
+              Your orders will appear here once you make a purchase.
+            </p>
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+};
+
+export default Orders;

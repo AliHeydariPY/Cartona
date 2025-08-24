@@ -15,6 +15,7 @@ import {
   FiUsers,
   FiDollarSign,
   FiPlusCircle,
+  FiMessageSquare
 } from "react-icons/fi";
 
 import { MdStorefront, MdOutlineWorkspacePremium } from "react-icons/md";
@@ -113,11 +114,11 @@ const UserDashboard = () => {
                 label: "Cart",
               },
               {
-                id: "payments",
+                id: "orders",
                 icon: (
-                  <FiCreditCard className="ml-3 text-green-600" size={18} />
+                  <FiMessageSquare className="ml-3 text-green-600" size={18} />
                 ),
-                label: "Payments",
+                label: "Orders & Chats",
               },
               ...(isSeller
                 ? [
@@ -137,23 +138,6 @@ const UserDashboard = () => {
                         />
                       ),
                       label: "Add Product",
-                    },
-                    {
-                      id: "customers",
-                      icon: (
-                        <FiUsers className="ml-3 text-cyan-600" size={18} />
-                      ),
-                      label: "Customers",
-                    },
-                    {
-                      id: "earnings",
-                      icon: (
-                        <FiDollarSign
-                          className="ml-3 text-emerald-600"
-                          size={18}
-                        />
-                      ),
-                      label: "Earnings",
                     },
                   ]
                 : []),
@@ -177,16 +161,12 @@ const UserDashboard = () => {
                     navigate("/account/cart");
                   } else if (item.id == "favorites") {
                     navigate("/account/favorites");
-                  } else if (item.id == "payments") {
-                    navigate("/account/payments");
+                  } else if (item.id == "orders") {
+                    navigate("/account/orders");
                   } else if (item.id == "my-products") {
                     navigate("/account/my-products");
                   } else if (item.id == "add-product") {
                     navigate("/account/add-product");
-                  } else if (item.id == "customers") {
-                    navigate("/account/customers");
-                  } else if (item.id == "earnings") {
-                    navigate("/account/earnings");
                   } else if (item.id == "home") {
                     navigate("/");
                   }

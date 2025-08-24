@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import {
   getCartProducts,
   editCartProduct,
+  totalCartPayment
 } from "../../services/cartAPIServices";
 import { getProduct } from "../../services/productAPIServices";
 
@@ -98,13 +99,15 @@ const Cart = ({
   };
 
   const subtotal = cartItems.reduce(
-    (sum, item) => sum + item.price * item.stock_quantity,
+    (sum, item) => sum + (item.discounted_price || item.price) * item.stock_quantity,
     0
   );
 
-  const shipping = 15.0;
-  const tax = subtotal * 0.08;
-  const total = subtotal + shipping + tax;
+  // const shipping = 15.0;
+  // const tax = subtotal * 0.08;
+  // const total = subtotal + shipping + tax;
+ 
+  const total = subtotal
 
   const openInNewTab = (url) => {
     window.open(url, "_blank", "noreferrer");
@@ -302,30 +305,30 @@ const Cart = ({
                 </h3>
 
                 <div className="space-y-4">
-                  <div className="flex justify-between">
+                  {/* <div className="flex justify-between">
                     <span className="text-sm sm:text-base text-blue-700">
                       Subtotal
                     </span>
                     <span className="font-medium text-sm sm:text-base text-blue-900">
                       ${subtotal.toFixed(2)}
                     </span>
-                  </div>
-                  <div className="flex justify-between">
+                  </div> */}
+                  {/* <div className="flex justify-between">
                     <span className="text-sm sm:text-base text-blue-700">
                       Shipping
                     </span>
                     <span className="font-medium text-sm sm:text-base text-blue-900">
                       ${shipping.toFixed(2)}
                     </span>
-                  </div>
-                  <div className="flex justify-between">
+                  </div> */}
+                  {/* <div className="flex justify-between">
                     <span className="text-sm sm:text-base text-blue-700">
                       Tax (8%)
                     </span>
                     <span className="font-medium text-sm sm:text-base text-blue-900">
                       ${tax.toFixed(2)}
                     </span>
-                  </div>
+                  </div> */}
                   <div className="border-t border-blue-200 pt-4 flex justify-between">
                     <span className="text-base sm:text-lg font-bold text-blue-900">
                       Total
@@ -335,12 +338,15 @@ const Cart = ({
                     </span>
                   </div>
 
-                  <button className="w-full cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-500 text-white py-2 sm:py-3 rounded-lg font-semibold mt-6 hover:shadow-lg transition-all duration-300 flex items-center justify-center text-sm sm:text-base">
+                  <button onClick={() => {
+                    const cartID = localStorage.getItem("userID")
+                    totalCartPayment(cartID)
+                  }} className="w-full cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-500 text-white py-2 sm:py-3 rounded-lg font-semibold mt-6 hover:shadow-lg transition-all duration-300 flex items-center justify-center text-sm sm:text-base">
                     Proceed to Checkout
                     <FiChevronRight className="sm:ml-2" />
                   </button>
 
-                  <button className="w-full cursor-pointer bg-white border border-blue-300 text-blue-700 py-2 sm:py-3 rounded-lg font-medium mt-3 hover:bg-blue-50 transition-colors duration-300 flex items-center justify-center text-sm sm:text-base">
+                  <button  className="w-full cursor-pointer bg-white border border-blue-300 text-blue-700 py-2 sm:py-3 rounded-lg font-medium mt-3 hover:bg-blue-50 transition-colors duration-300 flex items-center justify-center text-sm sm:text-base">
                     <FiHeart className="mr-2 text-rose-500" />
                     Save for Later
                   </button>

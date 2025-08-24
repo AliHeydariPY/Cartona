@@ -19,8 +19,8 @@ export const upgradeToSeller = (formData) => {
     })
 };
 
-export const getShopkeeper = (ID) => {
-  const url = `${SERVER_URL}/user-api/storekeepers/${ID}/`;
+export const getShopkeeper = (storekeeperID) => {
+  const url = `${SERVER_URL}/user-api/storekeepers/${storekeeperID}/`;
   return axios
     .get(url)
     

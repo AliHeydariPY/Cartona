@@ -10,6 +10,7 @@ import UserDashboard from "./pages/UserDashboard";
 import Profile from "./pages/user-dashboard/Profile";
 import Favorites from "./pages/user-dashboard/Favorites";
 import Cart from "./pages/user-dashboard/Cart";
+import Orders from "./pages/user-dashboard/Orders";
 import Payments from "./pages/user-dashboard/Payments";
 import AddProduct from "./pages/user-dashboard/AddProduct";
 import MyProducts from "./pages/user-dashboard/MyProducts";
@@ -89,6 +90,10 @@ function App() {
             }
           />
           <Route path="payments" element={<Payments />} />
+
+          <Route path="orders" element={<Orders />} />
+
+
           <Route path="add-product" element={<AddProduct />} />
 
           <Route
