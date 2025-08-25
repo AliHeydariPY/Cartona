@@ -1,21 +1,30 @@
+import { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import Category from "../components/Category";
 
-import { FiChevronRight } from "react-icons/fi";
-import { FiSmartphone } from "react-icons/fi";
-import { FiShoppingBag } from "react-icons/fi";
-import { FiHome } from "react-icons/fi";
-import { FiFeather } from "react-icons/fi";
-import { FiArrowRight } from "react-icons/fi";
-import { FiChevronLeft } from "react-icons/fi";
-import { FiHeart } from "react-icons/fi";
-import { FiStar } from "react-icons/fi";
+import {
+  FiChevronRight,
+  FiSmartphone,
+  FiShoppingBag,
+  FiHome,
+  FiFeather,
+  FiArrowRight,
+  FiChevronLeft,
+  FiHeart,
+  FiStar,
+  FiSearch,
+} from "react-icons/fi";
 import { TfiQuoteRight } from "react-icons/tfi";
-import { FiSearch } from "react-icons/fi";
 import { IoCartOutline } from "react-icons/io5";
 
 const Home = () => {
+  const navigate = useNavigate();
+  const [search, setSearch] = useState(() => {});
+  const inputRef = useRef();
+
   return (
     <>
       <Navbar />
@@ -41,16 +50,36 @@ const Home = () => {
             {/* کادر جستجو */}
             <div className="hero-search-container">
               <input
+                ref={inputRef}
                 type="text"
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                }}
+                onKeyDown={(e) => {
+                  if (e.code === "Enter") {
+                    if (search.trim()) {
+                      navigate(`/search/${search}`);
+                    }
+                  }
+                }}
                 placeholder="Search for anything..."
                 className="hero-search-input"
               />
-              <button className="hero-search-button cursor-pointer">
+              <button
+                onClick={() => {
+                  if (search.trim()) {
+                    navigate(`/search/${search}`);
+                  }
+                }}
+                className="hero-search-button cursor-pointer"
+              >
                 <FiSearch className="text-xl text-white" />
               </button>
             </div>
 
             <button
+              onClick={() => inputRef.current.focus()}
               className="flex items-center gap-2 mx-auto mt-8 px-6 py-3 
              text-white font-medium rounded-full 
              shadow-md hover:shadow-lg hover:shadow-blue-400/30

@@ -22,13 +22,15 @@ const Orders = () => {
       const payments = await Promise.all(
         res.data.map(async (payment) => {
           const productRes = await getProduct(payment.product);
-          const storekeeperRes = await getShopkeeper(productRes.data.storekeeper);
-          console.log(storekeeperRes.data)
+          const storekeeperRes = await getShopkeeper(
+            productRes.data.storekeeper
+          );
+          console.log(storekeeperRes.data);
           return {
             ...payment,
             product: productRes.data,
             storekeeper: storekeeperRes.data.store_name,
-            status: payment.is_delivered ? "Delivered" : "Pending",
+            status: payment.is_delivered ? "Delivered" : "Shipped",
           };
         })
       );
@@ -130,6 +132,10 @@ const Orders = () => {
     }
   };
 
+  const openInNewTab = (url) => {
+    window.open(url, "_blank", "noreferrer");
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 50 }}
@@ -171,7 +177,12 @@ const Orders = () => {
                 {/* اطلاعات محصول */}
                 <div className="flex items-center space-x-4">
                   {order.product.image ? (
-                    <div className="w-22 h-22 border-2 bg-white border-blue-400 rounded-lg flex items-center justify-center mb-4 sm:mb-0 relative overflow-hidden p-1">
+                    <div
+                      onClick={() =>
+                        openInNewTab(`/products/${order.product.id}`)
+                      }
+                      className="w-22 h-22 cursor-pointer border-2 bg-white border-blue-400 rounded-lg flex items-center justify-center mb-4 sm:mb-0 relative overflow-hidden p-1"
+                    >
                       <img
                         src={order.product.image}
                         alt=""

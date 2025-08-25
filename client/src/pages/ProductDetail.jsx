@@ -53,7 +53,6 @@ const ProductDetails = ({
               }
             })
           );
-          console.log(commentsWithReplies);
           setProductComments(commentsWithReplies);
         })
         .catch(() => {
@@ -62,7 +61,6 @@ const ProductDetails = ({
 
       const seller = getShopkeeper(selectedProduct.data.storekeeper);
       seller.then((res) => {
-        console.log(res.data);
         setSeller(res.data);
       });
 
@@ -70,7 +68,6 @@ const ProductDetails = ({
       const questions = allQuestions.data.map((qus) => {
         return qus.product == id ? qus : null;
       });
-      console.log(selectedProduct.data);
 
       setProductQuestions(questions.filter(Boolean));
     };

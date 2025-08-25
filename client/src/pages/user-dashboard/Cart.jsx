@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 import {
   getCartProducts,
@@ -28,6 +29,7 @@ const Cart = ({
   reloadComponent,
   setIsRemoveCartItem,
 }) => {
+  const navigate = useNavigate()
   const [cartItems, setCartItems] = useState([]);
 
   useEffect(() => {
@@ -71,10 +73,8 @@ const Cart = ({
     };
 
     try {
-      // منتظر بمان تا ریکوئست بره و جواب بیاد
       await editCartProduct(payload);
 
-      // فقط وقتی موفق بود مقدار رو تغییر بده
       setCartItems((prev) =>
         prev.map((p) =>
           p.id === id ? { ...p, stock_quantity: newQuantity } : p
@@ -146,7 +146,7 @@ const Cart = ({
                   <p className="text-sm sm:text-base text-blue-600 mb-4">
                     Start shopping to add items to your cart
                   </p>
-                  <button className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full hover:shadow-lg transition-all duration-300 text-sm sm:text-base">
+                  <button onClick={() => navigate("/")} className="bg-gradient-to-r cursor-pointer from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full transition-colors duration-300 text-sm sm:text-base">
                     Continue Shopping
                   </button>
                 </div>
