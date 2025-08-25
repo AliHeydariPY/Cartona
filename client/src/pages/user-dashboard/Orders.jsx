@@ -16,6 +16,12 @@ import {
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
+  const [filter, setFilter] = useState("All");
+
+  const filteredOrders =
+    filter === "All"
+      ? orders
+      : orders.filter((order) => order.status === filter);
 
   useEffect(() => {
     const fetchPaymentsData = async () => {
@@ -31,7 +37,7 @@ const Orders = () => {
             ...payment,
             product: productRes.data,
             storekeeper: storekeeperRes.data.store_name,
-            status: payment.is_delivered ? "Delivered" : "Shipped",
+            status: payment.is_delivered ? "Delivered" : "Pending",
           };
         })
       );
@@ -145,26 +151,45 @@ const Orders = () => {
       className="lg:col-span-3"
     >
       <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-lg p-5 sm:p-6 2xl:p-8 border border-blue-400 hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300">
-        {/* هدر */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center mb-2 sm:mb-0">
-            <FiFileText className="text-green-600 mr-3" size={22} />
-            <h1 className="text-base sm:text-lg md:text-2xl font-bold text-blue-800">
-              My Orders
-            </h1>
-            <p className="text-blue-700 text-sm mt-0.75 ml-3">
+        {/* header */}
+        <div className="sm:flex sm:items-center mb-4.75">
+          <div className="mb-2">
+            <div className="flex items-center mb-1 sm:mb-0">
+              <FiFileText className="text-green-600 mr-3" size={22} />
+              <h1 className="text-base sm:text-lg md:text-2xl font-bold text-blue-800">
+                My Orders
+              </h1>
+            </div>
+            <p className="text-blue-700 text-xs sm:text-sm ml-8 sm:ml-[34px]">
               Track and manage your purchases
             </p>
           </div>
 
-          <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium">
-            {orders.length} orders
+          <span className="ml-auto bg-blue-600 text-white px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
+            {orders.length} {orders.length === 1 ? "order" : "orders"}
           </span>
         </div>
 
-        {/* لیست سفارشات */}
+        {/* filter */}
+        <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:gap-3 mb-4">
+          {["All", "Pending", "Shipped", "Delivered"].map((status) => (
+            <button
+              key={status}
+              onClick={() => setFilter(status)}
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold border transition-colors duration-300 ${
+                filter === status
+                  ? "bg-blue-600 text-white border-blue-600"
+                  : "bg-white text-blue-700 border-blue-300 hover:bg-blue-50"
+              }`}
+            >
+              {status}
+            </button>
+          ))}
+        </div>
+
+        {/* orders list */}
         <div className="space-y-6">
-          {orders.map((order) => (
+          {filteredOrders.map((order) => (
             <motion.div
               key={order.id}
               initial={{ opacity: 0, scale: 0.95 }}
@@ -172,9 +197,9 @@ const Orders = () => {
               transition={{ duration: 0.3 }}
               className="bg-gradient-to-r from-blue-50/80 to-cyan-50/80 rounded-2xl p-6 border border-blue-200/60 hover:border-blue-300 hover:shadow-lg transition-all duration-300 group"
             >
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-7 xl:grid-cols-3 gap-6">
                 {/* اطلاعات محصول */}
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-4 lg:col-span-3 xl:col-span-1">
                   {order.product.image ? (
                     <div
                       onClick={() =>
@@ -207,7 +232,7 @@ const Orders = () => {
                 </div>
 
                 {/* وضعیت سفارش */}
-                <div className="flex flex-col justify-center space-y-2">
+                <div className="flex flex-col justify-center space-y-2 lg:col-span-2 xl:col-span-1">
                   <div className="flex items-center space-x-2">
                     {getStatusIcon(order.status)}
                     <span
@@ -233,8 +258,8 @@ const Orders = () => {
                 </div>
 
                 {/* دکمه‌های اقدام */}
-                <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-row gap-3 justify-center items-start lg:items-end xl:items-center">
-                  <button className="flex items-center justify-center px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-lg hover:from-blue-700 hover:to-cyan-600 transition-all duration-300 text-sm font-semibold whitespace-nowrap min-w-[120px]">
+                <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-row gap-3 justify-center items-start lg:items-end xl:items-center lg:col-span-2 xl:col-span-1">
+                  <button className="flex cursor-pointer items-center justify-center px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-lg hover:from-blue-700 hover:to-cyan-600 transition-colors duration-300 text-sm font-semibold whitespace-nowrap min-w-[120px]">
                     <FiMessageSquare className="mr-2" size={14} />
                     Chat
                   </button>
@@ -247,7 +272,7 @@ const Orders = () => {
                   )}
 
                   {order.status === "Delivered" && (
-                    <button className="flex items-center justify-center px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-300 text-sm font-semibold whitespace-nowrap min-w-[120px]">
+                    <button className="flex cursor-pointer items-center justify-center px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-colors duration-300 text-sm font-semibold whitespace-nowrap min-w-[120px]">
                       <FiCheckCircle className="mr-2" size={14} />
                       Rate Product
                     </button>
@@ -277,7 +302,7 @@ const Orders = () => {
           ))}
         </div>
 
-        {/* حالت خالی */}
+        {/* empty state  */}
         {orders.length === 0 && (
           <div className="text-center py-12 bg-blue-50/50 rounded-2xl border border-blue-200">
             <FiPackage className="text-blue-400 mx-auto mb-4" size={48} />

@@ -122,7 +122,7 @@ const Cart = ({
     >
       <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-lg p-5 sm:p-6 2xl:p-8 border border-blue-400 hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300">
         <div className="max-w-6xl mx-auto">
-          {/* هدر صفحه */}
+          {/* header */}
           <div className="sm:flex sm:items-center mb-4.75">
             <div className="flex items-center mb-2 sm:mb-0">
               <FiShoppingCart className="text-blue-600 mr-3" size={22} />
@@ -136,7 +136,7 @@ const Cart = ({
           </div>
 
           <div className="grid grid-cols-1 gap-8">
-            {/* لیست محصولات */}
+            {/* products list */}
             <div className="space-y-6">
               {cartItems.length === 0 ? (
                 <div className="bg-white/95 backdrop-blur-xl rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-200">
@@ -296,7 +296,7 @@ const Cart = ({
               )}
             </div>
 
-            {/* خلاصه سبد خرید */}
+            {/* shopping Cart Summary */}
             {cartItems.length > 0 && (
               <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-blue-200 h-fit sticky top-6">
                 <h3 className="text-lg sm:text-xl font-bold text-blue-900 mb-6 flex items-center">
