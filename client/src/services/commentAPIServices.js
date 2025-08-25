@@ -29,6 +29,12 @@ export const getComments = (productID) => {
     // });
 };
 
+export const getCommentsByUser = (userID) => {
+  const url = `${SERVER_URL}/comments-api/comments/user/${userID}/`;
+  return axios
+    .get(url)
+}
+
 export const sendComment = (comment) => {
   const url = `${SERVER_URL}/comments-api/comments/`;
   return axios.post(url, comment);

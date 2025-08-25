@@ -119,6 +119,57 @@ const Questions = ({
             autoFocus
             value={questionText}
             onChange={(e) => setQuestionText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.code == "Enter") {
+                if (questionText.trim() !== "") {
+                  sendProductQuestion({
+                    product: id,
+                    user: userID,
+                    question_text: questionText,
+                  })
+                    .then(() => {
+                      setQuestionText("");
+                      setReloadComponent(!reloadComponent);
+                      toast.custom((t) => (
+                        <div
+                          className={`${
+                            t.visible ? "animate-enter" : "animate-leave"
+                          } transform transition-all duration-300`}
+                        >
+                          <div className="bg-gradient-to-r from-green-500 to-cyan-400 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-2 sm:space-x-3">
+                            <div className="bg-blue-500/20 p-2 rounded-full">
+                              <FiCheckCircle className="text-xl text-white" />
+                            </div>
+                            <div>
+                              <p className="font-medium">
+                                Your question was successfully sent
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ));
+                    })
+                    .catch((err) => {
+                      toast.custom((t) => (
+                        <div
+                          className={`${
+                            t.visible ? "animate-enter" : "animate-leave"
+                          } bg-gradient-to-r from-red-500 to-rose-600 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-2 sm:space-x-3 rtl:space-x-reverse`}
+                        >
+                          <FiX className="text-xl shrink-0" />
+                          <span className="font-medium">
+                            {err.response.data[0]}
+                          </span>
+                        </div>
+                      ));
+                    });
+                } else {
+                  showValidationError(
+                    "Please write your question before submitting"
+                  );
+                }
+              }
+            }}
             type="text"
             placeholder="Type your question here..."
             className="flex-1 border border-blue-300 rounded-lg px-2 sm:px-3 py-1 sm:py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-300"

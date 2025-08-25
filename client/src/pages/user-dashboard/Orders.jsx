@@ -4,6 +4,10 @@ import { convertOffsetToTimes, motion } from "framer-motion";
 import { getPayments } from "../../services/cartAPIServices";
 import { getProduct } from "../../services/productAPIServices";
 import { getShopkeeper } from "../../services/userAPIServices";
+import { getCommentsByUser } from "../../services/commentAPIServices";
+
+import ReviewModal from "../../components/pop-ups/ReviewModal";
+
 import {
   FiPackage,
   FiMessageSquare,
@@ -12,11 +16,15 @@ import {
   FiClock,
   FiBox,
   FiFileText,
+  FiStar,
 } from "react-icons/fi";
 
-const Orders = () => {
+const Orders = ({ reloadComponent, setReloadComponent }) => {
   const [orders, setOrders] = useState([]);
   const [filter, setFilter] = useState("All");
+  const [isReviewOpen, setIsReviewOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedSeller, setSelectedSeller] = useState(null);
 
   const filteredOrders =
     filter === "All"
@@ -32,15 +40,24 @@ const Orders = () => {
           const storekeeperRes = await getShopkeeper(
             productRes.data.storekeeper
           );
-          console.log(storekeeperRes.data);
+          const commentRes = await getCommentsByUser(
+            localStorage.getItem("userID")
+          );
+          console.log(commentRes.data);
+          console.log(productRes.data);
           return {
             ...payment,
             product: productRes.data,
             storekeeper: storekeeperRes.data.store_name,
             status: payment.is_delivered ? "Delivered" : "Pending",
+            hasRated: commentRes.data.some((comment) => {
+              return comment.product == productRes.data.id;
+            }),
+            // hasComment:
           };
         })
       );
+      console.log(payments);
       setOrders([
         {
           id: 2,
@@ -51,6 +68,7 @@ const Orders = () => {
           paid_at: "2024-01-10",
           delivered_at: "2024-01-14",
           image: "/shoes.jpg",
+          hasRated: false,
         },
         {
           id: 1,
@@ -61,6 +79,7 @@ const Orders = () => {
           paid_at: "2024-01-15",
           estimatedDelivery: "2024-01-20",
           image: "/headphones.jpg",
+          hasRated: false,
         },
 
         {
@@ -72,13 +91,14 @@ const Orders = () => {
           paid_at: "2024-01-18",
           estimatedDelivery: "2024-01-25",
           image: "/watch.jpg",
+          hasRated: false,
         },
         ...payments,
       ]);
     };
 
     fetchPaymentsData();
-  }, []);
+  }, [reloadComponent]);
 
   //   const orders = [
   // {
@@ -176,7 +196,7 @@ const Orders = () => {
             <button
               key={status}
               onClick={() => setFilter(status)}
-              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold border transition-colors duration-300 ${
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 cursor-pointer rounded-lg text-xs sm:text-sm font-semibold border transition-colors duration-300 ${
                 filter === status
                   ? "bg-blue-600 text-white border-blue-600"
                   : "bg-white text-blue-700 border-blue-300 hover:bg-blue-50"
@@ -271,12 +291,28 @@ const Orders = () => {
                     </button>
                   )}
 
-                  {order.status === "Delivered" && (
-                    <button className="flex cursor-pointer items-center justify-center px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-colors duration-300 text-sm font-semibold whitespace-nowrap min-w-[120px]">
-                      <FiCheckCircle className="mr-2" size={14} />
-                      Rate Product
-                    </button>
-                  )}
+                  {order.status === "Delivered" &&
+                    (order.hasRated ? (
+                      <button
+                        disabled
+                        className="flex items-center justify-center px-4 py-2 bg-gray-200 text-gray-600 rounded-lg cursor-not-allowed text-sm font-semibold whitespace-nowrap min-w-[120px]"
+                      >
+                        <FiStar className="mr-2 mb-0.5" size={16} />
+                        Already Rated
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setSelectedProduct(order.product);
+                          setSelectedSeller(order.storekeeper);
+                          setIsReviewOpen(true);
+                        }}
+                        className="flex cursor-pointer items-center justify-center px-4 py-2 bg-yellow-400 text-white rounded-lg hover:bg-yellow-500 transition-colors duration-300 text-sm font-semibold whitespace-nowrap min-w-[140px]"
+                      >
+                        <FiStar className="mr-2 mb-0.5" size={16} />
+                        Rate Product
+                      </button>
+                    ))}
                 </div>
               </div>
 
@@ -301,6 +337,15 @@ const Orders = () => {
             </motion.div>
           ))}
         </div>
+
+        {isReviewOpen && (
+          <ReviewModal
+            onClose={() => setIsReviewOpen(false)}
+            product={selectedProduct}
+            seller={selectedSeller}
+            setReloadComponent={setReloadComponent}
+          />
+        )}
 
         {/* empty state  */}
         {orders.length === 0 && (

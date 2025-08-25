@@ -91,8 +91,15 @@ function App() {
           />
           <Route path="payments" element={<Payments />} />
 
-          <Route path="orders" element={<Orders />} />
-
+          <Route
+            path="orders"
+            element={
+              <Orders
+                reloadComponent={reloadComponent}
+                setReloadComponent={setReloadComponent}
+              />
+            }
+          />
 
           <Route path="add-product" element={<AddProduct />} />
 

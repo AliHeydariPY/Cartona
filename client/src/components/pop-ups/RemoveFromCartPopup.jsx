@@ -62,7 +62,7 @@ const RemoveFromCartPopup = ({
     <Portal>
       <div
         className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-colors duration-300 ${
-          show ? "bg-black/30" : "bg-black/0"
+          show ? "bg-black/40" : "bg-black/0"
         }`}
         onClick={handleClose}
       >

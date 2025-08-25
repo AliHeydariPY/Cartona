@@ -125,7 +125,6 @@ const Reviews = ({
         />
         <button
           onClick={() => {
-            console.log(seller.user);
             if (seller.user == localStorage.getItem("userID")) {
               toast.custom((t) => (
                 <div

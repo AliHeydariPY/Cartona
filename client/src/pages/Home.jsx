@@ -22,7 +22,7 @@ import { IoCartOutline } from "react-icons/io5";
 
 const Home = () => {
   const navigate = useNavigate();
-  const [search, setSearch] = useState(() => {});
+  const [search, setSearch] = useState("");
   const inputRef = useRef();
 
   return (
