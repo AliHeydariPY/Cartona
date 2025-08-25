@@ -2,6 +2,8 @@ import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
+import CartonaLoader from "../components/CartonaLoader";
+
 import ProductDetailTabs from "../components/product-detail/ProductDetailTabs";
 import ProductDisplay from "../components/product-detail/ProductDisplay";
 import ProductSeller from "../components/product-detail/ProductSeller";
@@ -28,11 +30,11 @@ const ProductDetails = ({
   const { id } = useParams();
 
   const userID = localStorage.getItem("userID");
-
   const [product, setProduct] = useState(null);
   const [productComments, setProductComments] = useState(null);
   const [productQuestions, setProductQuestions] = useState(null);
   const [seller, setSeller] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -70,65 +72,68 @@ const ProductDetails = ({
       });
 
       setProductQuestions(questions.filter(Boolean));
+      setIsLoading(false);
     };
     fetchData();
   }, [id, reloadComponent]);
 
-  if (!product || !productComments || !seller || !productQuestions)
-    return <p className="text-center mt-10">Loading...</p>;
-
   return (
-    <div className="min-h-screen bg-blue-100 flex justify-center p-0 sm:p-4">
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="w-full max-w-6xl"
-      >
-        <div className="bg-white/95 backdrop-blur-xl shadow-lg border border-blue-400 transition-all duration-300 p-4 sm:p-6 md:p-8 sm:rounded-xl md:rounded-2xl lg:rounded-3xl">
-          {/* header */}
-          <div className="flex flex-row items-center justify-between mb-6 sm:mb-8">
-            <div className="flex items-center mb-0">
-              <FiShoppingCart className="text-blue-600 mr-3" size={22} />
-              <h1 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
-                {product.name}
-              </h1>
+    <>
+      <CartonaLoader isLoading={isLoading} />
+      {product && productComments && seller && productQuestions && (
+        <div className="min-h-screen bg-blue-100 flex justify-center p-0 sm:p-4">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="w-full max-w-6xl"
+          >
+            <div className="bg-white/95 backdrop-blur-xl shadow-lg border border-blue-400 transition-all duration-300 p-4 sm:p-6 md:p-8 sm:rounded-xl md:rounded-2xl lg:rounded-3xl">
+              {/* header */}
+              <div className="flex flex-row items-center justify-between mb-6 sm:mb-8">
+                <div className="flex items-center mb-0">
+                  <FiShoppingCart className="text-blue-600 mr-3" size={22} />
+                  <h1 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
+                    {product.name}
+                  </h1>
+                </div>
+                <span
+                  className={`ml-auto text-white px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${
+                    product.stock_quantity > 0 ? "bg-blue-600" : "bg-red-600"
+                  }`}
+                >
+                  {product.stock_quantity > 0 ? "In Stock" : "Out of Stock"}
+                </span>
+              </div>
+
+              <ProductDisplay
+                product={product}
+                reloadComponent={reloadComponent}
+                setReloadComponent={setReloadComponent}
+                setAddToCartPopup={setAddToCartPopup}
+                setSelectedProduct={setSelectedProduct}
+                setRremoveFromCartPopup={setRremoveFromCartPopup}
+              />
+
+              <ProductSeller seller={seller} />
+
+              <ProductDetailTabs
+                setShowAnswerPopup={setShowAnswerPopup}
+                setQuestion={setQuestion}
+                setReloadComponent={setReloadComponent}
+                userID={userID}
+                productQuestions={productQuestions}
+                id={id}
+                reloadComponent={reloadComponent}
+                product={product}
+                productComments={productComments}
+                seller={seller}
+              />
             </div>
-            <span
-              className={`ml-auto text-white px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${
-                product.stock_quantity > 0 ? "bg-blue-600" : "bg-red-600"
-              }`}
-            >
-              {product.stock_quantity > 0 ? "In Stock" : "Out of Stock"}
-            </span>
-          </div>
-
-          <ProductDisplay
-            product={product}
-            reloadComponent={reloadComponent}
-            setReloadComponent={setReloadComponent}
-            setAddToCartPopup={setAddToCartPopup}
-            setSelectedProduct={setSelectedProduct}
-            setRremoveFromCartPopup={setRremoveFromCartPopup}
-          />
-
-          <ProductSeller seller={seller} />
-
-          <ProductDetailTabs
-            setShowAnswerPopup={setShowAnswerPopup}
-            setQuestion={setQuestion}
-            setReloadComponent={setReloadComponent}
-            userID={userID}
-            productQuestions={productQuestions}
-            id={id}
-            reloadComponent={reloadComponent}
-            product={product}
-            productComments={productComments}
-            seller={seller}
-          />
+          </motion.div>
         </div>
-      </motion.div>
-    </div>
+      )}
+    </>
   );
 };
 
