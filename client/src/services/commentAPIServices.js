@@ -65,3 +65,18 @@ export const sendCommentReply = (reply) => {
   const url = `${SERVER_URL}/comments-api/comment-replies/`;
   return axios.post(url, reply);
 };
+
+export const getSubscriptions = (userID) => {
+  const url = `${SERVER_URL}/comments-api/subscriptions/user/${userID}/`;
+  return axios.get(url);
+};
+
+export const enableNotifications = (payload) => {
+  const url = `${SERVER_URL}/comments-api/subscriptions/`;
+  return axios.post(url, payload);
+};
+
+export const disableNotifications = (srotekeeperID) => {
+  const url = `${SERVER_URL}/comments-api/subscriptions/${srotekeeperID}/`;
+  return axios.delete(url);
+};

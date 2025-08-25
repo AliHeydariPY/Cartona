@@ -1,10 +1,87 @@
-const ProductSeller = ({seller}) => {
+import { useEffect, useState } from "react";
+import { FiBell, FiBellOff } from "react-icons/fi";
+
+import {
+  getSubscriptions,
+  enableNotifications,
+  disableNotifications,
+} from "../../services/commentAPIServices";
+
+const ProductSeller = ({ seller }) => {
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+
+  useEffect(() => {
+    getSubscriptions(localStorage.getItem("userID"))
+      .then((res) => {
+        const hasSubscription = res.data.find((subscription) => {
+          return subscription.storekeeper == seller.id;
+        });
+
+        if (hasSubscription) {
+          setNotificationsEnabled(true);
+        } else {
+          setNotificationsEnabled(false);
+        }
+      })
+      .catch(() => {
+        setNotificationsEnabled(false);
+      });
+  }, [notificationsEnabled]);
+
+  const toggleNotifications = () => {
+    if (notificationsEnabled) {
+      getSubscriptions(localStorage.getItem("userID")).then((res) => {
+        const selectedSubscription = res.data.find((subscription) => {
+          return subscription.storekeeper == seller.id;
+        });
+        disableNotifications(selectedSubscription.id).then(() => {
+          setNotificationsEnabled(false);
+        });
+      });
+    } else {
+      enableNotifications({
+        user: localStorage.getItem("userID"),
+        storekeeper: seller.id,
+      }).then((res) => {
+        console.log(res);
+        setNotificationsEnabled(true);
+      });
+    }
+  };
+
   return (
     <div className="mb-6 md:mb-12">
       {/* Seller Card */}
       <div className="p-4 sm:p-6 bg-blue-100 rounded-lg sm:rounded-2xl border border-blue-300 shadow-md">
-        <h3 className="text-xl font-bold text-blue-900 mb-4 border-b border-blue-300 pb-2">
-          Seller Information
+        <h3 className="text-xl font-bold text-blue-900 mb-4 border-b border-blue-300 pb-2 flex items-center justify-between">
+          <span>Seller Information</span>
+
+          {/* Notification Button */}
+          <button
+            onClick={toggleNotifications}
+            className={`flex items-center cursor-pointer gap-1 px-3 py-1.5 rounded-full text-sm font-medium shadow transition 
+              ${
+                notificationsEnabled
+                  ? "bg-blue-600 text-white hover:bg-blue-700"
+                  : "bg-white text-blue-700 border border-blue-300 hover:bg-blue-50"
+              }`}
+          >
+            {notificationsEnabled ? (
+              <>
+                <span className="my-0.75">
+                  <FiBell className="w-4 h-4" />
+                </span>
+                Notifications On
+              </>
+            ) : (
+              <>
+                <span>
+                  <FiBellOff className="w-4 h-4" />
+                </span>
+                Enable Notifications
+              </>
+            )}
+          </button>
         </h3>
 
         <div className="flex items-center gap-3 sm:gap-4 mb-3">
