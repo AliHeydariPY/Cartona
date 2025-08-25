@@ -130,7 +130,6 @@ const Category = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       const mainRes = await getMainCategories();
-      console.log(mainRes.data);
 
       const mainCategoriesWithIcons = await mainRes.data.map(
         (category, index) => {
@@ -145,9 +144,8 @@ const Category = () => {
           };
         }
       );
-      console.log(mainCategoriesWithIcons);
       setMainCategories(() => {
-        return mainCategoriesWithIcons.reverse()
+        return mainCategoriesWithIcons.reverse();
       });
     };
 

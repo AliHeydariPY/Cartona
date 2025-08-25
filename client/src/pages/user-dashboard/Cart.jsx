@@ -126,7 +126,7 @@ const Cart = ({
           <div className="sm:flex sm:items-center mb-4.75">
             <div className="flex items-center mb-2 sm:mb-0">
               <FiShoppingCart className="text-blue-600 mr-3" size={22} />
-              <h1 className="text-base sm:text-lg md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
+              <h1 className="text-base sm:text-lg md:text-2xl font-bold text-blue-800 ">
                 Your Shopping Cart
               </h1>
             </div>

@@ -15,7 +15,7 @@ import {
   FiUsers,
   FiDollarSign,
   FiPlusCircle,
-  FiMessageSquare
+  FiFileText 
 } from "react-icons/fi";
 
 import { MdStorefront, MdOutlineWorkspacePremium } from "react-icons/md";
@@ -115,9 +115,7 @@ const UserDashboard = () => {
               },
               {
                 id: "orders",
-                icon: (
-                  <FiMessageSquare className="ml-3 text-green-600" size={18} />
-                ),
+                icon: <FiFileText className="ml-3 text-green-600" size={18} />,
                 label: "Orders & Chats",
               },
               ...(isSeller

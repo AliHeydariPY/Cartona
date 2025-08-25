@@ -11,6 +11,7 @@ import {
   FiTruck,
   FiClock,
   FiBox,
+  FiFileText,
 } from "react-icons/fi";
 
 const Orders = () => {
@@ -146,19 +147,17 @@ const Orders = () => {
       <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-lg p-5 sm:p-6 2xl:p-8 border border-blue-400 hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300">
         {/* هدر */}
         <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center">
-            <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-3 rounded-full mr-4">
-              <FiPackage className="text-white" size={24} />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-blue-900">My Orders</h2>
-              <p className="text-blue-600 text-sm">
-                Track and manage your purchases
-              </p>
-            </div>
+          <div className="flex items-center mb-2 sm:mb-0">
+            <FiFileText className="text-green-600 mr-3" size={22} />
+            <h1 className="text-base sm:text-lg md:text-2xl font-bold text-blue-800">
+              My Orders
+            </h1>
+            <p className="text-blue-700 text-sm mt-0.75 ml-3">
+              Track and manage your purchases
+            </p>
           </div>
 
-          <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+          <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium">
             {orders.length} orders
           </span>
         </div>

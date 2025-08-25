@@ -23,7 +23,7 @@ const Favorites = ({ setAddToCartPopup, setSelectedProduct }) => {
         {/* Wishlist Header */}
         <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-lg p-4 sm:p-6 2xl:p-8 border border-blue-400 hover:shadow-2xl hover:shadow-blue-500/40 transition-all duration-300">
           <div className="flex justify-between flex-wrap">
-            <h2 className="text-lg sm:text-2xl font-bold text-blue-900 mb-4 sm:mb-8 w-full sm:w-5/10 flex items-center">
+            <h2 className="text-lg sm:text-2xl font-bold text-blue-800 mb-4 sm:mb-8 w-full sm:w-5/10 flex items-center">
               <span>
                 <FiHeart
                   className="mr-2 sm:mr-3 text-rose-500 fill-current"

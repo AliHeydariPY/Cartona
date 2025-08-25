@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
+import { getCartProducts } from "../services/cartAPIServices"; 
+
 import { FiSearch } from "react-icons/fi";
 import { FaRegHeart, FaHeart } from "react-icons/fa6";
 import { IoCart, IoCartOutline } from "react-icons/io5";
@@ -12,7 +14,21 @@ import { UserCircleIcon as UserCircleSolid } from "@heroicons/react/24/solid";
 const Navbar = () => {
   const navigate = useNavigate();
   const { query } = useParams();
-  const [search, setSearch] = useState(() => {});
+  const [search, setSearch] = useState("");
+  const [cartItems, setCartItems] = useState([]);
+
+
+  useEffect(() => {
+    const fetchCartItems = async () => {
+      const cartProductsRes = await getCartProducts(
+        localStorage.getItem("userID")
+      );
+      setCartItems(cartProductsRes.data.items);
+    };
+
+    fetchCartItems();
+  }, []);
+
 
   useEffect(() => {
     const currentURL = window.location.href;
@@ -107,7 +123,7 @@ const Navbar = () => {
                 </div>
 
                 <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  3
+                  {cartItems.length}
                 </span>
               </div>
 
