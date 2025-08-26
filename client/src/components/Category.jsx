@@ -71,10 +71,12 @@ const CategoriesCarousel = ({ mainCategories }) => {
                 <h3 className="font-semibold text-base text-blue-800">
                   {category.name}
                 </h3>
-                <FiArrowRight
-                  size={16}
-                  className="text-blue-600 group-hover:text-cyan-500 group-hover:translate-x-1 transition-all duration-300"
-                />
+                <span>
+                  <FiArrowRight
+                    size={16}
+                    className="text-blue-600 group-hover:text-cyan-500 group-hover:translate-x-1 transition-all duration-300"
+                  />
+                </span>
               </div>
 
               <div className="absolute inset-0 border-2 border-transparent group-hover:border-cyan-400 rounded-2xl transition-all duration-300 pointer-events-none"></div>

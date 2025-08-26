@@ -11,7 +11,7 @@ const CartonaLoader = ({ isLoading }) => {
     } else {
       setTimeout(() => {
         setShow(false);
-      }, 800);
+      }, 700);
     }
   }, [isLoading]);
 

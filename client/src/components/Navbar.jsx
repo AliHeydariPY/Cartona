@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { getCartProducts } from "../services/cartAPIServices"; 
+import { getCartProducts } from "../services/cartAPIServices";
 
 import { FiSearch } from "react-icons/fi";
 import { FaRegHeart, FaHeart } from "react-icons/fa6";
@@ -10,13 +10,14 @@ import { BiCategory } from "react-icons/bi";
 import { BiSolidCategory } from "react-icons/bi";
 import { UserCircleIcon } from "@heroicons/react/24/outline";
 import { UserCircleIcon as UserCircleSolid } from "@heroicons/react/24/solid";
+import { FiBell } from "react-icons/fi";
+import { GoBellFill } from "react-icons/go";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const { query } = useParams();
   const [search, setSearch] = useState("");
   const [cartItems, setCartItems] = useState([]);
-
 
   useEffect(() => {
     const fetchCartItems = async () => {
@@ -28,7 +29,6 @@ const Navbar = () => {
 
     fetchCartItems();
   }, []);
-
 
   useEffect(() => {
     const currentURL = window.location.href;
@@ -96,61 +96,78 @@ const Navbar = () => {
           </div>
 
           <div className="hidden md:block col-span-2">
-            <div className="flex items-center justify-end md:justify-center space-x-4 md:space-x-6 lg:space-x-10 xl:space-x-15">
+            <div className="flex items-center justify-center space-x-4 md:space-x-8 lg:space-x-10 xl:space-x-15">
               <div
                 onClick={() => navigate("/account/favorites")}
-                className="relative group flex flex-col items-center cursor-pointer w-8 h-8 mt-2"
+                className="relative group flex flex-col items-center cursor-pointer w-8 h-8 mt-3 lg:mt-2"
               >
-                <FaRegHeart className="absolute inset-0 text-2xl text-blue-600 opacity-100 group-hover:opacity-0 scale-100 group-hover:scale-0 transition-all duration-300" />
+                <FaRegHeart className="absolute inset-0 text-xl lg:text-2xl text-blue-600 opacity-100 group-hover:opacity-0 scale-100 group-hover:scale-0 transition-all duration-300" />
 
-                <FaHeart className="absolute inset-0 text-2xl text-blue-600 opacity-0 group-hover:opacity-100 scale-0 group-hover:scale-100 transition-all duration-300" />
+                <FaHeart className="absolute inset-0 text-xl lg:text-2xl text-blue-600 opacity-0 group-hover:opacity-100 scale-0 group-hover:scale-100 transition-all duration-300" />
 
-                <div className="absolute -bottom-5.5 left-2/5 transform -translate-x-1/2 bg-blue-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+                <div className="absolute -bottom-4 lg:-bottom-5.5 left-2/6 lg:left-2/5 transform -translate-x-1/2 bg-blue-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
                   Favorite
                 </div>
               </div>
 
               <div
                 onClick={() => navigate("/account/cart")}
-                className="relative group flex flex-col items-center cursor-pointer w-8 h-8 mt-1"
+                className="relative group flex flex-col items-center cursor-pointer w-8 h-8 mt-2.25 lg:mt-1"
               >
-                <IoCartOutline className="absolute inset-0 text-3xl text-blue-600 opacity-100 group-hover:opacity-0 scale-100 group-hover:scale-0 transition-all duration-300" />
+                <IoCartOutline className="absolute inset-0 text-2xl lg:text-3xl text-blue-600 opacity-100 group-hover:opacity-0 scale-100 group-hover:scale-0 transition-all duration-300" />
 
-                <IoCart className="absolute inset-0 text-3xl text-blue-600 opacity-0 group-hover:opacity-100 scale-0 group-hover:scale-100 transition-all duration-300" />
+                <IoCart className="absolute inset-0 text-2xl lg:text-3xl text-blue-600 opacity-0 group-hover:opacity-100 scale-0 group-hover:scale-100 transition-all duration-300" />
 
-                <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+                <div className="absolute -bottom-4.25 left-2/5 lg:-bottom-6 lg:left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
                   Cart
                 </div>
 
-                <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                <span className="absolute -top-0.75 right-1 lg:-top-1 lg:-right-1 bg-blue-500 text-white text-xs rounded-full w-3.5 h-3.5 lg:w-5 lg:h-5 flex items-center justify-center">
                   {cartItems.length}
                 </span>
               </div>
 
               <div
                 onClick={() => navigate("/account/profile")}
-                className="relative group flex flex-col items-center cursor-pointer w-8 h-8 mt-0.5"
+                className="relative group flex flex-col items-center cursor-pointer w-6.5 h-6.5 lg:w-8 lg:h-8 mt-0.5"
               >
-                <UserCircleIcon className="absolute inset-0 text-3xl text-blue-600 opacity-100 group-hover:opacity-0 scale-100 group-hover:scale-0 transition-all duration-300" />
+                <UserCircleIcon className="absolute inset-0 text-blue-600 opacity-100 group-hover:opacity-0 scale-100 group-hover:scale-0 transition-all duration-300" />
 
-                <UserCircleSolid className="absolute inset-0 text-3xl text-blue-600 opacity-0 group-hover:opacity-100 scale-0 group-hover:scale-100 transition-all duration-300" />
+                <UserCircleSolid className="absolute inset-0 text-blue-600 opacity-0 group-hover:opacity-100 scale-0 group-hover:scale-100 transition-all duration-300" />
 
-                <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+                <div className="absolute -bottom-6 left-1/2 lg:-bottom-6.5 lg:left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
                   Your Account
                 </div>
               </div>
 
-              <div className="relative group flex flex-col items-center cursor-pointer w-8 h-8 mt-1">
-                <BiCategory className="absolute inset-0 text-3xl text-blue-600 opacity-100 group-hover:opacity-0 scale-100 group-hover:scale-0 transition-all duration-300" />
+              {/* <div className="relative group flex flex-col items-center cursor-pointer w-8 h-8 mt-2 lg:mt-1">
+                <BiCategory className="absolute inset-0 text-2xl lg:text-3xl text-blue-600 opacity-100 group-hover:opacity-0 scale-100 group-hover:scale-0 transition-all duration-300" />
 
                 <BiSolidCategory
-                  className="absolute inset-0 text-3xl text-blue-600
+                  className="absolute inset-0 text-2xl lg:text-3xl text-blue-600
                    opacity-0 group-hover:opacity-100 scale-0 group-hover:scale-100 transition-all duration-300"
                 />
 
                 <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
                   Categories
                 </div>
+              </div> */}
+
+              <div className="relative group flex flex-col items-center cursor-pointer w-8 h-8 mt-2.75 lg:mt-1.5">
+                <FiBell className="absolute inset-0 text-2xl lg:text-3xl text-blue-600 opacity-100 group-hover:opacity-0 scale-100 group-hover:scale-0 transition-all duration-300" />
+
+                <GoBellFill
+                  className="absolute inset-0 text-2xl lg:text-3xl text-blue-600
+                   opacity-0 group-hover:opacity-100 scale-0 group-hover:scale-100 transition-all duration-300"
+                />
+
+                <div className="absolute -bottom-4 left-2/5 lg:-bottom-6 lg:left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+                  Notifications
+                </div>
+
+                <span className="absolute -top-0.75 right-1.25 lg:-top-1 lg:-right-1 bg-blue-500 text-white text-xs rounded-full w-3.5 h-3.5 lg:w-5 lg:h-5 flex items-center justify-center">
+                  {cartItems.length}
+                </span>
               </div>
             </div>
           </div>
