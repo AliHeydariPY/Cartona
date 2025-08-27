@@ -80,3 +80,8 @@ export const disableNotifications = (srotekeeperID) => {
   const url = `${SERVER_URL}/comments-api/subscriptions/${srotekeeperID}/`;
   return axios.delete(url);
 };
+
+export const getPurchases = (userID) => {
+  const url = `${SERVER_URL}/comments-api/purchases/buyer/${userID}/`
+  return axios.get(url)
+}
