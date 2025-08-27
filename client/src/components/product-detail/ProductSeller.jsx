@@ -68,8 +68,8 @@ const ProductSeller = ({ seller }) => {
           >
             {notificationsEnabled ? (
               <>
-                <span className="my-0.75">
-                  <FiBell className="w-4 h-4" />
+                <span className="my-0.5">
+                  <FiBell className="w-4 h-4 mb-0.5" />
                 </span>
                 Notifications On
               </>

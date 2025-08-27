@@ -14,7 +14,9 @@ import Orders from "./pages/user-dashboard/Orders";
 import Payments from "./pages/user-dashboard/Payments";
 import AddProduct from "./pages/user-dashboard/AddProduct";
 import MyProducts from "./pages/user-dashboard/MyProducts";
+import ChatLayout from "./pages/user-dashboard/chats/ChatLayout";
 import ProductDetail from "./pages/ProductDetail";
+
 import SearchPage from "./pages/SearchPage";
 import SubCategory from "./pages/SubCategory";
 
@@ -95,6 +97,16 @@ function App() {
             path="orders"
             element={
               <Orders
+                reloadComponent={reloadComponent}
+                setReloadComponent={setReloadComponent}
+              />
+            }
+          />
+
+          <Route
+            path="chats"
+            element={
+              <ChatLayout
                 reloadComponent={reloadComponent}
                 setReloadComponent={setReloadComponent}
               />

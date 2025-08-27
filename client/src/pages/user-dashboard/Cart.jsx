@@ -135,7 +135,7 @@ const Cart = ({
             </span>
           </div>
 
-          <div className="grid grid-cols-1 gap-8">
+          <div className="grid grid-cols-1 gap-6">
             {/* products list */}
             <div className="space-y-6">
               {cartItems.length === 0 ? (

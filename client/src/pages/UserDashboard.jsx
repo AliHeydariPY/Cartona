@@ -15,7 +15,9 @@ import {
   FiUsers,
   FiDollarSign,
   FiPlusCircle,
-  FiFileText 
+  FiFileText,
+  FiBell,
+  FiMessageSquare,
 } from "react-icons/fi";
 import { MdStorefront, MdOutlineWorkspacePremium } from "react-icons/md";
 
@@ -106,6 +108,11 @@ const UserDashboard = () => {
                 label: "Favorites",
               },
               {
+                id: "notifications",
+                icon: <FiBell className="ml-3 text-amber-500" size={18} />,
+                label: "Notifications",
+              },
+              {
                 id: "cart",
                 icon: (
                   <FiShoppingCart className="ml-3 text-blue-700" size={18} />
@@ -115,7 +122,14 @@ const UserDashboard = () => {
               {
                 id: "orders",
                 icon: <FiFileText className="ml-3 text-green-600" size={18} />,
-                label: "Orders & Chats",
+                label: "Orders",
+              },
+              {
+                id: "chats",
+                icon: (
+                  <FiMessageSquare className="ml-3 text-green-600" size={18} />
+                ),
+                label: "Chats",
               },
               ...(isSeller
                 ? [
@@ -130,7 +144,7 @@ const UserDashboard = () => {
                       id: "add-product",
                       icon: (
                         <FiPlusCircle
-                          className="ml-3 text-green-500"
+                          className="ml-3 text-green-500 mb-0.25"
                           size={18}
                         />
                       ),
@@ -140,7 +154,9 @@ const UserDashboard = () => {
                 : []),
               {
                 id: "home",
-                icon: <FiHome className="ml-3 text-amber-500" size={18} />,
+                icon: (
+                  <FiHome className="ml-3 text-amber-500 mb-0.5" size={18} />
+                ),
                 label: "Home",
               },
             ].map((item, idx) => (
@@ -149,7 +165,7 @@ const UserDashboard = () => {
                 className={`w-full flex cursor-pointer items-center p-3 sm:p-4 rounded-xl font-semibold text-sm sm:text-base transition-all duration-300 ${
                   location.pathname.includes(`/account/${item.id}`)
                     ? "bg-gradient-to-r from-cyan-200 to-blue-400 text-blue-900 shadow-md"
-                    : "hover:bg-gradient-to-r hover:from-cyan-100 hover:to-blue-200 text-blue-800 hover:shadow-sm"
+                    : "hover:bg-gradient-to-r hover:from-cyan-100 hover:to-blue-200 text-blue-800 transition-colors duration-300"
                 }`}
                 onClick={() => {
                   if (item.id == "profile") {
@@ -160,6 +176,8 @@ const UserDashboard = () => {
                     navigate("/account/favorites");
                   } else if (item.id == "orders") {
                     navigate("/account/orders");
+                  } else if (item.id == "chats") {
+                    navigate("/account/chats");
                   } else if (item.id == "my-products") {
                     navigate("/account/my-products");
                   } else if (item.id == "add-product") {
