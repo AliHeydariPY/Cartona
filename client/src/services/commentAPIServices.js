@@ -85,3 +85,13 @@ export const getPurchases = (userID) => {
   const url = `${SERVER_URL}/comments-api/purchases/buyer/${userID}/`
   return axios.get(url)
 }
+
+export const getPurchaseChats = (purchaseID) => {
+  const url = `${SERVER_URL}/comments-api/purchase-chats/purchase/${purchaseID}/`
+  return axios.get(url)
+}
+
+export const sendMessagse = (payload) => {
+  const url = `${SERVER_URL}/comments-api/purchase-chats/`
+  return axios.post(url, payload)
+}
