@@ -16,7 +16,7 @@ import {
   getPurchasesByStorekeepre,
   sendMessagse,
 } from "../../../services/commentAPIServices";
-import { getShopkeeper } from "../../../services/userAPIServices";
+import { getShopkeeper, getBuyer } from "../../../services/userAPIServices";
 import { getProduct } from "../../../services/productAPIServices";
 
 const ChatLayout = ({ reloadComponent, setReloadComponent }) => {
@@ -26,6 +26,8 @@ const ChatLayout = ({ reloadComponent, setReloadComponent }) => {
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
   const messagesEndRef = useRef(null);
+  const userID = localStorage.getItem("userID");
+  const storekeeperID = localStorage.getItem("storekeeperID");
 
   // وقتی لیست پیام‌ها تغییر کرد => اسکرول کن به آخر
   useEffect(() => {
@@ -36,8 +38,8 @@ const ChatLayout = ({ reloadComponent, setReloadComponent }) => {
 
   useEffect(() => {
     const fetchPVs = async () => {
-      if (!localStorage.getItem("storekeeperID")) {
-        const pvsRes = await getPurchasesByBuyer(localStorage.getItem("userID"));
+      if (!storekeeperID) {
+        const pvsRes = await getPurchasesByBuyer(userID);
 
         console.log(pvsRes.data);
 
@@ -55,17 +57,17 @@ const ChatLayout = ({ reloadComponent, setReloadComponent }) => {
         );
         setConversations(pvs);
       } else {
-        const pvsRes = await getPurchasesByStorekeepre(localStorage.getItem("storekeeperID"));
+        const pvsRes = await getPurchasesByStorekeepre(storekeeperID);
 
         console.log(pvsRes);
 
         const pvs = await Promise.all(
           pvsRes.data.map(async (pv) => {
-            const storekeeper = await getShopkeeper(pv.storekeeper);
+            const user = await getBuyer(pv.buyer);
             const product = await getProduct(pv.product);
 
             return {
-              store: { ...storekeeper.data },
+              user: { ...user.data },
               ...pv,
               product: { ...product.data },
             };
@@ -110,21 +112,25 @@ const ChatLayout = ({ reloadComponent, setReloadComponent }) => {
   //   : [];
 
   const fetchMessages = async (purchaseID) => {
-    const chatsRes = await getPurchaseChats(purchaseID);
-    const sortMessages = await Promise.all(
-      chatsRes.data.map(async (message) => {
-        const dateStr = message.sent_at;
-        const date = new Date(dateStr.replace(" ", "T"));
+    try {
+      const chatsRes = await getPurchaseChats(purchaseID);
+      const sortMessages = await Promise.all(
+        chatsRes.data.map(async (message) => {
+          const dateStr = message.sent_at;
+          const date = new Date(dateStr.replace(" ", "T"));
 
-        const hours = date.getHours().toString().padStart(2, "0");
-        const minutes = date.getMinutes().toString().padStart(2, "0");
+          const hours = date.getHours().toString().padStart(2, "0");
+          const minutes = date.getMinutes().toString().padStart(2, "0");
 
-        const sent_at = `${hours}:${minutes}`;
+          const sent_at = `${hours}:${minutes}`;
 
-        return { ...message, sent_at };
-      })
-    );
-    setMessages(sortMessages.reverse());
+          return { ...message, sent_at };
+        })
+      );
+      setMessages(sortMessages.reverse());
+    } catch {
+      setMessages([]);
+    }
   };
 
   return (
@@ -184,16 +190,20 @@ const ChatLayout = ({ reloadComponent, setReloadComponent }) => {
                       <div className="flex items-center justify-between mb-1">
                         <div className="flex items-center">
                           <h4 className="font-semibold text-blue-900">
-                            {selectedChat.store.store_name}
+                            {storekeeperID
+                              ? selectedChat.user.username
+                              : selectedChat.store.store_name}
                           </h4>
                           <div className="flex items-center space-x-2">
-                            <span className="ml-2 px-2 py-1 bg-gradient-to-r from-blue-600 to-cyan-500 text-white text-xs font-bold rounded-full flex items-center">
-                              <MdStorefront
-                                className="mr-1 mb-0.25"
-                                size={15}
-                              />{" "}
-                              SELLER
-                            </span>
+                            {!storekeeperID && (
+                              <span className="ml-2 px-2 py-1 bg-gradient-to-r from-blue-600 to-cyan-500 text-white text-xs font-bold rounded-full flex items-center">
+                                <MdStorefront
+                                  className="mr-1 mb-0.25"
+                                  size={15}
+                                />{" "}
+                                SELLER
+                              </span>
+                            )}
                             {!selectedChat.chat_enabled && (
                               <span className="bg-gray-500 text-white text-xs px-2 py-1 rounded-full">
                                 Chat Closed
@@ -203,7 +213,7 @@ const ChatLayout = ({ reloadComponent, setReloadComponent }) => {
                         </div>
 
                         <button
-                          onClick={() => setReloadComponent(!reloadComponent)}
+                          onClick={() => fetchMessages(selectedChat.id)}
                           className="p-2 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow hover:from-blue-600 hover:to-cyan-600 transition-all duration-300"
                           title="Refresh messages"
                         >
@@ -238,14 +248,14 @@ const ChatLayout = ({ reloadComponent, setReloadComponent }) => {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       className={`flex ${
-                        message.sender == localStorage.getItem("userID")
+                        message.sender == userID
                           ? "justify-end"
                           : "justify-start"
                       }`}
                     >
                       <div
                         className={`max-w-xs lg:max-w-md px-3 py-2 rounded-xl ${
-                          message.sender == localStorage.getItem("userID")
+                          message.sender == userID
                             ? "bg-gradient-to-br from-blue-600 to-cyan-500 text-white"
                             : "bg-white border border-blue-200 text-blue-900"
                         }`}
@@ -253,7 +263,7 @@ const ChatLayout = ({ reloadComponent, setReloadComponent }) => {
                         <p>{message.message}</p>
                         <span
                           className={`text-xs ${
-                            message.sender == localStorage.getItem("userID")
+                            message.sender == userID
                               ? "text-blue-100"
                               : "text-blue-500"
                           }`}
@@ -280,7 +290,7 @@ const ChatLayout = ({ reloadComponent, setReloadComponent }) => {
                             if (message.trim() !== "") {
                               sendMessagse({
                                 purchase: selectedChat.id,
-                                sender: localStorage.getItem("userID"),
+                                sender: userID,
                                 message: message,
                               }).then((res) => {
                                 fetchMessages(res.data.purchase);

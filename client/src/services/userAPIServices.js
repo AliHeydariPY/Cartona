@@ -25,3 +25,10 @@ export const getShopkeeper = (storekeeperID) => {
     .get(url)
     
 }
+
+export const getBuyer = (buyerID) => {
+  const url = `${SERVER_URL}/user-api/users/${buyerID}`;
+  return axios
+    .get(url)
+    
+}

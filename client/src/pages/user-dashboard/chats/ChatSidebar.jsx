@@ -10,6 +10,8 @@ const ChatSidebar = ({
   fetchMessages,
   selectedChat,
 }) => {
+  const storekeeperID = localStorage.getItem("storekeeperID");
+
   return (
     <AnimatePresence>
       {(showSidebar || window.innerWidth >= 1280) && (
@@ -92,10 +94,16 @@ const ChatSidebar = ({
                     {/* نام فروشگاه و زمان با وضعیت */}
                     <div className="flex items-center justify-between mb-1">
                       <h4 className="flex font-semibold text-blue-900 truncate">
-                        {conversation.store.store_name}
-                        <span className="mt-1 ml-1 text-blue-800">
-                          <MdStorefront size={15} />
-                        </span>
+                        {storekeeperID
+                          ? conversation.user.username
+                          : conversation.store
+                              .store_name
+                        }
+                        {!storekeeperID && (
+                          <span className="mt-1 ml-1 text-blue-800">
+                            <MdStorefront size={15} />
+                          </span>
+                        )}
                         {!conversation.chat_enabled && (
                           <span className="ml-2 flex items-center bg-gray-500 text-white text-xs px-2 py-0.5 rounded-full">
                             Closed
