@@ -1,59 +1,82 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import {
   FiMenu,
   FiX,
   FiShoppingBag,
+  FiLock,
+  FiRefreshCcw,
 } from "react-icons/fi";
 import { RiSendPlaneFill } from "react-icons/ri";
 import { MdStorefront } from "react-icons/md";
 import ChatSidebar from "./ChatSidebar";
 import {
   getPurchaseChats,
-  getPurchases,
+  getPurchasesByBuyer,
+  getPurchasesByStorekeepre,
   sendMessagse,
 } from "../../../services/commentAPIServices";
 import { getShopkeeper } from "../../../services/userAPIServices";
 import { getProduct } from "../../../services/productAPIServices";
 
-const ChatLayout = () => {
+const ChatLayout = ({ reloadComponent, setReloadComponent }) => {
   const [selectedChat, setSelectedChat] = useState(null);
   const [showSidebar, setShowSidebar] = useState(false);
   const [conversations, setConversations] = useState([]);
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
+  const messagesEndRef = useRef(null);
+
+  // وقتی لیست پیام‌ها تغییر کرد => اسکرول کن به آخر
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
 
   useEffect(() => {
     const fetchPVs = async () => {
-      const pvsRes = await getPurchases(localStorage.getItem("userID"));
-      console.log(pvsRes.data);
+      if (!localStorage.getItem("storekeeperID")) {
+        const pvsRes = await getPurchasesByBuyer(localStorage.getItem("userID"));
 
-      const pvs = await Promise.all(
-        pvsRes.data.map(async (pv) => {
-          const storekeeper = await getShopkeeper(pv.storekeeper);
-          const product = await getProduct(pv.product);
-          console.log(pv);
-          console.log(storekeeper.data);
-          console.log(product.data);
+        console.log(pvsRes.data);
 
-          console.log({
-            store: { ...storekeeper.data },
-            ...pv,
-            product: { ...product.data },
-          });
+        const pvs = await Promise.all(
+          pvsRes.data.map(async (pv) => {
+            const storekeeper = await getShopkeeper(pv.storekeeper);
+            const product = await getProduct(pv.product);
 
-          return {
-            store: { ...storekeeper.data },
-            ...pv,
-            product: { ...product.data },
-          };
-        })
-      );
-      setConversations(pvs);
+            return {
+              store: { ...storekeeper.data },
+              ...pv,
+              product: { ...product.data },
+            };
+          })
+        );
+        setConversations(pvs);
+      } else {
+        const pvsRes = await getPurchasesByStorekeepre(localStorage.getItem("storekeeperID"));
+
+        console.log(pvsRes);
+
+        const pvs = await Promise.all(
+          pvsRes.data.map(async (pv) => {
+            const storekeeper = await getShopkeeper(pv.storekeeper);
+            const product = await getProduct(pv.product);
+
+            return {
+              store: { ...storekeeper.data },
+              ...pv,
+              product: { ...product.data },
+            };
+          })
+        );
+        setConversations(pvs);
+      }
     };
 
     fetchPVs();
-  }, []);
+  }, [reloadComponent]);
   // داده‌های نمونه
   // const conversations = [
   //   { id: 1, name: "John Doe", lastMessage: "Hello there!", unread: 2, time: "2:30 PM" },
@@ -91,7 +114,7 @@ const ChatLayout = () => {
     const sortMessages = await Promise.all(
       chatsRes.data.map(async (message) => {
         const dateStr = message.sent_at;
-        const date = new Date(dateStr.replace(" ", "T")); 
+        const date = new Date(dateStr.replace(" ", "T"));
 
         const hours = date.getHours().toString().padStart(2, "0");
         const minutes = date.getMinutes().toString().padStart(2, "0");
@@ -125,57 +148,86 @@ const ChatLayout = () => {
 
         <div className="flex h-[700px] xl:h-[762px] 2xl:h-[785px]">
           {/* Sidebar */}
-          <ChatSidebar conversations={conversations} setSelectedChat={setSelectedChat} showSidebar={showSidebar} setShowSidebar={setShowSidebar} fetchMessages={fetchMessages} selectedChat={selectedChat} />
+          <ChatSidebar
+            conversations={conversations}
+            setSelectedChat={setSelectedChat}
+            showSidebar={showSidebar}
+            setShowSidebar={setShowSidebar}
+            fetchMessages={fetchMessages}
+            selectedChat={selectedChat}
+          />
 
           {/* بخش اصلی چت */}
           <div className="flex-1 flex flex-col">
             {selectedChat ? (
               <>
-                {/* هدر چت با اطلاعات محصول */}
+                {/* هدر چت با وضعیت */}
                 <div className="p-4 border-b border-blue-200 bg-white/80">
                   <div className="flex items-center space-x-3">
-                    {/* تصویر محصول */}
-                    <div className="w-16 ring ring-blue-400 h-16 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    {/* تصویر محصول با وضعیت */}
+                    <div
+                      className={`w-16 h-16 ring ring-blue-400 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden relative`}
+                    >
                       <img
                         src={selectedChat.product.image}
                         alt={selectedChat.product.name}
                         className="w-full h-full object-cover"
                       />
+                      {!selectedChat.chat_enabled && (
+                        <div className="absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center">
+                          <FiX className="text-white" size={24} />
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
-                        <h4 className="font-semibold text-blue-900">
-                          {selectedChat.store.store_name}
-                        </h4>
-                        <span className="ml-2 px-2 py-1 bg-gradient-to-r from-blue-600 to-cyan-500 text-white text-xs font-bold rounded-full flex items-center">
-                          <MdStorefront className="mr-1 mb-0.25" size={15} />{" "}
-                          SELLER
-                        </span>
+                        <div className="flex items-center">
+                          <h4 className="font-semibold text-blue-900">
+                            {selectedChat.store.store_name}
+                          </h4>
+                          <div className="flex items-center space-x-2">
+                            <span className="ml-2 px-2 py-1 bg-gradient-to-r from-blue-600 to-cyan-500 text-white text-xs font-bold rounded-full flex items-center">
+                              <MdStorefront
+                                className="mr-1 mb-0.25"
+                                size={15}
+                              />{" "}
+                              SELLER
+                            </span>
+                            {!selectedChat.chat_enabled && (
+                              <span className="bg-gray-500 text-white text-xs px-2 py-1 rounded-full">
+                                Chat Closed
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => setReloadComponent(!reloadComponent)}
+                          className="p-2 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow hover:from-blue-600 hover:to-cyan-600 transition-all duration-300"
+                          title="Refresh messages"
+                        >
+                          <FiRefreshCcw
+                            size={18}
+                            className="animate-spin-slow-once"
+                          />
+                        </button>
                       </div>
 
-                      <p className="text-sm text-blue-800 font-medium mb-1">
-                        {selectedChat.product.name}
-                      </p>
-
-                      <div className="flex items-center space-x-2">
-                        {selectedChat.product.discounted_price ? (
-                          <>
-                            <span className="text-lg font-bold text-blue-800">
-                              ${selectedChat.product.discounted_price}
-                            </span>
-                            <span className="text-sm text-rose-500 line-through">
-                              ${selectedChat.product.price}
-                            </span>
-                          </>
-                        ) : (
-                          <span className="text-lg font-bold text-blue-800">
-                            ${selectedChat.product.price}
-                          </span>
-                        )}
+                      <div className="flex justify-between">
+                        <p className="text-sm text-blue-800 font-medium mb-1">
+                          {selectedChat.product.name}
+                        </p>
                       </div>
                     </div>
                   </div>
+                  {/* پیام وضعیت برای چت غیرفعال */}
+                  {!selectedChat.chat_enabled && (
+                    <p className="text-sm text-rose-600 mt-2">
+                      This chat conversation is no longer active. You can view
+                      previous messages but cannot send new ones.
+                    </p>
+                  )}
                 </div>
 
                 {/* پیام‌ها */}
@@ -192,9 +244,9 @@ const ChatLayout = () => {
                       }`}
                     >
                       <div
-                        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-xl ${
+                        className={`max-w-xs lg:max-w-md px-3 py-2 rounded-xl ${
                           message.sender == localStorage.getItem("userID")
-                            ? "bg-gradient-to-r from-blue-600 to-cyan-500 text-white"
+                            ? "bg-gradient-to-br from-blue-600 to-cyan-500 text-white"
                             : "bg-white border border-blue-200 text-blue-900"
                         }`}
                       >
@@ -211,17 +263,39 @@ const ChatLayout = () => {
                       </div>
                     </motion.div>
                   ))}
+
+                  {/* اینجا ref قرار می‌گیره برای اسکرول به آخر */}
+                  <div ref={messagesEndRef} />
                 </div>
 
-                {/* input ارسال پیام */}
-                <div className="p-4 border-t border-blue-200 bg-white/80">
-                  <div className="flex items-center space-x-3">
-                    <input
-                      type="text"
-                      value={message}
-                      onKeyDown={(e) => {
-                        if (e.code == "Enter") {
-                          if (message.trim() !== "") {
+                {/* input ارسال پیام - غیرفعال برای چت‌های بسته */}
+                {selectedChat.chat_enabled ? (
+                  <div className="p-4 border-t border-blue-200 bg-white/80">
+                    <div className="flex items-center space-x-3">
+                      <input
+                        type="text"
+                        value={message}
+                        onKeyDown={(e) => {
+                          if (e.code == "Enter") {
+                            if (message.trim() !== "") {
+                              sendMessagse({
+                                purchase: selectedChat.id,
+                                sender: localStorage.getItem("userID"),
+                                message: message,
+                              }).then((res) => {
+                                fetchMessages(res.data.purchase);
+                                setMessage("");
+                              });
+                            }
+                          }
+                        }}
+                        onChange={(e) => setMessage(e.target.value)}
+                        placeholder="Type a message..."
+                        className="flex-1 px-4 py-2 border border-blue-300 rounded-full hover:outline-none hover:ring-1 hover:ring-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400 transition-all duration-300"
+                      />
+                      <button
+                        onClick={() => {
+                          if (message.trim()) {
                             sendMessagse({
                               purchase: selectedChat.id,
                               sender: localStorage.getItem("userID"),
@@ -231,31 +305,21 @@ const ChatLayout = () => {
                               setMessage("");
                             });
                           }
-                        }
-                      }}
-                      onChange={(e) => setMessage(e.target.value)}
-                      placeholder="Type a message..."
-                      className="flex-1 px-4 py-2 border border-blue-300 rounded-full hover:outline-none hover:ring-1 hover:ring-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400 transition-all duration-300"
-                    />
-                    <button
-                      onClick={() => {
-                        if (message.trim()) {
-                          sendMessagse({
-                            purchase: selectedChat.id,
-                            sender: localStorage.getItem("userID"),
-                            message: message,
-                          }).then((res) => {
-                            fetchMessages(res.data.purchase);
-                            setMessage("");
-                          });
-                        }
-                      }}
-                      className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white p-3 rounded-full hover:from-blue-700 hover:to-cyan-600 cursor-pointer transition-colors duration-300"
-                    >
-                      <RiSendPlaneFill size={18} />
-                    </button>
+                        }}
+                        className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white p-3 rounded-full hover:from-blue-700 hover:to-cyan-600 cursor-pointer transition-colors duration-300"
+                      >
+                        <RiSendPlaneFill size={18} />
+                      </button>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="p-4 border-t border-blue-200 bg-rose-50/80 text-center">
+                    <p className="text-rose-700 text-sm">
+                      <FiLock className="inline mr-2 mb-1" />
+                      This chat is closed. You can no longer send messages.
+                    </p>
+                  </div>
+                )}
               </>
             ) : (
               /* حالت انتخاب نشدن چت */

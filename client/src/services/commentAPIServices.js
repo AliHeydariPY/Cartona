@@ -81,8 +81,13 @@ export const disableNotifications = (srotekeeperID) => {
   return axios.delete(url);
 };
 
-export const getPurchases = (userID) => {
+export const getPurchasesByBuyer = (userID) => {
   const url = `${SERVER_URL}/comments-api/purchases/buyer/${userID}/`
+  return axios.get(url)
+}
+
+export const getPurchasesByStorekeepre = (storekeeperID) => {
+  const url = `${SERVER_URL}/comments-api/purchases/storekeeper/${storekeeperID}/`
   return axios.get(url)
 }
 

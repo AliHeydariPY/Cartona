@@ -1,12 +1,15 @@
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  FiMessageSquare,
-  FiSearch,
-
-} from "react-icons/fi";
+import { FiMessageSquare, FiSearch, FiX } from "react-icons/fi";
 import { MdStorefront } from "react-icons/md";
 
-const ChatSidebar = ({ conversations, setSelectedChat, showSidebar, setShowSidebar, fetchMessages, selectedChat }) => {
+const ChatSidebar = ({
+  conversations,
+  setSelectedChat,
+  showSidebar,
+  setShowSidebar,
+  fetchMessages,
+  selectedChat,
+}) => {
   return (
     <AnimatePresence>
       {(showSidebar || window.innerWidth >= 1280) && (
@@ -52,34 +55,52 @@ const ChatSidebar = ({ conversations, setSelectedChat, showSidebar, setShowSideb
                   setShowSidebar(false);
                   fetchMessages(conversation.id);
                 }}
-                className={`p-4 border-b border-blue-100 cursor-pointer transition-colors group hover:bg-blue-50 ${
-                  selectedChat?.id === conversation.id ? "bg-blue-100" : ""
-                }`}
+                className={`p-4 border-b border-blue-100 transition-colors group ${
+                  conversation.chat_enabled
+                    ? "cursor-pointer hover:bg-blue-50"
+                    : "cursor-not-allowed opacity-70"
+                } ${selectedChat?.id === conversation.id ? "bg-blue-100" : ""}`}
               >
                 <div className="flex items-start space-x-3">
-                  {/* تصویر محصول */}
+                  {/* تصویر محصول با وضعیت غیرفعال */}
                   <div
                     className={`w-16 h-16 ${
                       selectedChat?.id === conversation.id
                         ? "ring ring-blue-400"
                         : ""
-                    } group-hover:ring group-hover:ring-blue-400 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden transition-all duration-300`}
+                    } ${
+                      conversation.chat_enabled
+                        ? "group-hover:ring group-hover:ring-blue-400"
+                        : ""
+                    } bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden transition-all duration-300 relative`}
                   >
                     <img
                       src={conversation.product.image}
                       alt={conversation.product.name}
                       className="w-full h-full object-cover"
                     />
+
+                    {/* overlay برای چت‌های غیرفعال */}
+                    {!conversation.chat_enabled && (
+                      <div className="absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center">
+                        <FiX className="text-white" size={20} />
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    {/* نام فروشگاه و زمان */}
+                    {/* نام فروشگاه و زمان با وضعیت */}
                     <div className="flex items-center justify-between mb-1">
                       <h4 className="flex font-semibold text-blue-900 truncate">
                         {conversation.store.store_name}
                         <span className="mt-1 ml-1 text-blue-800">
                           <MdStorefront size={15} />
                         </span>
+                        {!conversation.chat_enabled && (
+                          <span className="ml-2 flex items-center bg-gray-500 text-white text-xs px-2 py-0.5 rounded-full">
+                            Closed
+                          </span>
+                        )}
                       </h4>
                       <span className="text-xs text-blue-500 whitespace-nowrap">
                         {conversation.time}
@@ -119,12 +140,19 @@ const ChatSidebar = ({ conversations, setSelectedChat, showSidebar, setShowSideb
                       <p className="text-sm text-blue-600 truncate max-w-[120px]">
                         {conversation.lastMessage}
                       </p>
-                      {conversation.unread > 0 && (
+                      {conversation.unread > 0 && conversation.chat_enabled && (
                         <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                           {conversation.unread}
                         </span>
                       )}
                     </div>
+
+                    {/* پیام برای چت‌های غیرفعال */}
+                    {!conversation.chat_enabled && (
+                      <p className="text-xs text-rose-600 mt-1">
+                        Chat is no longer available
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>

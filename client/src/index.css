@@ -331,3 +331,11 @@ body {
   background: linear-gradient(to right, #2563eb, #01aaff);
   border-radius: 10px;
 }
+
+@keyframes spin-slow-once {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.animate-spin-slow-once {
+  animation: spin-slow-once 0.6s ease-in-out;
+}
