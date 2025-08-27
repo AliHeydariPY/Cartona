@@ -103,15 +103,9 @@ function App() {
             }
           />
 
-          <Route
-            path="chats"
-            element={
-              <ChatLayout
-                reloadComponent={reloadComponent}
-                setReloadComponent={setReloadComponent}
-              />
-            }
-          />
+          <Route path="chats" element={<ChatLayout />} />
+
+          <Route path="chats/:chatID" element={<ChatLayout />} />
 
           <Route path="add-product" element={<AddProduct />} />
 

@@ -91,6 +91,11 @@ export const getPurchasesByStorekeepre = (storekeeperID) => {
   return axios.get(url)
 }
 
+export const getPurchaseByPayment = (paymentID) => {
+  const url = `${SERVER_URL}/comments-api/purchases/payment/${paymentID}/`
+  return axios.get(url)
+}
+
 export const getPurchaseChats = (purchaseID) => {
   const url = `${SERVER_URL}/comments-api/purchase-chats/purchase/${purchaseID}/`
   return axios.get(url)

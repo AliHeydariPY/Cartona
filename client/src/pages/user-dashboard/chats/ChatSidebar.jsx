@@ -1,17 +1,17 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { FiMessageSquare, FiSearch, FiX } from "react-icons/fi";
 import { MdStorefront } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
 
 const ChatSidebar = ({
   conversations,
   setSelectedChat,
   showSidebar,
   setShowSidebar,
-  fetchMessages,
   selectedChat,
 }) => {
   const storekeeperID = localStorage.getItem("storekeeperID");
-
+  const navigate = useNavigate();
   return (
     <AnimatePresence>
       {(showSidebar || window.innerWidth >= 1280) && (
@@ -55,7 +55,8 @@ const ChatSidebar = ({
                 onClick={() => {
                   setSelectedChat(conversation);
                   setShowSidebar(false);
-                  fetchMessages(conversation.id);
+                  // fetchMessages(conversation.id);
+                  navigate(`/account/chats/${conversation.id}`);
                 }}
                 className={`p-4 border-b border-blue-100 transition-colors group ${
                   conversation.chat_enabled
@@ -96,9 +97,7 @@ const ChatSidebar = ({
                       <h4 className="flex font-semibold text-blue-900 truncate">
                         {storekeeperID
                           ? conversation.user.username
-                          : conversation.store
-                              .store_name
-                        }
+                          : conversation.store.store_name}
                         {!storekeeperID && (
                           <span className="mt-1 ml-1 text-blue-800">
                             <MdStorefront size={15} />

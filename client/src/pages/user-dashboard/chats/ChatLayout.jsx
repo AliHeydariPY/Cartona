@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   FiMenu,
@@ -19,7 +20,8 @@ import {
 import { getShopkeeper, getBuyer } from "../../../services/userAPIServices";
 import { getProduct } from "../../../services/productAPIServices";
 
-const ChatLayout = ({ reloadComponent, setReloadComponent }) => {
+const ChatLayout = () => {
+  const { chatID } = useParams();
   const [selectedChat, setSelectedChat] = useState(null);
   const [showSidebar, setShowSidebar] = useState(false);
   const [conversations, setConversations] = useState([]);
@@ -28,13 +30,6 @@ const ChatLayout = ({ reloadComponent, setReloadComponent }) => {
   const messagesEndRef = useRef(null);
   const userID = localStorage.getItem("userID");
   const storekeeperID = localStorage.getItem("storekeeperID");
-
-  // وقتی لیست پیام‌ها تغییر کرد => اسکرول کن به آخر
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [messages]);
 
   useEffect(() => {
     const fetchPVs = async () => {
@@ -78,7 +73,22 @@ const ChatLayout = ({ reloadComponent, setReloadComponent }) => {
     };
 
     fetchPVs();
-  }, [reloadComponent]);
+  }, []);
+
+  useEffect(() => {
+    if (!conversations[0]) return;
+    const chat = conversations.find((conversation) => {
+      return conversation.id == chatID;
+    });
+    setSelectedChat(chat);
+    fetchMessages(chatID);
+  }, [conversations, chatID]);
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
   // داده‌های نمونه
   // const conversations = [
   //   { id: 1, name: "John Doe", lastMessage: "Hello there!", unread: 2, time: "2:30 PM" },
@@ -159,7 +169,6 @@ const ChatLayout = ({ reloadComponent, setReloadComponent }) => {
             setSelectedChat={setSelectedChat}
             showSidebar={showSidebar}
             setShowSidebar={setShowSidebar}
-            fetchMessages={fetchMessages}
             selectedChat={selectedChat}
           />
 

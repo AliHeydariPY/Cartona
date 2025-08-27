@@ -1,10 +1,14 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { convertOffsetToTimes, motion } from "framer-motion";
 
 import { getPayments } from "../../services/cartAPIServices";
 import { getProduct } from "../../services/productAPIServices";
 import { getShopkeeper } from "../../services/userAPIServices";
-import { getCommentsByUser } from "../../services/commentAPIServices";
+import {
+  getCommentsByUser,
+  getPurchaseByPayment,
+} from "../../services/commentAPIServices";
 
 import ReviewModal from "../../components/pop-ups/ReviewModal";
 
@@ -20,6 +24,7 @@ import {
 } from "react-icons/fi";
 
 const Orders = ({ reloadComponent, setReloadComponent }) => {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [filter, setFilter] = useState("All");
   const [isReviewOpen, setIsReviewOpen] = useState(false);
@@ -43,8 +48,6 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
           const commentRes = await getCommentsByUser(
             localStorage.getItem("userID")
           );
-          console.log(commentRes.data);
-          console.log(productRes.data);
           return {
             ...payment,
             product: productRes.data,
@@ -279,7 +282,14 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
 
                 {/* دکمه‌های اقدام */}
                 <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-row gap-3 justify-center items-start lg:items-end xl:items-center lg:col-span-2 xl:col-span-1">
-                  <button className="flex cursor-pointer items-center justify-center px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-lg hover:from-blue-700 hover:to-cyan-600 transition-colors duration-300 text-sm font-semibold whitespace-nowrap min-w-[120px]">
+                  <button
+                    onClick={() => {
+                      getPurchaseByPayment(order.id).then((res) => {
+                        navigate(`/account/chats/${res.data[0].id}`);
+                      });
+                    }}
+                    className="flex cursor-pointer items-center justify-center px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-lg hover:from-blue-700 hover:to-cyan-600 transition-colors duration-300 text-sm font-semibold whitespace-nowrap min-w-[120px]"
+                  >
                     <FiMessageSquare className="mr-2" size={14} />
                     Chat
                   </button>
