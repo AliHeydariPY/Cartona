@@ -1,6 +1,4 @@
-import { CurrencyPoundIcon } from "@heroicons/react/24/outline";
 import axios from "axios";
-import { useParams } from "react-router-dom";
 const SERVER_URL = "http://127.0.0.1:8000";
 
 export const addNewProduct = (formData) => {
