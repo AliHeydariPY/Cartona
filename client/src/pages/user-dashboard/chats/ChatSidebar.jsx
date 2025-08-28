@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { FiMessageSquare, FiSearch, FiX } from "react-icons/fi";
+import { FiMessageSquare, FiSearch, FiX, FiLock } from "react-icons/fi";
 import { MdStorefront } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 
@@ -49,9 +49,9 @@ const ChatSidebar = ({
 
           {/* لیست چت‌ها با اطلاعات محصول */}
           <div className="flex-1 overflow-y-auto">
-            {conversations.map((conversation) => (
+            {conversations.map((conversation, inx) => (
               <div
-                key={conversation.id}
+                key={inx}
                 onClick={() => {
                   setSelectedChat(conversation);
                   setShowSidebar(false);
@@ -95,17 +95,17 @@ const ChatSidebar = ({
                     {/* نام فروشگاه و زمان با وضعیت */}
                     <div className="flex items-center justify-between mb-1">
                       <h4 className="flex font-semibold text-blue-900 truncate">
-                        {storekeeperID
+                        {conversation.user
                           ? conversation.user.username
                           : conversation.store.store_name}
-                        {!storekeeperID && (
+                        {!conversation.user && (
                           <span className="mt-1 ml-1 text-blue-800">
                             <MdStorefront size={15} />
                           </span>
                         )}
                         {!conversation.chat_enabled && (
-                          <span className="ml-2 flex items-center bg-gray-500 text-white text-xs px-2 py-0.5 rounded-full">
-                            Closed
+                          <span className="ml-2 flex justify-center items-center bg-gray-500 text-white text-xs w-6 h-6 rounded-full">
+                            <FiLock />
                           </span>
                         )}
                       </h4>

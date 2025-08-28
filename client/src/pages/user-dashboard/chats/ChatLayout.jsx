@@ -33,43 +33,60 @@ const ChatLayout = () => {
 
   useEffect(() => {
     const fetchPVs = async () => {
-      if (!storekeeperID) {
-        const pvsRes = await getPurchasesByBuyer(userID);
+      // if (!storekeeperID) {
+      const pvsByBuyer = await getPurchasesByBuyer(userID);
+      const pvsByStorekeeper = storekeeperID
+        ? await getPurchasesByStorekeepre(storekeeperID)
+        : null;
+      // console.log(pvsRes.data);
+      console.log(storekeeperID);
+      const allPVs = storekeeperID
+        ? [...pvsByBuyer.data, ...pvsByStorekeeper.data]
+        : [...pvsByBuyer.data];
 
-        console.log(pvsRes.data);
-
-        const pvs = await Promise.all(
-          pvsRes.data.map(async (pv) => {
-            const storekeeper = await getShopkeeper(pv.storekeeper);
-            const product = await getProduct(pv.product);
-
-            return {
-              store: { ...storekeeper.data },
-              ...pv,
-              product: { ...product.data },
-            };
-          })
-        );
-        setConversations(pvs);
-      } else {
-        const pvsRes = await getPurchasesByStorekeepre(storekeeperID);
-
-        console.log(pvsRes);
-
-        const pvs = await Promise.all(
-          pvsRes.data.map(async (pv) => {
+      console.log(pvsByBuyer.data);
+      const pvs = await Promise.all(
+        allPVs.map(async (pv) => {
+          const storekeeper = await getShopkeeper(pv.storekeeper);
+          const product = await getProduct(pv.product);
+          console.log(storekeeper.data.id == storekeeperID);
+          if (storekeeper.data.id == storekeeperID) {
             const user = await getBuyer(pv.buyer);
-            const product = await getProduct(pv.product);
-
             return {
               user: { ...user.data },
               ...pv,
               product: { ...product.data },
             };
-          })
-        );
-        setConversations(pvs);
-      }
+          } else {
+            return {
+              store: { ...storekeeper.data },
+              ...pv,
+              product: { ...product.data },
+            };
+          }
+        })
+      );
+      console.log(pvs);
+      setConversations(pvs);
+      // } else {
+      //   const pvsRes = await getPurchasesByStorekeepre(storekeeperID);
+
+      //   console.log(pvsRes);
+
+      //   const pvs = await Promise.all(
+      //     pvsRes.data.map(async (pv) => {
+      //       const user = await getBuyer(pv.buyer);
+      //       const product = await getProduct(pv.product);
+
+      //       return {
+      //         user: { ...user.data },
+      //         ...pv,
+      //         product: { ...product.data },
+      //       };
+      //   })
+      // );
+      // setConversations(pvs);
+      // }
     };
 
     fetchPVs();
@@ -197,15 +214,15 @@ const ChatLayout = () => {
 
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
-                        <div className="flex items-center">
+                        <div className="flex items-center space-x-2">
                           <h4 className="font-semibold text-blue-900">
-                            {storekeeperID
+                            {selectedChat.user
                               ? selectedChat.user.username
                               : selectedChat.store.store_name}
                           </h4>
                           <div className="flex items-center space-x-2">
-                            {!storekeeperID && (
-                              <span className="ml-2 px-2 py-1 bg-gradient-to-r from-blue-600 to-cyan-500 text-white text-xs font-bold rounded-full flex items-center">
+                            {!selectedChat.user && (
+                              <span className="px-2 py-1 bg-gradient-to-r from-blue-600 to-cyan-500 text-white text-xs font-bold rounded-full flex items-center">
                                 <MdStorefront
                                   className="mr-1 mb-0.25"
                                   size={15}
