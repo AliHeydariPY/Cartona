@@ -105,3 +105,8 @@ export const sendMessagse = (payload) => {
   const url = `${SERVER_URL}/comments-api/purchase-chats/`
   return axios.post(url, payload)
 }
+
+export const deleteMessagse = (msgID) => {
+  const url = `${SERVER_URL}/comments-api/purchase-chats/${msgID}/`
+  return axios.delete(url)
+}

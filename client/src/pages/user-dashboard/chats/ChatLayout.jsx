@@ -16,6 +16,7 @@ import {
   getPurchasesByBuyer,
   getPurchasesByStorekeepre,
   sendMessagse,
+  deleteMessagse,
 } from "../../../services/commentAPIServices";
 import { getShopkeeper, getBuyer } from "../../../services/userAPIServices";
 import { getProduct } from "../../../services/productAPIServices";
@@ -219,11 +220,21 @@ const ChatLayout = () => {
   };
 
   // هندلر حذف پیام‌ها
-  const handleDeleteMessages = () => {
-    // کد حذف پیام‌های انتخاب شده
-    console.log("Deleting messages:", selectedMessages);
-
+  const handleDeleteMessages = async (messageID) => {
+    if (messageID) {
+      deleteMessagse(messageID).then(() => {
+        fetchMessages(chatID);
+      });
+    } else {
+      await Promise.all(
+        selectedMessages.map(async (msgID) => {
+          await deleteMessagse(msgID);
+        })
+      );
+      fetchMessages(chatID);
+    }
     // پس از حذف موفق:
+
     setSelectedMessages([]);
     setIsSelectionMode(false);
     setContextMenu({ visible: false, x: 0, y: 0, message: null });
@@ -235,8 +246,8 @@ const ChatLayout = () => {
 
     if (selectedMessages.includes(messageId)) {
       setSelectedMessages(selectedMessages.filter((id) => id !== messageId));
-      console.log()
-      if (!(selectedMessages.filter((id) => id !== messageId))[0]) {
+      console.log();
+      if (!selectedMessages.filter((id) => id !== messageId)[0]) {
         setIsSelectionMode(false);
       }
     } else {
@@ -427,7 +438,10 @@ const ChatLayout = () => {
                   {contextMenu.visible && (
                     <div
                       className="fixed bg-white rounded-lg shadow-lg py-2 z-50"
-                      style={{ top: (contextMenu.y - 125), left: (contextMenu.x -509) }}
+                      style={{
+                        top: contextMenu.y - 125,
+                        left: contextMenu.x - 509,
+                      }}
                     >
                       <div
                         className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -438,8 +452,9 @@ const ChatLayout = () => {
                       <div
                         className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-600"
                         onClick={() => {
-                          setSelectedMessages([contextMenu.message.id]);
-                          handleDeleteMessages();
+                          console.log(contextMenu.message.id);
+                          setSelectedMessages([contextMenu.message.id, 3]);
+                          handleDeleteMessages(contextMenu.message.id);
                         }}
                       >
                         Delete
