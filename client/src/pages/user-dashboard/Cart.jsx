@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import {
   getCartProducts,
   editCartProduct,
-  totalCartPayment
+  totalCartPayment,
 } from "../../services/cartAPIServices";
 import { getProduct } from "../../services/productAPIServices";
 
@@ -21,15 +21,17 @@ import {
   FiShield,
   FiX,
   FiStar,
+  FiCheckCircle
 } from "react-icons/fi";
 
 const Cart = ({
   setRremoveFromCartPopup,
   setSelectedProduct,
   reloadComponent,
+  setReloadComponent,
   setIsRemoveCartItem,
 }) => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [cartItems, setCartItems] = useState([]);
 
   useEffect(() => {
@@ -99,15 +101,16 @@ const Cart = ({
   };
 
   const subtotal = cartItems.reduce(
-    (sum, item) => sum + (item.discounted_price || item.price) * item.stock_quantity,
+    (sum, item) =>
+      sum + (item.discounted_price || item.price) * item.stock_quantity,
     0
   );
 
   // const shipping = 15.0;
   // const tax = subtotal * 0.08;
   // const total = subtotal + shipping + tax;
- 
-  const total = subtotal
+
+  const total = subtotal;
 
   const openInNewTab = (url) => {
     window.open(url, "_blank", "noreferrer");
@@ -146,7 +149,10 @@ const Cart = ({
                   <p className="text-sm sm:text-base text-blue-600 mb-4">
                     Start shopping to add items to your cart
                   </p>
-                  <button onClick={() => navigate("/")} className="bg-gradient-to-r cursor-pointer from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full transition-colors duration-300 text-sm sm:text-base">
+                  <button
+                    onClick={() => navigate("/")}
+                    className="bg-gradient-to-r cursor-pointer from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full transition-colors duration-300 text-sm sm:text-base"
+                  >
                     Continue Shopping
                   </button>
                 </div>
@@ -159,7 +165,9 @@ const Cart = ({
                     >
                       {/* تصویر محصول */}
                       <div
-                        onClick={() => openInNewTab(`/products/${product.product}`)}
+                        onClick={() =>
+                          openInNewTab(`/products/${product.product}`)
+                        }
                         className="w-full sm:w-35 h-35 cursor-pointer rounded-xl flex items-center justify-center mb-4 sm:mb-0 relative overflow-hidden p-1"
                       >
                         <img
@@ -338,15 +346,39 @@ const Cart = ({
                     </span>
                   </div>
 
-                  <button onClick={() => {
-                    const cartID = localStorage.getItem("userID")
-                    totalCartPayment(cartID)
-                  }} className="w-full cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-500 text-white py-2 sm:py-3 rounded-lg font-semibold mt-6 hover:shadow-lg transition-all duration-300 flex items-center justify-center text-sm sm:text-base">
+                  <button
+                    onClick={() => {
+                      const cartID = localStorage.getItem("userID");
+                      totalCartPayment(cartID).then((res) => {
+                        console.log(res.data);
+                        setReloadComponent(!reloadComponent)
+                        toast.custom((t) => (
+                          <div
+                            className={`${
+                              t.visible ? "animate-enter" : "animate-leave"
+                            } transform transition-all duration-300`}
+                          >
+                            <div className="bg-gradient-to-r from-green-500 to-cyan-400 text-white px-6 py-3 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-3">
+                              <div className="bg-blue-500/20 p-2 rounded-full">
+                                <FiCheckCircle className="text-xl text-white" />
+                              </div>
+                              <div>
+                                <p className="font-medium">
+                                  Payment was successful
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ));
+                      });
+                    }}
+                    className="w-full cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-500 text-white py-2 sm:py-3 rounded-lg font-semibold mt-6 hover:shadow-lg transition-all duration-300 flex items-center justify-center text-sm sm:text-base"
+                  >
                     Proceed to Checkout
                     <FiChevronRight className="sm:ml-2" />
                   </button>
 
-                  <button  className="w-full cursor-pointer bg-white border border-blue-300 text-blue-700 py-2 sm:py-3 rounded-lg font-medium mt-3 hover:bg-blue-50 transition-colors duration-300 flex items-center justify-center text-sm sm:text-base">
+                  <button className="w-full cursor-pointer bg-white border border-blue-300 text-blue-700 py-2 sm:py-3 rounded-lg font-medium mt-3 hover:bg-blue-50 transition-colors duration-300 flex items-center justify-center text-sm sm:text-base">
                     <FiHeart className="mr-2 text-rose-500" />
                     Save for Later
                   </button>

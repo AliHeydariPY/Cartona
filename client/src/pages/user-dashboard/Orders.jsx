@@ -45,25 +45,36 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
           const storekeeperRes = await getShopkeeper(
             productRes.data.storekeeper
           );
-          const commentRes = await getCommentsByUser(
-            localStorage.getItem("userID")
-          );
-          return {
-            ...payment,
-            product: productRes.data,
-            storekeeper: storekeeperRes.data.store_name,
-            status: payment.is_delivered ? "Delivered" : "Pending",
-            hasRated: commentRes.data.some((comment) => {
-              return comment.product == productRes.data.id;
-            }),
-            // hasComment:
-          };
+          try{
+            const commentRes = await getCommentsByUser(
+              localStorage.getItem("userID")
+            )
+
+            return {
+              ...payment,
+              product: productRes.data,
+              storekeeper: storekeeperRes.data.store_name,
+              status: payment.is_delivered ? "Delivered" : "Pending",
+              hasRated: commentRes.data.some((comment) => {
+                return comment.product == productRes.data.id;
+              }),
+              // hasComment:
+            };
+          } catch {
+            return {
+              ...payment,
+              product: productRes.data,
+              storekeeper: storekeeperRes.data.store_name,
+              status: payment.is_delivered ? "Delivered" : "Pending",
+              hasRated: null,
+            };
+          }
         })
       );
       console.log(payments);
       setOrders([
         {
-          id: 2,
+          id: 222222,
           product: "Sports Running Shoes",
           storekeeper: "FashionHub",
           status: "Delivered",
@@ -74,7 +85,7 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
           hasRated: false,
         },
         {
-          id: 1,
+          id: 11111,
           product: "Premium Wireless Headphones",
           storekeeper: "TechStore",
           status: "Shipped",
@@ -86,7 +97,7 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
         },
 
         {
-          id: 3,
+          id: 333333,
           product: "Smart Watch Series 7",
           storekeeper: "GadgetWorld",
           status: "Pending",

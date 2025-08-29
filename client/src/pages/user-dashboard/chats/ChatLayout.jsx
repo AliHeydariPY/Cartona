@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, number } from "framer-motion";
 import {
   FiMenu,
   FiX,
@@ -34,60 +34,67 @@ const ChatLayout = () => {
 
   useEffect(() => {
     const fetchPVs = async () => {
-      const pvsByBuyer = await getPurchasesByBuyer(userID);
-      const pvsByStorekeeper = storekeeperID
-        ? await getPurchasesByStorekeepre(storekeeperID)
-        : null;
+      try {
+        let pvsByBuyer = [];
+        let pvsByStorekeeper = [];
 
-      const allPVs = storekeeperID
-        ? [...pvsByBuyer.data, ...pvsByStorekeeper.data]
-        : [...pvsByBuyer.data];
+        // گرفتن خریدهای کاربر
+        try {
+          const res = await getPurchasesByBuyer(userID);
+          pvsByBuyer = res?.data || [];
+        } catch (error) {
+          console.warn("getPurchasesByBuyer failed:", error);
+        }
 
-      const pvs = await Promise.all(
-        allPVs.map(async (pv) => {
-          const storekeeper = await getShopkeeper(pv.storekeeper);
-          const product = await getProduct(pv.product);
-          if (storekeeper.data.id == storekeeperID) {
-            const user = await getBuyer(pv.buyer);
-            return {
-              user: { ...user.data },
-              ...pv,
-              product: { ...product.data },
-            };
-          } else {
-            return {
-              store: { ...storekeeper.data },
-              ...pv,
-              product: { ...product.data },
-            };
+        // گرفتن خریدهای فروشنده
+        if (storekeeperID) {
+          try {
+            const res = await getPurchasesByStorekeepre(storekeeperID);
+            pvsByStorekeeper = res?.data || [];
+          } catch (error) {
+            console.warn("getPurchasesByStorekeepre failed:", error);
           }
-        })
-      );
-      console.log(pvs);
-      setConversations(pvs);
-      // } else {
-      //   const pvsRes = await getPurchasesByStorekeepre(storekeeperID);
+        }
 
-      //   console.log(pvsRes);
+        // ترکیب همه خریدها
+        const allPVs = [...pvsByBuyer, ...pvsByStorekeeper];
 
-      //   const pvs = await Promise.all(
-      //     pvsRes.data.map(async (pv) => {
-      //       const user = await getBuyer(pv.buyer);
-      //       const product = await getProduct(pv.product);
+        const pvs = await Promise.all(
+          allPVs.map(async (pv) => {
+            try {
+              const storekeeper = await getShopkeeper(pv.storekeeper);
+              const product = await getProduct(pv.product);
 
-      //       return {
-      //         user: { ...user.data },
-      //         ...pv,
-      //         product: { ...product.data },
-      //       };
-      //   })
-      // );
-      // setConversations(pvs);
-      // }
+              if (storekeeper.data.id == storekeeperID) {
+                const user = await getBuyer(pv.buyer);
+                return {
+                  user: { ...user.data },
+                  ...pv,
+                  product: { ...product.data },
+                };
+              } else {
+                return {
+                  store: { ...storekeeper.data },
+                  ...pv,
+                  product: { ...product.data },
+                };
+              }
+            } catch (err) {
+              console.error("Error fetching pv details:", err);
+              return null; // اینجوری اون یکی pv خراب می‌افته بیرون
+            }
+          })
+        );
+
+        // حذف nullها
+        setConversations(pvs.filter(Boolean));
+      } catch (error) {
+        console.error("fetchPVs failed:", error);
+      }
     };
 
     fetchPVs();
-  }, []);
+  }, [userID, storekeeperID]);
 
   useEffect(() => {
     if (!conversations[0]) return;
@@ -221,7 +228,7 @@ const ChatLayout = () => {
 
   // هندلر حذف پیام‌ها
   const handleDeleteMessages = async (messageID) => {
-    if (messageID) {
+    if (typeof messageID == "number") {
       deleteMessagse(messageID).then(() => {
         fetchMessages(chatID);
       });
@@ -233,20 +240,17 @@ const ChatLayout = () => {
       );
       fetchMessages(chatID);
     }
-    // پس از حذف موفق:
 
     setSelectedMessages([]);
     setIsSelectionMode(false);
     setContextMenu({ visible: false, x: 0, y: 0, message: null });
   };
 
-  // هندلر کلیک روی پیام در حالت انتخاب
   const handleMessageClick = (messageId, senderId) => {
     if (!isSelectionMode || senderId != userID) return;
 
     if (selectedMessages.includes(messageId)) {
       setSelectedMessages(selectedMessages.filter((id) => id !== messageId));
-      console.log();
       if (!selectedMessages.filter((id) => id !== messageId)[0]) {
         setIsSelectionMode(false);
       }
@@ -440,7 +444,7 @@ const ChatLayout = () => {
                       className="fixed bg-white rounded-lg shadow-lg py-2 z-50"
                       style={{
                         top: contextMenu.y - 125,
-                        left: contextMenu.x - 509,
+                        left: contextMenu.x - 385,
                       }}
                     >
                       <div
@@ -452,7 +456,6 @@ const ChatLayout = () => {
                       <div
                         className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-600"
                         onClick={() => {
-                          console.log(contextMenu.message.id);
                           setSelectedMessages([contextMenu.message.id, 3]);
                           handleDeleteMessages(contextMenu.message.id);
                         }}

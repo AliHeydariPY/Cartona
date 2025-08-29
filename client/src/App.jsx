@@ -78,6 +78,7 @@ function App() {
                 setRremoveFromCartPopup={setRremoveFromCartPopup}
                 setSelectedProduct={setSelectedProduct}
                 reloadComponent={reloadComponent}
+                setReloadComponent={setReloadComponent}
                 setIsRemoveCartItem={setIsRemoveCartItem}
               />
             }
