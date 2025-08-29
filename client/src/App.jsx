@@ -6,16 +6,16 @@ import Home from "./pages/Home";
 import CreateAccountForm from "./pages/CreateAccountForm";
 import UpgradeToSeller from "./pages/UpgradeToSeller";
 import UserDashboard from "./pages/UserDashboard";
+import ProductDetail from "./pages/ProductDetail";
 
 import Profile from "./pages/user-dashboard/Profile";
 import Favorites from "./pages/user-dashboard/Favorites";
 import Cart from "./pages/user-dashboard/Cart";
 import Orders from "./pages/user-dashboard/Orders";
-import Payments from "./pages/user-dashboard/Payments";
 import AddProduct from "./pages/user-dashboard/AddProduct";
 import MyProducts from "./pages/user-dashboard/MyProducts";
 import ChatLayout from "./pages/user-dashboard/chats/ChatLayout";
-import ProductDetail from "./pages/ProductDetail";
+import Notifications from "./pages/user-dashboard/Notifications";
 
 import SearchPage from "./pages/SearchPage";
 import SubCategory from "./pages/SubCategory";
@@ -26,7 +26,6 @@ import EditProduct from "./pages/user-dashboard/my-products/EditProduct";
 
 import AddedToCartPopup from "./components/pop-ups/AddedToCartPopup";
 import RemoveFromCartPopup from "./components/pop-ups/RemoveFromCartPopup";
-import Notifications from "./pages/user-dashboard/Notifications";
 
 function App() {
   const [removeFromCartPopup, setRremoveFromCartPopup] = useState(false);

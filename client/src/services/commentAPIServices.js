@@ -111,6 +111,11 @@ export const deleteMessagse = (msgID) => {
   return axios.delete(url)
 }
 
+export const editMessage = (editedMsg) => {
+  const url = `${SERVER_URL}/comments-api/purchase-chats/${editedMsg.id}/`
+  return axios.patch(url, editedMsg)
+}
+
 export const getNotifications = (userID) => {
   const url = `${SERVER_URL}/comments-api/notifications/user/${userID}/`
   return axios.get(url)

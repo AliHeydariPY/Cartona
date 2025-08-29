@@ -2,11 +2,6 @@ import axios from "axios";
 
 const SERVER_URL = "http://127.0.0.1:8000";
 
-// export const createCart = (user) => {
-//   const url = `${SERVER_URL}/cart-api/cart/`;
-//   return axios.post(url, user);
-// };
-
 export const getCartProducts = (userID) => {
   const url = `${SERVER_URL}/cart-api/cart/user/${userID}/`;
   // const url = `${SERVER_URL}/cart-api/cart/4/`;

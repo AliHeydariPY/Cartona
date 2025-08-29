@@ -10,7 +10,6 @@ const ChatSidebar = ({
   setShowSidebar,
   selectedChat,
 }) => {
-  const storekeeperID = localStorage.getItem("storekeeperID");
   const navigate = useNavigate();
   return (
     <AnimatePresence>
@@ -20,7 +19,7 @@ const ChatSidebar = ({
           animate={{ x: 0, opacity: 1 }}
           exit={{ x: -300, opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="w-8/12 xl:w-80 border-r border-blue-200 bg-white/50 flex flex-col"
+          className="w-5/12 xl:w-80 border-r border-blue-200 bg-white/50 flex flex-col"
         >
           {/* هدر سایدبار */}
           <div className="p-4 border-b border-blue-200">

@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
-import { motion, number } from "framer-motion";
+import { convertOffsetToTimes, motion, number } from "framer-motion";
 import { Portal } from "react-portal";
 import TextareaAutosize from "react-textarea-autosize";
 
+import { RiSendPlaneFill, RiCloseLine, RiEdit2Line } from "react-icons/ri";
 import {
   FiMenu,
   FiX,
@@ -11,8 +12,9 @@ import {
   FiLock,
   FiRefreshCcw,
 } from "react-icons/fi";
-import { RiSendPlaneFill } from "react-icons/ri";
 import { MdStorefront } from "react-icons/md";
+import { FaCheck } from "react-icons/fa6";
+
 import ChatSidebar from "./ChatSidebar";
 import {
   getPurchaseChats,
@@ -20,6 +22,7 @@ import {
   getPurchasesByStorekeepre,
   sendMessagse,
   deleteMessagse,
+  editMessage,
 } from "../../../services/commentAPIServices";
 import { getShopkeeper, getBuyer } from "../../../services/userAPIServices";
 import { getProduct } from "../../../services/productAPIServices";
@@ -34,6 +37,7 @@ const ChatLayout = () => {
   const messagesEndRef = useRef(null);
   const userID = localStorage.getItem("userID");
   const storekeeperID = localStorage.getItem("storekeeperID");
+  const inputRef = useRef();
 
   useEffect(() => {
     const fetchPVs = async () => {
@@ -178,12 +182,12 @@ const ChatLayout = () => {
   const messagesContainerRef = useRef(null);
   const [firstSelectMsg, setFirstSelectMsg] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [prevMessage, setPrevMessage] = useState("");
 
   // هندلر راست کلیک
   const handleContextMenu = (e, message) => {
     e.preventDefault();
 
-    console.log(e);
     // فقط برای پیام‌های کاربر
     if (message.sender != userID) return;
 
@@ -197,7 +201,9 @@ const ChatLayout = () => {
 
   // هندلر کلیک برای بستن منوی راست کلیک
   const handleClick = () => {
-    setContextMenu({ visible: false, x: 0, y: 0, message: null });
+    setContextMenu((prev) => {
+      return { ...prev, visible: false };
+    });
   };
 
   // هندلر شروع نگه‌داشتن (لمس یا ماوس)
@@ -269,7 +275,9 @@ const ChatLayout = () => {
   const handleEditMessage = () => {
     console.log(contextMenu);
     setMessage(contextMenu.message.message);
-    setIsEditing(ture);
+    setPrevMessage(contextMenu.message.message);
+    setIsEditing(true);
+    inputRef.current.focus();
   };
 
   // اضافه کردن event listener برای کلیک
@@ -290,7 +298,11 @@ const ChatLayout = () => {
       <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-lg border border-blue-400 hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 overflow-hidden">
         <div className="xl:hidden flex items-center justify-between p-4 border-b border-blue-200">
           <button
-            onClick={() => setShowSidebar(!showSidebar)}
+            onClick={() => {
+              setShowSidebar(!showSidebar);
+              setIsSelectionMode(false);
+              setSelectedMessages([]);
+            }}
             className="p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
           >
             {showSidebar ? <FiX size={20} /> : <FiMenu size={20} />}
@@ -391,76 +403,98 @@ const ChatLayout = () => {
                   className="flex-1 overflow-y-auto p-4 bg-gradient-to-br from-blue-50/50 to-cyan-50/50"
                   ref={messagesContainerRef}
                 >
-                  {messages.map((message) => (
-                    <motion.div
-                      key={message.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className={`flex py-2  rounded-r-2xl ${
-                        message.sender == userID
-                          ? "justify-end"
-                          : "justify-start"
-                      }
-                      ${
-                        selectedMessages.includes(message.id)
-                          ? "bg-blue-100"
-                          : null
-                      }
-                      `}
-                      onContextMenu={(e) => handleContextMenu(e, message)}
-                      onTouchStart={() => handleTouchStart(message)}
-                      onTouchEnd={handleTouchEnd}
-                      onMouseDown={() => {
-                        console.log("press");
-                        handleTouchStart(message);
-                      }}
-                      onMouseUp={() => {
-                        console.log("up");
-                        handleTouchEnd();
-                      }}
-                      onMouseLeave={handleTouchEnd}
-                      onClick={() =>
-                        handleMessageClick(message.id, message.sender)
-                      }
-                    >
-                      <div
-                        className={`max-w-xs lg:max-w-md px-3 py-2 rounded-xl relative cursor-pointer ${
-                          message.sender == userID
-                            ? "bg-gradient-to-br from-blue-600 to-cyan-500 text-white"
-                            : "bg-white border border-blue-200 text-blue-900"
-                        } ${
-                          selectedMessages.includes(message.id)
-                            ? "ring-2 ring-blue-500 ring-offset-2"
-                            : ""
-                        }`}
-                      >
-                        {isSelectionMode && message.sender == userID && (
-                          <div
-                            className={`absolute -left-2 -top-2 w-5 h-5 rounded-full flex items-center justify-center ${
-                              selectedMessages.includes(message.id)
-                                ? "bg-blue-600 text-white"
-                                : "bg-white border border-gray-300"
-                            }`}
-                          >
-                            {selectedMessages.includes(message.id) && (
-                              <span className="text-xs">✓</span>
-                            )}
-                          </div>
-                        )}
+                  {messages.map((message) => {
+                    const date = new Date(message.edited_at);
+                    const hours = date.getHours().toString().padStart(2, "0");
+                    const minutes = date
+                      .getMinutes()
+                      .toString()
+                      .padStart(2, "0");
 
-                        <p>{message.message}</p>
-                        <span
-                          className={`text-xs ${
+                    const editTime = `${hours}:${minutes}`;
+                    const isEdited = message.sent_at != editTime;
+                    console.log(message.sent_at);
+                    console.log(message.edited_at);
+                    console.log(editTime != message.edited_at);
+                    return (
+                      <motion.div
+                        key={message.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className={`flex py-2 rounded-r-2xl ${
+                          message.sender == userID
+                            ? "justify-end"
+                            : "justify-start"
+                        }
+      ${selectedMessages.includes(message.id) ? "bg-blue-100" : null}`}
+                        onContextMenu={(e) => handleContextMenu(e, message)}
+                        onTouchStart={() => handleTouchStart(message)}
+                        onTouchEnd={handleTouchEnd}
+                        onMouseDown={() => handleTouchStart(message)}
+                        onMouseUp={handleTouchEnd}
+                        onMouseLeave={handleTouchEnd}
+                        onClick={() =>
+                          handleMessageClick(message.id, message.sender)
+                        }
+                      >
+                        <div
+                          className={`max-w-xs lg:max-w-md px-3 py-2 rounded-xl relative cursor-pointer ${
                             message.sender == userID
-                              ? "text-blue-100"
-                              : "text-blue-500"
+                              ? "bg-gradient-to-br from-blue-600 to-cyan-500 text-white"
+                              : "bg-white border border-blue-200 text-blue-900"
+                          } ${
+                            selectedMessages.includes(message.id)
+                              ? "ring-2 ring-blue-500 ring-offset-2"
+                              : ""
                           }`}
                         >
-                          {message.sent_at}
-                        </span>
-                      </div>
-                    </motion.div>
-                  ))}
+                          {/* حالت انتخاب پیام */}
+                          {isSelectionMode && message.sender == userID && (
+                            <div
+                              className={`absolute -left-2 -top-2 w-5 h-5 rounded-full flex items-center justify-center ${
+                                selectedMessages.includes(message.id)
+                                  ? "bg-blue-600 text-white"
+                                  : "bg-white border border-gray-300"
+                              }`}
+                            >
+                              {selectedMessages.includes(message.id) && (
+                                <span className="text-xs">✓</span>
+                              )}
+                            </div>
+                          )}
+
+                          {/* متن پیام */}
+                          <p>{message.message}</p>
+
+                          {/* زمان ارسال + ادیت */}
+                          <div className="flex items-center space-x-1 mt-1 text-xs">
+                            {isEdited ? (
+                              <span
+                                className={`flex items-center space-x-1 ${
+                                  message.sender == userID
+                                    ? "text-blue-100"
+                                    : "text-blue-500"
+                                }`}
+                              >
+                                <RiEdit2Line className="mb-0.5" size={13} />
+                                <span>{editTime}</span>
+                              </span>
+                            ) : (
+                              <span
+                                className={
+                                  message.sender == userID
+                                    ? "text-blue-100"
+                                    : "text-blue-500"
+                                }
+                              >
+                                {message.sent_at}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
 
                   {/* منوی راست کلیک */}
                   {contextMenu.visible && (
@@ -500,7 +534,7 @@ const ChatLayout = () => {
 
                   {/* نوار ابزار انتخاب */}
                   {isSelectionMode && selectedMessages.length > 0 && (
-                    <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-white px-4 py-2 rounded-full shadow-lg border border-gray-200 flex items-center space-x-4">
+                    <div className="fixed top-44 left-1/2 xl:top-27 xl:left-2/3 2xl:left-3/5 transform -translate-x-1/2 bg-white px-4 py-2 rounded-full shadow-lg border border-gray-200 flex items-center space-x-4">
                       <span className="text-blue-600">
                         {selectedMessages.length} selected
                       </span>
@@ -525,57 +559,119 @@ const ChatLayout = () => {
                   <div ref={messagesEndRef} />
                 </div>
 
-                {/* input ارسال پیام - غیرفعال برای چت‌های بسته */}
                 {selectedChat.chat_enabled ? (
                   <div className="p-4 border-t border-blue-200 bg-white/80">
+                    {isEditing && (
+                      <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-3xl px-3 py-2 mb-2">
+                        <div className="flex items-center space-x-2">
+                          <RiEdit2Line className="text-blue-500" />
+                          <span className="text-sm text-blue-700 truncate max-w-md">
+                            {prevMessage}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => {
+                            setIsEditing(false);
+                            setContextMenu({
+                              visible: false,
+                              x: 0,
+                              y: 0,
+                              message: null,
+                            });
+                            setMessage("");
+                          }}
+                          className="text-blue-500 hover:text-red-500 transition-colors duration-300"
+                        >
+                          <RiCloseLine size={20} />
+                        </button>
+                      </div>
+                    )}
+
                     <div className="flex items-end space-x-3">
                       <TextareaAutosize
+                        ref={inputRef}
                         minRows={1}
-                        maxRows={5} 
+                        maxRows={5}
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         onKeyDown={(e) => {
                           if (e.key === "Enter" && !e.shiftKey) {
-                            e.preventDefault(); 
+                            e.preventDefault();
                             if (message.trim() !== "") {
+                              if (isEditing) {
+                                editMessage({
+                                  ...contextMenu.message,
+                                  message: message,
+                                }).then(() => {
+                                  fetchMessages(chatID);
+                                  setMessage("");
+                                  setIsEditing(false);
+                                });
+                              } else {
+                                sendMessagse({
+                                  purchase: selectedChat.id,
+                                  sender: userID,
+                                  message: message,
+                                }).then((res) => {
+                                  fetchMessages(res.data.purchase);
+                                  setMessage("");
+                                });
+                              }
+                            }
+                          }
+                        }}
+                        placeholder={
+                          isEditing
+                            ? "Edit your message..."
+                            : "Type a message..."
+                        }
+                        className="flex-1 px-4 py-2 border border-blue-300 rounded-3xl
+                     resize-none overflow-hidden 
+                     hover:outline-none hover:ring-1 hover:ring-blue-400 
+                     focus:outline-none focus:ring-1 focus:ring-blue-400 
+                     transition-all duration-300"
+                      />
+                      {isEditing ? (
+                        <button
+                          onClick={() => {
+                            editMessage({
+                              ...contextMenu.message,
+                              message: message,
+                            }).then(() => {
+                              fetchMessages(chatID);
+                              setMessage("");
+                              setIsEditing(false);
+                            });
+                          }}
+                          className="bg-gradient-to-r from-blue-600 to-cyan-500 
+                       text-white p-3 rounded-full 
+                       hover:from-blue-700 hover:to-cyan-600 
+                       cursor-pointer transition-colors duration-300"
+                        >
+                          <FaCheck size={18} />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            if (message.trim()) {
                               sendMessagse({
                                 purchase: selectedChat.id,
-                                sender: userID,
+                                sender: localStorage.getItem("userID"),
                                 message: message,
                               }).then((res) => {
                                 fetchMessages(res.data.purchase);
                                 setMessage("");
                               });
                             }
-                          }
-                        }}
-                        placeholder="Type a message..."
-                        className="flex-1 px-4 py-2 border border-blue-300 rounded-3xl 
-                     resize-none overflow-hidden 
-                     hover:outline-none hover:ring-1 hover:ring-blue-400 
-                     focus:outline-none focus:ring-1 focus:ring-blue-400 
-                     transition-all duration-300"
-                      />
-                      <button
-                        onClick={() => {
-                          if (message.trim()) {
-                            sendMessagse({
-                              purchase: selectedChat.id,
-                              sender: localStorage.getItem("userID"),
-                              message: message,
-                            }).then((res) => {
-                              fetchMessages(res.data.purchase);
-                              setMessage("");
-                            });
-                          }
-                        }}
-                        className="bg-gradient-to-r from-blue-600 to-cyan-500 
-                     text-white p-3 rounded-full 
-                     hover:from-blue-700 hover:to-cyan-600 
-                     cursor-pointer transition-colors duration-300"
-                      >
-                        <RiSendPlaneFill size={18} />
-                      </button>
+                          }}
+                          className="bg-gradient-to-r from-blue-600 to-cyan-500 
+                       text-white p-3 rounded-full 
+                       hover:from-blue-700 hover:to-cyan-600 
+                       cursor-pointer transition-colors duration-300"
+                        >
+                          <RiSendPlaneFill size={18} />
+                        </button>
+                      )}
                     </div>
                   </div>
                 ) : (
@@ -588,7 +684,6 @@ const ChatLayout = () => {
                 )}
               </>
             ) : (
-              /* حالت انتخاب نشدن چت */
               <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-blue-50 to-cyan-50">
                 <div className="text-center text-blue-600">
                   <FiShoppingBag
