@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { motion, number } from "framer-motion";
 import { Portal } from "react-portal";
+import TextareaAutosize from "react-textarea-autosize";
 
 import {
   FiMenu,
@@ -176,6 +177,7 @@ const ChatLayout = () => {
   const [longPressTimer, setLongPressTimer] = useState(null);
   const messagesContainerRef = useRef(null);
   const [firstSelectMsg, setFirstSelectMsg] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
 
   // هندلر راست کلیک
   const handleContextMenu = (e, message) => {
@@ -262,6 +264,12 @@ const ChatLayout = () => {
         setSelectedMessages([...selectedMessages, messageId]);
       }
     }
+  };
+
+  const handleEditMessage = () => {
+    console.log(contextMenu);
+    setMessage(contextMenu.message.message);
+    setIsEditing(ture);
   };
 
   // اضافه کردن event listener برای کلیک
@@ -393,7 +401,11 @@ const ChatLayout = () => {
                           ? "justify-end"
                           : "justify-start"
                       }
-                      ${selectedMessages.includes(message.id)? "bg-blue-100" : null}
+                      ${
+                        selectedMessages.includes(message.id)
+                          ? "bg-blue-100"
+                          : null
+                      }
                       `}
                       onContextMenu={(e) => handleContextMenu(e, message)}
                       onTouchStart={() => handleTouchStart(message)}
@@ -408,8 +420,8 @@ const ChatLayout = () => {
                       }}
                       onMouseLeave={handleTouchEnd}
                       onClick={() =>
-                          handleMessageClick(message.id, message.sender)
-                        }
+                        handleMessageClick(message.id, message.sender)
+                      }
                     >
                       <div
                         className={`max-w-xs lg:max-w-md px-3 py-2 rounded-xl relative cursor-pointer ${
@@ -421,7 +433,6 @@ const ChatLayout = () => {
                             ? "ring-2 ring-blue-500 ring-offset-2"
                             : ""
                         }`}
-                        
                       >
                         {isSelectionMode && message.sender == userID && (
                           <div
@@ -469,6 +480,12 @@ const ChatLayout = () => {
                           Select
                         </div>
                         <div
+                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                          onClick={handleEditMessage}
+                        >
+                          edit
+                        </div>
+                        <div
                           className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-600"
                           onClick={() => {
                             setSelectedMessages([contextMenu.message.id, 3]);
@@ -511,12 +528,15 @@ const ChatLayout = () => {
                 {/* input ارسال پیام - غیرفعال برای چت‌های بسته */}
                 {selectedChat.chat_enabled ? (
                   <div className="p-4 border-t border-blue-200 bg-white/80">
-                    <div className="flex items-center space-x-3">
-                      <input
-                        type="text"
+                    <div className="flex items-end space-x-3">
+                      <TextareaAutosize
+                        minRows={1}
+                        maxRows={5} 
                         value={message}
+                        onChange={(e) => setMessage(e.target.value)}
                         onKeyDown={(e) => {
-                          if (e.code == "Enter") {
+                          if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault(); 
                             if (message.trim() !== "") {
                               sendMessagse({
                                 purchase: selectedChat.id,
@@ -529,9 +549,12 @@ const ChatLayout = () => {
                             }
                           }
                         }}
-                        onChange={(e) => setMessage(e.target.value)}
                         placeholder="Type a message..."
-                        className="flex-1 px-4 py-2 border border-blue-300 rounded-full hover:outline-none hover:ring-1 hover:ring-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400 transition-all duration-300"
+                        className="flex-1 px-4 py-2 border border-blue-300 rounded-3xl 
+                     resize-none overflow-hidden 
+                     hover:outline-none hover:ring-1 hover:ring-blue-400 
+                     focus:outline-none focus:ring-1 focus:ring-blue-400 
+                     transition-all duration-300"
                       />
                       <button
                         onClick={() => {
@@ -546,7 +569,10 @@ const ChatLayout = () => {
                             });
                           }
                         }}
-                        className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white p-3 rounded-full hover:from-blue-700 hover:to-cyan-600 cursor-pointer transition-colors duration-300"
+                        className="bg-gradient-to-r from-blue-600 to-cyan-500 
+                     text-white p-3 rounded-full 
+                     hover:from-blue-700 hover:to-cyan-600 
+                     cursor-pointer transition-colors duration-300"
                       >
                         <RiSendPlaneFill size={18} />
                       </button>
