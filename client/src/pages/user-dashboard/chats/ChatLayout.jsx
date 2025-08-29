@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { motion, number } from "framer-motion";
+import { Portal } from "react-portal";
+
 import {
   FiMenu,
   FiX,
@@ -174,10 +176,12 @@ const ChatLayout = () => {
   const [longPressTimer, setLongPressTimer] = useState(null);
   const messagesContainerRef = useRef(null);
   const [firstSelectMsg, setFirstSelectMsg] = useState(true);
+
   // هندلر راست کلیک
   const handleContextMenu = (e, message) => {
     e.preventDefault();
 
+    console.log(e);
     // فقط برای پیام‌های کاربر
     if (message.sender != userID) return;
 
@@ -246,13 +250,13 @@ const ChatLayout = () => {
   const handleMessageClick = (messageId, senderId) => {
     if (!isSelectionMode || senderId != userID) return;
     if (firstSelectMsg) {
-      setFirstSelectMsg(false)
+      setFirstSelectMsg(false);
     } else {
       if (selectedMessages.includes(messageId)) {
         setSelectedMessages(selectedMessages.filter((id) => id !== messageId));
         if (!selectedMessages.filter((id) => id !== messageId)[0]) {
           setIsSelectionMode(false);
-          setFirstSelectMsg(true)
+          setFirstSelectMsg(true);
         }
       } else {
         setSelectedMessages([...selectedMessages, messageId]);
@@ -297,11 +301,11 @@ const ChatLayout = () => {
             selectedChat={selectedChat}
           />
 
-          {/* بخش اصلی چت */}
+          {/* main section */}
           <div className="flex-1 flex flex-col">
             {selectedChat ? (
               <>
-                {/* هدر چت با وضعیت */}
+                {/* header */}
                 <div className="p-4 border-b border-blue-200 bg-white/80">
                   <div className="flex items-center space-x-3">
                     {/* تصویر محصول با وضعیت */}
@@ -374,9 +378,9 @@ const ChatLayout = () => {
                   )}
                 </div>
 
-                {/* پیام‌ها */}
+                {/* messages */}
                 <div
-                  className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-br from-blue-50/50 to-cyan-50/50"
+                  className="flex-1 overflow-y-auto p-4 bg-gradient-to-br from-blue-50/50 to-cyan-50/50"
                   ref={messagesContainerRef}
                 >
                   {messages.map((message) => (
@@ -384,11 +388,13 @@ const ChatLayout = () => {
                       key={message.id}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className={`flex ${
+                      className={`flex py-2  rounded-r-2xl ${
                         message.sender == userID
                           ? "justify-end"
                           : "justify-start"
-                      }`}
+                      }
+                      ${selectedMessages.includes(message.id)? "bg-blue-100" : null}
+                      `}
                       onContextMenu={(e) => handleContextMenu(e, message)}
                       onTouchStart={() => handleTouchStart(message)}
                       onTouchEnd={handleTouchEnd}
@@ -401,6 +407,9 @@ const ChatLayout = () => {
                         handleTouchEnd();
                       }}
                       onMouseLeave={handleTouchEnd}
+                      onClick={() =>
+                          handleMessageClick(message.id, message.sender)
+                        }
                     >
                       <div
                         className={`max-w-xs lg:max-w-md px-3 py-2 rounded-xl relative cursor-pointer ${
@@ -412,11 +421,8 @@ const ChatLayout = () => {
                             ? "ring-2 ring-blue-500 ring-offset-2"
                             : ""
                         }`}
-                        onClick={() =>
-                          handleMessageClick(message.id, message.sender)
-                        }
+                        
                       >
-                        {/* نشانگر انتخاب برای پیام‌های کاربر */}
                         {isSelectionMode && message.sender == userID && (
                           <div
                             className={`absolute -left-2 -top-2 w-5 h-5 rounded-full flex items-center justify-center ${
@@ -447,29 +453,32 @@ const ChatLayout = () => {
 
                   {/* منوی راست کلیک */}
                   {contextMenu.visible && (
-                    <div
-                      className="fixed bg-white rounded-lg shadow-lg py-2 z-50"
-                      style={{
-                        top: contextMenu.y - 125,
-                        left: contextMenu.x - 385,
-                      }}
-                    >
+                    <Portal>
                       <div
-                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                        onClick={handleSelectOption}
-                      >
-                        Select
-                      </div>
-                      <div
-                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-600"
-                        onClick={() => {
-                          setSelectedMessages([contextMenu.message.id, 3]);
-                          handleDeleteMessages(contextMenu.message.id);
+                        className=" bg-white rounded-lg shadow-lg py-2 z-50"
+                        style={{
+                          position: "fixed",
+                          top: contextMenu.y,
+                          left: contextMenu.x,
                         }}
                       >
-                        Delete
+                        <div
+                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                          onClick={handleSelectOption}
+                        >
+                          Select
+                        </div>
+                        <div
+                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-600"
+                          onClick={() => {
+                            setSelectedMessages([contextMenu.message.id, 3]);
+                            handleDeleteMessages(contextMenu.message.id);
+                          }}
+                        >
+                          Delete
+                        </div>
                       </div>
-                    </div>
+                    </Portal>
                   )}
 
                   {/* نوار ابزار انتخاب */}

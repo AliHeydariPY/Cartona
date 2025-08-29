@@ -27,7 +27,9 @@ const UserDashboard = () => {
   const [isSeller, setIsSeller] = useState(false); // حالت seller فعال است
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-700/30 via-cyan-600/20 to-blue-400/20 p-4 sm:p-7 lg:p-5 xl:p-9 relative overflow-hidden">
+    <div
+      className="min-h-screen bg-gradient-to-b from-blue-700/30 via-cyan-600/20 to-blue-400/20 p-4 sm:p-7 lg:p-5 xl:p-9 relative overflow-hidden"
+    >
       {/* Background circles */}
       <div className="absolute -top-24 -right-24 w-60 h-60 sm:w-72 sm:h-72 md:w-80 md:h-80 bg-cyan-500/40 rounded-full blur-3xl animate-pulse"></div>
       <div className="absolute bottom-8 left-4 w-72 h-72 sm:w-80 sm:h-80 md:w-96 md:h-96 bg-blue-700/30 rounded-full blur-3xl animate-pulse delay-1500"></div>
