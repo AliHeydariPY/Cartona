@@ -38,7 +38,6 @@ const ChatLayout = () => {
         let pvsByBuyer = [];
         let pvsByStorekeeper = [];
 
-        // گرفتن خریدهای کاربر
         try {
           const res = await getPurchasesByBuyer(userID);
           pvsByBuyer = res?.data || [];
@@ -46,7 +45,6 @@ const ChatLayout = () => {
           console.warn("getPurchasesByBuyer failed:", error);
         }
 
-        // گرفتن خریدهای فروشنده
         if (storekeeperID) {
           try {
             const res = await getPurchasesByStorekeepre(storekeeperID);
@@ -56,7 +54,6 @@ const ChatLayout = () => {
           }
         }
 
-        // ترکیب همه خریدها
         const allPVs = [...pvsByBuyer, ...pvsByStorekeeper];
 
         const pvs = await Promise.all(

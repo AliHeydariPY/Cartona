@@ -26,6 +26,7 @@ import EditProduct from "./pages/user-dashboard/my-products/EditProduct";
 
 import AddedToCartPopup from "./components/pop-ups/AddedToCartPopup";
 import RemoveFromCartPopup from "./components/pop-ups/RemoveFromCartPopup";
+import Notifications from "./pages/user-dashboard/Notifications";
 
 function App() {
   const [removeFromCartPopup, setRremoveFromCartPopup] = useState(false);
@@ -92,7 +93,8 @@ function App() {
               />
             }
           />
-          <Route path="payments" element={<Payments />} />
+          <Route path="notifications" element={<Notifications />} />
+
 
           <Route
             path="orders"

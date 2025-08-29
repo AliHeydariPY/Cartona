@@ -110,3 +110,8 @@ export const deleteMessagse = (msgID) => {
   const url = `${SERVER_URL}/comments-api/purchase-chats/${msgID}/`
   return axios.delete(url)
 }
+
+export const getNotifications = (userID) => {
+  const url = `${SERVER_URL}/comments-api/notifications/user/${userID}/`
+  return axios.get(url)
+}

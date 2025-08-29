@@ -2,15 +2,15 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { getCartProducts } from "../services/cartAPIServices";
+import { getNotifications } from "../services/commentAPIServices.js";
 
-import { FiSearch } from "react-icons/fi";
+import { FiSearch, FiBell } from "react-icons/fi";
 import { FaRegHeart, FaHeart } from "react-icons/fa6";
 import { IoCart, IoCartOutline } from "react-icons/io5";
 import { BiCategory } from "react-icons/bi";
 import { BiSolidCategory } from "react-icons/bi";
 import { UserCircleIcon } from "@heroicons/react/24/outline";
 import { UserCircleIcon as UserCircleSolid } from "@heroicons/react/24/solid";
-import { FiBell } from "react-icons/fi";
 import { GoBellFill } from "react-icons/go";
 
 const Navbar = () => {
@@ -18,13 +18,17 @@ const Navbar = () => {
   const { query } = useParams();
   const [search, setSearch] = useState("");
   const [cartItems, setCartItems] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+
+  const userID = localStorage.getItem("userID");
 
   useEffect(() => {
     const fetchCartItems = async () => {
-      const cartProductsRes = await getCartProducts(
-        localStorage.getItem("userID")
-      );
+      const cartProductsRes = await getCartProducts(userID);
       setCartItems(cartProductsRes.data.items);
+
+      const notifRes = await getNotifications(userID);
+      setNotifications(notifRes.data);
     };
 
     fetchCartItems();
@@ -153,7 +157,10 @@ const Navbar = () => {
                 </div>
               </div> */}
 
-              <div className="relative group flex flex-col items-center cursor-pointer w-8 h-8 mt-2.75 lg:mt-1.5">
+              <div
+                onClick={() => navigate("/account/notifications")}
+                className="relative group flex flex-col items-center cursor-pointer w-8 h-8 mt-2.75 lg:mt-1.5"
+              >
                 <FiBell className="absolute inset-0 text-2xl lg:text-3xl text-blue-600 opacity-100 group-hover:opacity-0 scale-100 group-hover:scale-0 transition-all duration-300" />
 
                 <GoBellFill
@@ -166,7 +173,7 @@ const Navbar = () => {
                 </div>
 
                 <span className="absolute -top-0.75 right-1.25 lg:-top-1 lg:-right-1 bg-blue-500 text-white text-xs rounded-full w-3.5 h-3.5 lg:w-5 lg:h-5 flex items-center justify-center">
-                  {cartItems.length}
+                  {notifications.length}
                 </span>
               </div>
             </div>

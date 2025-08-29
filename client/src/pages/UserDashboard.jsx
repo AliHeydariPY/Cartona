@@ -174,6 +174,8 @@ const UserDashboard = () => {
                     navigate("/account/cart");
                   } else if (item.id == "favorites") {
                     navigate("/account/favorites");
+                  } else if (item.id == "notifications") {
+                    navigate("/account/notifications");
                   } else if (item.id == "orders") {
                     navigate("/account/orders");
                   } else if (item.id == "chats") {
