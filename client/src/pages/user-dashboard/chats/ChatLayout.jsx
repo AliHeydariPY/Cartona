@@ -173,7 +173,7 @@ const ChatLayout = () => {
   });
   const [longPressTimer, setLongPressTimer] = useState(null);
   const messagesContainerRef = useRef(null);
-
+  const [firstSelectMsg, setFirstSelectMsg] = useState(true);
   // هندلر راست کلیک
   const handleContextMenu = (e, message) => {
     e.preventDefault();
@@ -245,14 +245,18 @@ const ChatLayout = () => {
 
   const handleMessageClick = (messageId, senderId) => {
     if (!isSelectionMode || senderId != userID) return;
-
-    if (selectedMessages.includes(messageId)) {
-      setSelectedMessages(selectedMessages.filter((id) => id !== messageId));
-      if (!selectedMessages.filter((id) => id !== messageId)[0]) {
-        setIsSelectionMode(false);
-      }
+    if (firstSelectMsg) {
+      setFirstSelectMsg(false)
     } else {
-      setSelectedMessages([...selectedMessages, messageId]);
+      if (selectedMessages.includes(messageId)) {
+        setSelectedMessages(selectedMessages.filter((id) => id !== messageId));
+        if (!selectedMessages.filter((id) => id !== messageId)[0]) {
+          setIsSelectionMode(false);
+          setFirstSelectMsg(true)
+        }
+      } else {
+        setSelectedMessages([...selectedMessages, messageId]);
+      }
     }
   };
 
@@ -388,8 +392,14 @@ const ChatLayout = () => {
                       onContextMenu={(e) => handleContextMenu(e, message)}
                       onTouchStart={() => handleTouchStart(message)}
                       onTouchEnd={handleTouchEnd}
-                      onMouseDown={() => handleTouchStart(message)}
-                      onMouseUp={handleTouchEnd}
+                      onMouseDown={() => {
+                        console.log("press");
+                        handleTouchStart(message);
+                      }}
+                      onMouseUp={() => {
+                        console.log("up");
+                        handleTouchEnd();
+                      }}
                       onMouseLeave={handleTouchEnd}
                     >
                       <div
