@@ -14,7 +14,7 @@ import {
   FiRefreshCcw,
   FiCheckSquare,
   FiEdit,
-  FiTrash2 
+  FiTrash2,
 } from "react-icons/fi";
 import { MdStorefront } from "react-icons/md";
 import { FaCheck } from "react-icons/fa6";
@@ -164,10 +164,11 @@ const ChatLayout = () => {
 
           const sent_at = `${hours}:${minutes}`;
 
-          return { ...message, sent_at };
+          return { ...message };
         })
       );
       setMessages(sortMessages.reverse());
+      console.log(sortMessages);
     } catch {
       setMessages([]);
     }
@@ -191,31 +192,31 @@ const ChatLayout = () => {
 
   // هندلر راست کلیک
   const handleContextMenu = (e, message) => {
-  e.preventDefault();
-  if (message.sender != userID) return;
+    e.preventDefault();
+    if (message.sender != userID) return;
 
-  const menuWidth = 100;
-  const menuHeight = 200; 
-  const screenWidth = window.innerWidth;
-  const screenHeight = window.innerHeight;
+    const menuWidth = 100;
+    const menuHeight = 200;
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
 
-  let x = e.clientX;
-  let y = e.clientY;
+    let x = e.clientX;
+    let y = e.clientY;
 
-  if (x + menuWidth > screenWidth) {
-    x = screenWidth - menuWidth - 10;
-  }
-  if (y + menuHeight > screenHeight) {
-    y = screenHeight - menuHeight - 70;
-  }
+    if (x + menuWidth > screenWidth) {
+      x = screenWidth - menuWidth - 10;
+    }
+    if (y + menuHeight > screenHeight) {
+      y = screenHeight - menuHeight - 70;
+    }
 
-  setContextMenu({
-    visible: true,
-    x,
-    y,
-    message,
-  });
-};
+    setContextMenu({
+      visible: true,
+      x,
+      y,
+      message,
+    });
+  };
 
   // هندلر کلیک برای بستن منوی راست کلیک
   const handleClick = () => {
@@ -421,15 +422,24 @@ const ChatLayout = () => {
                   ref={messagesContainerRef}
                 >
                   {messages.map((message) => {
-                    const date = new Date(message.edited_at);
-                    const hours = date.getHours().toString().padStart(2, "0");
-                    const minutes = date
-                      .getMinutes()
-                      .toString()
-                      .padStart(2, "0");
-                    const editTime = `${hours}:${minutes}`;
-                    const isEdited = message.sent_at != editTime;
+                    const dates = [message.edited_at, message.sent_at];
+                    const comparison = dates.map((time) => {
+                      const date = new Date(time);
+                      const hours = date.getHours().toString().padStart(2, "0");
+                      const minutes = date
+                        .getMinutes()
+                        .toString()
+                        .padStart(2, "0");
+                      const seconds = date
+                        .getSeconds()
+                        .toString()
+                        .padStart(2, "0");
+                      return `${hours}:${minutes}:${seconds}`;
+                    });
 
+                    const isEdited = comparison[0] != comparison[1];
+                    const editTime = comparison[0].slice(0, 5);
+                    const sentTime = comparison[1].slice(0, 5);
                     return (
                       <motion.div
                         key={message.id}
@@ -472,13 +482,13 @@ const ChatLayout = () => {
                               }`}
                             >
                               {selectedMessages.includes(message.id) && (
-                          <FaCheck size={12} />
+                                <FaCheck size={12} />
                               )}
                             </div>
                           )}
 
                           {/* متن پیام */}
-                          <p>{message.message}</p>
+                          <div>{`${message.message}`}</div>
 
                           {/* زمان ارسال + ادیت */}
                           <div className="flex items-center space-x-1 mt-1 text-xs">
@@ -501,7 +511,7 @@ const ChatLayout = () => {
                                     : "text-blue-500"
                                 }
                               >
-                                {message.sent_at}
+                                {sentTime}
                               </span>
                             )}
                           </div>
@@ -525,7 +535,7 @@ const ChatLayout = () => {
                           className="flex items-center gap-2 px-3 py-3 hover:bg-blue-100 cursor-pointer"
                           onClick={handleSelectOption}
                         >
-                          <FaRegCircleCheck  className="text-blue-600 mb-0.5" />
+                          <FaRegCircleCheck className="text-blue-600 mb-0.5" />
                           <span>Select</span>
                         </div>
 
@@ -533,7 +543,10 @@ const ChatLayout = () => {
                           className="flex items-center gap-1 px-3 py-3 hover:bg-blue-100 cursor-pointer"
                           onClick={handleEditMessage}
                         >
-                          <TbEditCircle size={20} className="text-green-600 mb-0.5" />
+                          <TbEditCircle
+                            size={20}
+                            className="text-green-600 mb-0.5"
+                          />
                           <span>Edit</span>
                         </div>
 
@@ -544,7 +557,7 @@ const ChatLayout = () => {
                             handleDeleteMessages(contextMenu.message.id);
                           }}
                         >
-                          <FiTrash2 className="mb-0.5"/>
+                          <FiTrash2 className="mb-0.5" />
                           <span>Delete</span>
                         </div>
                       </div>
