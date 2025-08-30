@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { convertOffsetToTimes, motion, number } from "framer-motion";
 import { Portal } from "react-portal";
 import TextareaAutosize from "react-textarea-autosize";
+import { FaRegCircleCheck } from "react-icons/fa6";
 
 import { RiSendPlaneFill, RiCloseLine, RiEdit2Line } from "react-icons/ri";
 import {
@@ -11,9 +12,13 @@ import {
   FiShoppingBag,
   FiLock,
   FiRefreshCcw,
+  FiCheckSquare,
+  FiEdit,
+  FiTrash2 
 } from "react-icons/fi";
 import { MdStorefront } from "react-icons/md";
 import { FaCheck } from "react-icons/fa6";
+import { TbEditCircle } from "react-icons/tb";
 
 import ChatSidebar from "./ChatSidebar";
 import {
@@ -186,18 +191,31 @@ const ChatLayout = () => {
 
   // هندلر راست کلیک
   const handleContextMenu = (e, message) => {
-    e.preventDefault();
+  e.preventDefault();
+  if (message.sender != userID) return;
 
-    // فقط برای پیام‌های کاربر
-    if (message.sender != userID) return;
+  const menuWidth = 100;
+  const menuHeight = 200; 
+  const screenWidth = window.innerWidth;
+  const screenHeight = window.innerHeight;
 
-    setContextMenu({
-      visible: true,
-      x: e.clientX,
-      y: e.clientY,
-      message: message,
-    });
-  };
+  let x = e.clientX;
+  let y = e.clientY;
+
+  if (x + menuWidth > screenWidth) {
+    x = screenWidth - menuWidth - 10;
+  }
+  if (y + menuHeight > screenHeight) {
+    y = screenHeight - menuHeight - 70;
+  }
+
+  setContextMenu({
+    visible: true,
+    x,
+    y,
+    message,
+  });
+};
 
   // هندلر کلیک برای بستن منوی راست کلیک
   const handleClick = () => {
@@ -273,7 +291,6 @@ const ChatLayout = () => {
   };
 
   const handleEditMessage = () => {
-    console.log(contextMenu);
     setMessage(contextMenu.message.message);
     setPrevMessage(contextMenu.message.message);
     setIsEditing(true);
@@ -410,12 +427,9 @@ const ChatLayout = () => {
                       .getMinutes()
                       .toString()
                       .padStart(2, "0");
-
                     const editTime = `${hours}:${minutes}`;
                     const isEdited = message.sent_at != editTime;
-                    console.log(message.sent_at);
-                    console.log(message.edited_at);
-                    console.log(editTime != message.edited_at);
+
                     return (
                       <motion.div
                         key={message.id}
@@ -458,7 +472,7 @@ const ChatLayout = () => {
                               }`}
                             >
                               {selectedMessages.includes(message.id) && (
-                                <span className="text-xs">✓</span>
+                          <FaCheck size={12} />
                               )}
                             </div>
                           )}
@@ -496,37 +510,42 @@ const ChatLayout = () => {
                     );
                   })}
 
-                  {/* منوی راست کلیک */}
+                  {/* context menu */}
                   {contextMenu.visible && (
                     <Portal>
                       <div
-                        className=" bg-white rounded-lg shadow-lg py-2 z-50"
+                        className="bg-white/95 backdrop-blur-sm text-blue-950 border border-gray-200 rounded-lg shadow-xl  z-50"
                         style={{
                           position: "fixed",
                           top: contextMenu.y,
-                          left: contextMenu.x,
+                          left: contextMenu.x - 90,
                         }}
                       >
                         <div
-                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                          className="flex items-center gap-2 px-3 py-3 hover:bg-blue-100 cursor-pointer"
                           onClick={handleSelectOption}
                         >
-                          Select
+                          <FaRegCircleCheck  className="text-blue-600 mb-0.5" />
+                          <span>Select</span>
                         </div>
+
                         <div
-                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                          className="flex items-center gap-1 px-3 py-3 hover:bg-blue-100 cursor-pointer"
                           onClick={handleEditMessage}
                         >
-                          edit
+                          <TbEditCircle size={20} className="text-green-600 mb-0.5" />
+                          <span>Edit</span>
                         </div>
+
                         <div
-                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-600"
+                          className="flex items-center gap-2 px-3 py-3 hover:bg-blue-100 cursor-pointer text-red-600"
                           onClick={() => {
                             setSelectedMessages([contextMenu.message.id, 3]);
                             handleDeleteMessages(contextMenu.message.id);
                           }}
                         >
-                          Delete
+                          <FiTrash2 className="mb-0.5"/>
+                          <span>Delete</span>
                         </div>
                       </div>
                     </Portal>
