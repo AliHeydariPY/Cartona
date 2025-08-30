@@ -488,7 +488,7 @@ const ChatLayout = () => {
                           )}
 
                           {/* متن پیام */}
-                          <div>{`${message.message}`}</div>
+                            <div style={{ whiteSpace: 'pre-wrap' }}>{`${message.message}`}</div>
 
                           {/* زمان ارسال + ادیت */}
                           <div className="flex items-center space-x-1 mt-1 text-xs">

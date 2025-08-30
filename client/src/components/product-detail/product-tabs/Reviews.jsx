@@ -231,7 +231,7 @@ const Reviews = ({
                   {comment.updated_time}
                 </span>
               </div>
-              <p className="text-blue-700 text-sm">{comment.text}</p>
+              <div style={{ whiteSpace: 'pre-wrap' }} className="text-blue-700 text-sm">{comment.text}</div>
               <div className="flex justify-between">
                 <button
                   onClick={() => handleReply(comment.id)}
