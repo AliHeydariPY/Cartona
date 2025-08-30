@@ -418,7 +418,7 @@ const ChatLayout = () => {
 
                 {/* messages */}
                 <div
-                  className="flex-1 overflow-y-auto p-4 bg-gradient-to-br from-blue-50/50 to-cyan-50/50"
+                  className="flex-1 overflow-y-auto p-4 bg-gradient-to-br from-blue-50/50 to-cyan-50/50 custom-chat-scroll"
                   ref={messagesContainerRef}
                 >
                   {messages.map((message) => {

@@ -47,7 +47,7 @@ const ChatSidebar = ({
           </div>
 
           {/* لیست چت‌ها با اطلاعات محصول */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto  custom-chat-scroll">
             {conversations.map((conversation, inx) => (
               <div
                 key={inx}

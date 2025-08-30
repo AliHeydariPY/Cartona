@@ -206,7 +206,7 @@ const Reviews = ({
         )}
 
         {productComments.map((comment) => (
-          <div key={comment.id} className="space-y-1 sm:space-y-2">
+          <div key={comment.id} className="space-y-1 sm:space-y-2 ">
             <div className="p-3 sm:p-4 bg-blue-50/60 rounded-lg sm:rounded-xl border border-blue-200 shadow-sm">
               <div className="flex justify-between mb-1 sm:mb-2">
                 <div className="flex items-center">

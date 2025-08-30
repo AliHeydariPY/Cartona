@@ -339,3 +339,15 @@ body {
 .animate-spin-slow-once {
   animation: spin-slow-once 0.6s ease-in-out;
 }
+
+/* Custom Chat scrollbar */
+.custom-chat-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+
+.custom-chat-scroll::-webkit-scrollbar-thumb {
+  background-color: #3b82f6;
+  border-radius: 12px;
+  transition: background-color 0.3s ease, opacity 0.5s ease;
+  opacity: 1;
+}
