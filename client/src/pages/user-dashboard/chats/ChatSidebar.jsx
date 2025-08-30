@@ -74,7 +74,7 @@ const ChatSidebar = ({
                       conversation.chat_enabled
                         ? "group-hover:ring group-hover:ring-blue-400"
                         : ""
-                    } bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden transition-all duration-300 relative`}
+                    } rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden transition-all duration-300 relative`}
                   >
                     <img
                       src={conversation.product.image}

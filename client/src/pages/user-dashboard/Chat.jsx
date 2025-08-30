@@ -20,7 +20,7 @@ import { MdStorefront } from "react-icons/md";
 import { FaCheck } from "react-icons/fa6";
 import { TbEditCircle } from "react-icons/tb";
 
-import ChatSidebar from "./ChatSidebar";
+import ChatSidebar from "./chats/ChatSidebar";
 import {
   getPurchaseChats,
   getPurchasesByBuyer,
@@ -28,12 +28,12 @@ import {
   sendMessagse,
   deleteMessagse,
   editMessage,
-} from "../../../services/commentAPIServices";
-import { getShopkeeper, getBuyer } from "../../../services/userAPIServices";
-import { getProduct } from "../../../services/productAPIServices";
-import ChatInput from "./ChatInput";
+} from "../../services/commentAPIServices";
+import { getShopkeeper, getBuyer } from "../../services/userAPIServices";
+import { getProduct } from "../../services/productAPIServices";
+import ChatInput from "./chats/ChatInput";
 
-const ChatLayout = () => {
+const Chat = () => {
   const { chatID } = useParams();
   const [selectedChat, setSelectedChat] = useState(null);
   const [showSidebar, setShowSidebar] = useState(false);
@@ -640,4 +640,4 @@ const ChatLayout = () => {
   );
 };
 
-export default ChatLayout;
+export default Chat;

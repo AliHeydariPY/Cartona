@@ -14,7 +14,7 @@ import Cart from "./pages/user-dashboard/Cart";
 import Orders from "./pages/user-dashboard/Orders";
 import AddProduct from "./pages/user-dashboard/AddProduct";
 import MyProducts from "./pages/user-dashboard/MyProducts";
-import ChatLayout from "./pages/user-dashboard/chats/ChatLayout";
+import Chat from "./pages/user-dashboard/Chat";
 import Notifications from "./pages/user-dashboard/Notifications";
 
 import SearchPage from "./pages/SearchPage";
@@ -105,9 +105,9 @@ function App() {
             }
           />
 
-          <Route path="chats" element={<ChatLayout />} />
+          <Route path="chats" element={<Chat />} />
 
-          <Route path="chats/:chatID" element={<ChatLayout />} />
+          <Route path="chats/:chatID" element={<Chat />} />
 
           <Route path="add-product" element={<AddProduct />} />
 

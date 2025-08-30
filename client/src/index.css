@@ -333,8 +333,12 @@ body {
 }
 
 @keyframes spin-slow-once {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 .animate-spin-slow-once {
   animation: spin-slow-once 0.6s ease-in-out;
@@ -350,4 +354,30 @@ body {
   border-radius: 12px;
   transition: background-color 0.3s ease, opacity 0.5s ease;
   opacity: 1;
+}
+
+.custom-chat-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: #2563eb;
+  opacity: 0.9;
+}
+
+/* Emoji Picker */
+.epr-main {
+  border-color: oklch(90.1% 0.058 230.902) !important;
+}
+
+.epr-body::-webkit-scrollbar {
+  width: 5px; 
+}
+
+.epr-body::-webkit-scrollbar-thumb {
+  background-color: #3b82f6; 
+  border-radius: 12px; 
+  transition: background-color 0.3s ease, opacity 0.5s ease;
+  opacity: 1;
+}
+
+.epr-body::-webkit-scrollbar-thumb:hover {
+  background-color: #2563eb;
+  opacity: 0.9;
 }
