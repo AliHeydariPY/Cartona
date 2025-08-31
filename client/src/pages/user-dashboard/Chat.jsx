@@ -96,7 +96,6 @@ const Chat = () => {
           })
         );
 
-        // حذف nullها
         setConversations(pvs.filter(Boolean));
       } catch (error) {
         console.error("fetchPVs failed:", error);
@@ -120,51 +119,12 @@ const Chat = () => {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
-  // داده‌های نمونه
-  // const conversations = [
-  //   { id: 1, name: "John Doe", lastMessage: "Hello there!", unread: 2, time: "2:30 PM" },
-  //   { id: 2, name: "Alice Smith", lastMessage: "Thanks for your help!", unread: 0, time: "Yesterday" },
-  //   { id: 3, name: "Tech Support", lastMessage: "Your issue has been resolved", unread: 1, time: "12:45 PM" },
-  //   { id: 4, name: "Sarah Johnson", lastMessage: "Let's meet tomorrow", unread: 0, time: "Monday" },
-
-  // ];
-
-  // const messages = selectedChat
-  //   ? [
-  //       {
-  //         id: 1,
-  //         text: "Hello! How can I help you today?",
-  //         sender: "them",
-  //         time: "2:25 PM",
-  //       },
-  //       {
-  //         id: 2,
-  //         text: "I have a question about my order",
-  //         sender: "me",
-  //         time: "2:26 PM",
-  //       },
-  //       {
-  //         id: 3,
-  //         text: "Sure, I'd be happy to help. What's your order number?",
-  //         sender: "them",
-  //         time: "2:27 PM",
-  //       },
-  //     ]
-  //   : [];
 
   const fetchMessages = async (purchaseID) => {
     try {
       const chatsRes = await getPurchaseChats(purchaseID);
       const sortMessages = await Promise.all(
         chatsRes.data.map(async (message) => {
-          const dateStr = message.sent_at;
-          const date = new Date(dateStr.replace(" ", "T"));
-
-          const hours = date.getHours().toString().padStart(2, "0");
-          const minutes = date.getMinutes().toString().padStart(2, "0");
-
-          const sent_at = `${hours}:${minutes}`;
-
           return { ...message };
         })
       );

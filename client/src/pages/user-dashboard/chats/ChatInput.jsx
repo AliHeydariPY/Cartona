@@ -21,16 +21,15 @@ export default function ChatInput({
   userID,
 }) {
   const [emojiBox, setEmojiBox] = useState(false);
-  const textareaRef = useRef();
   const [textareaHeight, setTextareaHeight] = useState(0);
-  const isOverXL = window.innerWidth > 1280;
   const [isEmojiVisible, setIsEmojiVisible] = useState(false);
   const emojiPickerRef = useRef(null);
+  const textareaRef = useRef();
 
-  const addEmoji = (emojiData) => {
-    setMessage((prev) => prev + emojiData.emoji);
-    textareaRef.current.focus();
-  };
+  useEffect(() => {
+    setMessage("");
+    
+  }, [chatID]);
 
   // موقعیت‌یندی ایموجی پیکر
   useEffect(() => {
@@ -45,13 +44,18 @@ export default function ChatInput({
     }
   }, [isEmojiVisible, textareaHeight]);
 
+  const addEmoji = (emojiData) => {
+    setMessage((prev) => prev + emojiData.emoji);
+    textareaRef.current.focus();
+  };
+
   return (
     <div className="p-4 border-t border-blue-200 bg-white/90 relative">
       {/* باکس ایموجی */}
       <div
         className={`fixed z-50 right-0 mr-2`}
         style={{
-          bottom: isOverXL ? textareaHeight + 42 : textareaHeight + 42,
+          bottom: isEditing ? textareaHeight + 42 + 44 : textareaHeight + 42,
           opacity: emojiBox ? 1 : 0,
           pointerEvents: emojiBox ? "auto" : "none",
         }}
@@ -111,13 +115,12 @@ export default function ChatInput({
           <FiSmile size={22} />
         </button>
 
-        {/* اینپوت */}
         <TextareaAutosize
           ref={textareaRef}
           minRows={1}
           maxRows={5}
           value={message}
-          onHeightChange={(h) => setTextareaHeight(h)} // ارتفاع لحظه‌ای
+          onHeightChange={(h) => setTextareaHeight(h)}
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
@@ -154,7 +157,6 @@ export default function ChatInput({
    transition-all duration-300"
         />
 
-        {/* دکمه ارسال */}
         {isEditing ? (
           <button
             onClick={() => {
