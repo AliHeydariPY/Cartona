@@ -13,7 +13,7 @@ const CreateAccountForm = () => {
         /^[a-zA-Z0-9@./+\-_]+$/,
         "Only English letters, numbers and @./+-_ characters are allowed"
       )
-      .min(3, "At least 3 characters")
+      .min(4, "At least 3 characters")
       .max(18, "Maximum 18 characters")
       .required("Username is required"),
     password: Yup.string()

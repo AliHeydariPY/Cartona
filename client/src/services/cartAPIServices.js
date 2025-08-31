@@ -32,7 +32,7 @@ export const totalCartPayment = (cartID) => {
   });
 };
 
-export const getPayments = (cartID) => {
-  const url = `${SERVER_URL}/cart-api/product-payments/cart/${cartID}/`;
+export const getPayments = (path) => {
+  const url = `${SERVER_URL}/cart-api/product-payments/${path}`;
   return axios.get(url);
 };

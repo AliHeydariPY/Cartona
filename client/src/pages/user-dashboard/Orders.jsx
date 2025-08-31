@@ -38,7 +38,7 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
 
   useEffect(() => {
     const fetchPaymentsData = async () => {
-      const res = await getPayments(localStorage.getItem("userID"));
+      const res = await getPayments(`cart/${localStorage.getItem("userID")}/`);
       const payments = await Promise.all(
         res.data.map(async (payment) => {
           const productRes = await getProduct(payment.product);

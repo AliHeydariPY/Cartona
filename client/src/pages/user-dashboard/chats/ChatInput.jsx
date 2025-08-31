@@ -28,7 +28,6 @@ export default function ChatInput({
 
   useEffect(() => {
     setMessage("");
-    
   }, [chatID]);
 
   // موقعیت‌یندی ایموجی پیکر
@@ -53,27 +52,27 @@ export default function ChatInput({
     <div className="p-4 border-t border-blue-200 bg-white/90 relative">
       {/* باکس ایموجی */}
       <div
-        className={`fixed z-50 right-0 mr-2`}
+        className={`fixed z-50 right-0 mr-2 emoji-picker-container ${
+          emojiBox ? "emoji-enter" : "emoji-exit"
+        }`}
         style={{
           bottom: isEditing ? textareaHeight + 42 + 44 : textareaHeight + 42,
-          opacity: emojiBox ? 1 : 0,
-          pointerEvents: emojiBox ? "auto" : "none",
+        }}
+        onAnimationEnd={() => {
+          if (!emojiBox) {
+            // بعد از پایان انیمیشن خروج، display را none کنید
+          }
         }}
       >
-        <div
-          className={`transform transition-all duration-300 ease-in-out 
-    ${emojiBox ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"}`}
-        >
-          <EmojiPicker
-            theme="light"
-            onEmojiClick={addEmoji}
-            searchDisabled
-            emojiStyle="native"
-            height={380}
-            width={280}
-            previewConfig={{ showPreview: false }}
-          />
-        </div>
+        <EmojiPicker
+          theme="light"
+          onEmojiClick={addEmoji}
+          searchDisabled
+          emojiStyle="native"
+          height={380}
+          width={280}
+          previewConfig={{ showPreview: false }}
+        />
       </div>
 
       {isEditing && (
