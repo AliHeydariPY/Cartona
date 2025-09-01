@@ -43,7 +43,6 @@ const Chat = () => {
   const messagesEndRef = useRef(null);
   const userID = localStorage.getItem("userID");
   const storekeeperID = localStorage.getItem("storekeeperID");
-  const inputRef = useRef();
   
   useEffect(() => {
     const fetchPVs = async () => {
@@ -256,7 +255,6 @@ const Chat = () => {
     setMessage(contextMenu.message.message);
     setPrevMessage(contextMenu.message.message);
     setIsEditing(true);
-    inputRef.current.focus();
   };
 
   // اضافه کردن event listener برای کلیک

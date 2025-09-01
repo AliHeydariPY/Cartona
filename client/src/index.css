@@ -364,6 +364,7 @@ body {
 /* Emoji Picker */
 .epr-main {
   border-color: oklch(90.1% 0.058 230.902) !important;
+  opacity: 80%;
 }
 
 .epr-body::-webkit-scrollbar {

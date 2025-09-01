@@ -28,7 +28,21 @@ export default function ChatInput({
 
   useEffect(() => {
     setMessage("");
+    setIsEditing(false);
+    textareaRef.current.focus();
   }, [chatID]);
+
+  useEffect(() => {
+    (prev) => {
+      console.log(prev.trim());
+      if (prev) {
+        return prev;
+      } else {
+        return "";
+      }
+    };
+    textareaRef.current.focus();
+  }, [isEditing]);
 
   // موقعیت‌یندی ایموجی پیکر
   useEffect(() => {

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import toast from "react-hot-toast";
 import {
   FiPackage,
   FiTruck,
@@ -10,10 +11,13 @@ import {
 } from "react-icons/fi";
 import { getPayments } from "../../services/cartAPIServices";
 import { getProduct } from "../../services/productAPIServices";
+import SendNotePopup from "../../components/pop-ups/SendNotePopup";
+import { productSubmission } from "../../services/userAPIServices";
 
 const Payments = () => {
   const [payments, setPayments] = useState([]);
-
+  const [showSendNotePopup, setShowSendNotePopup] = useState(false);
+  const [payload, setPayload] = useState(null);
   useEffect(() => {
     const fetchPayments = async () => {
       const productPaymentsRes = await getPayments(``);
@@ -85,8 +89,7 @@ const Payments = () => {
   //   },
   // ];
 
-  const markAsDelivered = (paymentId) => {
-    // منطق علامت گذاری به عنوان تحویل شده
+  const submission = (paymentId) => {
     console.log("Mark as delivered:", paymentId);
   };
 
@@ -267,14 +270,17 @@ const Payments = () => {
                     </div>
 
                     <div className="flex items-center space-x-2">
-                      <FiCreditCard className="text-blue-500" size={16} />
+                      <FiCreditCard
+                        className="text-blue-500 mb-0.5"
+                        size={16}
+                      />
                       <span className="text-sm text-blue-600">
                         {formatCardNumber(payment.fake_card_number)}
                       </span>
                     </div>
 
                     <div className="flex items-center space-x-2">
-                      <FiMapPin className="text-blue-500" size={16} />
+                      <FiMapPin className="text-blue-500 mb-0.5" size={16} />
                       <span className="text-sm text-blue-600 truncate max-w-[200px]">
                         {payment.address}
                       </span>
@@ -297,11 +303,23 @@ const Payments = () => {
 
                     {!payment.is_delivered && (
                       <button
-                        onClick={() => markAsDelivered(payment.id)}
-                        className="bg-gradient-to-r from-green-600 to-emerald-500 text-white px-4 py-2 rounded-lg hover:from-green-700 hover:to-emerald-600 transition-all duration-300 font-semibold flex items-center justify-center"
+                        onClick={() => {
+                          setShowSendNotePopup(true);
+                          // submission(payment.id);
+                          const now = new Date().toISOString();
+                          setPayload(() => {
+                            return {
+                              payment: payment.id,
+                              is_sent: true,
+                              sent_at: now,
+                              note: "",
+                            };
+                          });
+                        }}
+                        className="bg-gradient-to-r cursor-pointer  from-green-600 to-emerald-500 text-white px-4 py-2 rounded-lg hover:from-green-700 hover:to-emerald-600 transition-colors duration-300 font-semibold flex items-center justify-center"
                       >
-                        <FiTruck className="mr-2" size={16} />
-                        Mark as Delivered
+                        <FiTruck className="mr-2 mb-0.5" size={16} />
+                        Product submission
                       </button>
                     )}
 
@@ -314,7 +332,6 @@ const Payments = () => {
                   </div>
                 </div>
 
-                {/* اطلاعات کارت (برای نمایش بیشتر) */}
                 <div className="mt-4 pt-4 border-t border-blue-200 grid grid-cols-2 md:grid-cols-4 gap-4 text-xs text-blue-600">
                   <div>
                     <span className="font-medium">Expiry:</span>{" "}
@@ -334,6 +351,34 @@ const Payments = () => {
                 </div>
               </motion.div>
             ))
+          )}
+          {showSendNotePopup && (
+            <SendNotePopup
+              onClose={() => setShowSendNotePopup(false)}
+              onConfirm={(note) => {
+                productSubmission({ ...payload, note }).then(() => {
+                  toast.custom((t) => (
+                    <div
+                      className={`${
+                        t.visible ? "animate-enter" : "animate-leave"
+                      } transform transition-all duration-300`}
+                    >
+                      <div className="bg-gradient-to-r from-green-500 to-cyan-400 text-white px-6 py-3 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-3">
+                        <div className="bg-blue-500/20 p-2 rounded-full">
+                          <FiCheckCircle className="text-xl text-white" />
+                        </div>
+                        <div>
+                          <p className="font-medium">
+                            The product was successfully sent
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ));
+                });
+              }}
+              payload={payload}
+            />
           )}
         </div>
       </div>
