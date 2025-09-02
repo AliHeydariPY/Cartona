@@ -70,7 +70,7 @@ const Navbar = () => {
                 onKeyDown={(e) => {
                   if (e.code === "Enter") {
                     if (search.trim()) {
-                      navigate(`/search/${search}`);
+                      navigate(`/search/search=${search}`);
                     }
                   }
                 }}
