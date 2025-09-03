@@ -3,51 +3,39 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Range, getTrackBackground } from "react-range";
 import { Formik, Form, Field } from "formik";
 
+import CategoryFilter from "./filters/CategoryFilter";
+
+import { BiCategory } from "react-icons/bi";
+import { MdStorefront } from "react-icons/md";
 import {
   FiFilter,
   FiX,
   FiChevronDown,
-  FiChevronUp,
   FiStar,
-  FiUser,
-  FiShoppingBag,
-  FiHeart,
-  FiSettings,
-  FiCreditCard,
-  FiLogOut,
-  FiHome,
-  FiShield,
-  FiPackage,
-  FiShoppingCart,
-  FiUsers,
   FiDollarSign,
-  FiPlusCircle,
-  FiFileText,
-  FiBell,
   FiMessageSquare,
 } from "react-icons/fi";
-import { FiHelpCircle, FiInfo } from "react-icons/fi";
 
-import { BiCategory, BiStore } from "react-icons/bi";
 import { useNavigate, useParams } from "react-router-dom";
-import { searchProduct } from "../services/productAPIServices";
+
+import { searchProduct, getCategory } from "../services/productAPIServices";
 
 const SearchFilters = ({ setProducts }) => {
   const navigate = useNavigate();
   const { query } = useParams();
   const [isOpen, setIsOpen] = useState(false);
-  const [filters, setFilters] = useState({
+  const filters = {
     min_rating: "",
     max_rating: "",
     min_comments: "",
     max_comments: "",
     min_price: "",
     max_price: "",
-    category: "",
+    category: null,
     storekeeper: "",
-  });
+  };
 
-  const [ready, setReady] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const [initialFilters, setInitialFilters] = useState({
     min_rating: "",
@@ -56,8 +44,8 @@ const SearchFilters = ({ setProducts }) => {
     max_comments: "",
     min_price: "",
     max_price: "",
-    category: "",
     storekeeper: "",
+    category: null,
   });
   const [isReady, setIsReady] = useState(false);
 
@@ -69,7 +57,14 @@ const SearchFilters = ({ setProducts }) => {
     Object.keys(initialFilters).forEach((filter) => {
       if (params.has(filter)) {
         const value = params.get(filter);
-        newFilters[filter] = isNaN(value) ? value : Number(value);
+
+        if (filter == "category") {
+          getCategory(value).then((res) => {
+            newFilters[filter] = res.data;
+          });
+        } else {
+          newFilters[filter] = isNaN(value) ? value : Number(value);
+        }
       } else {
         newFilters[filter] = "";
       }
@@ -78,17 +73,27 @@ const SearchFilters = ({ setProducts }) => {
     setIsReady(true);
   }, [query]);
 
-  useEffect(() => {
-    console.log(filters);
-  }, [filters]);
-
   const FilterSection = ({ title, icon, children }) => (
-    <div>
-      <div className="flex items-center mb-3 text-blue-800">
+    <div className="border-b border-blue-400 pb-4">
+      <div
+        onClick={() =>
+          setOpen((prev) => {
+            return title == prev ? "" : title;
+          })
+        }
+        className="flex cursor-pointer items-center mb-3 text-blue-800"
+      >
         {icon}
         <h3 className="font-semibold ml-2">{title}</h3>
+        <FiChevronDown
+          className={`ml-2 transform ${
+            open == title ? "rotate-180" : ""
+          } transition-transform duration-300`}
+          size={17}
+        />
       </div>
-      {children}
+
+      {open == title && children}
     </div>
   );
 
@@ -136,7 +141,10 @@ const SearchFilters = ({ setProducts }) => {
         initialValues={initialFilters}
         enableReinitialize
         onSubmit={(values) => {
-          const url = buildUrl(values);
+          const cat = values.category
+            ? values.category.id
+            : initialFilters.category.id;
+          const url = buildUrl({ ...values, category: cat });
           navigate(`/search/${url}`);
         }}
       >
@@ -150,10 +158,10 @@ const SearchFilters = ({ setProducts }) => {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.3 }}
-                    className="w-full bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg hover:shadow-xl border border-blue-200/50 hover:border-blue-300 transition-all duration-300 p-4 xl:sticky xl:top-24 xl:h-fit"
+                    className="w-full bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg hover:shadow-xl border border-blue-200/50 hover:border-blue-300 transition-all duration-300 p-4 xl:sticky xl:top-24"
                   >
                     {/* هدر فیلترها */}
-                    <div className="flex justify-between items-center mb-6">
+                    <div className="flex justify-between items-center mb-7 border-b border-blue-400 pb-4">
                       <h3 className="text-xl font-bold text-blue-900">
                         Filters
                       </h3>
@@ -176,7 +184,7 @@ const SearchFilters = ({ setProducts }) => {
                     </div>
 
                     {/* دسته‌بندی فیلترها */}
-                    <div className="space-y-5 max-h-[70vh] overflow-y-auto ">
+                    <div className="space-y-7 max-h-[70vh] overflow-y-auto ">
                       {/* فیلتر قیمت */}
                       <FilterSection
                         title="Price Range"
@@ -257,45 +265,22 @@ const SearchFilters = ({ setProducts }) => {
                       </button> */}
 
                       <FilterSection
-                        title="Rating"
-                        icon={<FiStar className="text-amber-500 mb-0.5" />}
+                        title="Categories"
+                        icon={
+                          <BiCategory
+                            className="text-blue-500 mb-0.5"
+                            size={17}
+                          />
+                        }
                       >
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <label className="block text-sm text-blue-700 mb-1">
-                              Min Rating
-                            </label>
-                            <Field
-                              as="select"
-                              name="min_rating"
-                              className="w-full p-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            >
-                              <option value="">Any</option>
-                              <option value="1">1+ Star</option>
-                              <option value="2">2+ Stars</option>
-                              <option value="3">3+ Stars</option>
-                              <option value="4">4+ Stars</option>
-                              <option value="5">5 Stars</option>
-                            </Field>
-                          </div>
-                          <div>
-                            <label className="block text-sm text-blue-700 mb-1">
-                              Max Rating
-                            </label>
-                            <Field
-                              as="select"
-                              name="max_rating"
-                              className="w-full p-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            >
-                              <option value="">Any</option>
-                              <option value="1">1 Star</option>
-                              <option value="2">2 Stars</option>
-                              <option value="3">3 Stars</option>
-                              <option value="4">4 Stars</option>
-                              <option value="5">5 Stars</option>
-                            </Field>
-                          </div>
-                        </div>
+                        <CategoryFilter
+                          selectedCategory={
+                            values.category
+                              ? values.category
+                              : initialFilters.category
+                          }
+                          onSelect={(cat) => setFieldValue("category", cat)}
+                        />
                       </FilterSection>
 
                       {/* فیلتر امتیاز */}
@@ -379,7 +364,7 @@ const SearchFilters = ({ setProducts }) => {
                     <div>
                       <button
                         type="submit"
-                        className="w-full bg-gradient-to-r text-white from-blue-600 to-cyan-500 mt-3 py-2 rounded-lg"
+                        className="w-full bg-gradient-to-r text-white from-blue-600 to-cyan-500 mt-4 py-2 rounded-lg"
                       >
                         submit
                       </button>
