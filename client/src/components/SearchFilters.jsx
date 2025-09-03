@@ -18,9 +18,9 @@ import {
 
 import { useNavigate, useParams } from "react-router-dom";
 
-import { searchProduct, getCategory } from "../services/productAPIServices";
+import { getCategory } from "../services/productAPIServices";
 
-const SearchFilters = ({ setProducts }) => {
+const SearchFilters = () => {
   const navigate = useNavigate();
   const { query } = useParams();
   const [isOpen, setIsOpen] = useState(false);
@@ -85,30 +85,6 @@ const SearchFilters = ({ setProducts }) => {
     return url;
   };
 
-  const FilterSection = ({ title, icon, children }) => (
-    <div className="border-b border-blue-400 pb-4">
-      <div
-        onClick={() =>
-          setOpen((prev) => {
-            return title == prev ? "" : title;
-          })
-        }
-        className="flex cursor-pointer items-center mb-3 text-blue-800"
-      >
-        {icon}
-        <h3 className="font-semibold ml-2">{title}</h3>
-        <FiChevronDown
-          className={`ml-2 transform rotate-transition ${
-            open == title ? "rotate-open" : ""
-          }`}
-          size={17}
-        />
-      </div>
-
-      {open === title && children}
-    </div>
-  );
-
   if (!isReady) {
     return (
       <div className="mb-6 col-span-2 2xl:col-span-1">
@@ -125,7 +101,7 @@ const SearchFilters = ({ setProducts }) => {
   }
 
   return (
-    <div className="mb-6 ">
+    <div className="mb-6 xl:col-span-2 2xl:col-span-1">
       {/* دکمه باز کردن فیلترها در موبایل */}
       <div className="flex w-full justify-between items-center mb-4 xl:hidden">
         <button
@@ -141,14 +117,22 @@ const SearchFilters = ({ setProducts }) => {
         initialValues={initialFilters}
         enableReinitialize
         onSubmit={(values) => {
+          console.log(values)
+
           const cat = values.category
-            ? values.category.id
-            : initialFilters.category.id;
-          const url = buildUrl({ ...values, category: cat });
-          navigate(`/search/${url}`);
+            ? values.category
+            : initialFilters.category;
+            if(cat) {
+
+              const url = buildUrl({ ...values, category: cat.id });
+              navigate(`/search/${url}`);
+            } else {
+              const url = buildUrl({ ...values});
+              navigate(`/search/${url}`);
+            }
         }}
       >
-        {({ values, setFieldValue, resetForm }) => (
+        {({ values, setFieldValue, submitForm }) => (
           <Form>
             <div className="  gap-6">
               <AnimatePresence>
@@ -168,7 +152,20 @@ const SearchFilters = ({ setProducts }) => {
                       <div className="flex items-center">
                         <button
                           type="button"
-                          onClick={() => resetForm()}
+                          onClick={() => {
+                            setInitialFilters({
+                              min_rating: "",
+                              max_rating: "",
+                              min_comments: "",
+                              max_comments: "",
+                              min_price: "",
+                              max_price: "",
+                              storekeeper: "",
+                              category: null,
+                            });
+
+                            submitForm();
+                          }}
                           className="text-sm text-blue-600 hover:text-cyan-500 mr-3 transition-colors duration-200 mt-1"
                         >
                           Reset

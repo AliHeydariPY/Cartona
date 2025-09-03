@@ -5,12 +5,13 @@ import {
   getMainCategories,
   getSubCategories,
 } from "../../services/productAPIServices";
+import { FiX } from "react-icons/fi";
 
 const CategoryFilter = ({ selectedCategory, onSelect }) => {
   const [selectedMainCategory, setSelectedMainCategory] = useState(null);
   const [mainCategories, setMainCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
-console.log(selectedCategory)
+
   useEffect(() => {
     getMainCategories().then((res) => setMainCategories(res.data));
   }, []);
@@ -24,14 +25,20 @@ console.log(selectedCategory)
 
   return (
     <div className="space-y-2">
-      {/* نمایش کتگوری انتخاب‌شده */}
       {selectedCategory && (
-        <div className="px-3 py-2 rounded-md bg-blue-100 border border-blue-400 text-blue-700">
+        <div className="flex items-center justify-between px-3 py-2 rounded-md bg-blue-100 border border-blue-400 text-blue-700">
           Selected: {selectedCategory.name}
+          <span
+            onClick={() => {
+              onSelect({});
+            }}
+            className="cursor-pointer hover:text-red-500 transition-colors duration-200"
+          >
+            <FiX size={18} />
+          </span>
         </div>
       )}
 
-      {/* اگر دسته اصلی انتخاب نشده → نمایش دسته‌های اصلی */}
       {!selectedMainCategory && (
         <div className="max-h-64 overflow-y-auto pr-1">
           {mainCategories.map((cat) => (
@@ -44,8 +51,9 @@ console.log(selectedCategory)
                   : "border-transparent hover:bg-blue-50 text-blue-800"
               }`}
               onClick={() => {
-                console.log(cat)
-                setSelectedMainCategory(cat)}}
+                console.log(cat);
+                setSelectedMainCategory(cat);
+              }}
             >
               <FiChevronLeft className="mr-1 mb-0.5" size={16} />
               {cat.name}
@@ -54,7 +62,6 @@ console.log(selectedCategory)
         </div>
       )}
 
-      {/* اگر دسته اصلی انتخاب شد → لیست زیرمجموعه‌ها */}
       {selectedMainCategory && (
         <>
           <div className="flex items-center justify-between px-3 py-2 border-b border-blue-300">
@@ -65,7 +72,9 @@ console.log(selectedCategory)
             >
               <FiChevronLeft className="mr-0.5 mb-0.5" /> Back
             </button>
-            <p className="font-medium text-blue-700 break-words whitespace-normal flex-1 text-right">{selectedMainCategory.name}</p>
+            <p className="font-medium text-blue-700 break-words whitespace-normal flex-1 text-right">
+              {selectedMainCategory.name}
+            </p>
           </div>
 
           <div className="max-h-64 overflow-y-auto pr-1">
@@ -80,6 +89,7 @@ console.log(selectedCategory)
                 }`}
                 onClick={() => {
                   onSelect(sub);
+                  
                 }}
               >
                 {sub.name}
