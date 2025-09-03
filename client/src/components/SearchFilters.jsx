@@ -73,6 +73,18 @@ const SearchFilters = ({ setProducts }) => {
     setIsReady(true);
   }, [query]);
 
+  const buildUrl = (values) => {
+    const filtersName = Object.keys(filters);
+    let url =
+      query.search("&") === -1 ? query : query.slice(0, query.search("&"));
+    filtersName.forEach((filterName) => {
+      if (values[filterName]) {
+        url += `&${filterName}=${values[filterName]}`;
+      }
+    });
+    return url;
+  };
+
   const FilterSection = ({ title, icon, children }) => (
     <div className="border-b border-blue-400 pb-4">
       <div
@@ -86,28 +98,16 @@ const SearchFilters = ({ setProducts }) => {
         {icon}
         <h3 className="font-semibold ml-2">{title}</h3>
         <FiChevronDown
-          className={`ml-2 transform ${
-            open == title ? "rotate-180" : ""
-          } transition-transform duration-300`}
+          className={`ml-2 transform rotate-transition ${
+            open == title ? "rotate-open" : ""
+          }`}
           size={17}
         />
       </div>
 
-      {open == title && children}
+      {open === title && children}
     </div>
   );
-
-  const buildUrl = (values) => {
-    const filtersName = Object.keys(filters);
-    let url =
-      query.search("&") === -1 ? query : query.slice(0, query.search("&"));
-    filtersName.forEach((filterName) => {
-      if (values[filterName]) {
-        url += `&${filterName}=${values[filterName]}`;
-      }
-    });
-    return url;
-  };
 
   if (!isReady) {
     return (
@@ -125,7 +125,7 @@ const SearchFilters = ({ setProducts }) => {
   }
 
   return (
-    <div className="mb-6 col-span-2 2xl:col-span-1">
+    <div className="mb-6 ">
       {/* دکمه باز کردن فیلترها در موبایل */}
       <div className="flex w-full justify-between items-center mb-4 xl:hidden">
         <button
@@ -150,7 +150,7 @@ const SearchFilters = ({ setProducts }) => {
       >
         {({ values, setFieldValue, resetForm }) => (
           <Form>
-            <div className=" flex-col lg:flex-row gap-6">
+            <div className="  gap-6">
               <AnimatePresence>
                 {(isOpen || window.innerWidth >= 1280) && (
                   <motion.div
@@ -158,7 +158,7 @@ const SearchFilters = ({ setProducts }) => {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.3 }}
-                    className="w-full bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg hover:shadow-xl border border-blue-200/50 hover:border-blue-300 transition-all duration-300 p-4 xl:sticky xl:top-24"
+                    className="w-full bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg hover:shadow-xl border border-blue-200/50 hover:border-blue-300 transition-all duration-300 p-4"
                   >
                     {/* هدر فیلترها */}
                     <div className="flex justify-between items-center mb-7 border-b border-blue-400 pb-4">
@@ -184,181 +184,224 @@ const SearchFilters = ({ setProducts }) => {
                     </div>
 
                     {/* دسته‌بندی فیلترها */}
-                    <div className="space-y-7 max-h-[70vh] overflow-y-auto ">
+                    <div className="space-y-7">
                       {/* فیلتر قیمت */}
-                      <FilterSection
-                        title="Price Range"
-                        icon={
+                      <div className="border-b border-blue-400 pb-4">
+                        <div
+                          onClick={() =>
+                            setOpen((prev) => {
+                              return "Price Range" == prev ? "" : "Price Range";
+                            })
+                          }
+                          className="flex cursor-pointer items-center mb-3 text-blue-800"
+                        >
                           <FiDollarSign className="text-green-500 mb-0.5" />
-                        }
-                      >
-                        <div className="px-3 py-1">
-                          <Range
-                            step={5}
-                            min={0}
-                            max={1000}
-                            values={[
-                              Number(values.min_price) || 0,
-                              Number(values.max_price) || 1000,
-                            ]}
-                            onChange={(rangeVals) => {
-                              setFieldValue("min_price", rangeVals[0]);
-                              setFieldValue("max_price", rangeVals[1]);
-                            }}
-                            renderTrack={({ props, children }) => {
-                              const { key, ...rest } = props;
-                              return (
-                                <div
-                                  key={key}
-                                  {...rest}
-                                  className="h-2 bg-blue-200 rounded-full cursor-pointer"
-                                  style={{
-                                    background: getTrackBackground({
-                                      values: [
-                                        values.min_price || 0,
-                                        values.max_price || 1000,
-                                      ],
-                                      colors: ["#c6dbfa", "#3b82f6", "#c6dbfa"],
-                                      min: 0,
-                                      max: 1000,
-                                    }),
-                                  }}
-                                >
-                                  {children}
-                                </div>
-                              );
-                            }}
-                            renderThumb={({ props }) => {
-                              const { key, ...rest } = props;
-                              return (
-                                <div
-                                  key={key}
-                                  {...rest}
-                                  className="w-5 h-5 bg-blue-500 rounded-full shadow-md cursor-grab focus:outline-none"
-                                />
-                              );
-                            }}
+                          <h3 className="font-semibold ml-2">Price Range</h3>
+                          <FiChevronDown
+                            className={`ml-2 transform ${
+                              open == "Price Range" ? "rotate-180" : ""
+                            } transition-transform duration-300`}
+                            size={17}
                           />
-                          <div className="flex justify-between text-sm text-blue-800 mt-2">
-                            <span>${values.min_price || 0}</span>
-                            <span>${values.max_price || 1000}</span>
-                          </div>
                         </div>
-                      </FilterSection>
+                        {open == "Price Range" && (
+                          <div className="px-3 py-1">
+                            <Range
+                              step={5}
+                              min={0}
+                              max={1000}
+                              values={[
+                                Number(values.min_price) || 0,
+                                Number(values.max_price) || 1000,
+                              ]}
+                              onChange={(rangeVals) => {
+                                setFieldValue("min_price", rangeVals[0]);
+                                setFieldValue("max_price", rangeVals[1]);
+                              }}
+                              renderTrack={({ props, children }) => {
+                                const { key, ...rest } = props;
+                                return (
+                                  <div
+                                    key={key}
+                                    {...rest}
+                                    className="h-2 bg-blue-200 rounded-full cursor-pointer"
+                                    style={{
+                                      background: getTrackBackground({
+                                        values: [
+                                          values.min_price || 0,
+                                          values.max_price || 1000,
+                                        ],
+                                        colors: [
+                                          "#c6dbfa",
+                                          "#3b82f6",
+                                          "#c6dbfa",
+                                        ],
+                                        min: 0,
+                                        max: 1000,
+                                      }),
+                                    }}
+                                  >
+                                    {children}
+                                  </div>
+                                );
+                              }}
+                              renderThumb={({ props }) => {
+                                const { key, ...rest } = props;
+                                return (
+                                  <div
+                                    key={key}
+                                    {...rest}
+                                    className="w-5 h-5 bg-blue-500 rounded-full shadow-md cursor-grab focus:outline-none"
+                                  />
+                                );
+                              }}
+                            />
+                            <div className="flex justify-between text-sm text-blue-800 mt-2">
+                              <span>${values.min_price || 0}</span>
+                              <span>${values.max_price || 1000}</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
 
-                      {/* <button
-                        type="button"
-                        className="flex justify-between w-full items-center bg-white border border-blue-300 rounded-lg px-4 py-3 text-blue-800 hover:border-blue-400 transition-colors duration-300 text-left"
-                        onClick={() => {}}
-                      >
-                        <span>
-                          {selectedCategory
-                            ? selectedCategory.name
-                            : "Any"}
-                        </span>
-                        <FiChevronDown
-                          className={`ml-2 transform ${
-                            isCategoryOpen ? "rotate-180" : ""
-                          } transition-transform duration-300`}
-                          size={16}
-                        />
-                      </button> */}
-
-                      <FilterSection
-                        title="Categories"
-                        icon={
+                      <div className="border-b border-blue-400 pb-4">
+                        <div
+                          onClick={() =>
+                            setOpen((prev) => {
+                              return "Categories" == prev ? "" : "Categories";
+                            })
+                          }
+                          className="flex cursor-pointer items-center mb-3 text-blue-800"
+                        >
                           <BiCategory
                             className="text-blue-500 mb-0.5"
                             size={17}
                           />
-                        }
-                      >
-                        <CategoryFilter
-                          selectedCategory={
-                            values.category
-                              ? values.category
-                              : initialFilters.category
-                          }
-                          onSelect={(cat) => setFieldValue("category", cat)}
-                        />
-                      </FilterSection>
+                          <h3 className="font-semibold ml-2">Categories</h3>
+                          <FiChevronDown
+                            className={`ml-2 transform ${
+                              open == "Categories" ? "rotate-180" : ""
+                            } transition-transform duration-300`}
+                            size={17}
+                          />
+                        </div>
+                        {open == "Categories" && (
+                          <CategoryFilter
+                            selectedCategory={
+                              values.category
+                                ? values.category
+                                : initialFilters.category
+                            }
+                            onSelect={(cat) => setFieldValue("category", cat)}
+                          />
+                        )}
+                      </div>
 
                       {/* فیلتر امتیاز */}
-                      <FilterSection
-                        title="Rating"
-                        icon={<FiStar className="text-amber-500 mb-0.5" />}
-                      >
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <label className="block text-sm text-blue-700 mb-1">
-                              Min Rating
-                            </label>
-                            <Field
-                              as="select"
-                              name="min_rating"
-                              className="w-full p-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            >
-                              <option value="">Any</option>
-                              <option value="1">1+ Star</option>
-                              <option value="2">2+ Stars</option>
-                              <option value="3">3+ Stars</option>
-                              <option value="4">4+ Stars</option>
-                              <option value="5">5 Stars</option>
-                            </Field>
-                          </div>
-                          <div>
-                            <label className="block text-sm text-blue-700 mb-1">
-                              Max Rating
-                            </label>
-                            <Field
-                              as="select"
-                              name="max_rating"
-                              className="w-full p-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            >
-                              <option value="">Any</option>
-                              <option value="1">1 Star</option>
-                              <option value="2">2 Stars</option>
-                              <option value="3">3 Stars</option>
-                              <option value="4">4 Stars</option>
-                              <option value="5">5 Stars</option>
-                            </Field>
-                          </div>
+                      <div className="border-b border-blue-400 pb-4">
+                        <div
+                          onClick={() =>
+                            setOpen((prev) => {
+                              return "Rating" == prev ? "" : "Rating";
+                            })
+                          }
+                          className="flex cursor-pointer items-center mb-3 text-blue-800"
+                        >
+                          <FiStar className="text-amber-500 mb-0.5" />
+                          <h3 className="font-semibold ml-2">Rating</h3>
+                          <FiChevronDown
+                            className={`ml-2 transform ${
+                              open == "Rating" ? "rotate-180" : ""
+                            } transition-transform duration-300`}
+                            size={17}
+                          />
                         </div>
-                      </FilterSection>
+                        {open == "Rating" && (
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-sm text-blue-700 mb-1">
+                                Min Rating
+                              </label>
+                              <Field
+                                as="select"
+                                name="min_rating"
+                                className="w-full p-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              >
+                                <option value="">Any</option>
+                                <option value="1">1+ Star</option>
+                                <option value="2">2+ Stars</option>
+                                <option value="3">3+ Stars</option>
+                                <option value="4">4+ Stars</option>
+                                <option value="5">5 Stars</option>
+                              </Field>
+                            </div>
+                            <div>
+                              <label className="block text-sm text-blue-700 mb-1">
+                                Max Rating
+                              </label>
+                              <Field
+                                as="select"
+                                name="max_rating"
+                                className="w-full p-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              >
+                                <option value="">Any</option>
+                                <option value="1">1 Star</option>
+                                <option value="2">2 Stars</option>
+                                <option value="3">3 Stars</option>
+                                <option value="4">4 Stars</option>
+                                <option value="5">5 Stars</option>
+                              </Field>
+                            </div>
+                          </div>
+                        )}
+                      </div>
 
                       {/* فیلتر تعداد نظرات */}
-
-                      <FilterSection
-                        title="Reviews"
-                        icon={
+                      <div className="border-b border-blue-400 pb-4">
+                        <div
+                          onClick={() =>
+                            setOpen((prev) => {
+                              return "Reviews" == prev ? "" : "Reviews";
+                            })
+                          }
+                          className="flex cursor-pointer items-center mb-3 text-blue-800"
+                        >
                           <FiMessageSquare className="text-blue-500 mb-0.25" />
-                        }
-                      >
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <label className="block text-sm text-blue-700 mb-1">
-                              Min Reviews
-                            </label>
-                            <Field
-                              type="number"
-                              name="min_comments"
-                              className="w-full p-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              placeholder="0"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm text-blue-700 mb-1">
-                              Max Reviews
-                            </label>
-                            <Field
-                              type="number"
-                              name="max_comments"
-                              className="w-full p-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              placeholder="1000"
-                            />
-                          </div>
+                          <h3 className="font-semibold ml-2">Reviews</h3>
+                          <FiChevronDown
+                            className={`ml-2 transform ${
+                              open == "Reviews" ? "rotate-180" : ""
+                            } transition-transform duration-300`}
+                            size={17}
+                          />
                         </div>
-                      </FilterSection>
+                        {open == "Reviews" && (
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-sm text-blue-700 mb-1">
+                                Min Reviews
+                              </label>
+                              <Field
+                                type="number"
+                                name="min_comments"
+                                className="w-full p-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="0"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm text-blue-700 mb-1">
+                                Max Reviews
+                              </label>
+                              <Field
+                                type="number"
+                                name="max_comments"
+                                className="w-full p-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="1000"
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
 
                     <div>
