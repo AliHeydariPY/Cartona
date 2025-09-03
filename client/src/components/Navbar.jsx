@@ -39,7 +39,8 @@ const Navbar = () => {
     if (!currentURL.includes("category")) {
       setSearch(() => {
         if (query) {
-          return query;
+          const params = new URLSearchParams(query);
+          return params.get("search");
         } else {
           return "";
         }

@@ -45,7 +45,7 @@ export default function SearchPage() {
   return (
     <>
       <Navbar />
-      <div className=" xl:grid xl:grid-cols-8 2xl:grid-cols-5 gap-5 mx-auto px-4 py-6">
+      <div className=" xl:grid xl:grid-cols-8 2xl:grid-cols-5 gap-5 mx-auto px-4 py-6 items-start">
         <SearchFilters
           setProducts={setProducts}
           // categories={categories} // لیست دسته‌بندی‌ها از API

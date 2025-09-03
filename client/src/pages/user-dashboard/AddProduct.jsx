@@ -36,8 +36,8 @@ const AddProduct = () => {
   const [isAmazingOffer, setIsAmazingOffer] = useState(false);
   // const { setFieldValue } = useFormikContext();
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
-  const [selectedMainCategory, setSelectedMainCategory] = useState(null); // دسته اصلی
-  const [selectedCategory, setSelectedCategory] = useState(null); // دسته نهایی (زیرمجموعه یا اصلی)
+  const [selectedMainCategory, setSelectedMainCategory] = useState(null); 
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [mainCategories, setMainCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
 
@@ -73,8 +73,6 @@ const AddProduct = () => {
       return newImages;
     });
   };
-
-  // if(subCategories) return <p>loading...</p>
 
   return (
     <motion.div

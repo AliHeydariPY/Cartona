@@ -89,7 +89,7 @@ const ProductSeller = ({ seller }) => {
             <img
               src={seller.image}
               alt={seller.store_name}
-              className=" object-cover"
+              className="h-full w-full object-cover"
             />
           </div>
           <div>

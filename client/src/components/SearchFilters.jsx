@@ -39,8 +39,8 @@ const SearchFilters = ({ setProducts }) => {
   const [filters, setFilters] = useState({
     min_rating: "",
     max_rating: "",
-    min_comment_count: "",
-    max_comment_count: "",
+    min_comments: "",
+    max_comments: "",
     min_price: "",
     max_price: "",
     category: "",
@@ -52,8 +52,8 @@ const SearchFilters = ({ setProducts }) => {
   const [initialFilters, setInitialFilters] = useState({
     min_rating: "",
     max_rating: "",
-    min_comment_count: "",
-    max_comment_count: "",
+    min_comments: "",
+    max_comments: "",
     min_price: "",
     max_price: "",
     category: "",
@@ -62,7 +62,7 @@ const SearchFilters = ({ setProducts }) => {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    // پارس کردن پارامترهای URL و تنظیم مقادیر اولیه
+    console.log(query);
     const params = new URLSearchParams(query);
     const newFilters = { ...initialFilters };
 
@@ -70,9 +70,10 @@ const SearchFilters = ({ setProducts }) => {
       if (params.has(filter)) {
         const value = params.get(filter);
         newFilters[filter] = isNaN(value) ? value : Number(value);
+      } else {
+        newFilters[filter] = "";
       }
     });
-
     setInitialFilters(newFilters);
     setIsReady(true);
   }, [query]);
@@ -124,7 +125,7 @@ const SearchFilters = ({ setProducts }) => {
       <div className="flex w-full justify-between items-center mb-4 xl:hidden">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-4 py-2 rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
+          className="flex items-center bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-300"
         >
           <FiFilter className="mr-2" />
           Filters
@@ -133,6 +134,7 @@ const SearchFilters = ({ setProducts }) => {
 
       <Formik
         initialValues={initialFilters}
+        enableReinitialize
         onSubmit={(values) => {
           const url = buildUrl(values);
           navigate(`/search/${url}`);
@@ -142,33 +144,33 @@ const SearchFilters = ({ setProducts }) => {
           <Form>
             <div className=" flex-col lg:flex-row gap-6">
               <AnimatePresence>
-                {(isOpen || window.innerWidth >= 1024) && (
+                {(isOpen || window.innerWidth >= 1280) && (
                   <motion.div
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.3 }}
-                    className="w-full bg-white/80 backdrop-blur-lg rounded-2xl p-4 border border-white/30 shadow-lg xl:sticky xl:top-24 xl:h-fit"
+                    className="w-full bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg hover:shadow-xl border border-blue-200/50 hover:border-blue-300 transition-all duration-300 p-4 xl:sticky xl:top-24 xl:h-fit"
                   >
                     {/* هدر فیلترها */}
                     <div className="flex justify-between items-center mb-6">
-                      <h3 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
+                      <h3 className="text-xl font-bold text-blue-900">
                         Filters
                       </h3>
                       <div className="flex items-center">
                         <button
                           type="button"
                           onClick={() => resetForm()}
-                          className="text-sm text-blue-600 hover:text-cyan-500 mr-3 transition-colors duration-200"
+                          className="text-sm text-blue-600 hover:text-cyan-500 mr-3 transition-colors duration-200 mt-1"
                         >
                           Reset
                         </button>
                         <button
                           type="button"
                           onClick={() => setIsOpen(false)}
-                          className="lg:hidden text-blue-800 hover:text-blue-600"
+                          className="xl:hidden text-blue-800 hover:text-blue-600"
                         >
-                          <FiX size={20} />
+                          <FiX size={20} className="mt-0.5" />
                         </button>
                       </div>
                     </div>
@@ -236,6 +238,66 @@ const SearchFilters = ({ setProducts }) => {
                         </div>
                       </FilterSection>
 
+                      {/* <button
+                        type="button"
+                        className="flex justify-between w-full items-center bg-white border border-blue-300 rounded-lg px-4 py-3 text-blue-800 hover:border-blue-400 transition-colors duration-300 text-left"
+                        onClick={() => {}}
+                      >
+                        <span>
+                          {selectedCategory
+                            ? selectedCategory.name
+                            : "Any"}
+                        </span>
+                        <FiChevronDown
+                          className={`ml-2 transform ${
+                            isCategoryOpen ? "rotate-180" : ""
+                          } transition-transform duration-300`}
+                          size={16}
+                        />
+                      </button> */}
+
+                      <FilterSection
+                        title="Rating"
+                        icon={<FiStar className="text-amber-500 mb-0.5" />}
+                      >
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-sm text-blue-700 mb-1">
+                              Min Rating
+                            </label>
+                            <Field
+                              as="select"
+                              name="min_rating"
+                              className="w-full p-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            >
+                              <option value="">Any</option>
+                              <option value="1">1+ Star</option>
+                              <option value="2">2+ Stars</option>
+                              <option value="3">3+ Stars</option>
+                              <option value="4">4+ Stars</option>
+                              <option value="5">5 Stars</option>
+                            </Field>
+                          </div>
+                          <div>
+                            <label className="block text-sm text-blue-700 mb-1">
+                              Max Rating
+                            </label>
+                            <Field
+                              as="select"
+                              name="max_rating"
+                              className="w-full p-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            >
+                              <option value="">Any</option>
+                              <option value="1">1 Star</option>
+                              <option value="2">2 Stars</option>
+                              <option value="3">3 Stars</option>
+                              <option value="4">4 Stars</option>
+                              <option value="5">5 Stars</option>
+                            </Field>
+                          </div>
+                        </div>
+                      </FilterSection>
+
                       {/* فیلتر امتیاز */}
                       <FilterSection
                         title="Rating"
@@ -280,6 +342,7 @@ const SearchFilters = ({ setProducts }) => {
                       </FilterSection>
 
                       {/* فیلتر تعداد نظرات */}
+
                       <FilterSection
                         title="Reviews"
                         icon={
@@ -293,7 +356,7 @@ const SearchFilters = ({ setProducts }) => {
                             </label>
                             <Field
                               type="number"
-                              name="min_comment_count"
+                              name="min_comments"
                               className="w-full p-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                               placeholder="0"
                             />
@@ -304,7 +367,7 @@ const SearchFilters = ({ setProducts }) => {
                             </label>
                             <Field
                               type="number"
-                              name="max_comment_count"
+                              name="max_comments"
                               className="w-full p-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                               placeholder="1000"
                             />
