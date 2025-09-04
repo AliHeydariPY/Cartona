@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   getSubCategories,
-  searchProduct,
+  getSubCategoryItems,
 } from "../services/productAPIServices";
 
 import { BiCategory } from "react-icons/bi";
@@ -22,12 +22,11 @@ const SubCategory = () => {
     const fetchSubCategories = async () => {
       const response = await getSubCategories(categoryId);
       setSubCategories(response.data);
-      console.log(response.data);
       //   const mainCatResponse = await getMainCategoryInfo(categoryId);
       //   setSelectedCategory(mainCatResponse.data)
 
       response.data.map((sub) => {
-        searchProduct(sub.id).then((res) => {
+        getSubCategoryItems(sub.id).then((res) => {
           setSubCategoryItems((prev) => [
             ...prev,
             { id: sub.id, num: res.data.length },
@@ -77,7 +76,6 @@ const SubCategory = () => {
           </div>
         )}
 
-        {/* کنترل‌های نمایش */}
         <div className="flex justify-between items-center mb-6">
           <p className="text-blue-700">
             {subCategories.length} sub-categories available
@@ -118,7 +116,7 @@ const SubCategory = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: index * 0.1 }}
                 className="group cursor-pointer bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg hover:shadow-xl border border-blue-200 hover:border-cyan-400 transition-all duration-300 overflow-hidden"
-                onClick={() => navigate(`/search/category/${subCategory.id}`)}
+                onClick={() => navigate(`/search/category=${subCategory.id}`)}
               >
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-4">
@@ -177,7 +175,6 @@ const SubCategory = () => {
           </div>
         )}
 
-        {/* حالت خالی */}
         {subCategories.length === 0 && (
           <div className="text-center py-16 bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg border border-blue-200">
             <div className="w-16 h-16 bg-gradient-to-r from-blue-100 to-cyan-100 rounded-full flex items-center justify-center mx-auto mb-4">

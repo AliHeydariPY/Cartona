@@ -16,14 +16,14 @@ export const deleteProduct = (productID) => {
 };
 
 export const editProduct = (formData) => {
-  console.log(formData.get("id"))
-  const url = `${SERVER_URL}/product-api/products/${formData.get("id")}/`
+  console.log(formData.get("id"));
+  const url = `${SERVER_URL}/product-api/products/${formData.get("id")}/`;
   return axios.patch(url, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
   });
-} 
+};
 
 export const getStorekeeperProducts = (storekeeperID) => {
   const url = `${SERVER_URL}/product-api/products/storekeeper/${storekeeperID}/`;
@@ -75,7 +75,11 @@ export const deleteImage = (imageID) => {
 };
 
 export const searchProduct = (query) => {
-  const currentURL = window.location.href
-  const url = currentURL.includes("category") ? `${SERVER_URL}/product-api/list-products/?category=${query}` : `${SERVER_URL}/product-api/list-products/?${query}`;
-  return axios.get(url)
-}
+  const url = `${SERVER_URL}/product-api/list-products/?${query}`;
+  return axios.get(url);
+};
+
+export const getSubCategoryItems = (categoryID) => {
+  const url = `${SERVER_URL}/product-api/list-products/?category=${categoryID}`;
+  return axios.get(url);
+};

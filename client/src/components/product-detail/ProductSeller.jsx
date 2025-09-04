@@ -6,8 +6,10 @@ import {
   enableNotifications,
   disableNotifications,
 } from "../../services/commentAPIServices";
+import { useNavigate } from "react-router-dom";
 
 const ProductSeller = ({ seller }) => {
+  const navigate = useNavigate();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
   useEffect(() => {
@@ -51,12 +53,10 @@ const ProductSeller = ({ seller }) => {
 
   return (
     <div className="mb-6 md:mb-12">
-      {/* Seller Card */}
       <div className="p-4 sm:p-6 bg-blue-100 rounded-lg sm:rounded-2xl border border-blue-300 shadow-md">
         <h3 className="text-xl font-bold text-blue-900 mb-4 border-b border-blue-300 pb-2 flex items-center justify-between">
           <span>Seller Information</span>
 
-          {/* Notification Button */}
           <button
             onClick={toggleNotifications}
             className={`flex items-center cursor-pointer gap-1 px-3 py-1.5 rounded-full text-sm font-medium shadow transition 
@@ -89,7 +89,8 @@ const ProductSeller = ({ seller }) => {
             <img
               src={seller.image}
               alt={seller.store_name}
-              className="h-full w-full object-cover"
+              onClick={() => navigate(`/search/storekeeper=${seller.id}`)}
+              className="h-full w-full object-cover cursor-pointer"
             />
           </div>
           <div>

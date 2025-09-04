@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 
 import { getCartProducts } from "../services/cartAPIServices";
 import { getNotifications } from "../services/commentAPIServices.js";
@@ -15,6 +15,7 @@ import { GoBellFill } from "react-icons/go";
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { query } = useParams();
   const [search, setSearch] = useState("");
   const [cartItems, setCartItems] = useState([]);
@@ -38,8 +39,8 @@ const Navbar = () => {
     const currentURL = window.location.href;
     if (!currentURL.includes("category")) {
       setSearch(() => {
-        if (query) {
-          const params = new URLSearchParams(query);
+        const params = new URLSearchParams(query);
+        if (params.has("search")) {
           return params.get("search");
         } else {
           return "";
@@ -70,9 +71,13 @@ const Navbar = () => {
                 }}
                 onKeyDown={(e) => {
                   if (e.code === "Enter") {
+                    const params = new URLSearchParams(location.search); 
                     if (search.trim()) {
-                      navigate(`/search/search=${search}`);
+                      params.set("search", search); 
+                    } else {
+                      params.delete("search"); 
                     }
+                    navigate(`${location.pathname}&${params.toString()}`);
                   }
                 }}
                 placeholder="Search products..."
