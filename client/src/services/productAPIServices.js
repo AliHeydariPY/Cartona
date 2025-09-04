@@ -79,6 +79,12 @@ export const searchProduct = (query) => {
   return axios.get(url);
 };
 
+export const getListProducts = () => {
+  const url = `${SERVER_URL}/product-api/list-products/`;
+  return axios.get(url);
+};
+
+
 export const getSubCategoryItems = (categoryID) => {
   const url = `${SERVER_URL}/product-api/list-products/?category=${categoryID}`;
   return axios.get(url);

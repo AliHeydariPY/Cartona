@@ -10,7 +10,7 @@ import { BiSolidOffer } from "react-icons/bi";
 
 import Navbar from "../components/Navbar";
 import ProductImageCarousel from "../components/ProductImageCarousel";
-import { searchProduct } from "../services/productAPIServices";
+import { getListProducts, searchProduct } from "../services/productAPIServices";
 import SearchFilters from "../components/SearchFilters";
 export default function SearchPage() {
   const { query } = useParams();
@@ -19,9 +19,17 @@ export default function SearchPage() {
   const [images, setImages] = useState([]);
 
   useEffect(() => {
-    searchProduct(`${query}`).then((res) => {
-      setProducts(res.data);
-    });
+    if(query) {
+      searchProduct(`${query}`).then((res) => {
+        setProducts(res.data);
+      });
+      
+    } else {
+      getListProducts().then(res => {
+        console.log(res.data) 
+        setProducts(res.data);
+      })
+    }
   }, [query]);
 
   const [favorites, setFavorites] = useState(new Set());

@@ -95,7 +95,6 @@ function App() {
           />
           <Route path="notifications" element={<Notifications />} />
 
-
           <Route
             path="orders"
             element={
@@ -106,7 +105,7 @@ function App() {
             }
           />
 
-            <Route path="payments" element={<Payments/>}/>
+          <Route path="payments" element={<Payments />} />
 
           <Route path="chats" element={<Chat />} />
 
@@ -162,7 +161,7 @@ function App() {
         <Route path="/upgradeToSeller" element={<UpgradeToSeller />} />
 
         <Route
-          path="/search/:query"
+          path="/search"
           element={
             <SearchPage
               reloadComponent={reloadComponent}
@@ -174,7 +173,7 @@ function App() {
           }
         />
         <Route
-          path="/search/category/:query"
+          path="/search/:query"
           element={
             <SearchPage
               reloadComponent={reloadComponent}
@@ -185,6 +184,7 @@ function App() {
             />
           }
         />
+
         <Route path="/category/:categoryId" element={<SubCategory />} />
       </Routes>
     </>

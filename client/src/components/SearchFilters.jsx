@@ -19,6 +19,7 @@ import {
 import { useNavigate, useParams } from "react-router-dom";
 
 import { getCategory } from "../services/productAPIServices";
+import { getShopkeeper } from "../services/userAPIServices";
 
 const SearchFilters = () => {
   const navigate = useNavigate();
@@ -36,6 +37,7 @@ const SearchFilters = () => {
   };
   const params = new URLSearchParams(query);
   const [open, setOpen] = useState(false);
+  const [storekeeperInfo, setStorekeeperInfo] = useState();
 
   const [initialFilters, setInitialFilters] = useState({
     min_rating: "",
@@ -67,6 +69,16 @@ const SearchFilters = () => {
         newFilters[filter] = "";
       }
     });
+
+    if (newFilters.storekeeper) {
+      getShopkeeper(newFilters.storekeeper).then((res) => {
+        setStorekeeperInfo(res.data);
+      });
+    } else {
+      setStorekeeperInfo(true);
+    }
+
+    console.log(newFilters);
     setInitialFilters(newFilters);
     setIsReady(true);
   }, [query]);
@@ -83,7 +95,7 @@ const SearchFilters = () => {
     return url;
   };
 
-  if (!isReady) {
+  if (!isReady || !storekeeperInfo) {
     return (
       <div className="mb-6 col-span-2 2xl:col-span-1">
         <div className="w-full bg-white/80 backdrop-blur-lg rounded-2xl p-4 border border-white/30 shadow-lg">
@@ -115,18 +127,32 @@ const SearchFilters = () => {
         initialValues={initialFilters}
         enableReinitialize
         onSubmit={(values) => {
-          console.log(values);
-
+          params.delete("storekeeper");
           const cat = values.category
             ? values.category
             : initialFilters.category;
+
+          let url;
+
           if (cat) {
-            const url = buildUrl({ ...values, category: cat.id });
-            navigate(`/search/${url}`);
+            if (params.has("search")) {
+              url = buildUrl({ ...values, category: cat.id });
+            } else {
+              if (values.storekeeper) {
+                url = buildUrl({
+                  ...values,
+                  category: cat.id,
+                  storekeeper: "",
+                });
+              } else {
+                url = buildUrl({ ...values, category: "" });
+              }
+            }
           } else {
-            const url = buildUrl({ ...values });
-            navigate(`/search/${url}`);
+            url = buildUrl({ ...values, storekeeper: "" });
           }
+
+          navigate(`/search/${url}`);
         }}
       >
         {({ values, setFieldValue, submitForm }) => (
@@ -142,7 +168,11 @@ const SearchFilters = () => {
                     className="w-full bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg hover:shadow-xl border border-blue-200/50 hover:border-blue-300 transition-all duration-300 p-4"
                   >
                     {/* هدر فیلترها */}
-                    <div className="flex justify-between items-center mb-7 border-b border-blue-400 pb-4">
+                    <div
+                      className={`flex justify-between items-center ${
+                        initialFilters.storekeeper ? "mb-4" : "mb-7"
+                      } border-b border-blue-400 pb-4`}
+                    >
                       <h3 className="text-xl font-bold text-blue-900">
                         Filters
                       </h3>
@@ -150,16 +180,44 @@ const SearchFilters = () => {
                         <button
                           type="button"
                           onClick={() => {
-                            setInitialFilters({
-                              min_rating: "",
-                              max_rating: "",
-                              min_comments: "",
-                              max_comments: "",
-                              min_price: "",
-                              max_price: "",
-                              storekeeper: "",
-                              category: null,
-                            });
+                            if (
+                              location.pathname.includes("/search/category")
+                            ) {
+                              setInitialFilters({
+                                ...initialFilters,
+                                min_rating: "",
+                                max_rating: "",
+                                min_comments: "",
+                                max_comments: "",
+                                min_price: "",
+                                max_price: "",
+                                storekeeper: "",
+                              });
+                            } else if (
+                              location.pathname.includes("/search/storekeeper")
+                            ) {
+                              setInitialFilters({
+                                ...initialFilters,
+                                min_rating: "",
+                                max_rating: "",
+                                min_comments: "",
+                                max_comments: "",
+                                min_price: "",
+                                max_price: "",
+                                category: null,
+                              });
+                            } else {
+                              setInitialFilters({
+                                min_rating: "",
+                                max_rating: "",
+                                min_comments: "",
+                                max_comments: "",
+                                min_price: "",
+                                max_price: "",
+                                storekeeper: "",
+                                category: null,
+                              });
+                            }
 
                             submitForm();
                           }}
@@ -179,6 +237,58 @@ const SearchFilters = () => {
                       </div>
                     </div>
 
+                    {initialFilters.storekeeper && (
+                      <div className="mb-4 p-3 rounded-lg bg-blue-100 border border-blue-300 text-blue-800 text-sm flex items-center justify-between">
+                        <span>
+                          viewing{" "}
+                          <span className="font-semibold">
+                            {storekeeperInfo.store_name}
+                          </span>{" "}
+                          Store products
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setInitialFilters({
+                              ...initialFilters,
+                              storekeeper: "",
+                            });
+
+                            navigate("/search");
+                          }}
+                          className="text-red-600 hover:text-red-800 "
+                        >
+                          exit
+                        </button>
+                      </div>
+                    )}
+
+                    {(initialFilters.category && location.pathname.includes("/search/category")) && (
+                      <div className="mb-4 p-3 rounded-lg bg-blue-100 border border-blue-300 text-blue-800 text-sm flex items-center justify-between">
+                        <span>
+                          viewing products in the{" "}
+                          <span className="font-semibold">
+                            {initialFilters.category.name}
+                          </span>{" "}
+                          category
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setInitialFilters({
+                              ...initialFilters,
+                              storekeeper: "",
+                            });
+
+                            navigate("/search");
+                          }}
+                          className="text-red-600 hover:text-red-800 "
+                        >
+                          exit
+                        </button>
+                      </div>
+                    )}
+
                     <div className="space-y-7">
                       {/* price */}
                       <div className="border-b border-blue-400 pb-4">
@@ -192,6 +302,11 @@ const SearchFilters = () => {
                         >
                           <FiDollarSign className="text-green-500 mb-0.5" />
                           <h3 className="font-semibold ml-2">Price Range</h3>
+
+                          {(values.min_price || values.max_price) && (
+                            <span className="ml-2 w-2 h-2 rounded-full bg-green-500" />
+                          )}
+
                           <FiChevronDown
                             className={`ml-2 transform ${
                               open == "Price Range" ? "rotate-180" : ""
@@ -292,6 +407,11 @@ const SearchFilters = () => {
                             size={17}
                           />
                           <h3 className="font-semibold ml-2">Categories</h3>
+
+                          {initialFilters.category && (
+                            <span className="ml-2 w-2 h-2 rounded-full bg-purple-500" />
+                          )}
+
                           <FiChevronDown
                             className={`ml-2 transform ${
                               open == "Categories" ? "rotate-180" : ""
@@ -323,6 +443,11 @@ const SearchFilters = () => {
                         >
                           <FiStar className="text-amber-500 mb-0.5" />
                           <h3 className="font-semibold ml-2">Rating</h3>
+
+                          {(values.min_rating || values.max_rating) && (
+                            <span className="ml-2 w-2 h-2 rounded-full bg-amber-500" />
+                          )}
+
                           <FiChevronDown
                             className={`ml-2 transform ${
                               open == "Rating" ? "rotate-180" : ""
@@ -437,6 +562,11 @@ const SearchFilters = () => {
                         >
                           <FiMessageSquare className="text-blue-500 mb-0.25" />
                           <h3 className="font-semibold ml-2">Reviews</h3>
+
+                          {(values.min_comments || values.max_comments) && (
+                            <span className="ml-2 w-2 h-2 rounded-full bg-blue-500" />
+                          )}
+
                           <FiChevronDown
                             className={`ml-2 transform ${
                               open == "Reviews" ? "rotate-180" : ""
