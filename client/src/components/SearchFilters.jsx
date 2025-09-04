@@ -34,7 +34,7 @@ const SearchFilters = () => {
     category: null,
     storekeeper: "",
   };
-
+  const params = new URLSearchParams(query);
   const [open, setOpen] = useState(false);
 
   const [initialFilters, setInitialFilters] = useState({
@@ -50,7 +50,6 @@ const SearchFilters = () => {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    const params = new URLSearchParams(query);
     const newFilters = { ...initialFilters };
 
     Object.keys(initialFilters).forEach((filter) => {
@@ -262,15 +261,14 @@ const SearchFilters = () => {
                                   placeholder="0"
                                 />
                               </div>
-                              <div >
+                              <div>
                                 $
-                              <Field
-                                type="number"
-                                name="max_price"
-                                className="w-10 p-0.5 placeholder:text-blue-800 rounded-lg focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                placeholder="1000"
-                              />
-
+                                <Field
+                                  type="number"
+                                  name="max_price"
+                                  className="w-10 p-0.5 placeholder:text-blue-800 rounded-lg focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                  placeholder="1000"
+                                />
                               </div>
                               {/* <span>${values.min_price || 0}</span> */}
                               {/* <span>${values.max_price || 1000}</span> */}
@@ -334,6 +332,44 @@ const SearchFilters = () => {
                         </div>
                         {open == "Rating" && (
                           <div className="space-y-4">
+                            {/* Maximum Rating */}
+                            <div>
+                              <label className="block text-sm text-blue-700 mb-2">
+                                Maximum Rating
+                              </label>
+                              <div className="flex items-center space-x-1">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <button
+                                    key={star}
+                                    type="button"
+                                    onClick={() => {
+                                      if (star >= values.min_rating) {
+                                        setFieldValue("max_rating", star);
+                                      }
+                                    }}
+                                    className={`p-1 rounded-full transition-all duration-200 ${
+                                      values.max_rating >= star
+                                        ? "bg-amber-100 scale-110"
+                                        : "bg-blue-50 hover:bg-blue-100"
+                                    }`}
+                                  >
+                                    <FiStar
+                                      className={`text-xl ${
+                                        values.max_rating >= star
+                                          ? "text-amber-400 fill-amber-400"
+                                          : "text-gray-300"
+                                      }`}
+                                    />
+                                  </button>
+                                ))}
+                              </div>
+                              <div className="text-xs text-blue-600 mt-1">
+                                {values.max_rating
+                                  ? `Up to ${values.max_rating} Stars`
+                                  : "Any rating"}
+                              </div>
+                            </div>
+
                             {/* Minimum Rating */}
                             <div>
                               <label className="block text-sm text-blue-700 mb-2">
@@ -368,42 +404,6 @@ const SearchFilters = () => {
                               <div className="text-xs text-blue-600 mt-1">
                                 {values.min_rating
                                   ? `${values.min_rating}+ Stars`
-                                  : "Any rating"}
-                              </div>
-                            </div>
-
-                            {/* Maximum Rating */}
-                            <div>
-                              <label className="block text-sm text-blue-700 mb-2">
-                                Maximum Rating
-                              </label>
-                              <div className="flex items-center space-x-1">
-                                {[1, 2, 3, 4, 5].map((star) => (
-                                  <button
-                                    key={star}
-                                    type="button"
-                                    onClick={() =>
-                                      setFieldValue("max_rating", star)
-                                    }
-                                    className={`p-1 rounded-full transition-all duration-200 ${
-                                      values.max_rating >= star
-                                        ? "bg-amber-100 scale-110"
-                                        : "bg-blue-50 hover:bg-blue-100"
-                                    }`}
-                                  >
-                                    <FiStar
-                                      className={`text-xl ${
-                                        values.max_rating >= star
-                                          ? "text-amber-400 fill-amber-400"
-                                          : "text-gray-300"
-                                      }`}
-                                    />
-                                  </button>
-                                ))}
-                              </div>
-                              <div className="text-xs text-blue-600 mt-1">
-                                {values.max_rating
-                                  ? `Up to ${values.max_rating} Stars`
                                   : "Any rating"}
                               </div>
                             </div>

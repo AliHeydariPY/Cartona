@@ -71,13 +71,18 @@ const Navbar = () => {
                 }}
                 onKeyDown={(e) => {
                   if (e.code === "Enter") {
-                    const params = new URLSearchParams(location.search); 
+                    const params = new URLSearchParams(query);
                     if (search.trim()) {
-                      params.set("search", search); 
-                    } else {
-                      params.delete("search"); 
+                      if (
+                        location.pathname.includes("/search/") &&
+                        params.has("storekeeper")
+                      ) {
+                        params.set("search", search);
+                        navigate(`/search/${params.toString()}`);
+                      } else {
+                        navigate(`/search/search=${search}`);
+                      }
                     }
-                    navigate(`${location.pathname}&${params.toString()}`);
                   }
                 }}
                 placeholder="Search products..."
@@ -86,8 +91,17 @@ const Navbar = () => {
             </div>
             <div
               onClick={() => {
+                const params = new URLSearchParams(query);
                 if (search.trim()) {
-                  navigate(`/search/${search}`);
+                  if (
+                    location.pathname.includes("/search/") &&
+                    params.has("storekeeper")
+                  ) {
+                    params.set("search", search);
+                    navigate(`/search/${params.toString()}`);
+                  } else {
+                    navigate(`/search/search=${search}`);
+                  }
                 }
               }}
               className="relative h-full flex items-center rounded-r-full my-0.25 mr-0.25 overflow-hidden cursor-pointer bg-white"
