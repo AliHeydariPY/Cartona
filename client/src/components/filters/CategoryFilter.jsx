@@ -51,7 +51,6 @@ const CategoryFilter = ({ selectedCategory, onSelect }) => {
                   : "border-transparent hover:bg-blue-50 text-blue-800"
               }`}
               onClick={() => {
-                console.log(cat);
                 setSelectedMainCategory(cat);
               }}
             >
@@ -89,7 +88,7 @@ const CategoryFilter = ({ selectedCategory, onSelect }) => {
                 }`}
                 onClick={() => {
                   onSelect(sub);
-                  
+
                 }}
               >
                 {sub.name}

@@ -50,7 +50,6 @@ const SearchFilters = () => {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    console.log(query);
     const params = new URLSearchParams(query);
     const newFilters = { ...initialFilters };
 
@@ -106,7 +105,7 @@ const SearchFilters = () => {
       <div className="flex w-full justify-between items-center mb-4 xl:hidden">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-300"
+          className="cursor-pointer bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white transition-colors duration-300 font-medium flex items-center justify-center px-4 py-2 rounded-lg shadow-md hover:shadow-lg"
         >
           <FiFilter className="mr-2" />
           Filters
@@ -117,19 +116,18 @@ const SearchFilters = () => {
         initialValues={initialFilters}
         enableReinitialize
         onSubmit={(values) => {
-          console.log(values)
+          console.log(values);
 
           const cat = values.category
             ? values.category
             : initialFilters.category;
-            if(cat) {
-
-              const url = buildUrl({ ...values, category: cat.id });
-              navigate(`/search/${url}`);
-            } else {
-              const url = buildUrl({ ...values});
-              navigate(`/search/${url}`);
-            }
+          if (cat) {
+            const url = buildUrl({ ...values, category: cat.id });
+            navigate(`/search/${url}`);
+          } else {
+            const url = buildUrl({ ...values });
+            navigate(`/search/${url}`);
+          }
         }}
       >
         {({ values, setFieldValue, submitForm }) => (
@@ -166,7 +164,7 @@ const SearchFilters = () => {
 
                             submitForm();
                           }}
-                          className="text-sm text-blue-600 hover:text-cyan-500 mr-3 transition-colors duration-200 mt-1"
+                          className="text-sm cursor-pointer text-blue-600 hover:text-cyan-600 mr-3 transition-colors duration-300 mt-1"
                         >
                           Reset
                         </button>
@@ -175,14 +173,15 @@ const SearchFilters = () => {
                           onClick={() => setIsOpen(false)}
                           className="xl:hidden text-blue-800 hover:text-blue-600"
                         >
-                          <FiX size={20} className="mt-0.5" />
+                          <span className="cursor-pointer hover:text-red-500 transition-colors duration-300">
+                            <FiX size={20} className="mt-0.5" />
+                          </span>
                         </button>
                       </div>
                     </div>
 
-                    {/* دسته‌بندی فیلترها */}
                     <div className="space-y-7">
-                      {/* فیلتر قیمت */}
+                      {/* price */}
                       <div className="border-b border-blue-400 pb-4">
                         <div
                           onClick={() =>
@@ -202,7 +201,7 @@ const SearchFilters = () => {
                           />
                         </div>
                         {open == "Price Range" && (
-                          <div className="px-3 py-1">
+                          <div className=" py-1">
                             <Range
                               step={5}
                               min={0}
@@ -221,7 +220,7 @@ const SearchFilters = () => {
                                   <div
                                     key={key}
                                     {...rest}
-                                    className="h-2 bg-blue-200 rounded-full cursor-pointer"
+                                    className="h-2 mx-3 bg-blue-200 rounded-full cursor-pointer"
                                     style={{
                                       background: getTrackBackground({
                                         values: [
@@ -253,14 +252,34 @@ const SearchFilters = () => {
                                 );
                               }}
                             />
-                            <div className="flex justify-between text-sm text-blue-800 mt-2">
-                              <span>${values.min_price || 0}</span>
-                              <span>${values.max_price || 1000}</span>
+                            <div className="flex justify-between text-sm text-blue-800 mt-3 ">
+                              <div>
+                                $
+                                <Field
+                                  type="number"
+                                  name="min_price"
+                                  className="w-15 p-0.5 placeholder:text-blue-800 rounded-lg focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                  placeholder="0"
+                                />
+                              </div>
+                              <div >
+                                $
+                              <Field
+                                type="number"
+                                name="max_price"
+                                className="w-10 p-0.5 placeholder:text-blue-800 rounded-lg focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                placeholder="1000"
+                              />
+
+                              </div>
+                              {/* <span>${values.min_price || 0}</span> */}
+                              {/* <span>${values.max_price || 1000}</span> */}
                             </div>
                           </div>
                         )}
                       </div>
 
+                      {/* categories */}
                       <div className="border-b border-blue-400 pb-4">
                         <div
                           onClick={() =>
@@ -271,7 +290,7 @@ const SearchFilters = () => {
                           className="flex cursor-pointer items-center mb-3 text-blue-800"
                         >
                           <BiCategory
-                            className="text-blue-500 mb-0.5"
+                            className="text-purple-500 mb-0.5"
                             size={17}
                           />
                           <h3 className="font-semibold ml-2">Categories</h3>
@@ -294,7 +313,7 @@ const SearchFilters = () => {
                         )}
                       </div>
 
-                      {/* فیلتر امتیاز */}
+                      {/* Rating */}
                       <div className="border-b border-blue-400 pb-4">
                         <div
                           onClick={() =>
@@ -314,46 +333,99 @@ const SearchFilters = () => {
                           />
                         </div>
                         {open == "Rating" && (
-                          <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-4">
+                            {/* Minimum Rating */}
                             <div>
-                              <label className="block text-sm text-blue-700 mb-1">
-                                Min Rating
+                              <label className="block text-sm text-blue-700 mb-2">
+                                Minimum Rating
                               </label>
-                              <Field
-                                as="select"
-                                name="min_rating"
-                                className="w-full p-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              >
-                                <option value="">Any</option>
-                                <option value="1">1+ Star</option>
-                                <option value="2">2+ Stars</option>
-                                <option value="3">3+ Stars</option>
-                                <option value="4">4+ Stars</option>
-                                <option value="5">5 Stars</option>
-                              </Field>
+                              <div className="flex items-center space-x-1">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <button
+                                    key={star}
+                                    type="button"
+                                    onClick={() => {
+                                      if (star <= values.max_rating) {
+                                        setFieldValue("min_rating", star);
+                                      }
+                                    }}
+                                    className={`p-1 rounded-full transition-all duration-200 ${
+                                      values.min_rating >= star
+                                        ? "bg-amber-100 scale-110"
+                                        : "bg-blue-50 hover:bg-blue-100"
+                                    }`}
+                                  >
+                                    <FiStar
+                                      className={`text-xl ${
+                                        values.min_rating >= star
+                                          ? "text-amber-400 fill-amber-400"
+                                          : "text-gray-300"
+                                      }`}
+                                    />
+                                  </button>
+                                ))}
+                              </div>
+                              <div className="text-xs text-blue-600 mt-1">
+                                {values.min_rating
+                                  ? `${values.min_rating}+ Stars`
+                                  : "Any rating"}
+                              </div>
                             </div>
+
+                            {/* Maximum Rating */}
                             <div>
-                              <label className="block text-sm text-blue-700 mb-1">
-                                Max Rating
+                              <label className="block text-sm text-blue-700 mb-2">
+                                Maximum Rating
                               </label>
-                              <Field
-                                as="select"
-                                name="max_rating"
-                                className="w-full p-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              >
-                                <option value="">Any</option>
-                                <option value="1">1 Star</option>
-                                <option value="2">2 Stars</option>
-                                <option value="3">3 Stars</option>
-                                <option value="4">4 Stars</option>
-                                <option value="5">5 Stars</option>
-                              </Field>
+                              <div className="flex items-center space-x-1">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <button
+                                    key={star}
+                                    type="button"
+                                    onClick={() =>
+                                      setFieldValue("max_rating", star)
+                                    }
+                                    className={`p-1 rounded-full transition-all duration-200 ${
+                                      values.max_rating >= star
+                                        ? "bg-amber-100 scale-110"
+                                        : "bg-blue-50 hover:bg-blue-100"
+                                    }`}
+                                  >
+                                    <FiStar
+                                      className={`text-xl ${
+                                        values.max_rating >= star
+                                          ? "text-amber-400 fill-amber-400"
+                                          : "text-gray-300"
+                                      }`}
+                                    />
+                                  </button>
+                                ))}
+                              </div>
+                              <div className="text-xs text-blue-600 mt-1">
+                                {values.max_rating
+                                  ? `Up to ${values.max_rating} Stars`
+                                  : "Any rating"}
+                              </div>
                             </div>
+
+                            {/* Reset Rating Button */}
+                            {(values.min_rating || values.max_rating) && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setFieldValue("min_rating", "");
+                                  setFieldValue("max_rating", "");
+                                }}
+                                className="text-xs text-blue-600 hover:text-cyan-500 transition-colors duration-200"
+                              >
+                                Clear rating filters
+                              </button>
+                            )}
                           </div>
                         )}
                       </div>
 
-                      {/* فیلتر تعداد نظرات */}
+                      {/* reviews */}
                       <div className="border-b border-blue-400 pb-4">
                         <div
                           onClick={() =>
@@ -381,7 +453,7 @@ const SearchFilters = () => {
                               <Field
                                 type="number"
                                 name="min_comments"
-                                className="w-full p-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="w-full p-2 ring ring-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
                                 placeholder="0"
                               />
                             </div>
@@ -392,7 +464,7 @@ const SearchFilters = () => {
                               <Field
                                 type="number"
                                 name="max_comments"
-                                className="w-full p-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="w-full p-2 ring ring-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
                                 placeholder="1000"
                               />
                             </div>
@@ -404,9 +476,9 @@ const SearchFilters = () => {
                     <div>
                       <button
                         type="submit"
-                        className="w-full bg-gradient-to-r text-white from-blue-600 to-cyan-500 mt-4 py-2 rounded-lg"
+                        className="w-full mt-4 py-3 cursor-pointer bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-lg transition-colors duration-300 font-medium "
                       >
-                        submit
+                        Apply
                       </button>
                     </div>
                   </motion.div>

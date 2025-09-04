@@ -77,6 +77,5 @@ export const deleteImage = (imageID) => {
 export const searchProduct = (query) => {
   const currentURL = window.location.href
   const url = currentURL.includes("category") ? `${SERVER_URL}/product-api/list-products/?category=${query}` : `${SERVER_URL}/product-api/list-products/?${query}`;
-  console.log(url)
   return axios.get(url)
 }

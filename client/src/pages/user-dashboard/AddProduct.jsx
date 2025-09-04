@@ -525,9 +525,9 @@ const AddProduct = () => {
               <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 pt-4">
                 <button
                   type="submit"
-                  className="px-6 py-3 cursor-pointer bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white rounded-lg hover:shadow-lg transition-colors duration-300 font-medium flex items-center justify-center"
+                  className="px-6 py-3 cursor-pointer bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-lg hover:shadow-lg transition-colors duration-300 font-medium flex items-center justify-center"
                 >
-                  <FiPlusCircle className="mr-2" />
+                  <FiPlusCircle className="mr-2 mb-0.5" size={18} />
                   Publish Product
                 </button>
                 <button
