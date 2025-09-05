@@ -7,3 +7,4 @@ class InnerConfig(AppConfig):
 
     def ready(self):
         import inner.signals
+

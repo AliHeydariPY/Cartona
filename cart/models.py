@@ -40,6 +40,36 @@ class CartItem(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['cart', 'product'], name='unique_product_per_cart')]
 
+class Favorite(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='favorite'
+    )
+    class Meta:
+        verbose_name = "Favorite"
+        verbose_name_plural = "Favorites"
+        db_table = "Favorites"
+
+class FavoriteItem(models.Model):
+    favorite = models.ForeignKey(
+        Favorite,
+        on_delete=models.CASCADE,
+        related_name='items'
+    )
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name='favorited_items'
+    )
+    class Meta:
+        verbose_name = "Favorite Item"
+        verbose_name_plural = "Favorite Items"
+        db_table = "Favorite_Items"
+        constraints = [
+            models.UniqueConstraint(fields=['favorite', 'product'], name='unique_product_per_favorite')
+        ]
+
 def generate_fake_second_password():
     return str(random.randint(100000, 999999))
 
@@ -90,6 +120,10 @@ class ProductPayment(models.Model):
         help_text="Has the product reached the buyer?"
     )
     delivered_at = models.DateTimeField(null=True, blank=True)
+    end_of_sending = models.BooleanField(
+        default=False,
+        help_text="Has the sending process been completed?"
+    )
 
     def save(self, *args, **kwargs):
         if self.cart_item:

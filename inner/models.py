@@ -28,7 +28,7 @@ class Product(models.Model):
     stock_quantity = models.IntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(10000)],
         help_text="Inventory must be between 0 and 10,000.")
-    image = models.ImageField(upload_to='products/%Y/%m/%d')
+    image = models.ImageField(upload_to='products/%Y/%m/%d', null=True, blank=True)
     description = models.TextField()
     amazing_offer = models.TextField(blank=True, null=True)
     amazing_offer_period = models.DateTimeField(blank=True, null=True)
@@ -61,7 +61,7 @@ class Product(models.Model):
 
 class Images(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='Images/%Y/%m/%d')
+    image = models.ImageField(upload_to='Images/%Y/%m/%d', null=True, blank=True)
 
     class Meta:
         verbose_name = "Image"

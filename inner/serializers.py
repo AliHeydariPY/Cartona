@@ -1,44 +1,94 @@
+from rest_framework.exceptions import PermissionDenied
 from rest_framework import serializers
 from .models import Product, Images, Types, TypesValues, Features, FrequentlyAskedQuestions, Category
+from comments.models import CommentReply
 from user.models import StoreKeeper
 
 class ImageSerializer(serializers.ModelSerializer):
     product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
-    image = serializers.ImageField(use_url=True)
+    image = serializers.ImageField(use_url=True, required=False, allow_null=True)
 
     class Meta:
         model = Images
         fields = ['id', 'product', 'image']
 
     def validate_image(self, image):
+        if image is None:
+            return image
         max_size = 5 * 1024 * 1024
         if image.size > max_size:
             raise serializers.ValidationError("The image size should not exceed 5 MB.")
         return image
 
+    def validate(self, attrs):
+        product = attrs.get('product')
+        image = attrs.get('image')
+
+        request = self.context.get('request')
+        user = request.user if request and request.user.is_authenticated else None
+
+        if product and user:
+            if product.storekeeper.user != user:
+                raise serializers.ValidationError({'product': 'You do not own this product.'})
+
+        if self.instance is None and not image:
+            raise serializers.ValidationError({'image': 'Image is required when creating a new entry.'})
+
+        if product and self.instance is None:
+            if Images.objects.filter(product=product).count() >= 7:
+                raise serializers.ValidationError({'image': 'You cannot upload more than 7 images for this product.'})
+
+        return attrs
+
     def create(self, validated_data):
+        request = self.context.get('request')
+        user = request.user if request and request.user.is_authenticated else None
+
+        product = validated_data.get('product')
+        if not product or product.storekeeper.user != user:
+            raise serializers.ValidationError("You cannot create an image for a product you don't own.")
+
+        image = validated_data.get('image')
+        if not image:
+            raise serializers.ValidationError({'image': 'Image is required when creating a new entry.'})
+
         return Images.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
-        instance.image = validated_data.get('image', instance.image)
+        request = self.context.get('request')
+        user = request.user if request and request.user.is_authenticated else None
+
+        if instance.product.storekeeper.user != user:
+            raise serializers.ValidationError("You cannot update an image for a product you don't own.")
+
+        image = validated_data.get('image', instance.image)
+        if image is None:
+            image = instance.image
+
+        instance.image = image
         instance.product = validated_data.get('product', instance.product)
         instance.save()
         return instance
+
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+
+        request = self.context.get('request')
+        method = request.method if request else None
+
+        if method in ['PUT', 'PATCH']:
+            if not request.data.get('image'):
+                rep['image'] = None
+        elif not instance.image:
+            rep['image'] = None
+
+        return rep
 
 class TypesValueSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TypesValues
-        fields = ['id', 'type_value']
-
-    def create(self, validated_data):
-        return TypesValues.objects.create(**validated_data)
-
-    def update(self, instance, validated_data):
-        instance.type = validated_data.get('type', instance.type)
-        instance.type_value = validated_data.get('type_value', instance.type_value)
-        instance.save()
-        return instance
+        fields = ['type_value']
 
 class TypesSerializer(serializers.ModelSerializer):
     product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
@@ -48,7 +98,25 @@ class TypesSerializer(serializers.ModelSerializer):
         model = Types
         fields = ['id', 'product', 'type_name', 'typesvalues_set']
 
+    def validate(self, attrs):
+        product = attrs.get('product')
+        request = self.context.get('request')
+        user = request.user if request else None
+
+        if product and user and user.is_authenticated:
+            if product.storekeeper.user != user:
+                raise serializers.ValidationError({'product': 'You do not own this product.'})
+
+        return attrs
+
     def create(self, validated_data):
+        request = self.context.get('request')
+        user = request.user if request else None
+        product = validated_data.get('product')
+
+        if product.storekeeper.user != user:
+            raise PermissionDenied("You do not have permission to add types to this product.")
+
         values_data = validated_data.pop('typesvalues_set', [])
         type_obj = Types.objects.create(**validated_data)
 
@@ -58,6 +126,13 @@ class TypesSerializer(serializers.ModelSerializer):
         return type_obj
 
     def update(self, instance, validated_data):
+        request = self.context.get('request')
+        user = request.user if request else None
+        product = instance.product
+
+        if product.storekeeper.user != user:
+            raise PermissionDenied("You do not have permission to update this type.")
+
         values_data = validated_data.pop('typesvalues_set', [])
 
         for attr, value in validated_data.items():
@@ -77,10 +152,35 @@ class FeatureSerializer(serializers.ModelSerializer):
         model = Features
         fields = ['id', 'product', 'feature_name', 'feature_value']
 
+    def validate(self, attrs):
+        product = attrs.get('product')
+        request = self.context.get('request')
+        user = request.user if request else None
+
+        if product and user and user.is_authenticated:
+            if product.storekeeper.user != user:
+                raise serializers.ValidationError({'product': 'You do not own this product.'})
+
+        return attrs
+
     def create(self, validated_data):
+        request = self.context.get('request')
+        user = request.user if request else None
+        product = validated_data.get('product')
+
+        if product.storekeeper.user != user:
+            raise PermissionDenied("You do not have permission to add features to this product.")
+
         return Features.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
+        request = self.context.get('request')
+        user = request.user if request else None
+        product = instance.product
+
+        if product.storekeeper.user != user:
+            raise PermissionDenied("You do not have permission to update this feature.")
+
         instance.feature_name = validated_data.get('feature_name', instance.feature_name)
         instance.feature_value = validated_data.get('feature_value', instance.feature_value)
         instance.save()
@@ -93,38 +193,90 @@ class FAQSerializer(serializers.ModelSerializer):
         model = FrequentlyAskedQuestions
         fields = ['id', 'product', 'frequently_asked_question', 'frequently_asked_question_answer']
 
+    def validate(self, attrs):
+        product = attrs.get('product')
+        request = self.context.get('request')
+        user = request.user if request else None
+
+        if product and user and user.is_authenticated:
+            if product.storekeeper.user != user:
+                raise serializers.ValidationError({'product': 'You do not own this product.'})
+
+        return attrs
+
     def create(self, validated_data):
+        request = self.context.get('request')
+        user = request.user if request else None
+        product = validated_data.get('product')
+
+        if product.storekeeper.user != user:
+            raise PermissionDenied("You do not have permission to add FAQs to this product.")
+
         return FrequentlyAskedQuestions.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
-        instance.frequently_asked_question = validated_data.get('frequently_asked_question', instance.frequently_asked_question)
-        instance.frequently_asked_question_answer = validated_data.get('frequently_asked_question_answer', instance.frequently_asked_question_answer)
+        request = self.context.get('request')
+        user = request.user if request else None
+        product = instance.product
+
+        if product.storekeeper.user != user:
+            raise PermissionDenied("You do not have permission to update this FAQ.")
+
+        instance.frequently_asked_question = validated_data.get(
+            'frequently_asked_question', instance.frequently_asked_question
+        )
+        instance.frequently_asked_question_answer = validated_data.get(
+            'frequently_asked_question_answer', instance.frequently_asked_question_answer
+        )
         instance.save()
         return instance
 
 class ProductSerializer(serializers.ModelSerializer):
-    images_set = ImageSerializer(many=True, required=False, allow_null=True)
-    types_set = TypesSerializer(many=True, required=False, allow_null=True)
-    features_set = FeatureSerializer(many=True, required=False, allow_null=True)
-    faqs = FAQSerializer(many=True, required=False, allow_null=True)
-    created_time = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
-    updated_time = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
-    image = serializers.ImageField(use_url=True)
-    storekeeper = serializers.PrimaryKeyRelatedField(queryset=StoreKeeper.objects.all())
-    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
+    name = serializers.CharField()
+    description = serializers.CharField()
+    price = serializers.DecimalField(max_digits=10, decimal_places=2)
+    discounted_price = serializers.DecimalField(max_digits=10, decimal_places=2, required=False, allow_null=True)
+    discount_percentage = serializers.DecimalField(max_digits=5, decimal_places=2, required=False, allow_null=True)
+    discount_period = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", required=False, allow_null=True)
+    amazing_offer = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    amazing_offer_period = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", required=False, allow_null=True)
+    stock_quantity = serializers.IntegerField()
+    image = serializers.ImageField(use_url=True, required=False, allow_null=True)
     average_rating = serializers.SerializerMethodField()
     comment_count = serializers.SerializerMethodField()
-    user_commented = serializers.SerializerMethodField()
+    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
+    storekeeper = serializers.PrimaryKeyRelatedField(read_only=True)
+    created_time = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
+    updated_time = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
 
     class Meta:
         model = Product
-        fields = '__all__'
+        fields = [
+            'id', 'name', 'description', 'price', 'discounted_price', 'discount_percentage',
+            'discount_period', 'amazing_offer', 'amazing_offer_period', 'stock_quantity',
+            'image', 'average_rating', 'comment_count', 'category',
+            'storekeeper', 'created_time', 'updated_time'
+        ]
 
     def validate_image(self, image):
-        max_size = 5 * 1024 * 1024
-        if image.size > max_size:
+        if image and hasattr(image, 'size') and image.size > 5 * 1024 * 1024:
             raise serializers.ValidationError("The image size should not exceed 5 MB.")
         return image
+
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+
+        request = self.context.get('request')
+        method = request.method if request else None
+
+        if method in ['PUT', 'PATCH']:
+            if not request.data.get('image'):
+                rep['image'] = None
+
+        elif not instance.image:
+            rep['image'] = None
+
+        return rep
 
     def validate_stock_quantity(self, value):
         if value < 0 or value > 10000:
@@ -138,135 +290,95 @@ class ProductSerializer(serializers.ModelSerializer):
         return None
 
     def get_comment_count(self, obj):
-        return obj.comments.count()
-
-    def get_user_commented(self, obj):
-        user = self.context['request'].user
-        if user.is_authenticated:
-            return obj.comments.filter(user=user).exists()
-        return False
+        comment_count = obj.comments.count()
+        reply_count = CommentReply.objects.filter(comment__product=obj).count()
+        return comment_count + reply_count
 
     def validate(self, data):
-        price = data.get('price')
+        price = data.get('price', getattr(self.instance, 'price', None))
         discounted_price = data.get('discounted_price')
         discount_percentage = data.get('discount_percentage')
         discount_period = data.get('discount_period')
         amazing_offer = data.get('amazing_offer')
         amazing_offer_period = data.get('amazing_offer_period')
+        stock_quantity = data.get('stock_quantity', getattr(self.instance, 'stock_quantity', None))
+
         errors = {}
 
-        if discounted_price and discount_percentage:
-            errors['discount_conflict'] = "Only one of 'Discounted Price' or 'Discount Percentage' must be entered."
+        old_discounted_price = getattr(self.instance, 'discounted_price', None)
+        old_discount_percentage = getattr(self.instance, 'discount_percentage', None)
 
-        if discount_period and not (discounted_price or discount_percentage):
+        if discounted_price is not None and discount_percentage is not None:
+            if self.instance:
+                if discounted_price != old_discounted_price and discount_percentage == old_discount_percentage:
+                    data['discount_percentage'] = round(100 * (1 - discounted_price / price), 2)
+                elif discount_percentage != old_discount_percentage and discounted_price == old_discounted_price:
+                    data['discounted_price'] = round(price * (1 - discount_percentage / 100), 2)
+                else:
+                    data['discounted_price'] = round(price * (1 - discount_percentage / 100), 2)
+            else:
+                errors['discount_conflict'] = "Only one of 'Discounted Price' or 'Discount Percentage' must be entered."
+
+        elif discount_percentage is not None and discounted_price is None:
+            data['discounted_price'] = round(price * (1 - discount_percentage / 100), 2)
+
+        elif discounted_price is not None and discount_percentage is None:
+            data['discount_percentage'] = round(100 * (1 - discounted_price / price), 2)
+
+        if discount_period and not (data.get('discounted_price') or data.get('discount_percentage')):
             errors['discount_period'] = "To register a 'discount period', one of the discount fields must be specified."
 
         if amazing_offer_period and not amazing_offer:
             errors['amazing_offer_period'] = "The offer text must first be entered for its validity period."
 
-        if price:
-            if discount_percentage and not discounted_price:
-                data['discounted_price'] = round(price * (1 - discount_percentage / 100), 2)
-            elif discounted_price and not discount_percentage:
-                data['discount_percentage'] = round(100 * (1 - discounted_price / price), 2)
-
-        if errors:
-            raise serializers.ValidationError(errors)
-
-        if data.get('stock_quantity') == 0:
+        if stock_quantity == 0:
             for field in ['price', 'discounted_price', 'discount_percentage',
                           'discount_period', 'amazing_offer', 'amazing_offer_period']:
                 if data.get(field) is not None:
                     errors[field] = "When the inventory is zero, no price or discount information should be entered."
 
+        if errors:
+            raise serializers.ValidationError(errors)
+
         return data
 
     def create(self, validated_data):
-        images_data = validated_data.pop('images_set', [])
-        types_data = validated_data.pop('types_set', [])
-        features_data = validated_data.pop('features_set', [])
-        faq_data = validated_data.pop('faqs', [])
+        request = self.context.get('request')
+        user = request.user if request and request.user.is_authenticated else None
 
-        product = Product.objects.create(**validated_data)
+        try:
+            storekeeper = StoreKeeper.objects.get(user=user)
+        except StoreKeeper.DoesNotExist:
+            raise serializers.ValidationError("You are not registered as a storekeeper.")
 
-        for image in images_data:
-            Images.objects.create(product=product, **image)
+        requested_storekeeper = validated_data.get('storekeeper')
+        if requested_storekeeper and requested_storekeeper != storekeeper:
+            raise serializers.ValidationError("You cannot assign another storekeeper's product.")
 
-        for type_item in types_data:
-            values_data = type_item.pop('typesvalues_set', [])
-            type_obj = Types.objects.create(product=product, **type_item)
-            for value in values_data:
-                TypesValues.objects.create(product=type_obj, **value)
+        validated_data['storekeeper'] = storekeeper
 
-        for feature in features_data:
-            Features.objects.create(product=product, **feature)
+        image = validated_data.get('image')
+        if not image:
+            raise serializers.ValidationError({'image': 'Product image is required when creating a product.'})
 
-        for faq in faq_data:
-            FrequentlyAskedQuestions.objects.create(product=product, **faq)
-
-        return product
+        return Product.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
-        images_data = validated_data.pop('images_set', [])
-        types_data = validated_data.pop('types_set', [])
-        features_data = validated_data.pop('features_set', [])
-        faq_data = validated_data.pop('faqs', [])
+        request = self.context.get('request')
+        user = request.user if request and request.user.is_authenticated else None
+
+        if instance.storekeeper.user != user:
+            raise serializers.ValidationError("You cannot update another storekeeper's product.")
+
+        image = validated_data.get('image', None)
+        if image is None or isinstance(image, str):
+            validated_data['image'] = instance.image
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
+
         instance.save()
-
-        instance.images_set.all().delete()
-        for image in images_data:
-            Images.objects.create(product=instance, **image)
-
-        instance.types_set.all().delete()
-        for type_item in types_data:
-            values_data = type_item.pop('typesvalues_set', [])
-            type_obj = Types.objects.create(product=instance, **type_item)
-            for value in values_data:
-                TypesValues.objects.create(product=type_obj, **value)
-
-        instance.features_set.all().delete()
-        for feature in features_data:
-            Features.objects.create(product=instance, **feature)
-
-        instance.faqs.all().delete()
-        for faq in faq_data:
-            FrequentlyAskedQuestions.objects.create(product=instance, **faq)
-
         return instance
-
-class ProductReadOnlySerializer(serializers.ModelSerializer):
-    images_set = ImageSerializer(many=True, read_only=True)
-    types_set = TypesSerializer(many=True, read_only=True)
-    features_set = FeatureSerializer(many=True, read_only=True)
-    faqs = FAQSerializer(many=True, read_only=True)
-    created_time = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
-    updated_time = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
-    image = serializers.ImageField(use_url=True, read_only=True)
-    average_rating = serializers.SerializerMethodField()
-    comment_count = serializers.SerializerMethodField()
-    user_commented = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Product
-        fields = '__all__'
-
-    def get_average_rating(self, obj):
-        ratings = obj.comments.exclude(rating=None).values_list('rating', flat=True)
-        if ratings:
-            return round(sum(ratings) / len(ratings), 1)
-        return None
-
-    def get_comment_count(self, obj):
-        return obj.comments.count()
-
-    def get_user_commented(self, obj):
-        request = self.context.get('request')
-        if request and request.user.is_authenticated:
-            return obj.comments.filter(user=request.user).exists()
-        return False
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:

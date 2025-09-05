@@ -4,6 +4,7 @@ from django.http import Http404
 from django.db.models import Avg, Count, Case, When, F, Q
 from django.core.exceptions import ValidationError
 from rest_framework import viewsets, status
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.exceptions import MethodNotAllowed
@@ -15,236 +16,8 @@ from .serializers import (
     TypesSerializer,
     FeatureSerializer,
     FAQSerializer,
-    ProductReadOnlySerializer,
     CategorySerializer,
 )
-
-class ProductViewSet(viewsets.ModelViewSet):
-    queryset = Product.objects.all().order_by('-created_time')
-    serializer_class = ProductSerializer
-    lookup_field = 'pk'
-
-    def get_products_by(self, **kwargs):
-        products = Product.objects.filter(**kwargs).order_by('-created_time')
-        if not products.exists():
-            raise Http404("No products found.")
-        return products
-
-    def handle_request(self, request, products, index=None):
-        if not index and request.method != 'GET':
-            raise MethodNotAllowed(request.method, detail="Only GET is allowed in list mode.")
-
-        if index:
-            try:
-                index = int(index)
-                if index < 1 or index > products.count():
-                    raise Http404("Invalid index.")
-                product = products[index - 1]
-            except ValueError:
-                raise Http404("Index must be a number.")
-        else:
-            product = None
-
-        if request.method == 'GET':
-            if index:
-                serializer = self.get_serializer(product)
-                return Response(serializer.data)
-            else:
-                serializer = self.get_serializer(products, many=True)
-                return Response(serializer.data)
-
-        elif request.method in ['PUT', 'PATCH']:
-            serializer = self.get_serializer(product, data=request.data, partial=(request.method == 'PATCH'))
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data)
-
-        elif request.method == 'DELETE':
-            product.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @action(detail=False, url_path=r'storekeeper/(?P<storekeeper_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
-    def by_storekeeper(self, request, storekeeper_id=None, index=None):
-        products = self.get_products_by(storekeeper_id=storekeeper_id)
-        return self.handle_request(request, products, index)
-
-    @action(detail=False, url_path=r'category/(?P<category_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
-    def by_category(self, request, category_id=None, index=None):
-        products = self.get_products_by(category_id=category_id)
-        return self.handle_request(request, products, index)
-
-    @action(detail=False, url_path=r'name/(?P<name>[^/.]+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
-    def by_name(self, request, name=None, index=None):
-        products = self.get_products_by(name=name)
-        return self.handle_request(request, products, index)
-
-class ImageViewSet(viewsets.ModelViewSet):
-    queryset = Images.objects.all()
-    serializer_class = ImageSerializer
-
-    @action(detail=False, url_path=r'product/(?P<product_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
-    def by_product(self, request, product_id=None, index=None):
-        images = Images.objects.filter(product_id=product_id).order_by('-id')
-        if not images.exists():
-            raise Http404("No images found for this product.")
-
-        if not index and request.method != 'GET':
-            raise MethodNotAllowed(request.method, detail="Only GET is allowed in list mode.")
-
-        if index:
-            try:
-                index = int(index)
-                if index < 1 or index > images.count():
-                    raise Http404("Invalid index.")
-                image = images[index - 1]
-            except ValueError:
-                raise Http404("Index must be a number.")
-        else:
-            image = None
-
-        if request.method == 'GET':
-            if index:
-                serializer = self.get_serializer(image)
-                return Response(serializer.data)
-            else:
-                serializer = self.get_serializer(images, many=True)
-                return Response(serializer.data)
-
-        elif request.method in ['PUT', 'PATCH']:
-            serializer = self.get_serializer(image, data=request.data, partial=(request.method == 'PATCH'))
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data)
-
-        elif request.method == 'DELETE':
-            image.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-class TypesViewSet(viewsets.ModelViewSet):
-    queryset = Types.objects.all()
-    serializer_class = TypesSerializer
-
-    @action(detail=False, url_path=r'product/(?P<product_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
-    def by_product(self, request, product_id=None, index=None):
-        types = Types.objects.filter(product_id=product_id).order_by('-id')
-        if not types.exists():
-            raise Http404("No types found for this product.")
-
-        if not index and request.method != 'GET':
-            raise MethodNotAllowed(request.method, detail="Only GET is allowed in list mode.")
-
-        if index:
-            try:
-                index = int(index)
-                if index < 1 or index > types.count():
-                    raise Http404("Invalid index.")
-                type_obj = types[index - 1]
-            except ValueError:
-                raise Http404("Index must be a number.")
-        else:
-            type_obj = None
-
-        if request.method == 'GET':
-            if index:
-                serializer = self.get_serializer(type_obj)
-                return Response(serializer.data)
-            else:
-                serializer = self.get_serializer(types, many=True)
-                return Response(serializer.data)
-
-        elif request.method in ['PUT', 'PATCH']:
-            serializer = self.get_serializer(type_obj, data=request.data, partial=(request.method == 'PATCH'))
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data)
-
-        elif request.method == 'DELETE':
-            type_obj.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-class FeatureViewSet(viewsets.ModelViewSet):
-    queryset = Features.objects.all()
-    serializer_class = FeatureSerializer
-
-    @action(detail=False, url_path=r'product/(?P<product_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
-    def by_product(self, request, product_id=None, index=None):
-        features = Features.objects.filter(product_id=product_id).order_by('-id')
-        if not features.exists():
-            raise Http404("No features found for this product.")
-
-        if not index and request.method != 'GET':
-            raise MethodNotAllowed(request.method, detail="Only GET is allowed in list mode.")
-
-        if index:
-            try:
-                index = int(index)
-                if index < 1 or index > features.count():
-                    raise Http404("Invalid index.")
-                feature = features[index - 1]
-            except ValueError:
-                raise Http404("Index must be a number.")
-        else:
-            feature = None
-
-        if request.method == 'GET':
-            if index:
-                serializer = self.get_serializer(feature)
-                return Response(serializer.data)
-            else:
-                serializer = self.get_serializer(features, many=True)
-                return Response(serializer.data)
-
-        elif request.method in ['PUT', 'PATCH']:
-            serializer = self.get_serializer(feature, data=request.data, partial=(request.method == 'PATCH'))
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data)
-
-        elif request.method == 'DELETE':
-            feature.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-class FAQViewSet(viewsets.ModelViewSet):
-    queryset = FrequentlyAskedQuestions.objects.all()
-    serializer_class = FAQSerializer
-
-    @action(detail=False, url_path=r'product/(?P<product_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
-    def by_product(self, request, product_id=None, index=None):
-        faqs = FrequentlyAskedQuestions.objects.filter(product_id=product_id).order_by('-id')
-        if not faqs.exists():
-            raise Http404("No FAQs found for this product.")
-
-        if not index and request.method != 'GET':
-            raise MethodNotAllowed(request.method, detail="Only GET is allowed in list mode.")
-
-        if index:
-            try:
-                index = int(index)
-                if index < 1 or index > faqs.count():
-                    raise Http404("Invalid index.")
-                faq = faqs[index - 1]
-            except ValueError:
-                raise Http404("Index must be a number.")
-        else:
-            faq = None
-
-        if request.method == 'GET':
-            if index:
-                serializer = self.get_serializer(faq)
-                return Response(serializer.data)
-            else:
-                serializer = self.get_serializer(faqs, many=True)
-                return Response(serializer.data)
-
-        elif request.method in ['PUT', 'PATCH']:
-            serializer = self.get_serializer(faq, data=request.data, partial=(request.method == 'PATCH'))
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data)
-
-        elif request.method == 'DELETE':
-            faq.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
 
 class ProductFilter(django_filters.FilterSet):
     min_rating = django_filters.CharFilter(
@@ -357,14 +130,19 @@ class ProductFilter(django_filters.FilterSet):
             'category', 'storekeeper'
         ]
 
-class ProductReadOnlyViewSet(viewsets.ReadOnlyModelViewSet):
-    serializer_class = ProductReadOnlySerializer
+class ProductViewSet(viewsets.ModelViewSet):
+    serializer_class = ProductSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_class = ProductFilter
     search_fields = ['name', 'description']
 
+    def get_permissions(self):
+        if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
     def get_queryset(self):
-        return Product.objects.annotate(
+        base_queryset = Product.objects.annotate(
             comment_count=Count('comments'),
             average_rating=Avg('comments__rating'),
             final_price=Case(
@@ -372,6 +150,13 @@ class ProductReadOnlyViewSet(viewsets.ReadOnlyModelViewSet):
                 default=F('price')
             )
         )
+
+        if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return base_queryset.order_by('-updated_time')
+        return base_queryset.filter(storekeeper__user=self.request.user).order_by('-updated_time')
+
+    def get_serializer_context(self):
+        return {"request": self.request}
 
     def handle_exception(self, exc):
         if isinstance(exc, ValidationError):
@@ -381,13 +166,283 @@ class ProductReadOnlyViewSet(viewsets.ReadOnlyModelViewSet):
             )
         return super().handle_exception(exc)
 
+    def _handle_filtered_request(self, request, queryset, index, label="product"):
+        queryset = queryset.order_by('-id')
+
+        if not queryset.exists():
+            raise Http404(f"No {label}s found.")
+
+        if not index and request.method != 'GET':
+            raise MethodNotAllowed(request.method, detail="Only GET is allowed in list mode.")
+
+        if index:
+            try:
+                index = int(index)
+                if index < 1 or index > queryset.count():
+                    raise Http404("Invalid index.")
+                obj = queryset[index - 1]
+            except ValueError:
+                raise Http404("Index must be a number.")
+        else:
+            obj = None
+
+        if request.method == 'GET':
+            serializer = self.get_serializer(obj if index else queryset, many=not index)
+            return Response(serializer.data)
+
+        elif request.method in ['PUT', 'PATCH']:
+            serializer = self.get_serializer(obj, data=request.data, partial=(request.method == 'PATCH'))
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+
+        elif request.method == 'DELETE':
+            obj.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=False, url_path=r'category/(?P<category_id>\d+)(?:/(?P<index>\d+))?',
+            methods=['get', 'put', 'patch', 'delete'])
+    def by_category(self, request, category_id=None, index=None):
+        queryset = self.get_queryset().filter(category_id=category_id)
+        return self._handle_filtered_request(request, queryset, index, label="category product")
+
+    @action(detail=False, url_path=r'storekeeper/(?P<storekeeper_id>\d+)(?:/(?P<index>\d+))?',
+            methods=['get', 'put', 'patch', 'delete'])
+    def by_storekeeper(self, request, storekeeper_id=None, index=None):
+        queryset = self.get_queryset().filter(storekeeper_id=storekeeper_id)
+        return self._handle_filtered_request(request, queryset, index, label="storekeeper product")
+
+class ImageViewSet(viewsets.ModelViewSet):
+    serializer_class = ImageSerializer
+
+    def get_permissions(self):
+        if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+    def get_queryset(self):
+        if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return Images.objects.all().order_by('-id')
+        user = self.request.user
+        return Images.objects.filter(product__storekeeper__user=user).order_by('-id')
+
+    def get_serializer_context(self):
+        return {"request": self.request}
+
+    def _handle_filtered_request(self, request, queryset, index, label="image"):
+        queryset = queryset.order_by('-id')
+
+        if not queryset.exists():
+            raise Http404(f"No {label}s found.")
+
+        if not index and request.method != 'GET':
+            raise MethodNotAllowed(request.method, detail="Only GET is allowed in list mode.")
+
+        if index:
+            try:
+                index = int(index)
+                if index < 1 or index > queryset.count():
+                    raise Http404("Invalid index.")
+                obj = queryset[index - 1]
+            except ValueError:
+                raise Http404("Index must be a number.")
+        else:
+            obj = None
+
+        if request.method == 'GET':
+            serializer = self.get_serializer(obj if index else queryset, many=not index)
+            return Response(serializer.data)
+
+        elif request.method in ['PUT', 'PATCH']:
+            serializer = self.get_serializer(obj, data=request.data, partial=(request.method == 'PATCH'))
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+
+        elif request.method == 'DELETE':
+            obj.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=False, url_path=r'product/(?P<product_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
+    def product(self, request, product_id=None, index=None):
+        queryset = self.get_queryset().filter(product_id=product_id)
+        return self._handle_filtered_request(request, queryset, index, label="product image")
+
+class TypesViewSet(viewsets.ModelViewSet):
+    serializer_class = TypesSerializer
+
+    def get_permissions(self):
+        if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+    def get_queryset(self):
+        if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return Types.objects.all().order_by('-id')
+        user = self.request.user
+        return Types.objects.filter(product__storekeeper__user=user).order_by('-id')
+
+    def get_serializer_context(self):
+        return {"request": self.request}
+
+    def _handle_filtered_request(self, request, queryset, index, label="type"):
+        queryset = queryset.order_by('-id')
+
+        if not queryset.exists():
+            raise Http404(f"No {label}s found.")
+
+        if not index and request.method != 'GET':
+            raise MethodNotAllowed(request.method, detail="Only GET is allowed in list mode.")
+
+        if index:
+            try:
+                index = int(index)
+                if index < 1 or index > queryset.count():
+                    raise Http404("Invalid index.")
+                obj = queryset[index - 1]
+            except ValueError:
+                raise Http404("Index must be a number.")
+        else:
+            obj = None
+
+        if request.method == 'GET':
+            serializer = self.get_serializer(obj if index else queryset, many=not index)
+            return Response(serializer.data)
+
+        elif request.method in ['PUT', 'PATCH']:
+            serializer = self.get_serializer(obj, data=request.data, partial=(request.method == 'PATCH'))
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+
+        elif request.method == 'DELETE':
+            obj.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=False, url_path=r'product/(?P<product_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
+    def product(self, request, product_id=None, index=None):
+        queryset = self.get_queryset().filter(product_id=product_id)
+        return self._handle_filtered_request(request, queryset, index, label="product type")
+
+class FeatureViewSet(viewsets.ModelViewSet):
+    serializer_class = FeatureSerializer
+
+    def get_permissions(self):
+        if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+    def get_queryset(self):
+        if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return Features.objects.all().order_by('-id')
+        user = self.request.user
+        return Features.objects.filter(product__storekeeper__user=user).order_by('-id')
+
+    def get_serializer_context(self):
+        return {"request": self.request}
+
+    def _handle_filtered_request(self, request, queryset, index, label="feature"):
+        queryset = queryset.order_by('-id')
+
+        if not queryset.exists():
+            raise Http404(f"No {label}s found.")
+
+        if not index and request.method != 'GET':
+            raise MethodNotAllowed(request.method, detail="Only GET is allowed in list mode.")
+
+        if index:
+            try:
+                index = int(index)
+                if index < 1 or index > queryset.count():
+                    raise Http404("Invalid index.")
+                obj = queryset[index - 1]
+            except ValueError:
+                raise Http404("Index must be a number.")
+        else:
+            obj = None
+
+        if request.method == 'GET':
+            serializer = self.get_serializer(obj if index else queryset, many=not index)
+            return Response(serializer.data)
+
+        elif request.method in ['PUT', 'PATCH']:
+            serializer = self.get_serializer(obj, data=request.data, partial=(request.method == 'PATCH'))
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+
+        elif request.method == 'DELETE':
+            obj.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=False, url_path=r'product/(?P<product_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
+    def product(self, request, product_id=None, index=None):
+        queryset = self.get_queryset().filter(product_id=product_id)
+        return self._handle_filtered_request(request, queryset, index, label="product feature")
+
+class FAQViewSet(viewsets.ModelViewSet):
+    serializer_class = FAQSerializer
+
+    def get_permissions(self):
+        if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+    def get_queryset(self):
+        if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return FrequentlyAskedQuestions.objects.all().order_by('-id')
+        user = self.request.user
+        return FrequentlyAskedQuestions.objects.filter(product__storekeeper__user=user).order_by('-id')
+
+    def get_serializer_context(self):
+        return {"request": self.request}
+
+    def _handle_filtered_request(self, request, queryset, index, label="FAQ"):
+        queryset = queryset.order_by('-id')
+
+        if not queryset.exists():
+            raise Http404(f"No {label}s found.")
+
+        if not index and request.method != 'GET':
+            raise MethodNotAllowed(request.method, detail="Only GET is allowed in list mode.")
+
+        if index:
+            try:
+                index = int(index)
+                if index < 1 or index > queryset.count():
+                    raise Http404("Invalid index.")
+                obj = queryset[index - 1]
+            except ValueError:
+                raise Http404("Index must be a number.")
+        else:
+            obj = None
+
+        if request.method == 'GET':
+            serializer = self.get_serializer(obj if index else queryset, many=not index)
+            return Response(serializer.data)
+
+        elif request.method in ['PUT', 'PATCH']:
+            serializer = self.get_serializer(obj, data=request.data, partial=(request.method == 'PATCH'))
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+
+        elif request.method == 'DELETE':
+            obj.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=False, url_path=r'product/(?P<product_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
+    def product(self, request, product_id=None, index=None):
+        queryset = self.get_queryset().filter(product_id=product_id)
+        return self._handle_filtered_request(request, queryset, index, label="product FAQ")
+
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Category.objects.all().order_by('-id')
     serializer_class = CategorySerializer
     filter_backends = [SearchFilter]
     search_fields = ['name', 'description']
 
-    @action(detail=False, url_path='parent/(?P<parent_id>[^/]+)(?:/(?P<index>\d+))?', methods=['get'])
+    @action(detail=False, url_path=r'parent/(?P<parent_id>[^/]+)(?:/(?P<index>\d+))?', methods=['get'])
     def by_parent(self, request, parent_id=None, index=None):
         if parent_id == "null":
             categories = Category.objects.filter(parent__isnull=True).order_by('-id')

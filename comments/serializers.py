@@ -1,13 +1,13 @@
-from django.contrib.auth.models import User
+from django.utils import timezone
 from rest_framework import serializers
 from .models import (Comment, CommentReply, ProductQuestion,
     ProductPurchase, PurchaseChat, StoreNotificationSubscription, Notification)
 from inner.models import Product
-from user.models import StoreKeeper
+from user.models import StoreKeeper, ProductDeliveryStatus
 from cart.models import ProductPayment
 
 class CommentReplySerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    user = serializers.SerializerMethodField()
     comment = serializers.PrimaryKeyRelatedField(queryset=Comment.objects.all())
     updated_time = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
 
@@ -15,26 +15,35 @@ class CommentReplySerializer(serializers.ModelSerializer):
         model = CommentReply
         fields = ['id', 'comment', 'user', 'text', 'updated_time']
 
+    def get_user(self, obj):
+        return obj.user.username if obj.user else None
+
     def validate_text(self, value):
         if not value.strip():
             raise serializers.ValidationError("The response text cannot be empty.")
         return value
 
     def validate(self, data):
-        user = data.get('user')
-        comment = data.get('comment')
+        request = self.context.get('request')
+        method = request.method if request else None
 
-        if not user or not user.is_authenticated:
-            raise serializers.ValidationError("You must be logged in to post a reply.")
-        if not comment:
-            raise serializers.ValidationError("The comment is not valid.")
+        if method in ['POST', 'PUT']:
+            comment = data.get('comment')
+            if not comment:
+                raise serializers.ValidationError({"comment": "The comment is not valid."})
+
         return data
 
     def create(self, validated_data):
+        request = self.context.get('request')
+        user = request.user if request and request.user.is_authenticated else None
+        validated_data['user'] = user
         return CommentReply.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
-        user = validated_data.get('user')
+        request = self.context.get('request')
+        user = request.user if request and request.user.is_authenticated else None
+
         if user != instance.user:
             raise serializers.ValidationError("You cannot edit another user's reply.")
 
@@ -45,146 +54,237 @@ class CommentReplySerializer(serializers.ModelSerializer):
         return instance
 
 class CommentSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    user = serializers.SerializerMethodField()
+    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
     updated_time = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
-    replies = CommentReplySerializer(many=True, required=False, allow_null=True)
 
     class Meta:
         model = Comment
-        fields = '__all__'
+        fields = [
+            "id", "user", "product", "text",
+            "rating", "updated_time"
+        ]
+
+    def get_user(self, obj):
+        return obj.user.username if obj.user else None
 
     def validate(self, data):
-        user = data.get("user")
-        product = data.get("product")
-
-        if not user or not user.is_authenticated:
-            raise serializers.ValidationError("You must be logged in to post a comment.")
+        request = self.context.get("request")
+        user = request.user if request and request.user.is_authenticated else None
+        product = data.get("product") or getattr(self.instance, "product", None)
+        rating = data.get("rating", None)
 
         if not product:
-            raise serializers.ValidationError("The product is invalid.")
+            raise serializers.ValidationError({"product": "The product is invalid."})
+
+        product_id = product.id if hasattr(product, "id") else product
+
+        has_rated_comment = Comment.objects.filter(
+            user=user,
+            product_id=product_id,
+            rating__isnull=False
+        ).exists()
+
+        if self.instance:
+            if self.instance.product_id != int(product_id):
+                raise serializers.ValidationError({"product": "You cannot change the product of a comment."})
+            if self.instance.user != user:
+                raise serializers.ValidationError("You cannot edit another user's comment.")
+            if has_rated_comment and self.instance.rating is None and rating is not None:
+                raise serializers.ValidationError({"rating": "You cannot rate a comment after the first one."})
+            return data
+
+        if has_rated_comment and rating is not None:
+            raise serializers.ValidationError({
+                "rating": "You have already rated this product. Only the first comment can have a rating."
+            })
+        if not has_rated_comment and rating is None:
+            raise serializers.ValidationError({
+                "rating": "Rating is required for your first comment on this product."
+            })
 
         return data
 
     def validate_rating(self, value):
-        user_id = self.initial_data.get("user")
-        product_id = self.initial_data.get("product")
-
-        if not user_id or not product_id:
-            return value
-
-        try:
-            user_instance = User.objects.get(pk=user_id)
-        except User.DoesNotExist:
-            raise serializers.ValidationError("The user is not valid.")
-
-        has_commented = Comment.objects.filter(user=user_instance, product_id=product_id).exists()
-
-        if self.instance:
-            original_rating = self.instance.rating
-            if original_rating is None and value is not None:
-                raise serializers.ValidationError("You cannot rate a comment that has not already been rated.")
-            return value
-
-        if has_commented and value is not None:
-            raise serializers.ValidationError(
-                "You have already commented on this product and cannot rate it again.")
-        if not has_commented and value is None:
-            raise serializers.ValidationError("Rating is required for the first comment.")
-
+        if value is not None and not (1 <= value <= 5):
+            raise serializers.ValidationError("The score must be a number between 1 and 5.")
         return value
 
     def create(self, validated_data):
-        replies_data = validated_data.pop('replies', [])
-        comment = super().create(validated_data)
-
-        for reply_data in replies_data:
-            CommentReply.objects.create(comment=comment, **reply_data)
-
-        return comment
+        request = self.context.get('request')
+        user = request.user if request and request.user.is_authenticated else None
+        validated_data['user'] = user
+        return super().create(validated_data)
 
     def update(self, instance, validated_data):
-        user = validated_data.get("user")
+        request = self.context.get("request")
+        user = request.user if request and request.user.is_authenticated else None
         if user != instance.user:
             raise serializers.ValidationError("You cannot edit another user's comment.")
 
         rating = validated_data.get("rating")
         if rating is not None and not (1 <= rating <= 5):
-            raise serializers.ValidationError("The score must be a number between 1 and 5.")
+            raise serializers.ValidationError({"rating": "The score must be a number between 1 and 5."})
 
-        replies_data = validated_data.pop('replies', [])
-
-        comment = super().update(instance, validated_data)
-
-        for reply_data in replies_data:
-            reply_id = reply_data.get('id')
-            if reply_id:
-                try:
-                    reply_instance = CommentReply.objects.get(id=reply_id, comment=comment)
-                    for attr, value in reply_data.items():
-                        setattr(reply_instance, attr, value)
-                    reply_instance.save()
-                except CommentReply.DoesNotExist:
-                    continue
-            else:
-                CommentReply.objects.create(comment=comment, **reply_data)
-
-        return comment
+        return super().update(instance, validated_data)
 
 class ProductQuestionSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    user = serializers.SerializerMethodField()
+    storekeeper = serializers.PrimaryKeyRelatedField(read_only=True)
     product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
-    storekeeper = serializers.PrimaryKeyRelatedField(queryset=StoreKeeper.objects.all(), required=False, allow_null=True)
     updated_time = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
 
     class Meta:
         model = ProductQuestion
-        fields = ['id', 'product', 'user', 'question_text', 'answer_text', 'storekeeper', 'updated_time']
+        fields = [
+            'id',
+            'product',
+            'user',
+            'question_text',
+            'answer_text',
+            'storekeeper',
+            'updated_time'
+        ]
+
+    def get_user(self, obj):
+        return obj.user.username if obj.user else None
 
     def validate_question_text(self, value):
         if not value.strip():
             raise serializers.ValidationError("The question text cannot be empty.")
         return value
 
+    def validate(self, data):
+        request = self.context.get('request')
+        user = request.user if request and request.user.is_authenticated else None
+        product = data.get('product') or getattr(self.instance, 'product', None)
+
+        if request.method == 'POST':
+            if product and product.storekeeper.user == user:
+                raise serializers.ValidationError("The seller cannot ask a question about their own product.")
+
+            if 'answer_text' in data and data['answer_text'].strip():
+                raise serializers.ValidationError("You cannot provide an answer when creating a question.")
+
+        elif request.method in ['PUT', 'PATCH']:
+            if self.instance:
+                if 'product' in data and data['product'] != self.instance.product:
+                    raise serializers.ValidationError("You cannot change the product of a question.")
+
+                if user == self.instance.user:
+                    if 'answer_text' in data:
+                        raise serializers.ValidationError("You cannot answer your own question.")
+
+                elif user == self.instance.product.storekeeper.user:
+                    if 'question_text' in data:
+                        raise serializers.ValidationError("You cannot modify the question text.")
+
+                else:
+                    raise serializers.ValidationError("You do not have permission to update this question.")
+
+        question_text = data.get('question_text')
+        if question_text and not question_text.strip():
+            raise serializers.ValidationError("The question text cannot be empty.")
+
+        if question_text and not (self.instance and self.instance.user) and not user:
+            raise serializers.ValidationError("User must be set when providing a question.")
+
+        answer_text = data.get('answer_text')
+        if answer_text and not (self.instance and self.instance.storekeeper):
+            if not (product and product.storekeeper):
+                raise serializers.ValidationError("Storekeeper must be set when providing an answer.")
+
+        return data
+
     def create(self, validated_data):
-        product = validated_data.get('product')
-        user = validated_data.get('user')
-
-        if product.storekeeper.user == user:
-            raise serializers.ValidationError("The seller cannot register a question for their own product.")
-
+        request = self.context.get('request')
+        user = request.user if request and request.user.is_authenticated else None
+        validated_data['user'] = user
         return ProductQuestion.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
-        storekeeper = validated_data.get('storekeeper')
-        product_storekeeper = instance.product.storekeeper
+        request = self.context.get('request')
+        user = request.user if request and request.user.is_authenticated else None
 
-        if storekeeper != product_storekeeper:
-            raise serializers.ValidationError("Only the product seller can answer the question.")
+        if 'product' in validated_data and validated_data['product'] != instance.product:
+            raise serializers.ValidationError("Product cannot be changed during update.")
 
-        answer = validated_data.get('answer_text')
-        if answer is not None:
-            instance.answer_text = answer.strip()
-            instance.storekeeper = storekeeper
+        if user == instance.user:
+            question = validated_data.get('question_text')
+            if question is not None:
+                instance.question_text = question.strip()
+
+        elif user == instance.product.storekeeper.user:
+            answer = validated_data.get('answer_text')
+            if answer is not None:
+                instance.answer_text = answer.strip()
+                instance.storekeeper = instance.product.storekeeper
+
+        else:
+            raise serializers.ValidationError("You do not have permission to update this question.")
 
         instance.save()
         return instance
 
 class ProductPurchaseSerializer(serializers.ModelSerializer):
-    buyer = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
-    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
-    storekeeper = serializers.PrimaryKeyRelatedField(queryset=StoreKeeper.objects.all())
+    buyer = serializers.SerializerMethodField()
+    product = serializers.PrimaryKeyRelatedField(read_only=True)
+    storekeeper = serializers.PrimaryKeyRelatedField(read_only=True)
     payment = serializers.PrimaryKeyRelatedField(queryset=ProductPayment.objects.all())
     chat_enabled = serializers.BooleanField(read_only=True)
+    storekeeper_delivery = serializers.SerializerMethodField()
+    storekeeper_delivered_at = serializers.DateTimeField(
+        source='payment.delivery_status.sent_at',
+        format='%Y-%m-%d %H:%M:%S',
+        read_only=True
+    )
+    buyer_delivery = serializers.SerializerMethodField()
+    buyer_delivered_at = serializers.DateTimeField(
+        source='payment.delivered_at',
+        format='%Y-%m-%d %H:%M:%S',
+        read_only=True
+    )
 
     class Meta:
         model = ProductPurchase
-        fields = ['id', 'buyer', 'product', 'storekeeper', 'payment', 'chat_enabled']
+        fields = [
+            'id', 'buyer', 'product', 'storekeeper', 'payment', 'chat_enabled',
+            'storekeeper_delivery', 'storekeeper_delivered_at',
+            'buyer_delivery', 'buyer_delivered_at'
+        ]
+
+    def get_buyer(self, obj):
+        return obj.buyer.username if obj.buyer else None
+
+    def get_storekeeper_delivery(self, obj):
+        try:
+            delivery_status = ProductDeliveryStatus.objects.get(payment=obj.payment)
+            return bool(delivery_status.is_sent)
+        except ProductDeliveryStatus.DoesNotExist:
+            return False
+
+    def get_storekeeper_delivered_at(self, obj):
+        try:
+            delivery_status = ProductDeliveryStatus.objects.get(payment=obj.payment)
+            return delivery_status.sent_at
+        except ProductDeliveryStatus.DoesNotExist:
+            return None
+
+    def get_buyer_delivery(self, obj):
+        return obj.payment.is_delivered
+
+    def get_buyer_delivered_at(self, obj):
+        return obj.payment.delivered_at
 
     def validate(self, data):
-        buyer = data.get('buyer')
-        product = data.get('product')
-        storekeeper = data.get('storekeeper')
         payment = data.get('payment')
+
+        if not payment.is_successful:
+            raise serializers.ValidationError("Only successful payments can be linked to a purchase.")
+
+        buyer = payment.cart.user
+        product = payment.product
+        storekeeper = product.storekeeper
 
         if buyer == storekeeper.user:
             raise serializers.ValidationError("The buyer cannot be the same as the seller.")
@@ -192,12 +292,14 @@ class ProductPurchaseSerializer(serializers.ModelSerializer):
         if ProductPurchase.objects.filter(
             buyer=buyer,
             product=product,
-            storekeeper=storekeeper
+            storekeeper=storekeeper,
+            payment=payment
         ).exists():
             raise serializers.ValidationError("This purchase has already been registered.")
 
-        if payment.cart.user != buyer:
-            raise serializers.ValidationError("The selected payment does not belong to this buyer.")
+        data['buyer'] = buyer
+        data['product'] = product
+        data['storekeeper'] = storekeeper
 
         return data
 
@@ -205,16 +307,23 @@ class ProductPurchaseSerializer(serializers.ModelSerializer):
         return ProductPurchase.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
-        instance.buyer = validated_data.get('buyer', instance.buyer)
-        instance.product = validated_data.get('product', instance.product)
-        instance.storekeeper = validated_data.get('storekeeper', instance.storekeeper)
-        instance.payment = validated_data.get('payment', instance.payment)
+        payment = validated_data.get('payment', instance.payment)
+
+        buyer = payment.cart.user
+        product = payment.product
+        storekeeper = product.storekeeper
+
+        instance.payment = payment
+        instance.buyer = buyer
+        instance.product = product
+        instance.storekeeper = storekeeper
         instance.save()
+
         return instance
 
 class PurchaseChatSerializer(serializers.ModelSerializer):
     purchase = serializers.PrimaryKeyRelatedField(queryset=ProductPurchase.objects.all())
-    sender = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    sender = serializers.SerializerMethodField()
     sent_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
     edited_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
 
@@ -222,41 +331,60 @@ class PurchaseChatSerializer(serializers.ModelSerializer):
         model = PurchaseChat
         fields = ['id', 'purchase', 'sender', 'message', 'sent_at', 'edited_at']
 
+    def get_sender(self, obj):
+        return obj.sender.username if obj.sender else None
+
     def validate_message(self, value):
         if not value.strip():
             raise serializers.ValidationError("The message text cannot be empty.")
         return value
 
     def validate(self, data):
-        purchase = data.get('purchase')
-        sender = data.get('sender')
+        request = self.context.get('request')
+        user = request.user if request else None
+
+        purchase = data.get('purchase') or getattr(self.instance, 'purchase', None)
+
+        if not purchase:
+            raise serializers.ValidationError("Purchase information is missing.")
 
         if not purchase.chat_enabled:
             raise serializers.ValidationError("Chat has been disabled for this purchase.")
 
-        if sender != purchase.buyer and sender != purchase.storekeeper.user:
+        if user != purchase.buyer and user != purchase.storekeeper.user:
             raise serializers.ValidationError("Only the buyer or seller can send messages.")
 
         return data
 
     def create(self, validated_data):
+        request = self.context.get('request')
+        user = request.user if request else None
+        validated_data['sender'] = user
         return PurchaseChat.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
+        request = self.context.get('request')
+        user = request.user if request else None
+
+        if user != instance.sender:
+            raise serializers.ValidationError("You can only edit your own messages.")
+
         instance.message = validated_data.get('message', instance.message).strip()
-        instance.save()
+        instance.edited_at = timezone.now()
+        instance.save(update_fields=['message', 'edited_at'])
         return instance
 
 class StoreNotificationSubscriptionSerializer(serializers.ModelSerializer):
     storekeeper = serializers.PrimaryKeyRelatedField(queryset=StoreKeeper.objects.all())
-    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = StoreNotificationSubscription
         fields = ['id', 'user', 'storekeeper']
 
     def validate(self, attrs):
-        user = attrs.get('user')
+        request = self.context.get('request')
+        user = request.user if request and request.user.is_authenticated else None
         storekeeper = attrs.get('storekeeper')
 
         if StoreNotificationSubscription.objects.filter(user=user, storekeeper=storekeeper).exists():
@@ -265,19 +393,34 @@ class StoreNotificationSubscriptionSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
+        request = self.context.get('request')
+        user = request.user if request and request.user.is_authenticated else None
+        validated_data['user'] = user
         return StoreNotificationSubscription.objects.create(**validated_data)
-
-    def update(self, instance, validated_data):
-        instance.storekeeper = validated_data.get('storekeeper', instance.storekeeper)
-        instance.user = validated_data.get('user', instance.user)
-        instance.save()
-        return instance
 
 class NotificationSerializer(serializers.ModelSerializer):
     notification = serializers.PrimaryKeyRelatedField(read_only=True)
     user = serializers.PrimaryKeyRelatedField(read_only=True)
+    is_read = serializers.BooleanField(required=False)
 
     class Meta:
         model = Notification
-        fields = ['id', 'user', 'notification', 'message', 'storekeeper_id', 'product_id']
-        read_only_fields = ['user', 'notification', 'message', 'storekeeper_id', 'product_id']
+        fields = [
+            'id', 'user', 'notification', 'message',
+            'storekeeper_id', 'product_id', 'is_read'
+        ]
+        read_only_fields = [
+            'user', 'notification', 'message',
+            'storekeeper_id', 'product_id'
+        ]
+
+    def update(self, instance, validated_data):
+        request = self.context.get('request')
+        user = request.user if request else None
+
+        if user != instance.user:
+            raise serializers.ValidationError("You do not have permission to update this notification.")
+
+        instance.is_read = validated_data.get('is_read', instance.is_read)
+        instance.save(update_fields=['is_read'])
+        return instance

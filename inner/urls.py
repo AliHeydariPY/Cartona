@@ -6,7 +6,6 @@ from .views import (
     TypesViewSet,
     FeatureViewSet,
     FAQViewSet,
-    ProductReadOnlyViewSet,
     CategoryViewSet)
 
 router = DefaultRouter()
@@ -15,7 +14,6 @@ router.register(r'images', ImageViewSet, basename='image')
 router.register(r'types', TypesViewSet, basename='type')
 router.register(r'features', FeatureViewSet, basename='feature')
 router.register(r'faqs', FAQViewSet, basename='faq')
-router.register(r'list-products', ProductReadOnlyViewSet, basename='list-products')
 router.register(r'categories', CategoryViewSet, basename='category')
 
 urlpatterns = [

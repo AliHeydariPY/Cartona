@@ -1,23 +1,99 @@
 from django.http import Http404
+from django.db.models import Q, OuterRef, Subquery, Exists
+from django.contrib.auth.models import User
+from django_filters import rest_framework as filters
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, mixins, status
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import action
-from rest_framework.exceptions import MethodNotAllowed
+from rest_framework.exceptions import MethodNotAllowed, ValidationError, PermissionDenied
 from rest_framework.response import Response
 from .models import (Comment, CommentReply, ProductQuestion, ProductPurchase,
     PurchaseChat, StoreNotificationSubscription, Notification)
+from user.models import ProductDeliveryStatus
 
 from .serializers import (CommentSerializer, CommentReplySerializer,
     ProductQuestionSerializer, ProductPurchaseSerializer, PurchaseChatSerializer,
     StoreNotificationSubscriptionSerializer, NotificationSerializer)
 
-class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all()
-    serializer_class = CommentSerializer
+class CommentFilter(filters.FilterSet):
+    min_rating = filters.CharFilter(method='filter_min_rating', label='Minimum Rating')
+    max_rating = filters.CharFilter(method='filter_max_rating', label='Maximum Rating')
 
-    def _handle_filtered_request(self, request, comments, index):
-        comments = comments.order_by('-id')
-        if not comments.exists():
-            raise Http404("No comments found.")
+    def filter_min_rating(self, queryset, name, value):
+        max_rating_value = self.data.get('max_rating')
+
+        if value == 'null':
+            if max_rating_value and max_rating_value != 'null':
+                try:
+                    max_rating = float(max_rating_value)
+                    if not (1.0 <= max_rating <= 5.0):
+                        raise ValidationError("max_rating must be between 1.0 and 5.0.")
+                    return queryset.filter(Q(rating__isnull=True) | Q(rating__lte=max_rating))
+                except ValueError:
+                    raise ValidationError("max_rating must be a number or 'null'.")
+            else:
+                return queryset.filter(rating__isnull=True)
+
+        try:
+            min_rating = float(value)
+            if not (1.0 <= min_rating <= 5.0):
+                raise ValidationError("min_rating must be between 1.0 and 5.0.")
+            if max_rating_value and max_rating_value != 'null':
+                try:
+                    max_rating = float(max_rating_value)
+                    if not (1.0 <= max_rating <= 5.0):
+                        raise ValidationError("max_rating must be between 1.0 and 5.0.")
+                    return queryset.filter(rating__gte=min_rating, rating__lte=max_rating)
+                except ValueError:
+                    raise ValidationError("max_rating must be a number or 'null'.")
+            return queryset.filter(rating__gte=min_rating)
+        except ValueError:
+            raise ValidationError("min_rating must be a number or 'null'.")
+
+    def filter_max_rating(self, queryset, name, value):
+        min_rating_value = self.data.get('min_rating')
+        if min_rating_value:
+            return queryset
+
+        if value == 'null':
+            return queryset.filter(rating__isnull=True)
+
+        try:
+            max_rating = float(value)
+            if not (1.0 <= max_rating <= 5.0):
+                raise ValidationError("max_rating must be between 1.0 and 5.0.")
+            return queryset.filter(rating__lte=max_rating)
+        except ValueError:
+            raise ValidationError("max_rating must be a number or 'null'.")
+
+    class Meta:
+        model = Comment
+        fields = ['min_rating', 'max_rating']
+
+class CommentViewSet(viewsets.ModelViewSet):
+    serializer_class = CommentSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = CommentFilter
+
+    def get_permissions(self):
+        if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+    def get_queryset(self):
+        queryset = Comment.objects.all() if self.request.method in ['GET', 'HEAD', 'OPTIONS'] else Comment.objects.filter(
+            user=self.request.user)
+        return queryset.order_by('-updated_time')
+
+    def get_serializer_context(self):
+        return {"request": self.request}
+
+    def _handle_filtered_request(self, request, queryset, index, label="comment"):
+        queryset = queryset.order_by('-id')
+
+        if not queryset.exists():
+            raise Http404(f"No {label}s found.")
 
         if not index and request.method != 'GET':
             raise MethodNotAllowed(request.method, detail="Only GET is allowed in list mode.")
@@ -25,68 +101,61 @@ class CommentViewSet(viewsets.ModelViewSet):
         if index:
             try:
                 index = int(index)
-                if index < 1 or index > comments.count():
+                if index < 1 or index > queryset.count():
                     raise Http404("Invalid index.")
-                comment = comments[index - 1]
+                obj = queryset[index - 1]
             except ValueError:
                 raise Http404("Index must be a number.")
         else:
-            comment = None
+            obj = None
 
         if request.method == 'GET':
-            serializer = self.get_serializer(comment if index else comments, many=not index)
+            serializer = self.get_serializer(obj if index else queryset, many=not index)
             return Response(serializer.data)
 
         elif request.method in ['PUT', 'PATCH']:
-            serializer = self.get_serializer(comment, data=request.data, partial=(request.method == 'PATCH'))
+            serializer = self.get_serializer(obj, data=request.data, partial=(request.method == 'PATCH'))
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data)
 
         elif request.method == 'DELETE':
-            comment.delete()
+            obj.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=False, url_path='product/(?P<product_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
-    def by_product(self, request, product_id=None, index=None):
-        comments = Comment.objects.filter(product_id=product_id)
-        return self._handle_filtered_request(request, comments, index)
-
-    @action(detail=False, url_path='user/(?P<user_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
-    def by_user(self, request, user_id=None, index=None):
-        comments = Comment.objects.filter(user_id=user_id)
-        return self._handle_filtered_request(request, comments, index)
-
-    @action(detail=False, url_path='rating/(?P<rating>([0-9]+|null))(?:/(?P<index>\d+))?',
+    @action(detail=False, url_path=r'product/(?P<product_id>\d+)(?:/(?P<index>\d+))?',
             methods=['get', 'put', 'patch', 'delete'])
-    def by_rating(self, request, rating=None, index=None):
-        if rating == 'null':
-            comments = Comment.objects.filter(rating__isnull=True)
-        else:
-            try:
-                rating_value = int(rating)
-                if rating_value < 1 or rating_value > 5:
-                    return Response(
-                        {"detail": "Rating must be between 1 and 5 or 'null'."},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-                comments = Comment.objects.filter(rating=rating_value)
-            except ValueError:
-                return Response(
-                    {"detail": "Rating must be a number between 1 and 5 or 'null'."},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+    def by_product(self, request, product_id=None, index=None):
+        base_queryset = self.get_queryset().filter(product_id=product_id)
 
-        return self._handle_filtered_request(request, comments, index)
+        filterset = self.filterset_class(data=request.query_params, queryset=base_queryset, request=request)
+        if not filterset.is_valid():
+            raise ValidationError(filterset.errors)
+        filtered_queryset = filterset.qs
+
+        return self._handle_filtered_request(request, filtered_queryset, index, label="product comment")
 
 class CommentReplyViewSet(viewsets.ModelViewSet):
-    queryset = CommentReply.objects.all()
     serializer_class = CommentReplySerializer
 
-    def _handle_filtered_request(self, request, replies, index):
-        replies = replies.order_by('-id')
-        if not replies.exists():
-            raise Http404("No replies found.")
+    def get_permissions(self):
+        if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+    def get_queryset(self):
+        queryset = CommentReply.objects.all() if self.request.method in ['GET', 'HEAD', 'OPTIONS'] else CommentReply.objects.filter(
+            user=self.request.user)
+        return queryset.order_by('-updated_time')
+
+    def get_serializer_context(self):
+        return {"request": self.request}
+
+    def _handle_filtered_request(self, request, queryset, index, label="reply"):
+        queryset = queryset.order_by('-id')
+
+        if not queryset.exists():
+            raise Http404(f"No {label}s found.")
 
         if not index and request.method != 'GET':
             raise MethodNotAllowed(request.method, detail="Only GET is allowed in list mode.")
@@ -94,50 +163,56 @@ class CommentReplyViewSet(viewsets.ModelViewSet):
         if index:
             try:
                 index = int(index)
-                if index < 1 or index > replies.count():
+                if index < 1 or index > queryset.count():
                     raise Http404("Invalid index.")
-                reply = replies[index - 1]
+                obj = queryset[index - 1]
             except ValueError:
                 raise Http404("Index must be a number.")
         else:
-            reply = None
+            obj = None
 
         if request.method == 'GET':
-            if index:
-                serializer = self.get_serializer(reply)
-                return Response(serializer.data)
-            else:
-                serializer = self.get_serializer(replies, many=True)
-                return Response(serializer.data)
+            serializer = self.get_serializer(obj if index else queryset, many=not index)
+            return Response(serializer.data)
 
         elif request.method in ['PUT', 'PATCH']:
-            serializer = self.get_serializer(reply, data=request.data, partial=(request.method == 'PATCH'))
+            serializer = self.get_serializer(obj, data=request.data, partial=(request.method == 'PATCH'))
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data)
 
         elif request.method == 'DELETE':
-            reply.delete()
+            obj.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=False, url_path='user/(?P<user_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
-    def by_user(self, request, user_id=None, index=None):
-        replies = CommentReply.objects.filter(user_id=user_id)
-        return self._handle_filtered_request(request, replies, index)
-
-    @action(detail=False, url_path='comment/(?P<comment_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
+    @action(detail=False, url_path=r'comment/(?P<comment_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
     def by_comment(self, request, comment_id=None, index=None):
-        replies = CommentReply.objects.filter(comment_id=comment_id)
-        return self._handle_filtered_request(request, replies, index)
+        queryset = self.get_queryset().filter(comment_id=comment_id)
+        return self._handle_filtered_request(request, queryset, index, label="comment reply")
 
 class ProductQuestionViewSet(viewsets.ModelViewSet):
-    queryset = ProductQuestion.objects.all()
     serializer_class = ProductQuestionSerializer
 
-    def _handle_filtered_request(self, request, questions, index):
-        questions = questions.order_by('-id')
-        if not questions.exists():
-            raise Http404("No questions found.")
+    def get_permissions(self):
+        if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = ProductQuestion.objects.all() if self.request.method in ['GET', 'HEAD', 'OPTIONS'] else ProductQuestion.objects.filter(
+            Q(user=user) | Q(product__storekeeper__user=user)
+        )
+        return queryset.order_by('-updated_time')
+
+    def get_serializer_context(self):
+        return {"request": self.request}
+
+    def _handle_filtered_request(self, request, queryset, index, label="product question"):
+        queryset = queryset.order_by('-id')
+
+        if not queryset.exists():
+            raise Http404(f"No {label}s found.")
 
         if not index and request.method != 'GET':
             raise MethodNotAllowed(request.method, detail="Only GET is allowed in list mode.")
@@ -145,71 +220,60 @@ class ProductQuestionViewSet(viewsets.ModelViewSet):
         if index:
             try:
                 index = int(index)
-                if index < 1 or index > questions.count():
+                if index < 1 or index > queryset.count():
                     raise Http404("Invalid index.")
-                question = questions[index - 1]
+                obj = queryset[index - 1]
             except ValueError:
                 raise Http404("Index must be a number.")
         else:
-            question = None
+            obj = None
 
         if request.method == 'GET':
-            if index:
-                serializer = self.get_serializer(question)
-                return Response(serializer.data)
-            else:
-                serializer = self.get_serializer(questions, many=True)
-                return Response(serializer.data)
+            serializer = self.get_serializer(obj if index else queryset, many=not index)
+            return Response(serializer.data)
 
         elif request.method in ['PUT', 'PATCH']:
-            serializer = self.get_serializer(question, data=request.data, partial=(request.method == 'PATCH'))
+            serializer = self.get_serializer(obj, data=request.data, partial=(request.method == 'PATCH'))
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data)
 
         elif request.method == 'DELETE':
-            question.delete()
+            obj.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=False, url_path='user/(?P<user_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
-    def by_user(self, request, user_id=None, index=None):
-        questions = ProductQuestion.objects.filter(user_id=user_id)
-        return self._handle_filtered_request(request, questions, index)
-
-    @action(detail=False, url_path='storekeeper/(?P<storekeeper_id>([0-9]+|null))(?:/(?P<index>\d+))?',
-            methods=['get', 'put', 'patch', 'delete'])
-    def by_storekeeper(self, request, storekeeper_id=None, index=None):
-        if storekeeper_id == 'null':
-            questions = ProductQuestion.objects.filter(storekeeper__isnull=True)
-        else:
-            try:
-                storekeeper_id = int(storekeeper_id)
-                questions = ProductQuestion.objects.filter(storekeeper_id=storekeeper_id)
-            except ValueError:
-                return Response(
-                    {"detail": "Storekeeper must be a number or 'null'."},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-        return self._handle_filtered_request(request, questions, index)
-
-    @action(detail=False, url_path='product/(?P<product_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
+    @action(detail=False, url_path=r'product/(?P<product_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
     def by_product(self, request, product_id=None, index=None):
-        questions = ProductQuestion.objects.filter(product_id=product_id)
-        return self._handle_filtered_request(request, questions, index)
+        queryset = self.get_queryset().filter(product_id=product_id)
+        return self._handle_filtered_request(request, queryset, index, label="product question")
 
-class ProductPurchaseViewSet(mixins.RetrieveModelMixin,
-                  mixins.ListModelMixin,
-                  mixins.DestroyModelMixin,
-                  mixins.CreateModelMixin,
-                  viewsets.GenericViewSet):
-    queryset = ProductPurchase.objects.all()
+class ProductPurchaseViewSet(
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.CreateModelMixin,
+    viewsets.GenericViewSet
+):
     serializer_class = ProductPurchaseSerializer
+    permission_classes = [IsAuthenticated]
 
-    def _handle_filtered_request(self, request, purchases, index):
-        purchases = purchases.order_by('-id')
-        if not purchases.exists():
-            raise Http404("No purchases found.")
+    def get_queryset(self):
+        user = self.request.user
+        if not user.is_authenticated:
+            return ProductPurchase.objects.none()
+
+        return ProductPurchase.objects.filter(
+            Q(buyer=user) | Q(storekeeper__user=user)
+        ).order_by('-id')
+
+    def get_serializer_context(self):
+        return {"request": self.request}
+
+    def _handle_filtered_request(self, request, queryset, index, label="purchase"):
+        queryset = queryset.order_by('-id')
+
+        if not queryset.exists():
+            raise Http404(f"No {label}s found.")
 
         if not index and request.method != 'GET':
             raise MethodNotAllowed(request.method, detail="Only GET is allowed in list mode.")
@@ -217,52 +281,90 @@ class ProductPurchaseViewSet(mixins.RetrieveModelMixin,
         if index:
             try:
                 index = int(index)
-                if index < 1 or index > purchases.count():
+                if index < 1 or index > queryset.count():
                     raise Http404("Invalid index.")
-                purchase = purchases[index - 1]
+                obj = queryset[index - 1]
             except ValueError:
                 raise Http404("Index must be a number.")
         else:
-            purchase = None
+            obj = None
 
         if request.method == 'GET':
-            if index:
-                serializer = self.get_serializer(purchase)
-                return Response(serializer.data)
-            else:
-                serializer = self.get_serializer(purchases, many=True)
-                return Response(serializer.data)
+            serializer = self.get_serializer(obj if index else queryset, many=not index)
+            return Response(serializer.data)
+
+        elif request.method in ['PUT', 'PATCH']:
+            serializer = self.get_serializer(obj, data=request.data, partial=(request.method == 'PATCH'))
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
 
         elif request.method == 'DELETE':
-            purchase.delete()
+            obj.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=False, url_path='buyer/(?P<buyer_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
-    def by_buyer(self, request, buyer_id=None, index=None):
-        purchases = ProductPurchase.objects.filter(buyer_id=buyer_id)
-        return self._handle_filtered_request(request, purchases, index)
-
-    @action(detail=False, url_path='storekeeper/(?P<storekeeper_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
-    def by_storekeeper(self, request, storekeeper_id=None, index=None):
-        purchases = ProductPurchase.objects.filter(storekeeper_id=storekeeper_id)
-        return self._handle_filtered_request(request, purchases, index)
-
-    @action(detail=False, url_path='product/(?P<product_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
+    @action(detail=False, url_path=r'product/(?P<product_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
     def by_product(self, request, product_id=None, index=None):
-        purchases = ProductPurchase.objects.filter(product_id=product_id)
-        return self._handle_filtered_request(request, purchases, index)
+        queryset = self.get_queryset().filter(product_id=product_id)
+        return self._handle_filtered_request(request, queryset, index, label="product purchase")
 
-    @action(detail=False, url_path='payment/(?P<payment_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
+    @action(detail=False, url_path=r'payment/(?P<payment_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
     def by_payment(self, request, payment_id=None, index=None):
-        purchases = ProductPurchase.objects.filter(payment_id=payment_id)
-        return self._handle_filtered_request(request, purchases, index)
+        queryset = self.get_queryset().filter(payment_id=payment_id)
+        return self._handle_filtered_request(request, queryset, index, label="payment purchase")
+
+    @action(detail=False, url_path=r'chat-enabled/(?P<enabled>true|false)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
+    def by_chat_enabled(self, request, enabled=None, index=None):
+        value = enabled.lower() == 'true'
+        queryset = self.get_queryset().filter(chat_enabled=value)
+        return self._handle_filtered_request(request, queryset, index, label="chat-enabled purchase")
+
+    @action(detail=False, url_path=r'storekeeper-delivery/(?P<sent>true|false)(?:/(?P<index>\d+))?',
+            methods=['get', 'put', 'patch', 'delete'])
+    def by_storekeeper_delivery(self, request, sent=None, index=None):
+        value = sent.lower() == 'true'
+        delivery_qs = ProductDeliveryStatus.objects.filter(payment=OuterRef('payment'))
+        queryset = self.get_queryset().annotate(
+            has_delivery=Exists(delivery_qs),
+            is_sent=Subquery(delivery_qs.values('is_sent')[:1])
+        )
+        if value:
+            queryset = queryset.filter(is_sent=True)
+        else:
+            queryset = queryset.filter(Q(has_delivery=False) | Q(is_sent=False))
+        return self._handle_filtered_request(request, queryset, index, label="storekeeper delivery")
+
+    @action(detail=False, url_path=r'buyer-delivery/(?P<delivered>true|false)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
+    def by_buyer_delivery(self, request, delivered=None, index=None):
+        value = delivered.lower() == 'true'
+        queryset = self.get_queryset().filter(payment__is_delivered=value)
+        return self._handle_filtered_request(request, queryset, index, label="buyer delivery")
 
 class PurchaseChatViewSet(viewsets.ModelViewSet):
-    queryset = PurchaseChat.objects.all()
     serializer_class = PurchaseChatSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        user_purchases = ProductPurchase.objects.filter(
+            Q(buyer=user) | Q(product__storekeeper__user=user)
+        ).values_list("id", flat=True)
+
+        return PurchaseChat.objects.filter(purchase_id__in=user_purchases).order_by('-edited_at')
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        user = request.user
+
+        if user != instance.sender:
+            raise PermissionDenied("You can only delete your own messages.")
+
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     def _handle_filtered_request(self, request, chats, index):
         chats = chats.order_by('-id')
+
         if not chats.exists():
             raise Http404("No chats found.")
 
@@ -281,12 +383,8 @@ class PurchaseChatViewSet(viewsets.ModelViewSet):
             chat = None
 
         if request.method == 'GET':
-            if index:
-                serializer = self.get_serializer(chat)
-                return Response(serializer.data)
-            else:
-                serializer = self.get_serializer(chats, many=True)
-                return Response(serializer.data)
+            serializer = self.get_serializer(chat if index else chats, many=not index)
+            return Response(serializer.data)
 
         elif request.method in ['PUT', 'PATCH']:
             serializer = self.get_serializer(chat, data=request.data, partial=(request.method == 'PATCH'))
@@ -300,12 +398,18 @@ class PurchaseChatViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, url_path='purchase/(?P<purchase_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
     def by_purchase(self, request, purchase_id=None, index=None):
-        chats = PurchaseChat.objects.filter(purchase_id=purchase_id)
+        chats = self.get_queryset().filter(purchase_id=purchase_id)
         return self._handle_filtered_request(request, chats, index)
 
-    @action(detail=False, url_path='sender/(?P<sender_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
-    def by_sender(self, request, sender_id=None, index=None):
-        chats = PurchaseChat.objects.filter(sender_id=sender_id)
+    @action(detail=False, url_path='sender/(?P<username>[^/]+)(?:/(?P<index>\d+))?',
+            methods=['get', 'put', 'patch', 'delete'])
+    def by_sender(self, request, username=None, index=None):
+        try:
+            sender = User.objects.get(username=username)
+        except User.DoesNotExist:
+            raise Http404("User with this username does not exist.")
+
+        chats = self.get_queryset().filter(sender=sender)
         return self._handle_filtered_request(request, chats, index)
 
 class StoreNotificationSubscriptionViewSet(
@@ -315,63 +419,30 @@ class StoreNotificationSubscriptionViewSet(
     mixins.CreateModelMixin,
     viewsets.GenericViewSet
 ):
-    queryset = StoreNotificationSubscription.objects.all()
     serializer_class = StoreNotificationSubscriptionSerializer
+    permission_classes = [IsAuthenticated]
 
-    def _handle_filtered_request(self, request, subscriptions, index):
-        subscriptions = subscriptions.order_by('-id')
-        if not subscriptions.exists():
-            raise Http404("No subscriptions found.")
-
-        if not index and request.method != 'GET':
-            raise MethodNotAllowed(request.method, detail="Only GET is allowed in list mode.")
-
-        if index:
-            try:
-                index = int(index)
-                if index < 1 or index > subscriptions.count():
-                    raise Http404("Invalid index.")
-                subscription = subscriptions[index - 1]
-            except ValueError:
-                raise Http404("Index must be a number.")
-        else:
-            subscription = None
-
-        if request.method == 'GET':
-            if index:
-                serializer = self.get_serializer(subscription)
-                return Response(serializer.data)
-            else:
-                serializer = self.get_serializer(subscriptions, many=True)
-                return Response(serializer.data)
-
-        elif request.method == 'DELETE':
-            subscription.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @action(detail=False, url_path='user/(?P<user_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'delete'])
-    def by_user(self, request, user_id=None, index=None):
-        subscriptions = StoreNotificationSubscription.objects.filter(user_id=user_id)
-        return self._handle_filtered_request(request, subscriptions, index)
-
-    @action(detail=False, url_path='storekeeper/(?P<storekeeper_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'delete'])
-    def by_storekeeper(self, request, storekeeper_id=None, index=None):
-        subscriptions = StoreNotificationSubscription.objects.filter(storekeeper_id=storekeeper_id)
-        return self._handle_filtered_request(request, subscriptions, index)
+    def get_queryset(self):
+        return StoreNotificationSubscription.objects.filter(user=self.request.user).order_by('-id')
 
 class NotificationViewSet(
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
     mixins.DestroyModelMixin,
+    mixins.UpdateModelMixin,
     viewsets.GenericViewSet
 ):
-    queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
+    permission_classes = [IsAuthenticated]
 
-    def _handle_filtered_request(self, request, notifications, index):
-        notifications = notifications.order_by('-id')
-        if not notifications.exists():
-            raise Http404("No notifications found.")
+    def get_queryset(self):
+        return Notification.objects.filter(user=self.request.user).order_by('-id')
+
+    def _handle_filtered_request(self, request, queryset, index, label="notification"):
+        queryset = queryset.order_by('-id')
+
+        if not queryset.exists():
+            raise Http404(f"No {label}s found.")
 
         if not index and request.method != 'GET':
             raise MethodNotAllowed(request.method, detail="Only GET is allowed in list mode.")
@@ -379,48 +450,49 @@ class NotificationViewSet(
         if index:
             try:
                 index = int(index)
-                if index < 1 or index > notifications.count():
+                if index < 1 or index > queryset.count():
                     raise Http404("Invalid index.")
-                notification = notifications[index - 1]
+                obj = queryset[index - 1]
             except ValueError:
                 raise Http404("Index must be a number.")
         else:
-            notification = None
+            obj = None
 
         if request.method == 'GET':
-            if index:
-                serializer = self.get_serializer(notification)
-                return Response(serializer.data)
-            else:
-                serializer = self.get_serializer(notifications, many=True)
-                return Response(serializer.data)
+            serializer = self.get_serializer(obj if index else queryset, many=not index)
+            return Response(serializer.data)
+
+        elif request.method in ['PUT', 'PATCH']:
+            serializer = self.get_serializer(obj, data=request.data, partial=(request.method == 'PATCH'))
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
 
         elif request.method == 'DELETE':
-            notification.delete()
+            obj.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=False, url_path='user/(?P<user_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'delete'])
-    def by_user(self, request, user_id=None, index=None):
-        notifications = Notification.objects.filter(user_id=user_id)
-        return self._handle_filtered_request(request, notifications, index)
-
-    @action(detail=False, url_path='storekeeper-id/(?P<storekeeper_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'delete'])
-    def by_storekeeper(self, request, storekeeper_id=None, index=None):
-        notifications = Notification.objects.filter(storekeeper_id=storekeeper_id)
-        return self._handle_filtered_request(request, notifications, index)
-
-    @action(detail=False, url_path='product-id/(?P<product_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'delete'])
+    @action(detail=False, url_path=r'product/(?P<product_id>\d+)(?:/(?P<index>\d+))?',
+            methods=['get', 'put', 'patch', 'delete'])
     def by_product(self, request, product_id=None, index=None):
-        notifications = Notification.objects.filter(product_id=product_id)
-        return self._handle_filtered_request(request, notifications, index)
+        queryset = self.get_queryset().filter(product_id=product_id)
+        return self._handle_filtered_request(request, queryset, index, label="product notification")
 
-    @action(detail=False, url_path='notification/(?P<notification_id>[^/]+)(?:/(?P<index>\d+))?', methods=['get', 'delete'])
+    @action(detail=False, url_path=r'storekeeper/(?P<storekeeper_id>\d+)(?:/(?P<index>\d+))?',
+            methods=['get', 'put', 'patch', 'delete'])
+    def by_storekeeper(self, request, storekeeper_id=None, index=None):
+        queryset = self.get_queryset().filter(storekeeper_id=storekeeper_id)
+        return self._handle_filtered_request(request, queryset, index, label="storekeeper notification")
+
+    @action(detail=False, url_path=r'is-read/(?P<is_read>true|false)(?:/(?P<index>\d+))?',
+            methods=['get', 'put', 'patch', 'delete'])
+    def by_is_read(self, request, is_read=None, index=None):
+        value = is_read.lower() == 'true'
+        queryset = self.get_queryset().filter(is_read=value)
+        return self._handle_filtered_request(request, queryset, index, label="read-status notification")
+
+    @action(detail=False, url_path=r'notification/(?P<notification_id>\d+)(?:/(?P<index>\d+))?',
+            methods=['get', 'put', 'patch', 'delete'])
     def by_notification(self, request, notification_id=None, index=None):
-        if notification_id == 'null':
-            notifications = Notification.objects.filter(notification__isnull=True)
-        else:
-            try:
-                notifications = Notification.objects.filter(notification_id=int(notification_id))
-            except ValueError:
-                raise Http404("Invalid notification ID.")
-        return self._handle_filtered_request(request, notifications, index)
+        queryset = self.get_queryset().filter(id=notification_id)
+        return self._handle_filtered_request(request, queryset, index, label="notification")

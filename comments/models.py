@@ -84,7 +84,12 @@ class ProductPurchase(models.Model):
     chat_enabled = models.BooleanField(default=True, help_text="Is chat between buyer and seller enabled?")
 
     class Meta:
-        unique_together = ('buyer', 'product', 'storekeeper')
+        constraints = [
+            models.UniqueConstraint(
+                fields=['buyer', 'product', 'storekeeper', 'payment'],
+                name='unique_purchase_per_payment'
+            )
+        ]
         verbose_name = "Product_Purchase"
         verbose_name_plural = "Product_Purchases"
         db_table = "Product_Purchases"
@@ -125,12 +130,9 @@ class Notification(models.Model):
     notification = models.ForeignKey(StoreNotificationSubscription, on_delete=models.SET_NULL,
         blank=True, null=True, related_name='notifications')
     message = models.TextField()
-
-    storekeeper = models.ForeignKey(
-        StoreKeeper, on_delete=models.CASCADE, related_name='notifications')
-
-    product = models.ForeignKey(
-        Product, on_delete=models.CASCADE, related_name='notifications')
+    storekeeper = models.ForeignKey(StoreKeeper, on_delete=models.CASCADE, related_name='notifications')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='notifications')
+    is_read = models.BooleanField(default=False, help_text="Has the notification been read?")
 
     class Meta:
         verbose_name = "Notification"
