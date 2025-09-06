@@ -1,6 +1,5 @@
 from django.contrib.auth.models import User
 from django.http import Http404
-from django.db.models import Q
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.exceptions import MethodNotAllowed, PermissionDenied, NotFound

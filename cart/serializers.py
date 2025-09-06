@@ -24,7 +24,7 @@ class CartItemSerializer(serializers.ModelSerializer):
         return 0.0
 
     def validate(self, data):
-        product = data.get("product")
+        product = data.get("product") or getattr(self.instance, "product", None)
         quantity = data.get("quantity")
 
         if quantity is None:
@@ -32,6 +32,9 @@ class CartItemSerializer(serializers.ModelSerializer):
 
         if not (1 <= quantity <= 10):
             raise serializers.ValidationError("The product number must be between 1 and 10.")
+
+        if not product:
+            raise serializers.ValidationError("Product is missing or invalid.")
 
         if product.stock_quantity == 0:
             raise serializers.ValidationError("This product is not available and cannot be added to the cart.")

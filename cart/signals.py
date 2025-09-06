@@ -2,7 +2,6 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
 from .models import ProductPayment, Payment, Cart, Favorite
-from user.models import ProductDeliveryStatus
 
 @receiver(post_save, sender=ProductPayment)
 def delete_cart_item_when_payment_successful(sender, instance, created, **kwargs):
