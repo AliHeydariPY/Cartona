@@ -396,7 +396,7 @@ class PurchaseChatViewSet(viewsets.ModelViewSet):
             chat.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=False, url_path='purchase/(?P<purchase_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
+    @action(detail=False, url_path=r'purchase/(?P<purchase_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
     def by_purchase(self, request, purchase_id=None, index=None):
         chats = self.get_queryset().filter(purchase_id=purchase_id)
         return self._handle_filtered_request(request, chats, index)
