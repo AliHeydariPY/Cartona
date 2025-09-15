@@ -19,8 +19,8 @@ from django.urls import path, include, re_path
 from django.conf import settings
 from django.views.static import serve
 from django.conf.urls.static import static
-from rest_framework_simplejwt.views import (
-TokenObtainPairView, TokenRefreshView, TokenBlacklistView )
+from inner.views import (CustomTokenObtainPairView,
+    RefreshAccessTokenView, LogoutView)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -28,9 +28,9 @@ urlpatterns = [
     path('',include('user.urls')),
     path('',include('comments.urls')),
     path('',include('cart.urls')),
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/token/logout/', TokenBlacklistView.as_view(), name='token_blacklist'),
+    path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', RefreshAccessTokenView.as_view(), name='token_refresh_access'),
+    path('api/logout/', LogoutView.as_view(), name='logout'),
     re_path(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
     re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT})
 ]

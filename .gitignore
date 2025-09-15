@@ -27,3 +27,7 @@ node_modules/
 .idea/
 *.sublime-project
 *.sublime-workspace
+
+# openssl
+localhost.crt
+localhost.key

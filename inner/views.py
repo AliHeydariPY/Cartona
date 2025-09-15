@@ -4,11 +4,14 @@ from django.http import Http404
 from django.db.models import Avg, Count, Case, When, F, Q
 from django.core.exceptions import ValidationError
 from rest_framework import viewsets, status
+from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.filters import SearchFilter
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from .models import Product, Images, Types, Features, FrequentlyAskedQuestions, Category
 from .serializers import (
     ProductSerializer,
@@ -465,3 +468,67 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
 
         serializer = self.get_serializer(categories, many=True)
         return Response(serializer.data)
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        refresh_token = response.data.get('refresh')
+
+        response.data.pop('refresh', None)
+
+        response.set_cookie(
+            key='refresh_token',
+            value=refresh_token,
+            httponly=True,
+            secure=True,
+            samesite='None',
+            max_age=10 * 24 * 60 * 60
+        )
+
+        return response
+
+class RefreshAccessTokenView(APIView):
+    def post(self, request):
+        refresh_token = request.COOKIES.get('refresh_token')
+        if not refresh_token:
+            return Response({'detail': 'Refresh token not found.'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        try:
+            refresh = RefreshToken(refresh_token)
+            new_access = str(refresh.access_token)
+            new_refresh = str(refresh)
+
+            response = Response({'access': new_access})
+
+            response.set_cookie(
+                key='refresh_token',
+                value=new_refresh,
+                httponly=True,
+                secure=True,
+                samesite='None',
+                max_age=10 * 24 * 60 * 60
+            )
+
+            return response
+
+        except TokenError:
+            return Response({'detail': 'Invalid or expired refresh token.'}, status=status.HTTP_401_UNAUTHORIZED)
+
+class LogoutView(APIView):
+    def post(self, request):
+        refresh_token = request.COOKIES.get('refresh_token')
+        if not refresh_token:
+            return Response({'detail': 'Refresh token not found.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+
+            response = Response({'detail': 'Logout successful.'}, status=status.HTTP_200_OK)
+
+            response.delete_cookie('refresh_token')
+
+            return response
+
+        except TokenError:
+            return Response({'detail': 'Invalid or expired refresh token.'}, status=status.HTTP_400_BAD_REQUEST)

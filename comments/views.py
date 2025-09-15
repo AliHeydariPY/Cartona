@@ -401,7 +401,7 @@ class PurchaseChatViewSet(viewsets.ModelViewSet):
         chats = self.get_queryset().filter(purchase_id=purchase_id)
         return self._handle_filtered_request(request, chats, index)
 
-    @action(detail=False, url_path='sender/(?P<username>[^/]+)(?:/(?P<index>\d+))?',
+    @action(detail=False, url_path=r'sender/(?P<username>[^/]+)(?:/(?P<index>\d+))?',
             methods=['get', 'put', 'patch', 'delete'])
     def by_sender(self, request, username=None, index=None):
         try:
