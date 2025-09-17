@@ -39,8 +39,9 @@ const Cart = ({
       const cartProductsRes = await getCartProducts(
         localStorage.getItem("userID")
       );
+      console.log(cartProductsRes)
       const productsData = await Promise.all(
-        cartProductsRes.data.items.map(async (item) => {
+        cartProductsRes.data.map(async (item) => {
           const productRes = await getProduct(item.product);
           const productData = productRes.data;
           console.log(productRes.data);

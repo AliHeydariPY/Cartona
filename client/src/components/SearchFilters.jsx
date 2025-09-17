@@ -7,6 +7,7 @@ import CategoryFilter from "./filters/CategoryFilter";
 
 import { BiCategory } from "react-icons/bi";
 import { MdStorefront } from "react-icons/md";
+
 import {
   FiFilter,
   FiX,
@@ -112,7 +113,6 @@ const SearchFilters = () => {
 
   return (
     <div className="mb-6 xl:col-span-2 2xl:col-span-1">
-      {/* دکمه باز کردن فیلترها در موبایل */}
       <div className="flex w-full justify-between items-center mb-4 xl:hidden">
         <button
           onClick={() => setIsOpen(!isOpen)}
@@ -167,7 +167,6 @@ const SearchFilters = () => {
                     transition={{ duration: 0.3 }}
                     className="w-full bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg hover:shadow-xl border border-blue-200/50 hover:border-blue-300 transition-all duration-300 p-4"
                   >
-                    {/* هدر فیلترها */}
                     <div
                       className={`flex justify-between items-center ${
                         initialFilters.storekeeper ? "mb-4" : "mb-7"
@@ -290,7 +289,6 @@ const SearchFilters = () => {
                     )}
 
                     <div className="space-y-7">
-                      {/* price */}
                       <div className="border-b border-blue-400 pb-4">
                         <div
                           onClick={() =>
@@ -392,7 +390,6 @@ const SearchFilters = () => {
                         )}
                       </div>
 
-                      {/* categories */}
                       <div className="border-b border-blue-400 pb-4">
                         <div
                           onClick={() =>
@@ -431,7 +428,6 @@ const SearchFilters = () => {
                         )}
                       </div>
 
-                      {/* Rating */}
                       <div className="border-b border-blue-400 pb-4">
                         <div
                           onClick={() =>
@@ -457,7 +453,6 @@ const SearchFilters = () => {
                         </div>
                         {open == "Rating" && (
                           <div className="space-y-4">
-                            {/* Maximum Rating */}
                             <div>
                               <label className="block text-sm text-blue-700 mb-2">
                                 Maximum Rating
@@ -495,7 +490,6 @@ const SearchFilters = () => {
                               </div>
                             </div>
 
-                            {/* Minimum Rating */}
                             <div>
                               <label className="block text-sm text-blue-700 mb-2">
                                 Minimum Rating
@@ -533,7 +527,6 @@ const SearchFilters = () => {
                               </div>
                             </div>
 
-                            {/* Reset Rating Button */}
                             {(values.min_rating || values.max_rating) && (
                               <button
                                 type="button"
@@ -550,7 +543,6 @@ const SearchFilters = () => {
                         )}
                       </div>
 
-                      {/* reviews */}
                       <div className="border-b border-blue-400 pb-4">
                         <div
                           onClick={() =>

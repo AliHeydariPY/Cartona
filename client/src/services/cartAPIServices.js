@@ -1,31 +1,31 @@
 import axios from "axios";
-
-const SERVER_URL = "http://127.0.0.1:8000";
+import api from "../api/api";
+const SERVER_URL = "https://127.0.0.1:8000";
 
 export const getCartProducts = (userID) => {
-  const url = `${SERVER_URL}/cart-api/cart/user/${userID}/`;
-  // const url = `${SERVER_URL}/cart-api/cart/4/`;
-  return axios.get(url);
+  const url = `/cart-api/cart-items/`;
+  // const url = `api/cart-api/cart/4/`;
+  return api.get(url);
 };
 
 export const addToCart = (data) => {
-  const url = `${SERVER_URL}/cart-api/cart-items/`;
-  return axios.post(url, data);
+  const url = `/cart-api/cart-items/`;
+  return api.post(url, data);
 };
 
 export const editCartProduct = (payload) => {
-  const url = `${SERVER_URL}/cart-api/cart-items/${payload.id}/`;
-  return axios.put(url, payload);
+  const url = `/cart-api/cart-items/${payload.id}/`;
+  return api.put(url, payload);
 };
 
 export const deleteCartProduct = (productID) => {
-  const url = `${SERVER_URL}/cart-api/cart-items/${productID}/`;
-  return axios.delete(url);
+  const url = `/cart-api/cart-items/${productID}/`;
+  return api.delete(url);
 };
 
 export const totalCartPayment = (cartID) => {
-  const url = `${SERVER_URL}/cart-api/payments/`;
-  return axios.post(url, {
+  const url = `/cart-api/payments/`;
+  return api.post(url, {
     address: "ugd",
     is_successful: true,
     cart: cartID,
@@ -33,6 +33,6 @@ export const totalCartPayment = (cartID) => {
 };
 
 export const getPayments = (path) => {
-  const url = `${SERVER_URL}/cart-api/product-payments/${path}`;
-  return axios.get(url);
+  const url = `/cart-api/product-payments/${path}`;
+  return api.get(url);
 };

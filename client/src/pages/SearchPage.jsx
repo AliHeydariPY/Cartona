@@ -15,20 +15,21 @@ import SearchFilters from "../components/SearchFilters";
 export default function SearchPage() {
   const { query } = useParams();
   const [products, setProducts] = useState([]);
+
   const [showImages, setShowImages] = useState(false);
-  const [images, setImages] = useState([]);
+  const [mainImage, setMainImages] = useState([]);
+  const [productID, setProductID] = useState(null);
 
   useEffect(() => {
-    if(query) {
+    if (query) {
       searchProduct(`${query}`).then((res) => {
         setProducts(res.data);
       });
-      
     } else {
-      getListProducts().then(res => {
-        console.log(res.data) 
+      getListProducts().then((res) => {
+        console.log(res.data);
         setProducts(res.data);
-      })
+      });
     }
   }, [query]);
 
@@ -98,10 +99,8 @@ export default function SearchPage() {
 
                   <button
                     onClick={() => {
-                      setImages([
-                        { image: product.image },
-                        ...product.images_set,
-                      ]);
+                      setProductID(product.id);
+                      setMainImages({ image: product.image });
                       setShowImages(true);
                     }}
                     className="p-2 cursor-pointer bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-blue-100 transition-colors duration-200"
@@ -204,7 +203,8 @@ export default function SearchPage() {
         </div>
         {showImages && (
           <ProductImageCarousel
-            images={images}
+            productID={productID}
+            mainImage={mainImage}
             onClose={() => setShowImages(false)}
           />
         )}

@@ -26,7 +26,8 @@ const Navbar = () => {
   useEffect(() => {
     const fetchCartItems = async () => {
       const cartProductsRes = await getCartProducts(userID);
-      setCartItems(cartProductsRes.data.items);
+      console.log(cartProductsRes.data)
+      setCartItems(cartProductsRes.data);
 
       const notifRes = await getNotifications(userID);
       setNotifications(notifRes.data);

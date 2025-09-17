@@ -13,7 +13,7 @@ const ProductSeller = ({ seller }) => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
   useEffect(() => {
-    getSubscriptions(localStorage.getItem("userID"))
+    getSubscriptions()
       .then((res) => {
         const hasSubscription = res.data.find((subscription) => {
           return subscription.storekeeper == seller.id;
@@ -32,7 +32,7 @@ const ProductSeller = ({ seller }) => {
 
   const toggleNotifications = () => {
     if (notificationsEnabled) {
-      getSubscriptions(localStorage.getItem("userID")).then((res) => {
+      getSubscriptions().then((res) => {
         const selectedSubscription = res.data.find((subscription) => {
           return subscription.storekeeper == seller.id;
         });
@@ -42,10 +42,8 @@ const ProductSeller = ({ seller }) => {
       });
     } else {
       enableNotifications({
-        user: localStorage.getItem("userID"),
         storekeeper: seller.id,
-      }).then((res) => {
-        console.log(res);
+      }).then(() => {
         setNotificationsEnabled(true);
       });
     }

@@ -1,9 +1,10 @@
 import axios from "axios";
-const SERVER_URL = "http://127.0.0.1:8000";
+const SERVER_URL = "https://127.0.0.1:8000";
+import api from "../api/api";
 
 export const addNewProduct = (formData) => {
-  const url = `${SERVER_URL}/product-api/products/`;
-  return axios.post(url, formData, {
+  const url = `/product-api/products/`;
+  return api.post(url, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
@@ -11,14 +12,14 @@ export const addNewProduct = (formData) => {
 };
 
 export const deleteProduct = (productID) => {
-  const url = `${SERVER_URL}/product-api/products/${productID}/`;
-  return axios.delete(url);
+  const url = `/product-api/products/${productID}/`;
+  return api.delete(url);
 };
 
 export const editProduct = (formData) => {
   console.log(formData.get("id"));
-  const url = `${SERVER_URL}/product-api/products/${formData.get("id")}/`;
-  return axios.patch(url, formData, {
+  const url = `/product-api/products/${formData.get("id")}/`;
+  return api.patch(url, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
@@ -26,8 +27,8 @@ export const editProduct = (formData) => {
 };
 
 export const getStorekeeperProducts = (storekeeperID) => {
-  const url = `${SERVER_URL}/product-api/products/storekeeper/${storekeeperID}/`;
-  return axios.get(url);
+  const url = `/product-api/products/storekeeper/${storekeeperID}/`;
+  return api.get(url);
 };
 
 export const getProduct = (productID) => {
@@ -36,33 +37,38 @@ export const getProduct = (productID) => {
 };
 
 export const getCategory = (categoryID) => {
-  const url = `${SERVER_URL}/product-api/categories/${categoryID}/`;
-  return axios.get(url);
+  const url = `/product-api/categories/${categoryID}/`;
+  return api.get(url);
 };
 
 export const getMainCategories = () => {
-  const url = `${SERVER_URL}/product-api/categories/parent/null/`;
-  return axios.get(url);
+  const url = `/product-api/categories/parent/null/`;
+  return api.get(url);
 };
 
 export const getSubCategories = (mainCategoriesID) => {
-  const url = `${SERVER_URL}/product-api/categories/parent/${mainCategoriesID}/`;
+  const url = `/product-api/categories/parent/${mainCategoriesID}/`;
+  return api.get(url);
+};
+
+export const getProductFeatures = (productID) => {
+  const url = `${SERVER_URL}/product-api/features/product/${productID}`;
   return axios.get(url);
 };
 
 export const addFeature = (feature) => {
-  const url = `${SERVER_URL}/product-api/features/`;
-  return axios.post(url, feature);
+  const url = `/product-api/features/`;
+  return api.post(url, feature);
 };
 
 export const deleteFeature = (featureID) => {
-  const url = `${SERVER_URL}/product-api/features/${featureID}/`;
-  return axios.delete(url);
+  const url = `/product-api/features/${featureID}/`;
+  return api.delete(url);
 };
 
 export const addImage = (image) => {
-  const url = `${SERVER_URL}/product-api/images/`;
-  return axios.post(url, image, {
+  const url = `/product-api/images/`;
+  return api.post(url, image, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
@@ -70,22 +76,27 @@ export const addImage = (image) => {
 };
 
 export const deleteImage = (imageID) => {
-  const url = `${SERVER_URL}/product-api/images/${imageID}/`;
-  return axios.delete(url);
+  const url = `/product-api/images/${imageID}/`;
+  return api.delete(url);
 };
 
 export const searchProduct = (query) => {
-  const url = `${SERVER_URL}/product-api/list-products/?${query}`;
-  return axios.get(url);
+  const url = `/product-api/products/?${query}`;
+  return api.get(url);
 };
 
 export const getListProducts = () => {
-  const url = `${SERVER_URL}/product-api/list-products/`;
-  return axios.get(url);
+  const url = `/product-api/list-products/`;
+  return api.get(url);
 };
 
 
 export const getSubCategoryItems = (categoryID) => {
-  const url = `${SERVER_URL}/product-api/list-products/?category=${categoryID}`;
-  return axios.get(url);
+  const url = `/product-api/list-products/?category=${categoryID}`;
+  return api.get(url);
+};
+
+export const getProducImages = (productID) => {
+  const url = `/product-api/images/product/${productID}`;
+  return api.get(url);
 };

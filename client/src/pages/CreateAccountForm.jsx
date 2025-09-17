@@ -4,7 +4,7 @@ import * as Yup from "yup";
 import toast from "react-hot-toast";
 import { FiCheckCircle, FiX } from "react-icons/fi";
 
-import { createUser } from "../services/userAPIServices";
+import { createUser, login } from "../services/userAPIServices";
 
 const CreateAccountForm = () => {
   const SignupSchema = Yup.object().shape({
@@ -47,6 +47,10 @@ const CreateAccountForm = () => {
                 localStorage.setItem("username", response.data.username);
                 localStorage.setItem("userID", response.data.id);
 
+                login({
+                  username: values.username,
+                  password: values.password,
+                });
                 toast.custom((t) => (
                   <div
                     className={`${

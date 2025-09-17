@@ -21,19 +21,20 @@ const ProductDisplay = ({
   const { id } = useParams();
   const [currentImage, setCurrentImage] = useState(null);
   const [isInCart, setIsInCart] = useState();
+
   const [showImages, setShowImages] = useState(false);
-  const [images, setImages] = useState([]);
+  const [mainImage, setMainImage] = useState([]);
+  const [productID, setProductID] = useState(null);
 
   useEffect(() => {
     const fetchCartItems = async () => {
-      const cartProductsRes = await getCartProducts(
-        localStorage.getItem("userID")
-      );
-
+      const cartProductsRes = await getCartProducts();
+      console.log(cartProductsRes);
       setIsInCart(() => {
-        const hasCart = cartProductsRes.data.items.find((cartProduct) => {
+        const hasCart = cartProductsRes.data.find((cartProduct) => {
           return cartProduct.product == product.id;
         });
+        console.log(hasCart);
         return hasCart;
       });
     };
@@ -47,7 +48,8 @@ const ProductDisplay = ({
       <div className="flex flex-col items-center">
         <div
           onClick={() => {
-            setImages([{ image: product.image }, ...product.images_set]);
+            setProductID(product.id)
+            setMainImage({ image: product.image });
             setShowImages(true);
           }}
           className="flex justify-center items-center cursor-pointer p-3 sm:p-4 rounded-lg sm:rounded-2xl border border-blue-300 shadow-inner mb-4 w-full h-[260px] md:min-w-[360px] md:h-[360px]"
@@ -92,7 +94,7 @@ const ProductDisplay = ({
             />
           </div> */}
 
-          {product.images_set.map((image, index) => (
+          {product.images_set?.map((image, index) => (
             <button
               key={image.id}
               onClick={() => setCurrentImage(image.image)}
@@ -303,7 +305,8 @@ const ProductDisplay = ({
       </div>
       {showImages && (
         <ProductImageCarousel
-          images={images}
+          productID={productID}
+          mainImage={mainImage}
           onClose={() => setShowImages(false)}
         />
       )}

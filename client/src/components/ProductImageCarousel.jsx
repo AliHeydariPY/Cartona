@@ -2,13 +2,25 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { Portal } from "react-portal";
 import { FiX, FiChevronLeft, FiChevronRight, FiMaximize } from "react-icons/fi";
+import { getProducImages } from "../services/productAPIServices";
 
-const ProductImageCarousel = ({ images, onClose }) => {
+const ProductImageCarousel = ({ productID, mainImage, onClose }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [show, setShow] = useState(false);
+  const [images, setImages] = useState([]);
 
   useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const productImages = await getProducImages(productID);
+
+        setImages([mainImage, ...productImages.data]);
+      } catch (error) {
+        setImages([mainImage]);
+      }
+    };
     setShow(true);
+    fetchImages();
     //   document.body.style.overflow = "hidden";
   }, []);
 
@@ -31,6 +43,8 @@ const ProductImageCarousel = ({ images, onClose }) => {
   };
 
   const stopPropagation = (e) => e.stopPropagation();
+
+  if (images.length < 1) return;
 
   return (
     <Portal>

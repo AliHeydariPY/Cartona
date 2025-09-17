@@ -22,6 +22,7 @@ import {
   getProduct,
   addImage,
   deleteImage,
+  getProducImages,
 } from "../../../services/productAPIServices";
 
 import RemoveImagePopup from "../../../components/pop-ups/RemoveImagePopup";
@@ -35,9 +36,24 @@ const ProductImages = ({ reloadComponent, setReloadComponent }) => {
   const [showRemovePopup, setShowRemovePopup] = useState(false);
 
   useEffect(() => {
-    getProduct(id).then((res) => {
-      setProduct(res.data);
-    });
+    const fetchData = async () => {
+      const productRes = await getProduct(id)
+
+      const allImages = await getProducImages(id)
+      const productImgs = allImages.data.filter(img => img.product == id)
+
+      setProduct({...productRes.data, images_set: productImgs});
+
+    }
+    fetchData()
+    // getProduct(id).then((res) => {
+    //   console.log(res.data);
+    //   getProducImages().then((res) => {
+    //     const images = res.data.filter(img => img.product == id)
+    //     console.log(images)
+    //   });
+    //   setProduct(res.data);
+    // });
   }, [reloadComponent]);
 
   const handleAddImage = (values, resetForm, setFieldValue) => {

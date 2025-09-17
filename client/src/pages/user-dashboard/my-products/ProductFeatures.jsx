@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 
 import {
   getProduct,
+  getProductFeatures,
   addFeature,
   deleteFeature,
 } from "../../../services/productAPIServices";
@@ -24,9 +25,14 @@ const ProductFeatures = ({ reloadComponent, setReloadComponent }) => {
   const [showRemovePopup, setShowRemovePopup] = useState(false);
 
   useEffect(() => {
-    getProduct(id).then((res) => {
-      setProduct(res.data);
-    });
+    const fetchData = async () => {
+      const productRes = await getProduct(id);
+      const productsFeatures = await getProductFeatures(id);
+
+      setProduct({ ...productRes.data, features_set: productsFeatures.data });
+    };
+
+    fetchData();
   }, [reloadComponent]);
 
   const handleAddFeature = (values, resetForm) => {
@@ -77,8 +83,10 @@ const ProductFeatures = ({ reloadComponent, setReloadComponent }) => {
     feature_name: Yup.string().required("Feature Name is required"),
     feature_value: Yup.string().required("Feature Value is required"),
   });
-
+  
+  ////////////////////////////////////////////
   if (!product) return <p>loading...</p>;
+  ////////////////////////////////////////////
 
   return (
     <motion.div

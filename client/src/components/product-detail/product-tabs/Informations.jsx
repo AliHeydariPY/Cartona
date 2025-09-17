@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { containerVariants, itemVariants } from "../../../utils/animations";
 
 const Informations = ({ product }) => {
+  
   return (
     <motion.div
       initial="hidden"

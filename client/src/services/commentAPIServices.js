@@ -1,7 +1,7 @@
 import axios from "axios";
 import { captureOwnerStack } from "react";
-
-const SERVER_URL = "http://127.0.0.1:8000";
+import api from "../api/api";
+const SERVER_URL = "https://127.0.0.1:8000";
 
 export const getComments = (productID) => {
   const url = `${SERVER_URL}/comments-api/comments/product/${productID}/`;
@@ -30,93 +30,98 @@ export const getComments = (productID) => {
 };
 
 export const getCommentsByUser = (userID) => {
-  const url = `${SERVER_URL}/comments-api/comments/user/${userID}/`;
-  return axios
+  const url = `/comments-api/comments/user/${userID}/`;
+  return api
     .get(url)
 }
 
 export const sendComment = (comment) => {
-  const url = `${SERVER_URL}/comments-api/comments/`;
-  return axios.post(url, comment);
+  const url = `/comments-api/comments/`;
+  return api.post(url, comment);
 };
 
 export const getProductQuestions = () => {
-  const url = `${SERVER_URL}/comments-api/product-questions/`;
-  return axios.get(url);
+  const url = `/comments-api/product-questions/`;
+  return api.get(url);
 };
 
 export const sendProductQuestion = (question) => {
-  const url = `${SERVER_URL}/comments-api/product-questions/`;
-  return axios.post(url, question);
+  const url = `/comments-api/product-questions/`;
+  return api.post(url, question);
 };
 
 export const answerProductQuestion = (answer, questionID) => {
   console.log(questionID);
-  const url = `${SERVER_URL}/comments-api/product-questions/${questionID}/`;
-  return axios.patch(url, answer);
+  const url = `/comments-api/product-questions/${questionID}/`;
+  return api.patch(url, answer);
 };
 
 export const getCommentReplies = (commentID) => {
-  const url = `${SERVER_URL}/comments-api/comment-replies/comment/${commentID}/`;
-  return axios.get(url);
+  const url = `/comments-api/comment-replies/comment/${commentID}/`;
+  return api.get(url);
 };
 
 export const sendCommentReply = (reply) => {
-  const url = `${SERVER_URL}/comments-api/comment-replies/`;
-  return axios.post(url, reply);
+  const url = `/comments-api/comment-replies/`;
+  return api.post(url, reply);
 };
 
-export const getSubscriptions = (userID) => {
-  const url = `${SERVER_URL}/comments-api/subscriptions/user/${userID}/`;
-  return axios.get(url);
+export const getSubscriptions = () => {
+  const url = `/comments-api/subscriptions/`;
+  return api.get(url);
+};
+
+export const getSubscriptionsByStorekeeper = (storekeeperID) => {
+  const url = `/comments-api/subscriptions/storekeeper/${storekeeperID}`;
+  return api.get(url);
 };
 
 export const enableNotifications = (payload) => {
-  const url = `${SERVER_URL}/comments-api/subscriptions/`;
-  return axios.post(url, payload);
+  const url = `/comments-api/subscriptions/`;
+  return api.post(url, payload);
 };
 
 export const disableNotifications = (srotekeeperID) => {
-  const url = `${SERVER_URL}/comments-api/subscriptions/${srotekeeperID}/`;
-  return axios.delete(url);
+  const url = `/comments-api/subscriptions/${srotekeeperID}/`;
+  return api.delete(url);
 };
 
 export const getPurchasesByBuyer = (userID) => {
-  const url = `${SERVER_URL}/comments-api/purchases/buyer/${userID}/`
-  return axios.get(url)
+  const url = `/comments-api/purchases/buyer/${userID}/`
+  return api.get(url)
 }
 
 export const getPurchasesByStorekeepre = (storekeeperID) => {
-  const url = `${SERVER_URL}/comments-api/purchases/storekeeper/${storekeeperID}/`
-  return axios.get(url)
+  const url = `/comments-api/purchases/storekeeper/${storekeeperID}/`
+  return api.get(url)
 }
 
 export const getPurchaseByPayment = (paymentID) => {
-  const url = `${SERVER_URL}/comments-api/purchases/payment/${paymentID}/`
-  return axios.get(url)
+  const url = `/comments-api/purchases/payment/${paymentID}/`
+  return api.get(url)
 }
 
 export const getPurchaseChats = (purchaseID) => {
-  const url = `${SERVER_URL}/comments-api/purchase-chats/purchase/${purchaseID}/`
-  return axios.get(url)
+  const url = `/comments-api/purchase-chats/purchase/${purchaseID}/`
+  return api.get(url)
 }
 
 export const sendMessagse = (payload) => {
-  const url = `${SERVER_URL}/comments-api/purchase-chats/`
-  return axios.post(url, payload)
+  const url = `/comments-api/purchase-chats/`
+  return api.post(url, payload)
 }
 
 export const deleteMessagse = (msgID) => {
-  const url = `${SERVER_URL}/comments-api/purchase-chats/${msgID}/`
-  return axios.delete(url)
+  const url = `/comments-api/purchase-chats/${msgID}/`
+  return api.delete(url)
 }
 
 export const editMessage = (editedMsg) => {
-  const url = `${SERVER_URL}/comments-api/purchase-chats/${editedMsg.id}/`
-  return axios.patch(url, editedMsg)
+  const url = `/comments-api/purchase-chats/${editedMsg.id}/`
+  return api.patch(url, editedMsg)
 }
 
 export const getNotifications = (userID) => {
-  const url = `${SERVER_URL}/comments-api/notifications/user/${userID}/`
-  return axios.get(url)
+  const url = `/comments-api/notifications/`
+  return api.get(url)
 }

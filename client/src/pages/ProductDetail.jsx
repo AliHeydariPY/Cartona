@@ -10,7 +10,11 @@ import ProductSeller from "../components/product-detail/ProductSeller";
 
 import { FiShoppingCart } from "react-icons/fi";
 
-import { getProduct } from "../services/productAPIServices";
+import {
+  getProduct,
+  getProducImages,
+  getProductFeatures,
+} from "../services/productAPIServices";
 import {
   getComments,
   getProductQuestions,
@@ -36,42 +40,80 @@ const ProductDetails = ({
   const [seller, setSeller] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // handle without product !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
   useEffect(() => {
     const fetchData = async () => {
       const selectedProduct = await getProduct(id);
-      setProduct(selectedProduct.data);
+      let prodcutData = { ...selectedProduct.data };
 
-      const comments = getComments(id);
-      comments
-        .then(async (res) => {
-          const commentsWithReplies = await Promise.all(
-            res.data.map(async (comment) => {
-              try {
-                const repliesResponse = await getCommentReplies(comment.id);
-                const replies = repliesResponse.data;
-                return { ...comment, replies };
-              } catch {
-                return { ...comment };
-              }
-            })
-          );
-          setProductComments(commentsWithReplies);
-        })
-        .catch(() => {
-          setProductComments([]);
-        });
+      try {
+        const productImgs = await getProducImages(id);
+
+        prodcutData.images_set = productImgs.data;
+      } catch (error) {
+        prodcutData.images_set = [];
+      }
+
+      const productsFeatures = await getProductFeatures(id);
+
+      prodcutData.features_set = productsFeatures.data;
+
+      setProduct(prodcutData);
 
       const seller = getShopkeeper(selectedProduct.data.storekeeper);
       seller.then((res) => {
         setSeller(res.data);
       });
 
-      const allQuestions = await getProductQuestions();
-      const questions = allQuestions.data.map((qus) => {
-        return qus.product == id ? qus : null;
-      });
+      try {
+        const comments = await getComments(id);
+        const commentsWithReplies = await Promise.all(
+          comments.data.map(async (comment) => {
+            try {
+              const repliesResponse = await getCommentReplies(comment.id);
+              const replies = repliesResponse.data;
+              return { ...comment, replies };
+            } catch {
+              return { ...comment };
+            }
+          })
+        );
+        setProductComments(commentsWithReplies);
+      } catch (error) {
+        setProductComments([]);
+      }
+      // comments
+      //   .then(async (res) => {
+      //     const commentsWithReplies = await Promise.all(
+      //       res.data.map(async (comment) => {
+      //         try {
+      //           const repliesResponse = await getCommentReplies(comment.id);
+      //           const replies = repliesResponse.data;
+      //           return { ...comment, replies };
+      //         } catch {
+      //           return { ...comment };
+      //         }
+      //       })
+      //     );
+      //     setProductComments(commentsWithReplies);
+      //   })
+      //   .catch(() => {
+      //     console.log("adfasf");
+      //     setProductComments([]);
+      //   });
 
-      setProductQuestions(questions.filter(Boolean));
+      try {
+        const allQuestions = await getProductQuestions();
+        const questions = allQuestions.data.map((qus) => {
+          return qus.product == id ? qus : null;
+        });
+
+        setProductQuestions(questions.filter(Boolean));
+      } catch (error) {
+        setProductQuestions([]);
+      }
+
       setIsLoading(false);
     };
     fetchData();

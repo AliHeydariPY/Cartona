@@ -47,7 +47,7 @@ const Questions = ({
 
   const QuestionItem = ({ index, style }) => {
     const faq = productQuestions[index];
-    const isUserQuestion = faq.user == userID;
+    const isUserQuestion = faq.user == localStorage.getItem("username");
 
     return (
       <div
@@ -63,7 +63,7 @@ const Questions = ({
         }`}
       >
         <div className="flex items-center justify-between">
-          <p className="font-semibold text-blue-900">Q: {faq.question_text}</p>
+          <p className="font-semibold text-blue-900">{faq.user}: {faq.question_text}</p>
           <div className="flex items-center gap-2">
             {isUserQuestion && (
               <span className="px-2 py-1 text-xs font-bold rounded-full bg-blue-600 text-white">
@@ -205,6 +205,7 @@ const Questions = ({
                     ));
                   })
                   .catch((err) => {
+                    console.log(err)
                     toast.custom((t) => (
                       <div
                         className={`${
@@ -213,7 +214,7 @@ const Questions = ({
                       >
                         <FiX className="text-xl shrink-0" />
                         <span className="font-medium">
-                          {err.response.data[0]}
+                          {err.response.data.non_field_errors}
                         </span>
                       </div>
                     ));
