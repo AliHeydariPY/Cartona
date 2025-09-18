@@ -58,12 +58,11 @@ export default function MyProducts({
                 key={inx}
                 className="overflow-hidden rounded-2xl shadow-md hover:shadow-xl border border-gray-200 bg-white transition-all duration-300"
               >
-                {/* Product Image */}
                 <div
                   onClick={() => {
                     console.log(product);
 
-                    openInNewTab(`/products/${product.id}`);
+                    openInNewTab(`/product/${product.id}`);
                   }}
                   className="flex cursor-pointer justify-center items-center p-4 md:p-6 rounded-xl sm:rounded-2xl border-2 border-blue-200 shadow-inner w-full h-[260px] md:min-w-[260px] md:h-[260px]"
                 >

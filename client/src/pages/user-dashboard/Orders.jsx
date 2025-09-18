@@ -185,7 +185,6 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
       className="lg:col-span-3"
     >
       <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-lg p-5 sm:p-6 2xl:p-8 border border-blue-400 hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300">
-        {/* header */}
         <div className="sm:flex sm:items-center mb-4.75">
           <div className="mb-2">
             <div className="flex items-center mb-1 sm:mb-0">
@@ -204,7 +203,6 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
           </span>
         </div>
 
-        {/* filter */}
         <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:gap-3 mb-4">
           {["All", "Pending", "Shipped", "Delivered"].map((status) => (
             <button
@@ -221,7 +219,6 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
           ))}
         </div>
 
-        {/* orders list */}
         <div className="space-y-6">
           {filteredOrders.map((order) => (
             <motion.div
@@ -232,12 +229,11 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
               className="bg-gradient-to-r from-blue-50/80 to-cyan-50/80 rounded-2xl p-6 border border-blue-200/60 hover:border-blue-300 hover:shadow-lg transition-all duration-300 group"
             >
               <div className="grid grid-cols-1 lg:grid-cols-7 xl:grid-cols-3 gap-6">
-                {/* اطلاعات محصول */}
                 <div className="flex items-center space-x-4 lg:col-span-3 xl:col-span-1">
                   {order.product.image ? (
                     <div
                       onClick={() =>
-                        openInNewTab(`/products/${order.product.id}`)
+                        openInNewTab(`/product/${order.product.id}`)
                       }
                       className="w-22 h-22 cursor-pointer border-2 bg-white border-blue-400 rounded-lg flex items-center justify-center mb-4 sm:mb-0 relative overflow-hidden p-1"
                     >
@@ -265,7 +261,6 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
                   </div>
                 </div>
 
-                {/* وضعیت سفارش */}
                 <div className="flex flex-col justify-center space-y-2 lg:col-span-2 xl:col-span-1">
                   <div className="flex items-center space-x-2">
                     {getStatusIcon(order.status)}
@@ -291,7 +286,6 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
                   </p>
                 </div>
 
-                {/* دکمه‌های اقدام */}
                 <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-row gap-3 justify-center items-start lg:items-end xl:items-center lg:col-span-2 xl:col-span-1">
                   <button
                     onClick={() => {
@@ -337,7 +331,6 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
                 </div>
               </div>
 
-              {/* نوار پیشرفت */}
               <div className="mt-4 pt-4 border-t border-blue-200/50">
                 <div className="flex items-center justify-between text-xs text-blue-600 mb-2">
                   <span>Order Progress</span>
@@ -368,7 +361,6 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
           />
         )}
 
-        {/* empty state  */}
         {orders.length === 0 && (
           <div className="text-center py-12 bg-blue-50/50 rounded-2xl border border-blue-200">
             <FiPackage className="text-blue-400 mx-auto mb-4" size={48} />

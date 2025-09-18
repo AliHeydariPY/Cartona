@@ -55,6 +55,7 @@ const Questions = ({
           ...style,
           top: style.top,
           height: style.height - 14,
+          width: "99%",
         }}
         className={`p-3 sm:p-4 border rounded-lg sm:rounded-xl shadow space-y-1 sm:space-y-2 transition ${
           isUserQuestion
@@ -106,7 +107,6 @@ const Questions = ({
       variants={containerVariants}
       className="space-y-5 sm:space-y-6 mt-5 sm:mt-6"
     >
-      {/* Ask a Question */}
       <motion.div
         variants={itemVariants}
         className="p-3 sm:p-4 bg-white/90 border border-blue-200 rounded-lg sm:rounded-xl shadow-lg"
@@ -232,7 +232,6 @@ const Questions = ({
         </div>
       </motion.div>
 
-      {/* Questions List */}
       <motion.div variants={itemVariants}>
         {productQuestions.length === 0 ? (
           <div className="text-blue-600">No questions have been asked yet.</div>

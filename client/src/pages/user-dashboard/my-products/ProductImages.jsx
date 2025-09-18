@@ -35,17 +35,22 @@ const ProductImages = ({ reloadComponent, setReloadComponent }) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [showRemovePopup, setShowRemovePopup] = useState(false);
 
+  let canSetImage = product?.images_set.length >= 7 ? false : true;
+
   useEffect(() => {
     const fetchData = async () => {
-      const productRes = await getProduct(id)
+      const productRes = await getProduct(id);
 
-      const allImages = await getProducImages(id)
-      const productImgs = allImages.data.filter(img => img.product == id)
+      try {
+        const allImages = await getProducImages(id);
+        const productImgs = allImages.data.filter((img) => img.product == id);
 
-      setProduct({...productRes.data, images_set: productImgs});
-
-    }
-    fetchData()
+        setProduct({ ...productRes.data, images_set: productImgs });
+      } catch (error) {
+        setProduct({ ...productRes.data, images_set: [] });
+      }
+    };
+    fetchData();
     // getProduct(id).then((res) => {
     //   console.log(res.data);
     //   getProducImages().then((res) => {
@@ -110,7 +115,6 @@ const ProductImages = ({ reloadComponent, setReloadComponent }) => {
       className="lg:col-span-3"
     >
       <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-xl p-5 sm:p-6 2xl:p-8 border border-blue-400 hover:shadow-lg hover:shadow-blue-400/50 transition-all duration-300">
-        {/* Header */}
         <div className="flex items-center gap-y-2 flex-wrap-reverse justify-between mb-4 sm:mb-6">
           <div className="flex items-center">
             <span>
@@ -132,7 +136,6 @@ const ProductImages = ({ reloadComponent, setReloadComponent }) => {
           </button>
         </div>
 
-        {/* Product Info */}
         <div className="flex items-center gap-4 mb-6 sm:mb-8 p-2 sm:p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-200">
           <div className="flex justify-center items-center p-2 bg-white rounded-lg sm:rounded-xl border border-blue-200 shadow-inner w-24 h-24">
             <img
@@ -151,7 +154,6 @@ const ProductImages = ({ reloadComponent, setReloadComponent }) => {
           </div>
         </div>
 
-        {/* Upload Form */}
         <Formik
           initialValues={{ image: null }}
           validationSchema={validationSchema}
@@ -229,17 +231,27 @@ const ProductImages = ({ reloadComponent, setReloadComponent }) => {
               </div>
 
               <button
+                disabled={!canSetImage}
                 type="submit"
-                className="w-full cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-semibold py-2 sm:py-3 px-4 rounded-lg transition-colors duration-300 flex items-center justify-center text-sm sm:text-base"
+                className={`w-full font-semibold py-2 sm:py-3 px-4 rounded-lg transition-colors duration-300 flex items-center justify-center text-sm sm:text-base
+    ${
+      canSetImage
+        ? "cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white"
+        : "cursor-not-allowed bg-gray-300 text-gray-500"
+    }`}
               >
                 <FiPlus className="mr-1 mb-0.5" size={18} strokeWidth={3} />
                 Add Image
               </button>
+              {!canSetImage && (
+                <p className="mt-2 text-sm text-red-500">
+                  You can only upload up to 7 images.
+                </p>
+              )}
             </Form>
           )}
         </Formik>
 
-        {/* Images List */}
         <div className="space-y-3">
           <h3 className="text-base sm:text-lg md:text-xl font-semibold text-blue-800 mb-3">
             Added Images ({product.images_set.length})
@@ -298,7 +310,6 @@ const ProductImages = ({ reloadComponent, setReloadComponent }) => {
           />
         )}
 
-        {/* Quick Tips */}
         {product.images_set.length > 0 && (
           <div className="mt-6 p-3 sm:p-4 bg-cyan-50/50 rounded-xl border border-cyan-200">
             <p className="text-xs sm:text-sm md:text-base text-cyan-800">

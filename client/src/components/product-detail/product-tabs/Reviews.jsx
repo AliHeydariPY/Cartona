@@ -211,7 +211,7 @@ const Reviews = ({
               <div className="flex justify-between mb-1 sm:mb-2">
                 <div className="flex items-center">
                   <span className="font-semibold text-blue-800 mr-2">
-                    User {comment.user}
+                     {comment.user}
                   </span>
                   <div className="flex">
                     {[...Array(5)].map((_, i) => (
@@ -319,7 +319,7 @@ const Reviews = ({
                             {reply.updated_time}
                           </span>
                         </div>
-                        <p className="text-blue-800 text-sm">{reply.text}</p>
+                         <p  style={{ whiteSpace: 'pre-wrap' }}  className="text-blue-800 text-sm">{reply.text}</p>
                       </div>
                     ))}
                   </motion.div>

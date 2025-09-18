@@ -126,7 +126,6 @@ const Cart = ({
     >
       <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-lg p-5 sm:p-6 2xl:p-8 border border-blue-400 hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300">
         <div className="max-w-6xl mx-auto">
-          {/* header */}
           <div className="sm:flex sm:items-center mb-4.75">
             <div className="flex items-center mb-2 sm:mb-0">
               <FiShoppingCart className="text-blue-600 mr-3" size={22} />
@@ -140,7 +139,6 @@ const Cart = ({
           </div>
 
           <div className="grid grid-cols-1 gap-6">
-            {/* products list */}
             <div className="space-y-6">
               {cartItems.length === 0 ? (
                 <div className="bg-white/95 backdrop-blur-xl rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-200">
@@ -164,10 +162,9 @@ const Cart = ({
                       key={product.id}
                       className="flex flex-col sm:flex-row border-b border-blue-100 last:border-0 pb-6 mb-6 last:mb-0 group"
                     >
-                      {/* تصویر محصول */}
                       <div
                         onClick={() =>
-                          openInNewTab(`/products/${product.product}`)
+                          openInNewTab(`/product/${product.product}`)
                         }
                         className="w-full sm:w-35 h-35 cursor-pointer rounded-xl flex items-center justify-center mb-4 sm:mb-0 relative overflow-hidden p-1"
                       >
@@ -178,16 +175,13 @@ const Cart = ({
                         />
                       </div>
 
-                      {/* اطلاعات کامل محصول */}
                       <div className="flex-1 sm:ml-6 space-y-3">
-                        {/* هدر با نام محصول و دکمه حذف */}
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
                             <h3 className="font-bold text-lg text-blue-900 mb-1">
                               {product.name}
                             </h3>
 
-                            {/* قیمت و تخفیف */}
                             <div className="flex items-center flex-wrap gap-2 mb-2">
                               <span className="text-xl font-bold text-blue-800">
                                 ${product.discounted_price || product.price}
@@ -219,7 +213,6 @@ const Cart = ({
                           </button>
                         </div>
 
-                        {/* امتیاز و نظرات */}
                         <div className="flex items-center gap-3">
                           <div className="flex items-center bg-blue-100 px-3 py-1 rounded-full">
                             <FiStar
@@ -235,13 +228,11 @@ const Cart = ({
                           </span>
                         </div>
 
-                        {/* موجودی */}
                         <p className="text-sm text-blue-700">
                           <span className="font-medium">Stock:</span>{" "}
                           {product.stock_quantity}
                         </p>
 
-                        {/* انتخاب رنگ (اگر موجود باشد) */}
                         {product.color && (
                           <div className="flex items-center gap-2">
                             <span className="text-sm text-blue-800 font-medium">
@@ -255,7 +246,6 @@ const Cart = ({
                           </div>
                         )}
 
-                        {/* کنترل تعداد */}
                         <div className="flex items-center justify-between pt-3">
                           <div className="flex items-center bg-blue-100 rounded-lg p-1">
                             <button
@@ -286,7 +276,6 @@ const Cart = ({
                             </button>
                           </div>
 
-                          {/* جمع کل برای این محصول */}
                           <div className="text-right">
                             <p className="text-sm text-gray-500">Subtotal</p>
                             <p className="text-lg font-bold text-blue-800">
@@ -305,7 +294,6 @@ const Cart = ({
               )}
             </div>
 
-            {/* shopping Cart Summary */}
             {cartItems.length > 0 && (
               <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-blue-200 h-fit sticky top-6">
                 <h3 className="text-lg sm:text-xl font-bold text-blue-900 mb-6 flex items-center">

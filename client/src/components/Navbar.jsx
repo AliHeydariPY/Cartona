@@ -104,8 +104,10 @@ const Navbar = () => {
 
           <div className="hidden md:block col-span-2">
             <div className="flex items-center justify-center space-x-4 md:space-x-8 lg:space-x-10 xl:space-x-15">
-              <div
-                onClick={() => navigate("/account/favorites")}
+              {/* have to fix */}
+
+              <Link
+                to="/account/favorites"
                 className="relative group flex flex-col items-center cursor-pointer w-8 h-8 mt-3 lg:mt-2"
               >
                 <FaRegHeart className="absolute inset-0 text-xl lg:text-2xl text-blue-600 opacity-100 group-hover:opacity-0 scale-100 group-hover:scale-0 transition-all duration-300" />
@@ -115,10 +117,10 @@ const Navbar = () => {
                 <div className="absolute -bottom-4 lg:-bottom-5.5 left-2/6 lg:left-2/5 transform -translate-x-1/2 bg-blue-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
                   Favorite
                 </div>
-              </div>
+              </Link>
 
-              <div
-                onClick={() => navigate("/account/cart")}
+              <Link
+                to={`${isAuth ? "/account/cart" : "/create-account"}`}
                 className="relative group flex flex-col items-center cursor-pointer w-8 h-8 mt-2.25 lg:mt-1"
               >
                 <IoCartOutline className="absolute inset-0 text-2xl lg:text-3xl text-blue-600 opacity-100 group-hover:opacity-0 scale-100 group-hover:scale-0 transition-all duration-300" />
@@ -132,10 +134,10 @@ const Navbar = () => {
                 <span className="absolute -top-0.75 right-1 lg:-top-1 lg:-right-1 bg-blue-500 text-white text-xs rounded-full w-3.5 h-3.5 lg:w-5 lg:h-5 flex items-center justify-center">
                   {cartItems.length}
                 </span>
-              </div>
+              </Link>
 
               <Link
-                to={`${isAuth? "/account/profile" : "/create-account"}`}
+                to={`${isAuth ? "/account/profile" : "/create-account"}`}
                 className="relative group flex flex-col items-center cursor-pointer w-6.5 h-6.5 lg:w-8 lg:h-8 mt-0.5"
               >
                 <UserCircleIcon className="absolute inset-0 text-blue-600 opacity-100 group-hover:opacity-0 scale-100 group-hover:scale-0 transition-all duration-300" />
@@ -160,8 +162,8 @@ const Navbar = () => {
                 </div>
               </div> */}
 
-              <div
-                onClick={() => navigate("/account/notifications")}
+              <Link
+                to={`${isAuth ? "/account/notifications" : "/create-account"}`}
                 className="relative group flex flex-col items-center cursor-pointer w-8 h-8 mt-2.75 lg:mt-1.5"
               >
                 <FiBell className="absolute inset-0 text-2xl lg:text-3xl text-blue-600 opacity-100 group-hover:opacity-0 scale-100 group-hover:scale-0 transition-all duration-300" />
@@ -178,7 +180,7 @@ const Navbar = () => {
                 <span className="absolute -top-0.75 right-1.25 lg:-top-1 lg:-right-1 bg-blue-500 text-white text-xs rounded-full w-3.5 h-3.5 lg:w-5 lg:h-5 flex items-center justify-center">
                   {notifications.length}
                 </span>
-              </div>
+              </Link>
             </div>
           </div>
         </div>

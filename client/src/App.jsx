@@ -148,7 +148,7 @@ function App() {
         </Route>
 
         <Route
-          path="/products/:id"
+          path="/product/:id"
           element={
             <ProductDetail
               reloadComponent={reloadComponent}
