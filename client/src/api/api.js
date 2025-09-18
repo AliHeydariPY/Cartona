@@ -1,14 +1,17 @@
 import axios from "axios";
+import { getStorekeeper } from "../services/userAPIServices";
+import { authAtom } from "../atoms/authAtom";
+import { getDefaultStore } from "jotai";
+
+const store = getDefaultStore();
 
 const api = axios.create({
   baseURL: "https://127.0.0.1:8000",
-  withCredentials: true, // چون رفرش توی کوکیه
+  withCredentials: true,
 });
 
-// ✅ دسترسی به توکن از sessionStorage
 let accessToken = sessionStorage.getItem("accessToken");
 
-// متغیر برای جلوگیری از چندبار رفرش همزمان
 let isRefreshing = false;
 let failedQueue = [];
 
@@ -23,15 +26,14 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
-// ====== interceptor برای request ======
 api.interceptors.request.use((config) => {
   if (accessToken) {
     config.headers["Authorization"] = `Bearer ${accessToken}`;
+
   }
   return config;
 });
 
-// ====== interceptor برای response ======
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -61,11 +63,20 @@ api.interceptors.response.use(
 
         accessToken = res.data.access;
 
-        // ✅ ذخیره در sessionStorage
         sessionStorage.setItem("accessToken", accessToken);
+        store.set(authAtom, true);
+
+        //coming soon
         const payload = JSON.parse(atob(accessToken.split(".")[1]));
         console.log(payload);
-        
+        getStorekeeper(payload.user_id)
+          .then((res) => {
+            console.log(res);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+
         api.defaults.headers.common["Authorization"] = "Bearer " + accessToken;
         processQueue(null, accessToken);
 
@@ -73,6 +84,9 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (err) {
         processQueue(err, null);
+
+        store.set(authAtom, false);
+
         return Promise.reject(err);
       } finally {
         isRefreshing = false;
@@ -83,7 +97,6 @@ api.interceptors.response.use(
   }
 );
 
-// ====== تابعی برای ست کردن توکن موقع لاگین ======
 export const setAccessToken = (token) => {
   accessToken = token;
   sessionStorage.setItem("accessToken", token);

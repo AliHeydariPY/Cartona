@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useNavigate, useParams, useLocation, Link } from "react-router-dom";
 
 import { getCartProducts } from "../services/cartAPIServices";
 import { getNotifications } from "../services/commentAPIServices.js";
@@ -12,6 +12,8 @@ import { BiSolidCategory } from "react-icons/bi";
 import { UserCircleIcon } from "@heroicons/react/24/outline";
 import { UserCircleIcon as UserCircleSolid } from "@heroicons/react/24/solid";
 import { GoBellFill } from "react-icons/go";
+import { useAtom } from "jotai";
+import { authAtom } from "../atoms/authAtom.js";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -20,13 +22,14 @@ const Navbar = () => {
   const [search, setSearch] = useState("");
   const [cartItems, setCartItems] = useState([]);
   const [notifications, setNotifications] = useState([]);
+  const [isAuth] = useAtom(authAtom);
 
   const userID = localStorage.getItem("userID");
 
   useEffect(() => {
     const fetchCartItems = async () => {
       const cartProductsRes = await getCartProducts(userID);
-      console.log(cartProductsRes.data)
+      console.log(cartProductsRes.data);
       setCartItems(cartProductsRes.data);
 
       const notifRes = await getNotifications(userID);
@@ -37,14 +40,14 @@ const Navbar = () => {
   }, []);
 
   useEffect(() => {
-      setSearch(() => {
-        const params = new URLSearchParams(query);
-        if (params.has("search")) {
-          return params.get("search");
-        } else {
-          return "";
-        }
-      });
+    setSearch(() => {
+      const params = new URLSearchParams(query);
+      if (params.has("search")) {
+        return params.get("search");
+      } else {
+        return "";
+      }
+    });
   }, [query]);
 
   return (
@@ -131,8 +134,8 @@ const Navbar = () => {
                 </span>
               </div>
 
-              <div
-                onClick={() => navigate("/account/profile")}
+              <Link
+                to={`${isAuth? "/account/profile" : "/create-account"}`}
                 className="relative group flex flex-col items-center cursor-pointer w-6.5 h-6.5 lg:w-8 lg:h-8 mt-0.5"
               >
                 <UserCircleIcon className="absolute inset-0 text-blue-600 opacity-100 group-hover:opacity-0 scale-100 group-hover:scale-0 transition-all duration-300" />
@@ -142,7 +145,7 @@ const Navbar = () => {
                 <div className="absolute -bottom-6 left-1/2 lg:-bottom-6.5 lg:left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
                   Your Account
                 </div>
-              </div>
+              </Link>
 
               {/* <div className="relative group flex flex-col items-center cursor-pointer w-8 h-8 mt-2 lg:mt-1">
                 <BiCategory className="absolute inset-0 text-2xl lg:text-3xl text-blue-600 opacity-100 group-hover:opacity-0 scale-100 group-hover:scale-0 transition-all duration-300" />

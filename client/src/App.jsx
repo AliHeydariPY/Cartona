@@ -27,6 +27,7 @@ import EditProduct from "./pages/user-dashboard/my-products/EditProduct";
 import AddedToCartPopup from "./components/pop-ups/AddedToCartPopup";
 import RemoveFromCartPopup from "./components/pop-ups/RemoveFromCartPopup";
 import Payments from "./pages/user-dashboard/Payments";
+import LoginForm from "./pages/LoginForm";
 
 function App() {
   const [removeFromCartPopup, setRremoveFromCartPopup] = useState(false);
@@ -158,6 +159,8 @@ function App() {
           }
         />
         <Route path="/create-account" element={<CreateAccountForm />} />
+        <Route path="/login" element={<LoginForm />} />
+
         <Route path="/upgradeToSeller" element={<UpgradeToSeller />} />
 
         <Route
@@ -172,6 +175,7 @@ function App() {
             />
           }
         />
+
         <Route
           path="/search/:query"
           element={

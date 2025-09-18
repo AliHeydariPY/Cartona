@@ -16,6 +16,7 @@
     "emoji-picker-react": "^4.13.2",
     "formik": "^2.4.6",
     "framer-motion": "^12.23.12",
+    "jotai": "^2.14.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-hot-toast": "^2.5.2",

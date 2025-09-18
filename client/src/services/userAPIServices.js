@@ -1,18 +1,16 @@
 import axios from "axios";
 import api from "../api/api";
+import { getDefaultStore } from "jotai";
+import { authAtom } from "../atoms/authAtom";
 
 const SERVER_URL = "https://127.0.0.1:8000";
 
+const store = getDefaultStore()
+
 export const login = async (userData) => {
   const response = await api.post("/api/token/", userData);
-  console.log(response.data);
   sessionStorage.setItem("accessToken", response.data.access);
-  return response;
-};
-
-export const refreshToken = async () => {
-  const response = await api.post("/api/token/refresh/");
-  localStorage.setItem("accessToken", response.data.access);
+  store.set(authAtom, true);
   return response;
 };
 
@@ -32,7 +30,7 @@ export const upgradeToSeller = (formData) => {
   });
 };
 
-export const getShopkeeper = (storekeeperID) => {
+export const getStorekeeper = (storekeeperID) => {
   const url = `${SERVER_URL}/user-api/storekeepers/${storekeeperID}/`;
   return axios.get(url);
 };

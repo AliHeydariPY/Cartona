@@ -1,15 +1,15 @@
-import { motion } from "framer-motion";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import toast from "react-hot-toast";
-import { FiCheckCircle, FiX, FiEye, FiEyeOff, FiUserPlus } from "react-icons/fi";
-import { createUser, login } from "../services/userAPIServices";
+import { FiCheckCircle, FiX, FiEye, FiEyeOff, FiLogIn } from "react-icons/fi";
+import { login } from "../services/userAPIServices";
 import { useAtom } from "jotai";
 import { authAtom } from "../atoms/authAtom";
 
-const CreateAccountForm = () => {
+const LoginForm = () => {
   const [isAuth] = useAtom(authAtom);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
@@ -18,7 +18,7 @@ const CreateAccountForm = () => {
     navigate("/account/profile");
   }
 
-  const SignupSchema = Yup.object().shape({
+  const LoginSchema = Yup.object().shape({
     username: Yup.string()
       .matches(
         /^[a-zA-Z0-9@./+\-_]+$/,
@@ -33,7 +33,7 @@ const CreateAccountForm = () => {
       .matches(/[a-z]/, "at least one lowercase letter")
       .matches(/[0-9]/, "at least one number")
       .matches(/[@$!%*?&]/, "at least one special character")
-      .required("Password is required"),
+      .required("Password entry is required"),
   });
 
   return (
@@ -44,6 +44,7 @@ const CreateAccountForm = () => {
         transition={{ duration: 0.5 }}
         className="w-full max-w-md bg-white/20 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden"
       >
+        {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-6 text-center relative overflow-hidden">
           <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
           <motion.div
@@ -52,29 +53,21 @@ const CreateAccountForm = () => {
             transition={{ delay: 0.3, duration: 0.5 }}
             className="relative z-10"
           >
-            <FiUserPlus className="text-4xl text-white mx-auto mb-3" />
-            <h2 className="text-3xl font-bold text-white">Join Cartona</h2>
-            <p className="text-blue-100 mt-1">Create your account in seconds</p>
+            <FiLogIn className="text-4xl text-white mx-auto mb-3" />
+            <h2 className="text-3xl font-bold text-white">Welcome Back</h2>
+            <p className="text-blue-100 mt-1">Login to your Cartona account</p>
           </motion.div>
         </div>
 
         <Formik
           initialValues={{ username: "", password: "" }}
-          validationSchema={SignupSchema}
+          validationSchema={LoginSchema}
           onSubmit={(values, { setSubmitting }) => {
-            createUser({
+            login({
               username: values.username,
               password: values.password,
             })
-              .then((response) => {
-                localStorage.setItem("username", response.data.username);
-                localStorage.setItem("userID", response.data.id);
-
-                login({
-                  username: values.username,
-                  password: values.password,
-                });
-
+              .then(() => {
                 toast.custom((t) => (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
@@ -87,16 +80,18 @@ const CreateAccountForm = () => {
                       <FiCheckCircle className="text-xl text-white" />
                     </div>
                     <div>
-                      <p className="font-medium">Account created successfully!</p>
-                      <p className="text-sm opacity-90">Welcome to Cartona</p>
+                      <p className="font-medium">Login successful!</p>
+                      <p className="text-sm opacity-90">
+                        Welcome back to Cartona
+                      </p>
                     </div>
                   </motion.div>
                 ));
-                
                 setSubmitting(false);
+
                 navigate("/account/profile");
               })
-              .catch((error) => {
+              .catch((err) => {
                 toast.custom((t) => (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
@@ -107,16 +102,18 @@ const CreateAccountForm = () => {
                   >
                     <FiX className="text-xl shrink-0" />
                     <span className="font-medium">
-                      {error.response?.data.username || "An error occurred"}
+                      Username or password is incorrect
                     </span>
                   </motion.div>
                 ));
+                console.log(err);
                 setSubmitting(false);
               });
           }}
         >
           {({ isSubmitting }) => (
             <Form className="p-6 space-y-5">
+              {/* Username Field */}
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -129,7 +126,7 @@ const CreateAccountForm = () => {
                 <Field
                   type="text"
                   name="username"
-                  placeholder="Choose a username"
+                  placeholder="Enter your username"
                   className="w-full px-4 py-3 bg-white/80 rounded-lg border border-blue-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent placeholder-blue-300 text-blue-950 transition-all duration-300"
                 />
                 <ErrorMessage
@@ -150,6 +147,7 @@ const CreateAccountForm = () => {
                 </ErrorMessage>
               </motion.div>
 
+              {/* Password Field */}
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -163,7 +161,7 @@ const CreateAccountForm = () => {
                   <Field
                     type={showPassword ? "text" : "password"}
                     name="password"
-                    placeholder="Create a strong password"
+                    placeholder="Enter your password"
                     className="w-full px-4 py-3 bg-white/80 rounded-lg border border-blue-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent placeholder-blue-300 text-blue-950 transition-all duration-300 pr-12"
                   />
                   <button
@@ -196,60 +194,31 @@ const CreateAccountForm = () => {
                 </ErrorMessage>
               </motion.div>
 
+              {/* Submit Button */}
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
-                className="bg-blue-50/50 p-3 rounded-lg border border-blue-200"
-              >
-                <p className="text-xs font-medium text-blue-700 mb-2">Password must contain:</p>
-                <ul className="text-xs text-blue-600 space-y-1">
-                  <li className="flex items-center">
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>
-                    At least 8 characters
-                  </li>
-                  <li className="flex items-center">
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>
-                    One uppercase letter
-                  </li>
-                  <li className="flex items-center">
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>
-                    One lowercase letter
-                  </li>
-                  <li className="flex items-center">
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>
-                    One number
-                  </li>
-                  <li className="flex items-center">
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>
-                    One special character (@$!%*?&)
-                  </li>
-                </ul>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.7 }}
               >
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold py-3 px-4 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:transform-none disabled:hover:shadow-lg"
+                  className="w-full cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-500  text-white font-semibold py-3 px-4 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:transform-none disabled:hover:shadow-lg"
                 >
                   {isSubmitting ? (
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                   ) : (
-                    <FiUserPlus size={18} />
+                    <FiLogIn size={18} />
                   )}
-                  <span>{isSubmitting ? "Creating account..." : "Create Account"}</span>
+                  <span>{isSubmitting ? "Logining in ..." : "Login"}</span>
                 </button>
               </motion.div>
 
+              {/* Divider */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.8 }}
+                transition={{ delay: 0.7 }}
                 className="relative flex items-center py-1"
               >
                 <div className="flex-grow border-t border-blue-200"></div>
@@ -259,19 +228,20 @@ const CreateAccountForm = () => {
                 <div className="flex-grow border-t border-blue-200"></div>
               </motion.div>
 
+              {/* Sign Up Link */}
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.9 }}
+                transition={{ delay: 0.8 }}
                 className="text-center"
               >
                 <p className="text-sm text-blue-700">
-                  Already have an account?{" "}
+                  Don't have an account?{" "}
                   <Link
-                    to="/login"
+                    to="/create-account"
                     className="font-medium text-cyan-600 hover:text-cyan-700 transition-colors duration-200"
                   >
-                    Log in
+                    Create account
                   </Link>
                 </p>
               </motion.div>
@@ -283,4 +253,4 @@ const CreateAccountForm = () => {
   );
 };
 
-export default CreateAccountForm;
+export default LoginForm;

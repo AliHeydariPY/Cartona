@@ -20,7 +20,7 @@ import {
   getProductQuestions,
   getCommentReplies,
 } from "../services/commentAPIServices";
-import { getShopkeeper } from "../services/userAPIServices";
+import { getStorekeeper } from "../services/userAPIServices";
 
 const ProductDetails = ({
   setShowAnswerPopup,
@@ -54,14 +54,19 @@ const ProductDetails = ({
       } catch (error) {
         prodcutData.images_set = [];
       }
+      
+      try {
+        const productsFeatures = await getProductFeatures(id);
+        
+        prodcutData.features_set = productsFeatures.data;
+      } catch (error) {
+        prodcutData.features_set = [];
+       }
 
-      const productsFeatures = await getProductFeatures(id);
-
-      prodcutData.features_set = productsFeatures.data;
 
       setProduct(prodcutData);
 
-      const seller = getShopkeeper(selectedProduct.data.storekeeper);
+      const seller = getStorekeeper(selectedProduct.data.storekeeper);
       seller.then((res) => {
         setSeller(res.data);
       });

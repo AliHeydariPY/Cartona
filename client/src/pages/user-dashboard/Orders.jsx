@@ -4,7 +4,7 @@ import { convertOffsetToTimes, motion } from "framer-motion";
 
 import { getPayments } from "../../services/cartAPIServices";
 import { getProduct } from "../../services/productAPIServices";
-import { getShopkeeper } from "../../services/userAPIServices";
+import { getStorekeeper } from "../../services/userAPIServices";
 import {
   getCommentsByUser,
   getPurchaseByPayment,
@@ -42,7 +42,7 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
       const payments = await Promise.all(
         res.data.map(async (payment) => {
           const productRes = await getProduct(payment.product);
-          const storekeeperRes = await getShopkeeper(
+          const storekeeperRes = await getStorekeeper(
             productRes.data.storekeeper
           );
           try{

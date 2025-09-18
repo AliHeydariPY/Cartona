@@ -29,7 +29,7 @@ import {
   deleteMessagse,
   editMessage,
 } from "../../services/commentAPIServices";
-import { getShopkeeper, getBuyer } from "../../services/userAPIServices";
+import { getStorekeeper, getBuyer } from "../../services/userAPIServices";
 import { getProduct } from "../../services/productAPIServices";
 import ChatInput from "./chats/ChatInput";
 
@@ -71,7 +71,7 @@ const Chat = () => {
         const pvs = await Promise.all(
           allPVs.map(async (pv) => {
             try {
-              const storekeeper = await getShopkeeper(pv.storekeeper);
+              const storekeeper = await getStorekeeper(pv.storekeeper);
               const product = await getProduct(pv.product);
 
               if (storekeeper.data.id == storekeeperID) {
