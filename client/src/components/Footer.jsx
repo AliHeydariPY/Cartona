@@ -10,7 +10,7 @@ import { FiHeart } from "react-icons/fi";
 
 const Footer = () => {
   return (
-    <footer className="bg-gradient-to-br from-blue-900 to-cyan-800 pt-20 pb-12 px-4 relative overflow-hidden">
+    <footer className="bg-gradient-to-br from-blue-900 to-cyan-800 pt-20 pb-20 md:pb-10 px-4 relative overflow-hidden ">
 
       <div className="absolute inset-0 overflow-hidden">
         {[...Array(20)].map((_, i) => (

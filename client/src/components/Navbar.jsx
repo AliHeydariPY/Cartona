@@ -51,7 +51,7 @@ const Navbar = () => {
   }, [query]);
 
   return (
-    <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-blue-100">
+    <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 rounded-b-2xl md:rounded-none">
       <div className="max-w-7xl mx-auto py-2 px-4">
         <div className="grid grid-cols-6 items-center justify-between h-16">
           <div className=" hidden md:grid col-span-2 md:col-span-1">

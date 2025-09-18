@@ -28,6 +28,7 @@ import AddedToCartPopup from "./components/pop-ups/AddedToCartPopup";
 import RemoveFromCartPopup from "./components/pop-ups/RemoveFromCartPopup";
 import Payments from "./pages/user-dashboard/Payments";
 import LoginForm from "./pages/LoginForm";
+import BottomNav from "./components/BottomNav";
 
 function App() {
   const [removeFromCartPopup, setRremoveFromCartPopup] = useState(false);

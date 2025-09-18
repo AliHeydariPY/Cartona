@@ -12,6 +12,8 @@ import Navbar from "../components/Navbar";
 import ProductImageCarousel from "../components/ProductImageCarousel";
 import { getListProducts, searchProduct } from "../services/productAPIServices";
 import SearchFilters from "../components/SearchFilters";
+import BottomNav from "../components/BottomNav";
+
 export default function SearchPage() {
   const { query } = useParams();
   const [products, setProducts] = useState([]);
@@ -54,7 +56,7 @@ export default function SearchPage() {
   return (
     <>
       <Navbar />
-      <div className="xl:grid xl:grid-cols-8 2xl:grid-cols-5 gap-5 mx-auto px-4 py-6 items-start">
+      <div className="xl:grid xl:grid-cols-8 2xl:grid-cols-5 gap-5 mx-auto pb-20 md:pb-6 px-4 py-6 items-start">
         <SearchFilters />
 
         <div className="grid xl:col-span-6 2xl:col-span-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-5 bg-blue-50">
@@ -209,6 +211,7 @@ export default function SearchPage() {
           />
         )}
       </div>
+      <BottomNav />
     </>
   );
 }
