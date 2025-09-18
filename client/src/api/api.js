@@ -84,7 +84,6 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (err) {
         processQueue(err, null);
-
         store.set(authAtom, false);
 
         return Promise.reject(err);

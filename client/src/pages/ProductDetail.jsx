@@ -21,6 +21,7 @@ import {
   getCommentReplies,
 } from "../services/commentAPIServices";
 import { getStorekeeper } from "../services/userAPIServices";
+import ProductNotFound from "../components/ProductNotFound";
 
 const ProductDetails = ({
   setShowAnswerPopup,
@@ -39,90 +40,74 @@ const ProductDetails = ({
   const [productQuestions, setProductQuestions] = useState(null);
   const [seller, setSeller] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-
-  // handle without product !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
-      const selectedProduct = await getProduct(id);
-      let prodcutData = { ...selectedProduct.data };
-
       try {
-        const productImgs = await getProducImages(id);
+        const selectedProduct = await getProduct(id);
+        let prodcutData = { ...selectedProduct.data };
 
-        prodcutData.images_set = productImgs.data;
-      } catch (error) {
-        prodcutData.images_set = [];
-      }
-      
-      try {
-        const productsFeatures = await getProductFeatures(id);
-        
-        prodcutData.features_set = productsFeatures.data;
-      } catch (error) {
-        prodcutData.features_set = [];
-       }
+        try {
+          const productImgs = await getProducImages(id);
 
+          prodcutData.images_set = productImgs.data;
+        } catch {
+          prodcutData.images_set = [];
+        }
 
-      setProduct(prodcutData);
+        try {
+          const productsFeatures = await getProductFeatures(id);
 
-      const seller = getStorekeeper(selectedProduct.data.storekeeper);
-      seller.then((res) => {
-        setSeller(res.data);
-      });
+          prodcutData.features_set = productsFeatures.data;
+        } catch {
+          prodcutData.features_set = [];
+        }
 
-      try {
-        const comments = await getComments(id);
-        const commentsWithReplies = await Promise.all(
-          comments.data.map(async (comment) => {
-            try {
-              const repliesResponse = await getCommentReplies(comment.id);
-              const replies = repliesResponse.data;
-              return { ...comment, replies };
-            } catch {
-              return { ...comment };
-            }
-          })
-        );
-        setProductComments(commentsWithReplies);
-      } catch (error) {
-        setProductComments([]);
-      }
-      // comments
-      //   .then(async (res) => {
-      //     const commentsWithReplies = await Promise.all(
-      //       res.data.map(async (comment) => {
-      //         try {
-      //           const repliesResponse = await getCommentReplies(comment.id);
-      //           const replies = repliesResponse.data;
-      //           return { ...comment, replies };
-      //         } catch {
-      //           return { ...comment };
-      //         }
-      //       })
-      //     );
-      //     setProductComments(commentsWithReplies);
-      //   })
-      //   .catch(() => {
-      //     console.log("adfasf");
-      //     setProductComments([]);
-      //   });
+        setProduct(prodcutData);
 
-      try {
-        const allQuestions = await getProductQuestions();
-        const questions = allQuestions.data.map((qus) => {
-          return qus.product == id ? qus : null;
+        const seller = getStorekeeper(selectedProduct.data.storekeeper);
+        seller.then((res) => {
+          setSeller(res.data);
         });
 
-        setProductQuestions(questions.filter(Boolean));
-      } catch (error) {
-        setProductQuestions([]);
-      }
+        try {
+          const comments = await getComments(id);
+          const commentsWithReplies = await Promise.all(
+            comments.data.map(async (comment) => {
+              try {
+                const repliesResponse = await getCommentReplies(comment.id);
+                const replies = repliesResponse.data;
+                return { ...comment, replies };
+              } catch {
+                return { ...comment };
+              }
+            })
+          );
+          setProductComments(commentsWithReplies);
+        } catch {
+          setProductComments([]);
+        }
 
-      setIsLoading(false);
+        try {
+          const allQuestions = await getProductQuestions();
+          const questions = allQuestions.data.map((qus) => {
+            return qus.product == id ? qus : null;
+          });
+
+          setProductQuestions(questions.filter(Boolean));
+        } catch {
+          setProductQuestions([]);
+        }
+        setIsLoading(false);
+      } catch {
+        setNotFound(true);
+      }
     };
     fetchData();
   }, [id, reloadComponent]);
+
+  if (notFound) return <ProductNotFound />;
 
   return (
     <>

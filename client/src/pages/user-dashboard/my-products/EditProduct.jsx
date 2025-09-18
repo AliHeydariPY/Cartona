@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { productFormSchema } from "../../../validations/productForm";
+import ProductNotFound from "../../../components/ProductNotFound";
 
 import {
   FiTag,
@@ -51,25 +52,30 @@ const EditProduct = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [mainCategories, setMainCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
+  const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
-      const selectedProduct = await getProduct(id);
-      setProduct(selectedProduct.data);
-      console.log(selectedProduct.data);
-      if (selectedProduct.data.discount_period) {
-        setHasDiscount(true);
-      } else {
-        setHasDiscount(false);
-      }
-      if (selectedProduct.data.amazing_offer_period) {
-        setIsAmazingOffer(true);
-      } else {
-        setIsAmazingOffer(false);
-      }
+      try {
+        const selectedProduct = await getProduct(id);
+        setProduct(selectedProduct.data);
 
-      const category = await getCategory(selectedProduct.data.category);
-      setSelectedCategory(category.data);
+        if (selectedProduct.data.discount_period) {
+          setHasDiscount(true);
+        } else {
+          setHasDiscount(false);
+        }
+        if (selectedProduct.data.amazing_offer_period) {
+          setIsAmazingOffer(true);
+        } else {
+          setIsAmazingOffer(false);
+        }
+
+        const category = await getCategory(selectedProduct.data.category);
+        setSelectedCategory(category.data);
+      } catch {
+        setNotFound(true);
+      }
     };
     fetchData();
   }, [id]);
@@ -114,8 +120,9 @@ const EditProduct = () => {
     setFirstImage(false);
   };
 
-  if (!product) return <p>Loading...</p>;
-
+  if (notFound) return <ProductNotFound />;
+  if (!product) return;
+  
   const initialValues = {
     id: id,
     image: image[0] || null,

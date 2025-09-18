@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams, useLocation, Link } from "react-router-dom";
 
 import { getCartProducts } from "../services/cartAPIServices";
@@ -15,20 +15,21 @@ import { GoBellFill } from "react-icons/go";
 import { useAtom } from "jotai";
 import { authAtom } from "../atoms/authAtom.js";
 
-const Navbar = () => {
+const Navbar = ({isFocus = false, setIsFocus}) => {
   const navigate = useNavigate();
   const { query } = useParams();
   const [search, setSearch] = useState("");
   const [cartItems, setCartItems] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [isAuth] = useAtom(authAtom);
+  const inputRef = useRef()
 
   const userID = localStorage.getItem("userID");
+
 
   useEffect(() => {
     const fetchCartItems = async () => {
       const cartProductsRes = await getCartProducts(userID);
-      console.log(cartProductsRes.data);
       setCartItems(cartProductsRes.data);
 
       const notifRes = await getNotifications(userID);
@@ -37,6 +38,15 @@ const Navbar = () => {
 
     fetchCartItems();
   }, []);
+
+  useEffect(() => {
+    console.log(isFocus)
+    if(isFocus) {
+      inputRef.current.focus()
+      setIsFocus()
+    }
+
+  }, [isFocus])
 
   useEffect(() => {
     setSearch(() => {
@@ -65,6 +75,7 @@ const Navbar = () => {
             <div className="w-full bg-white h-12 rounded-l-full ml-0.25">
               <input
                 type="text"
+                ref={inputRef}
                 value={search}
                 onChange={(e) => {
                   setSearch(e.target.value);

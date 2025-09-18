@@ -52,7 +52,7 @@ const LogoutPopup = ({ onClose, onConfirm }) => {
                 <div className="relative z-10 flex justify-between items-center">
                   <div className="flex items-center">
                     <div className="mr-3 bg-white/20 rounded-full p-2">
-                      <FiAlertTriangle size={20} />
+                      <FiAlertTriangle className="mb-0.5" size={20} />
                     </div>
                     <div>
                       <h3 className="text-xl font-bold">Sign Out</h3>

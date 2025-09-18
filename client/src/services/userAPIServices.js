@@ -16,6 +16,8 @@ export const login = async (userData) => {
 
 export const logout = async () => {
   const response = await api.post("/api/logout/");
+  sessionStorage.removeItem('accessToken')
+  console.log("dsf")
   store.set(authAtom, false);
   return response;
 };

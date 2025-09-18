@@ -28,7 +28,7 @@ const Home = () => {
 
   return (
     <>
-      <div className="bg-gradient-to-r from-[#1d4ed8] to-[#3730a3] md:bg-gradient-to-r md:from-blue-50 md:to-blue-50">
+      <div className="bg-gradient-to-r from-[#1d4ed8] to-[#3730a3] md:from-blue-50 md:to-blue-50">
         <Navbar />
 
         <section className="hero-section">

@@ -10,7 +10,7 @@ import { useAtom } from "jotai";
 import { authAtom } from "../atoms/authAtom";
 
 const LoginForm = () => {
-  const [isAuth] = useAtom(authAtom);
+  const [isAuth, setIsAuth] = useAtom(authAtom);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
@@ -88,7 +88,7 @@ const LoginForm = () => {
                 ));
                 setSubmitting(false);
 
-                navigate("/account/profile");
+                // navigate("/account/profile");
               })
               .catch((err) => {
                 toast.custom((t) => (
@@ -105,7 +105,6 @@ const LoginForm = () => {
                     </span>
                   </motion.div>
                 ));
-                console.log(err);
                 setSubmitting(false);
               });
           }}
