@@ -14,7 +14,6 @@ const Profile = () => {
       <div
         className="space-y-6 sm:space-y-7 lg:space-y-5 xl:space-y-9"
       >
-        {/* Activity Summary */}
         <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-lg p-5 sm:p-6 2xl:p-8 border border-blue-400 hover:shadow-2xl hover:shadow-blue-500/40 transition-all duration-300">
           <h2 className="text-xl sm:text-2xl font-bold text-blue-900 mb-6 sm:mb-8 flex items-center">
             <FiStar
@@ -48,7 +47,6 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* Latest Orders */}
         <div transition={0.3} className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-lg p-5 sm:p-6 2xl:p-8 border border-blue-400 hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300">
           <h2 className="text-xl sm:text-2xl font-bold text-blue-900 mb-6 sm:mb-8">
             Latest Orders
@@ -113,7 +111,6 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* Recently Viewed */}
         <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-lg p-5 sm:p-6 2xl:p-8 border border-blue-400 hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300">
           <h2 className="text-xl sm:text-2xl font-bold text-blue-900 mb-6 sm:mb-8">
             Recently Viewed

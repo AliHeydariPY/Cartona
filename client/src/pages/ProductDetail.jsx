@@ -136,7 +136,6 @@ const ProductDetails = ({
             className="w-full max-w-6xl"
           >
             <div className="bg-white/95 backdrop-blur-xl shadow-lg border border-blue-400 transition-all duration-300 p-4 sm:p-6 md:p-8 sm:rounded-xl md:rounded-2xl lg:rounded-3xl">
-              {/* header */}
               <div className="flex flex-row items-center justify-between mb-6 sm:mb-8">
                 <div className="flex items-center mb-0">
                   <FiShoppingCart className="text-blue-600 mr-3" size={22} />

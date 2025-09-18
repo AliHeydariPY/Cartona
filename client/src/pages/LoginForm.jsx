@@ -44,7 +44,6 @@ const LoginForm = () => {
         transition={{ duration: 0.5 }}
         className="w-full max-w-md bg-white/20 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden"
       >
-        {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-6 text-center relative overflow-hidden">
           <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
           <motion.div
@@ -113,7 +112,6 @@ const LoginForm = () => {
         >
           {({ isSubmitting }) => (
             <Form className="p-6 space-y-5">
-              {/* Username Field */}
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -138,16 +136,15 @@ const LoginForm = () => {
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="flex items-center"
+                      className="flex items-center text-red-500"
                     >
-                      <FiX className="mr-1" size={14} />
+                      <FiX className="mr-1 " size={14} />
                       {msg}
                     </motion.div>
                   )}
                 </ErrorMessage>
               </motion.div>
 
-              {/* Password Field */}
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -185,7 +182,7 @@ const LoginForm = () => {
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="flex items-center"
+                      className="flex items-center text-red-500"
                     >
                       <FiX className="mr-1" size={14} />
                       {msg}
@@ -194,7 +191,6 @@ const LoginForm = () => {
                 </ErrorMessage>
               </motion.div>
 
-              {/* Submit Button */}
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -214,7 +210,6 @@ const LoginForm = () => {
                 </button>
               </motion.div>
 
-              {/* Divider */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -228,7 +223,6 @@ const LoginForm = () => {
                 <div className="flex-grow border-t border-blue-200"></div>
               </motion.div>
 
-              {/* Sign Up Link */}
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}

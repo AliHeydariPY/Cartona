@@ -152,7 +152,6 @@ const AddProduct = () => {
         >
           {({ setFieldValue }) => (
             <Form className="space-y-6 px-0.5">
-              {/* بخش تصویر محصول */}
               <div className="space-y-2">
                 <label className="flex items-center text-blue-800 font-medium">
                   <FiImage className="mr-2" /> Product Image
@@ -215,7 +214,6 @@ const AddProduct = () => {
                 />
               </div>
 
-              {/* نام محصول */}
               <div className="space-y-2">
                 <label className="flex items-center text-blue-800 font-medium">
                   <FiTag className="mr-2" /> Product Name*
@@ -233,14 +231,12 @@ const AddProduct = () => {
                 />
               </div>
 
-              {/* دسته‌بندی */}
               <div className="space-y-2">
                 <label className="flex items-center text-blue-800 font-medium">
                   <BiCategory size={18} className="mr-2" /> Category*
                 </label>
 
                 <div className="relative group w-full">
-                  {/* دکمه بازکردن */}
                   <button
                     type="button"
                     className="flex justify-between w-full items-center bg-white border border-blue-300 rounded-lg px-4 py-3 text-blue-800 hover:border-blue-400 transition-colors duration-300 text-left"
@@ -259,10 +255,8 @@ const AddProduct = () => {
                     />
                   </button>
 
-                  {/* لیست دسته‌ها */}
                   {isCategoryOpen && (
                     <div className="absolute w-full z-20 mt-1 bg-white rounded-lg shadow-xl border border-blue-200 max-h-64 overflow-y-auto">
-                      {/* اگر دسته اصلی انتخاب نشده → لیست ۱۰ تا اصلی */}
                       {!selectedMainCategory &&
                         mainCategories.reverse().map((category) => (
                           <button
@@ -275,7 +269,6 @@ const AddProduct = () => {
                           </button>
                         ))}
 
-                      {/* اگر دسته اصلی انتخاب شد → لیست زیرمجموعه‌ها */}
                       {selectedMainCategory && (
                         <>
                           <div className="flex items-center px-4 py-2 border-b border-blue-100">
@@ -311,9 +304,7 @@ const AddProduct = () => {
                 </div>
               </div>
 
-              {/* قیمت‌ها */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* قیمت اصلی */}
                 <div className="space-y-2">
                   <label className="flex items-center text-blue-800 font-medium">
                     <FiDollarSign className="mr-2" /> Price*
@@ -338,7 +329,6 @@ const AddProduct = () => {
                   />
                 </div>
 
-                {/* موجودی */}
                 <div className="space-y-2">
                   <label className="flex items-center text-blue-800 font-medium">
                     <FiLayers className="mr-2" /> Stock Quantity*
@@ -358,7 +348,6 @@ const AddProduct = () => {
                 </div>
               </div>
 
-              {/* تخفیف */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <label className="flex items-center text-blue-800 font-medium">
@@ -443,7 +432,6 @@ const AddProduct = () => {
                 )}
               </div>
 
-              {/* پیشنهاد ویژه */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <label className="flex items-center text-blue-800 font-medium">
@@ -502,7 +490,6 @@ const AddProduct = () => {
                 )}
               </div>
 
-              {/* توضیحات */}
               <div className="space-y-2">
                 <label className="flex items-center text-blue-800 font-medium">
                   <FiAlignLeft className="mr-2" /> Description*
@@ -521,7 +508,6 @@ const AddProduct = () => {
                 />
               </div>
 
-              {/* دکمه‌های اقدام */}
               <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 pt-4">
                 <button
                   type="submit"

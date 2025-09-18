@@ -96,6 +96,11 @@ export const getPurchasesByStorekeepre = (storekeeperID) => {
   return api.get(url)
 }
 
+export const getPurchases = (storekeeperID) => {
+  const url = `/comments-api/purchases/`
+  return api.get(url)
+}
+
 export const getPurchaseByPayment = (paymentID) => {
   const url = `/comments-api/purchases/payment/${paymentID}/`
   return api.get(url)

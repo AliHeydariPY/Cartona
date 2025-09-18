@@ -12,7 +12,10 @@ import {
 import { getPayments } from "../../services/cartAPIServices";
 import { getProduct } from "../../services/productAPIServices";
 import SendNotePopup from "../../components/pop-ups/SendNotePopup";
-import { productSubmission } from "../../services/userAPIServices";
+import {
+  getStorekeeperPayments,
+  productSubmission,
+} from "../../services/userAPIServices";
 
 const Payments = () => {
   const [payments, setPayments] = useState([]);
@@ -20,7 +23,8 @@ const Payments = () => {
   const [payload, setPayload] = useState(null);
   useEffect(() => {
     const fetchPayments = async () => {
-      const productPaymentsRes = await getPayments(``);
+      const productPaymentsRes = await getStorekeeperPayments();
+
       const productPayments = await Promise.all(
         productPaymentsRes.data.map(async (productPayment) => {
           const product = await getProduct(productPayment.product);
@@ -122,7 +126,6 @@ const Payments = () => {
       className="lg:col-span-3"
     >
       <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-lg p-5 sm:p-6 2xl:p-8 border border-blue-400 hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300">
-        {/* هدر */}
         <div className="flex items-center justify-between mb-8">
           <div className="mb-2">
             <div className="flex items-center mb-1 sm:mb-0">
@@ -150,7 +153,6 @@ const Payments = () => {
           </div>
         </div>
 
-        {/* فیلترها و آمار */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
             <div className="flex items-center justify-between">
@@ -202,7 +204,6 @@ const Payments = () => {
           </div> */}
         </div>
 
-        {/* لیست پرداخت‌ها */}
         <div className="space-y-4">
           {payments.length === 0 ? (
             <div className="text-center py-12 bg-blue-50/50 rounded-2xl border border-blue-200">
@@ -224,7 +225,6 @@ const Payments = () => {
                 className="bg-gradient-to-r from-blue-50/80 to-cyan-50/80 rounded-2xl p-6 border border-blue-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300"
               >
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  {/* اطلاعات محصول */}
                   <div className="flex items-center space-x-4">
                     <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
                       <img
@@ -260,7 +260,6 @@ const Payments = () => {
                     </div>
                   </div>
 
-                  {/* اطلاعات پرداخت */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-blue-700 font-medium">Total:</span>
@@ -275,7 +274,7 @@ const Payments = () => {
                         size={16}
                       />
                       <span className="text-sm text-blue-600">
-                        {formatCardNumber(payment.fake_card_number)}
+                        {/* {formatCardNumber(payment.fake_card_number)} */}
                       </span>
                     </div>
 
@@ -292,7 +291,6 @@ const Payments = () => {
                     </p>
                   </div>
 
-                  {/* وضعیت و اقدامات */}
                   <div className="flex flex-col justify-between">
                     <div className="mb-4">
                       {getStatusBadge(

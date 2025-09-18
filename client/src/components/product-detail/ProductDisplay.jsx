@@ -44,7 +44,6 @@ const ProductDisplay = ({
 
   return (
     <div className="grid md:grid-cols-2 gap-4 md:gap-8 mb-6 md:mb-8">
-      {/* Product Image Gallery */}
       <div className="flex flex-col items-center">
         <div
           onClick={() => {
@@ -129,7 +128,6 @@ const ProductDisplay = ({
         </div>
       </div>
 
-      {/* Product Details */}
       <div className="flex flex-col">
         <h2 className="text-2xl font-bold text-blue-900 mb-3">
           {product.name}
@@ -139,7 +137,6 @@ const ProductDisplay = ({
           {product.short_description}
         </p>
 
-        {/* Rating Section */}
         <div className="flex items-center mb-3 gap-2">
           <div className="flex items-center bg-blue-100 px-2 py-1 rounded-full">
             <FiStar className="text-yellow-500 fill-yellow-500 mr-1 mb-0.5" />
@@ -171,7 +168,6 @@ const ProductDisplay = ({
           )}
         </div>
 
-        {/* Stock Status */}
         <div className="mb-4 flex items-center">
           <span
             className={`inline-block w-2 h-2 rounded-full mr-2 mb-0.25 ${
@@ -251,7 +247,6 @@ const ProductDisplay = ({
           </button>
         </div>
 
-        {/* Specifications */}
         {/* <div className="mt-6 space-y-3">
           <h3 className="font-semibold text-blue-900 border-b pb-2">
             Specifications
@@ -273,7 +268,6 @@ const ProductDisplay = ({
           </div>
         </div> */}
 
-        {/* Social Sharing */}
         <div className="mt-6 flex items-center justify-between border-t border-blue-500 pt-4">
           <span className="text-sm text-blue-600">Share this product:</span>
           <div className="flex gap-2">

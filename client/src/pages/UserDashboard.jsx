@@ -21,19 +21,33 @@ import {
 } from "react-icons/fi";
 import { MdStorefront, MdOutlineWorkspacePremium } from "react-icons/md";
 import BottomNav from "../components/BottomNav";
+import LogoutPopup from "../components/pop-ups/LogoutPopup";
+import { logout } from "../services/userAPIServices";
+import { useAtom } from "jotai";
+import { authAtom } from "../atoms/authAtom";
 
 const UserDashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [isSeller, setIsSeller] = useState(false); // حالت seller فعال است
+  const [isSeller, setIsSeller] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  const [isAuth] = useAtom(authAtom);
+
+  if (!isAuth) {
+    navigate("/");
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-700/30 via-cyan-600/20 to-blue-400/20 p-4 sm:p-7 lg:p-5 xl:p-9 relative overflow-hidden">
-      {/* Background circles */}
       <div className="absolute -top-24 -right-24 w-60 h-60 sm:w-72 sm:h-72 md:w-80 md:h-80 bg-cyan-500/40 rounded-full blur-3xl animate-pulse"></div>
       <div className="absolute bottom-8 left-4 w-72 h-72 sm:w-80 sm:h-80 md:w-96 md:h-96 bg-blue-700/30 rounded-full blur-3xl animate-pulse delay-1500"></div>
+      {showPopup && (
+        <LogoutPopup
+          onClose={() => setShowPopup(false)}
+          onConfirm={() => logout()}
+        />
+      )}
 
-      {/* Header */}
       <div className="relative bg-white/90 backdrop-blur-3xl rounded-2xl sm:rounded-3xl shadow-2xl p-4 sm:p-6 2xl:p-8 mb-4 sm:mb-7 lg:mb-5 xl:mb-9 border border-blue-400 transition-transform duration-300 hover:scale-[1.004] hover:shadow-blue-500/60">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-0">
           <div className="flex items-center">
@@ -84,7 +98,10 @@ const UserDashboard = () => {
               Settings
               <FiSettings className="ml-2 sm:ml-3" size={18} />
             </button>
-            <button className="bg-white ring cursor-pointer ring-blue-700 text-blue-700 px-5 py-1.75 sm:px-6 sm:py-3 rounded-full hover:bg-blue-100 hover:shadow-md transition-all duration-300 flex items-center justify-center font-semibold hover:scale-103 text-sm sm:text-base">
+            <button
+              onClick={() => setShowPopup(true)}
+              className="bg-white ring cursor-pointer ring-blue-700 text-blue-700 px-5 py-1.75 sm:px-6 sm:py-3 rounded-full hover:bg-blue-100 hover:shadow-md transition-all duration-300 flex items-center justify-center font-semibold hover:scale-103 text-sm sm:text-base"
+            >
               Logout
               <FiLogOut className="ml-2 sm:ml-3" size={18} />
             </button>
@@ -93,7 +110,6 @@ const UserDashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 pb-15 md:pb-0 sm:gap-7 lg:gap-5 xl:gap-9">
-        {/* Sidebar Menu */}
         <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-xl p-5 sm:p-6 2xl:p-8 h-fit border border-blue-400 hover:shadow-lg hover:shadow-blue-400/50 transition-all duration-300">
           <nav className="space-y-3 sm:space-y-4">
             {[
@@ -237,7 +253,6 @@ const UserDashboard = () => {
           )}
         </div>
 
-        {/* Main Content */}
         <Outlet />
       </div>
       <BottomNav />

@@ -24,7 +24,6 @@ const ProductDetailTabs = ({
 
   return (
     <>
-      {/* Tabs Header */}
       <div className="flex gap-4 sm:gap-6 border-b border-blue-300 mt-4 sm:mt-6">
         <button
           className={`pb-2 cursor-pointer flex items-center gap-1 sm:gap-2 font-semibold transition-colors duration-300 ${
@@ -59,7 +58,6 @@ const ProductDetailTabs = ({
         </button>
       </div>
 
-      {/* Reviews Section */}
       {activeTab === "description" && <Informations product={product} />}
 
       {activeTab === "reviews" && (

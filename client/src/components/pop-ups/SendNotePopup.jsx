@@ -44,7 +44,6 @@ const SendNotePopup = ({ onClose, onConfirm }) => {
           }`}
           onClick={stopPropagation}
         >
-          {/* Header */}
           <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-6 text-white">
             <div className="flex justify-between items-center">
               <h3 className="text-xl font-bold flex items-center">
@@ -62,7 +61,6 @@ const SendNotePopup = ({ onClose, onConfirm }) => {
             </div>
           </div>
 
-          {/* Body */}
           <div className="p-6">
             <textarea
               ref={textareaRef}
@@ -72,7 +70,6 @@ const SendNotePopup = ({ onClose, onConfirm }) => {
               className="w-full h-31 border border-blue-300 rounded-lg p-3 text-gray-800 focus:ring-2 focus:ring-blue-400 focus:outline-none resize-none transition-all duration-300"
             />
 
-            {/* Buttons */}
             <div className="grid grid-cols-2 gap-3 mt-6">
               <button
                 onClick={handleClose}

@@ -10,7 +10,6 @@ const Informations = ({ product }) => {
       variants={containerVariants}
       className="space-y-8 mt-4 sm:mt-6"
     >
-      {/* Product Description */}
       <motion.div
         variants={itemVariants}
         className="p-6 bg-white/90 border border-blue-200 rounded-2xl shadow-lg"
@@ -21,7 +20,6 @@ const Informations = ({ product }) => {
         <p className="text-blue-700 leading-relaxed">{product.description}</p>
       </motion.div>
 
-      {/* Product Features */}
       <motion.div
         variants={itemVariants}
         className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-2xl shadow-sm"

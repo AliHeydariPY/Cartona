@@ -17,7 +17,6 @@ import { authAtom } from "../atoms/authAtom.js";
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { query } = useParams();
   const [search, setSearch] = useState("");
   const [cartItems, setCartItems] = useState([]);

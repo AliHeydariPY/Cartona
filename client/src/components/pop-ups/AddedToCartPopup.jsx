@@ -30,21 +30,18 @@ const AddToCartPopup = ({ onClose, product }) => {
 
   return (
     <Portal>
-      {/* Overlay تاریک */}
       <div
         className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-colors duration-300 ${
           show ? "bg-black/30" : "bg-black/0"
         }`}
         onClick={handleClose}
       >
-        {/* محتوای پاپ‌آپ */}
         <div
           className={`bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-md relative overflow-hidden transform transition-all duration-300 ${
             show ? "opacity-100 scale-100" : "opacity-0 scale-95"
           }`}
           onClick={stopPropagation}
         >
-          {/* هدر پاپ‌آپ */}
           <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-6 text-white">
             <div className="flex justify-between items-center">
               <h3 className="text-xl font-bold flex items-center ">
@@ -64,7 +61,6 @@ const AddToCartPopup = ({ onClose, product }) => {
             </div>
           </div>
 
-          {/* بدنه پاپ‌آپ */}
           <div className="p-6">
             <div className="flex items-center mb-6">
               <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg flex items-center justify-center mr-4">
@@ -98,7 +94,6 @@ const AddToCartPopup = ({ onClose, product }) => {
               </div>
             </div>
 
-            {/* دکمه‌های اقدام */}
             <div className="space-y-3">
               <button
                 onClick={() => {

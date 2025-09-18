@@ -35,7 +35,6 @@ const RemoveImagePopup = ({ onClose, image, removeImage }) => {
           }`}
           onClick={stopPropagation}
         >
-          {/* Header */}
           <div className="bg-gradient-to-r from-rose-600 to-red-500 p-6 text-white">
             <div className="flex justify-between items-center">
               <h3 className="text-xl font-bold flex items-center">
@@ -54,7 +53,6 @@ const RemoveImagePopup = ({ onClose, image, removeImage }) => {
             </div>
           </div>
 
-          {/* Body */}
           <div className="p-6">
             <div className="flex items-center mb-6">
               <div className="w-24 h-24 sm:w-28 sm:h-28 border-2 border-red-400 rounded-lg flex items-center justify-center overflow-hidden p-2">
@@ -72,7 +70,6 @@ const RemoveImagePopup = ({ onClose, image, removeImage }) => {
               </div>
             </div>
 
-            {/* Buttons */}
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={handleClose}

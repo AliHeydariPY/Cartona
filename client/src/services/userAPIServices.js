@@ -14,6 +14,12 @@ export const login = async (userData) => {
   return response;
 };
 
+export const logout = async () => {
+  const response = await api.post("/api/logout/");
+  store.set(authAtom, false);
+  return response;
+};
+
 export const createUser = (userData) => {
   console.log(userData)
   const url = `${SERVER_URL}/user-api/users/`;
@@ -35,12 +41,19 @@ export const getStorekeeper = (storekeeperID) => {
   return axios.get(url);
 };
 
+export const getStorekeeperPayments = () => {
+  const url = `/user-api/storekeeper-payments/`;
+  return api.get(url);
+};
+
 export const getBuyer = (buyerID) => {
   const url = `${SERVER_URL}/user-api/users/${buyerID}`;
   return axios.get(url);
 };
 
 export const productSubmission = (payload) => {
-  const url = `${SERVER_URL}/user-api/delivery-status/`;
-  return axios.post(url, payload);
+  const url = `/user-api/delivery-status/`;
+  return api.post(url, payload);
 };
+
+

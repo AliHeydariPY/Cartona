@@ -68,7 +68,6 @@ export default function SearchPage() {
               transition={{ duration: 0.4 }}
               className="group relative bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg hover:shadow-xl border border-blue-200/50 hover:border-blue-300 transition-all duration-300 overflow-hidden"
             >
-              {/* تصویر محصول با افکت‌ها */}
               <div className="relative overflow-hidden">
                 <div className=" w-full h-80 flex items-center justify-center border-b-1 border-blue-300 mb-0 relative overflow-hidden p-7">
                   <img
@@ -78,7 +77,6 @@ export default function SearchPage() {
                   />
                 </div>
 
-                {/* پیشنهاد شگفت‌انگیز */}
                 {product.amazing_offer && (
                   <div className="absolute flex top-3 left-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg z-10">
                     <PiLightningFill className="mt-0.25 mr-0.75" size={13} />
@@ -86,7 +84,6 @@ export default function SearchPage() {
                   </div>
                 )}
 
-                {/* دکمه‌های اکشن */}
                 <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <button
                     onClick={() => toggleFavorite(product.id)}
@@ -120,16 +117,13 @@ export default function SearchPage() {
                 </div>
               </div>
 
-              {/* اطلاعات محصول */}
               <div className="p-4 space-y-3">
-                {/* نام و دسته‌بندی */}
                 <div>
                   <h3 className="font-bold text-blue-900 text-lg line-clamp-2 mb-1">
                     {product.name}
                   </h3>
                 </div>
 
-                {/* قیمت‌ها */}
                 <div className="flex items-center w-full justify-between gap-2 flex-wrap">
                   <div className="flex-wrap">
                     <span className="text-xl font-bold text-blue-800">
@@ -143,7 +137,6 @@ export default function SearchPage() {
                     )}
                   </div>
 
-                  {/* بدج تخفیف */}
                   {product.discount_percentage && (
                     <div className="right-3 flex bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg z-10">
                       <span className="mt-0.25 mr-1">
@@ -154,7 +147,6 @@ export default function SearchPage() {
                   )}
                 </div>
 
-                {/* امتیاز و نظرات */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="flex items-center bg-blue-100 px-2 py-1 rounded-full">
@@ -187,7 +179,6 @@ export default function SearchPage() {
                 </div>
               </div>
 
-              {/* تایمر تخفیف (اگر وجود داشته باشد) */}
               {product.discount_period ? (
                 <div className="px-4 pb-4">
                   <div className="bg-blue-100 rounded-lg p-2">

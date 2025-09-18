@@ -141,7 +141,7 @@ const CreateAccountForm = () => {
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="flex items-center"
+                      className="flex items-center text-red-500"
                     >
                       <FiX className="mr-1" size={14} />
                       {msg}
@@ -187,7 +187,7 @@ const CreateAccountForm = () => {
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="flex items-center"
+                      className="flex items-center text-red-500"
                     >
                       <FiX className="mr-1" size={14} />
                       {msg}

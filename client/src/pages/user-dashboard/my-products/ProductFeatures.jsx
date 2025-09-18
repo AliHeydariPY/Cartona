@@ -96,7 +96,6 @@ const ProductFeatures = ({ reloadComponent, setReloadComponent }) => {
       className="lg:col-span-3"
     >
       <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-xl p-5 sm:p-6 2xl:p-8 border border-blue-400 hover:shadow-lg hover:shadow-blue-400/50 transition-all duration-300">
-        {/* Header with Back Button */}
         <div className="flex items-center gap-y-2 flex-wrap-reverse justify-between mb-4 sm:mb-6">
           <div className="flex items-center">
             <span>
@@ -115,7 +114,6 @@ const ProductFeatures = ({ reloadComponent, setReloadComponent }) => {
           </button>
         </div>
 
-        {/* Product Info */}
         <div className="flex items-center gap-4 mb-6 sm:mb-8 p-2 sm:p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-200">
           <div className="flex justify-center items-center p-2 bg-white rounded-lg sm:rounded-xl border border-blue-200 shadow-inner w-24 h-24">
             <img
@@ -135,7 +133,6 @@ const ProductFeatures = ({ reloadComponent, setReloadComponent }) => {
           </div>
         </div>
 
-        {/* Formik Form */}
         <Formik
           initialValues={{ feature_name: "", feature_value: "" }}
           validationSchema={FeatureSchema}
@@ -190,7 +187,6 @@ const ProductFeatures = ({ reloadComponent, setReloadComponent }) => {
           )}
         </Formik>
 
-        {/* Features List */}
         <div className="space-y-3">
           <h3 className="text-base sm:text-lg md:text-xl font-semibold text-blue-800 mb-3">
             Added Features ({product.features_set.length})
@@ -248,7 +244,6 @@ const ProductFeatures = ({ reloadComponent, setReloadComponent }) => {
           />
         )}
 
-        {/* Quick Tips */}
         {product.features_set.length > 0 && (
           <div className="mt-6 p-3 sm:p-4 bg-cyan-50/50 rounded-xl border border-cyan-200">
             <p className="text-xs sm:text-sm md:text-base text-cyan-800">

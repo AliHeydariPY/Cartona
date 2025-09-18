@@ -73,7 +73,6 @@ const Notifications = () => {
       className="lg:col-span-3"
     >
       <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-lg p-5 sm:p-6 2xl:p-8 border border-blue-400 hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300">
-        {/* هدر */}
         <div className="flex items-center justify-between mb-8">
           
           <div className="mb-2">
@@ -101,7 +100,6 @@ const Notifications = () => {
           </div>
         </div>
 
-        {/* filter */}
         <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:gap-3 mb-4">
           {["All", "Unread", "Read"].map((status) => (
             <button
@@ -118,7 +116,6 @@ const Notifications = () => {
           ))}
         </div>
 
-        {/* لیست نوتیفیکیشن‌ها */}
         <div className="space-y-4">
           {notifications.length === 0 ? (
             <div className="text-center py-12 bg-blue-50/50 rounded-2xl border border-blue-200">
@@ -144,7 +141,6 @@ const Notifications = () => {
                 }`}
               >
                 <div className="flex items-start space-x-4">
-                  {/* آیکون */}
                   <div
                     className={`p-2 rounded-lg ${
                       notification.isRead ? "bg-blue-100" : "bg-white"
@@ -153,7 +149,6 @@ const Notifications = () => {
                     <MdOutlineStorefront className="text-blue-500" size={18} />
                   </div>
 
-                  {/* محتوا */}
                   <div className="flex-1 min-w-0">
                     <p
                       className={`text-sm ${
@@ -170,7 +165,6 @@ const Notifications = () => {
                     </p>
                   </div>
 
-                  {/* اقدامات */}
                   <div className="flex items-center space-x-2">
                     {!notification.isRead && (
                       <button
@@ -191,7 +185,6 @@ const Notifications = () => {
                   </div>
                 </div>
 
-                {/* دکمه‌های اقدام اضافی */}
                 {notification.product_id && (
                   <div className="mt-3 pt-3 border-t border-blue-100 flex space-x-2">
                     <button className="px-3 py-1 bg-blue-100 text-blue-700 text-xs rounded-lg hover:bg-blue-200 transition-colors duration-300">
@@ -209,7 +202,6 @@ const Notifications = () => {
           )}
         </div>
 
-        {/* پagination */}
         <div className="flex justify-center items-center mt-8 pt-6 border-t border-blue-200">
           <button className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-200 transition-colors duration-300">
             Load More

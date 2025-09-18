@@ -120,7 +120,6 @@ const ReviewPopup = ({ onClose, product, seller, setReloadComponent }) => {
               className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-lg sm:max-w-md relative overflow-hidden"
               onClick={stopPropagation}
             >
-              {/* هدر */}
               <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-4 sm:p-6 text-white">
                 <div className="flex flex-row justify-between items-center gap-3 sm:gap-0">
                   <div className="flex items-center">
@@ -145,9 +144,7 @@ const ReviewPopup = ({ onClose, product, seller, setReloadComponent }) => {
                 </div>
               </div>
 
-              {/* محتوا */}
               <div className="p-4 sm:p-6">
-                {/* ستاره‌ها */}
                 <div className="mb-3 sm:mb-4">
                   <label className="block text-sm font-medium text-blue-800 mb-1 sm:mb-2">
                     Your Rating
@@ -173,7 +170,6 @@ const ReviewPopup = ({ onClose, product, seller, setReloadComponent }) => {
                   </div>
                 </div>
 
-                {/* textarea */}
                 <div className="mb-5 sm:mb-6">
                   <textarea
                     rows={3}
@@ -184,7 +180,6 @@ const ReviewPopup = ({ onClose, product, seller, setReloadComponent }) => {
                   />
                 </div>
 
-                {/* دکمه‌ها */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <button
                     onClick={handleClose}
@@ -211,7 +206,6 @@ const ReviewPopup = ({ onClose, product, seller, setReloadComponent }) => {
                 </div>
               </div>
 
-              {/* فوتر */}
               <div className="px-4 sm:px-6 pb-4">
                 <p className="text-[10px] sm:text-xs text-blue-500/80 text-center">
                   Your review helps other shoppers make better decisions
