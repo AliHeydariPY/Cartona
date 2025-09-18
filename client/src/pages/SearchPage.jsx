@@ -59,9 +59,12 @@ export default function SearchPage() {
   return (
     <>
       {products.length < 1 ? (
-        <div className="bg-gradient-to-r from-blue-600 to-cyan-500 md:from-blue-50 md:to-blue-50">
+        <div className="bg-gradient-to-r from-blue-600 to-cyan-500 md:from-blue-50 md:to-blue-50 mb-20 md:mb-0">
           <Navbar isFocus={isFocus} setIsFocus={() => setIsFocus(false)} />
-          <ProductNotFound searchQuery={query} setIsFocus={() => setIsFocus(true)} />
+          <ProductNotFound
+            searchQuery={query}
+            setIsFocus={() => setIsFocus(true)}
+          />
         </div>
       ) : (
         <>
@@ -76,10 +79,19 @@ export default function SearchPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4 }}
-                  className="group relative bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg hover:shadow-xl border border-blue-200/50 hover:border-blue-300 transition-all duration-300 overflow-hidden"
+                  className={` group relative bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg hover:shadow-xl border border-blue-200/50 hover:border-blue-300 transition-all duration-300 overflow-hidden`}
                 >
                   <div className="relative overflow-hidden">
-                    <div className=" w-full h-80 flex items-center justify-center border-b-1 border-blue-300 mb-0 relative overflow-hidden p-7">
+                    <div
+                      onClick={() => {
+                        if (window.innerWidth <= 1024) {
+                          openInNewTab(`/product/${product.id}`);
+                        }
+                      }}
+                      className={`${
+                        window.innerWidth <= 1024 && "cursor-pointer"
+                      } w-full h-80 flex items-center justify-center border-b-1 border-blue-300 mb-0 relative overflow-hidden p-7`}
+                    >
                       <img
                         src={product.image}
                         alt={product.name}
@@ -97,44 +109,75 @@ export default function SearchPage() {
                       </div>
                     )}
 
-                    <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <button
-                        onClick={() => toggleFavorite(product.id)}
-                        className="p-2 cursor-pointer bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-rose-100 transition-colors duration-200"
-                      >
-                        {favorites.has(product.id) ? (
-                          <FaHeart className="text-rose-500" size={16} />
-                        ) : (
-                          <FiHeart className="text-rose-500" size={16} />
-                        )}
-                      </button>
+                    {window.innerWidth > 1024 && (
+                      <>
+                        <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <button
+                            onClick={() => toggleFavorite(product.id)}
+                            className="p-2 cursor-pointer bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-rose-100 transition-colors duration-200"
+                          >
+                            {favorites.has(product.id) ? (
+                              <FaHeart className="text-rose-500" size={16} />
+                            ) : (
+                              <FiHeart className="text-rose-500" size={16} />
+                            )}
+                          </button>
 
-                      <button
-                        onClick={() => {
-                          setProductID(product.id);
-                          setMainImages({ image: product.image });
-                          setShowImages(true);
-                        }}
-                        className="p-2 cursor-pointer bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-blue-100 transition-colors duration-200"
-                      >
-                        <FiEye className="text-blue-600" size={16} />
-                      </button>
-                    </div>
-                    <div className="absolute bottom-4 left-0 right-0 flex justify-center">
-                      <button
-                        onClick={() => openInNewTab(`/products/${product.id}`)}
-                        className="bg-white cursor-pointer px-6 py-2 rounded-full shadow-md shadow-blue-100 hover:bg-blue-500 hover:text-white transition-all duration-300 transform translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100"
-                      >
-                        Quick View
-                      </button>
-                    </div>
+                          <button
+                            onClick={() => {
+                              setProductID(product.id);
+                              setMainImages({ image: product.image });
+                              setShowImages(true);
+                            }}
+                            className="p-2 cursor-pointer bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-blue-100 transition-colors duration-200"
+                          >
+                            <FiEye className="text-blue-600" size={16} />
+                          </button>
+                        </div>
+                        <div className="absolute bottom-4 left-0 right-0 flex justify-center">
+                          <button
+                            onClick={() =>
+                              openInNewTab(`/product/${product.id}`)
+                            }
+                            className="bg-white cursor-pointer px-6 py-2 rounded-full shadow-md shadow-blue-100 hover:bg-blue-500 hover:text-white transition-all duration-300 transform translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100"
+                          >
+                            Quick View
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
 
                   <div className="p-4 space-y-3">
-                    <div>
+                    <div className="flex justify-between">
                       <h3 className="font-bold text-blue-900 text-lg line-clamp-2 mb-1">
                         {product.name}
                       </h3>
+                      {window.innerWidth <= 1024 && (
+                        <div className="flex gap-2  duration-300">
+                          <button
+                            onClick={() => toggleFavorite(product.id)}
+                            className="p-2 cursor-pointer bg-rose-100 rounded-full hover:bg-rose-200 transition-colors duration-300"
+                          >
+                            {favorites.has(product.id) ? (
+                              <FaHeart className="text-rose-500" size={16} />
+                            ) : (
+                              <FiHeart className="text-rose-500" size={16} />
+                            )}
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setProductID(product.id);
+                              setMainImages({ image: product.image });
+                              setShowImages(true);
+                            }}
+                            className="p-2 cursor-pointer bg-blue-100 rounded-full hover:bg-blue-200 transition-colors duration-300"
+                          >
+                            <FiEye className="text-blue-600" size={16} />
+                          </button>
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex items-center w-full justify-between gap-2 flex-wrap">

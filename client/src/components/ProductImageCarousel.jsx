@@ -117,7 +117,7 @@ const ProductImageCarousel = ({ productID, mainImage, onClose }) => {
                 .slice(0, window.innerWidth < 768 ? 4 : images.length)
                 .map((image, index) => (
                   <button
-                    key={image.id}
+                    key={index}
                     onClick={() => goToImage(index)}
                     className={`w-12 h-12 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
                       index === currentIndex
