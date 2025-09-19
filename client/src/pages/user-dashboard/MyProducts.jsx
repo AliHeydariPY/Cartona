@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
 import { getStorekeeperProducts } from "../../services/productAPIServices";
+import { getStorekeeper } from "../../services/userAPIServices";
 
 import {
   FiEdit,
@@ -23,11 +24,12 @@ export default function MyProducts({
   const navigate = useNavigate();
 
   useEffect(() => {
-    getStorekeeperProducts(localStorage.getItem("storekeeperID")).then(
-      (res) => {
-        setProducts(res.data);
-      }
-    );
+    getStorekeeper(localStorage.getItem("username"))
+      .then((res) => {
+        getStorekeeperProducts(res.data.id).then((res) => {
+          setProducts(res.data);
+        });
+      })
   }, [reloadComponent]);
 
   const openInNewTab = (url) => {
@@ -60,8 +62,6 @@ export default function MyProducts({
               >
                 <div
                   onClick={() => {
-                    console.log(product);
-
                     openInNewTab(`/product/${product.id}`);
                   }}
                   className="flex cursor-pointer justify-center items-center p-4 md:p-6 rounded-xl sm:rounded-2xl border-2 border-blue-200 shadow-inner w-full h-[260px] md:min-w-[260px] md:h-[260px]"

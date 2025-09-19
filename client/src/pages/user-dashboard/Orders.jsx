@@ -4,7 +4,7 @@ import { convertOffsetToTimes, motion } from "framer-motion";
 
 import { getPayments } from "../../services/cartAPIServices";
 import { getProduct } from "../../services/productAPIServices";
-import { getStorekeeper } from "../../services/userAPIServices";
+import { getStorekeeperById } from "../../services/userAPIServices";
 import {
   getCommentsByUser,
   getPurchaseByPayment,
@@ -43,7 +43,7 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
       const payments = await Promise.all(
         paymentsRes.data.map(async (payment) => {
           const productRes = await getProduct(payment.product);
-          const storekeeperRes = await getStorekeeper(
+          const storekeeperRes = await getStorekeeperById(
             productRes.data.storekeeper
           );
           try{
@@ -185,7 +185,7 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
       transition={{ duration: 0.4 }}
       className="lg:col-span-3"
     >
-      <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-lg p-5 sm:p-6 2xl:p-8 border border-blue-400 hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300">
+      <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-lg p-4 sm:p-6 2xl:p-8 border border-blue-400 hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300">
         <div className="sm:flex sm:items-center mb-4.75">
           <div className="mb-2">
             <div className="flex items-center mb-1 sm:mb-0">

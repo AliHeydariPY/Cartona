@@ -38,7 +38,6 @@ export const productFormSchema = Yup.object()
         .nullable()
         .transform((v, o) => (o === "" ? null : v)),
     })
-    // قوانین تخفیف
     .test("discount-rules", null, function (values) {
       const { discounted_price, discount_percentage, discount_period } =
         values || {};
@@ -49,7 +48,6 @@ export const productFormSchema = Yup.object()
 
       const errors = [];
 
-      // فقط یکی از price/percentage باید پر باشه
       if (hasPrice && hasPercent) {
         errors.push(
           this.createError({
@@ -60,7 +58,6 @@ export const productFormSchema = Yup.object()
         );
       }
 
-      // اگر یکی پر شد، period اجباریه
       if ((hasPrice || hasPercent) && !hasPeriod) {
         errors.push(
           this.createError({
@@ -70,7 +67,6 @@ export const productFormSchema = Yup.object()
         );
       }
 
-      // اگر period پر شد، یکی از price/percentage هم باید پر بشه
       if (hasPeriod && !hasPrice && !hasPercent) {
         const msg =
           "When entering a discount period, also fill in the discount price or discount percentage";
@@ -82,7 +78,6 @@ export const productFormSchema = Yup.object()
 
       return errors.length ? new Yup.ValidationError(errors) : true;
     })
-    // قوانین بخش "amazing offer"
     .test("amazing-offer-rules", null, function (values) {
       const { amazing_offer, amazing_offer_period } = values || {};
       const hasOffer = !!amazing_offer;
@@ -90,7 +85,6 @@ export const productFormSchema = Yup.object()
 
       const errors = [];
 
-      // اگر یکی پر شد، اون یکی هم باید پر باشه
       if (hasOffer && !hasOfferPeriod) {
         errors.push(
           this.createError({

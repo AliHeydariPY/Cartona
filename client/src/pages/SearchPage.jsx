@@ -25,15 +25,24 @@ export default function SearchPage() {
 
   const [isFocus, setIsFocus] = useState(false);
 
+  const [notFound, setNotFound] = useState(false);
+
   useEffect(() => {
     if (query) {
       searchProduct(`${query}`).then((res) => {
-        setProducts(res.data);
+        if (res.data[0]) {
+          setProducts(res.data);
+        } else {
+          setNotFound(true);
+        }
       });
     } else {
       getListProducts().then((res) => {
-        console.log(res.data);
-        setProducts(res.data);
+        if (res.data[0]) {
+          setProducts(res.data);
+        } else {
+          setNotFound(true);
+        }
       });
     }
   }, [query]);
@@ -56,17 +65,21 @@ export default function SearchPage() {
     window.open(url, "_blank", "noreferrer");
   };
 
+  if (notFound) {
+    return (
+      <div className="bg-gradient-to-r from-blue-600 to-cyan-500 md:from-blue-50 md:to-blue-50 mb-20 md:mb-0">
+        <Navbar isFocus={isFocus} setIsFocus={() => setIsFocus(false)} />
+        <ProductNotFound
+          searchQuery={query}
+          setIsFocus={() => setIsFocus(true)}
+        />
+      </div>
+    );
+  }
+
   return (
     <>
-      {products.length < 1 ? (
-        <div className="bg-gradient-to-r from-blue-600 to-cyan-500 md:from-blue-50 md:to-blue-50 mb-20 md:mb-0">
-          <Navbar isFocus={isFocus} setIsFocus={() => setIsFocus(false)} />
-          <ProductNotFound
-            searchQuery={query}
-            setIsFocus={() => setIsFocus(true)}
-          />
-        </div>
-      ) : (
+      {products[0] && (
         <>
           <Navbar />
           <div className="xl:grid xl:grid-cols-8 2xl:grid-cols-5 gap-5 mx-auto pb-20 md:pb-6 px-4 py-6 items-start">

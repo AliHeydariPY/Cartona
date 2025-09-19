@@ -40,7 +40,6 @@ const Navbar = ({isFocus = false, setIsFocus}) => {
   }, []);
 
   useEffect(() => {
-    console.log(isFocus)
     if(isFocus) {
       inputRef.current.focus()
       setIsFocus()
@@ -188,7 +187,7 @@ const Navbar = ({isFocus = false, setIsFocus}) => {
                 </div>
 
                 <span className="absolute -top-0.75 right-1.25 lg:-top-1 lg:-right-1 bg-blue-500 text-white text-xs rounded-full w-3.5 h-3.5 lg:w-5 lg:h-5 flex items-center justify-center">
-                  {notifications.length}
+                  {notifications.filter((n) => !n.is_read).length}
                 </span>
               </Link>
             </div>

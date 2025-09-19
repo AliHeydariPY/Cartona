@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getStorekeeper } from "../services/userAPIServices";
+import { getStorekeeper, getUser } from "../services/userAPIServices";
 import { authAtom } from "../atoms/authAtom";
 import { getDefaultStore } from "jotai";
 
@@ -29,7 +29,6 @@ const processQueue = (error, token = null) => {
 api.interceptors.request.use((config) => {
   if (accessToken) {
     config.headers["Authorization"] = `Bearer ${accessToken}`;
-
   }
   return config;
 });
@@ -67,9 +66,16 @@ api.interceptors.response.use(
         store.set(authAtom, true);
 
         //coming soon
-        const payload = JSON.parse(atob(accessToken.split(".")[1]));
-        console.log(payload);
-        getStorekeeper(payload.user_id)
+        const userData = JSON.parse(atob(accessToken.split(".")[1]));
+        console.log("refresh", userData);
+        getUser(userData.user_id)
+          .then((res) => {
+            console.log(res.data.username)
+            localStorage.setItem("username", res.data.username);
+          })
+          
+
+        getStorekeeper(userData.user_id)
           .then((res) => {
             console.log(res);
           })

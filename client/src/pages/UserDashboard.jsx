@@ -34,7 +34,6 @@ const UserDashboard = () => {
   const [showPopup, setShowPopup] = useState(false);
 
   useEffect(() => {
-    console.log(isAuth);
     if (!isAuth) {
       navigate("/");
     }
@@ -115,7 +114,7 @@ const UserDashboard = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 pb-15 md:pb-0 sm:gap-7 lg:gap-5 xl:gap-9">
-            <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-xl p-5 sm:p-6 2xl:p-8 h-fit border border-blue-400 hover:shadow-lg hover:shadow-blue-400/50 transition-all duration-300">
+            <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-xl p-4 sm:p-6 2xl:p-8 h-fit border border-blue-400 hover:shadow-lg hover:shadow-blue-400/50 transition-all duration-300">
               <nav className="space-y-3 sm:space-y-4">
                 {[
                   {

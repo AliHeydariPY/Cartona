@@ -296,7 +296,7 @@ body {
 
 /* custom scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 8px;
+  width: 5px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {

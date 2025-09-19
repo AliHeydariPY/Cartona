@@ -20,7 +20,7 @@ import {
 import { useNavigate, useParams } from "react-router-dom";
 
 import { getCategory } from "../services/productAPIServices";
-import { getStorekeeper } from "../services/userAPIServices";
+import { getStorekeeperById } from "../services/userAPIServices";
 
 const SearchFilters = () => {
   const navigate = useNavigate();
@@ -72,7 +72,7 @@ const SearchFilters = () => {
     });
 
     if (newFilters.storekeeper) {
-      getStorekeeper(newFilters.storekeeper).then((res) => {
+      getStorekeeperById(newFilters.storekeeper).then((res) => {
         setStorekeeperInfo(res.data);
       });
     } else {

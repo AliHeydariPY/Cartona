@@ -20,7 +20,7 @@ import {
   getProductQuestions,
   getCommentReplies,
 } from "../services/commentAPIServices";
-import { getStorekeeper } from "../services/userAPIServices";
+import { getStorekeeperById } from "../services/userAPIServices";
 import ProductNotFound from "../components/ProductNotFound";
 
 const ProductDetails = ({
@@ -66,7 +66,7 @@ const ProductDetails = ({
 
         setProduct(prodcutData);
 
-        const seller = getStorekeeper(selectedProduct.data.storekeeper);
+        const seller = getStorekeeperById(selectedProduct.data.storekeeper);
         seller.then((res) => {
           setSeller(res.data);
         });

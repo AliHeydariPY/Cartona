@@ -5,10 +5,11 @@ import { authAtom } from "../atoms/authAtom";
 
 const SERVER_URL = "https://127.0.0.1:8000";
 
-const store = getDefaultStore()
+const store = getDefaultStore();
 
 export const login = async (userData) => {
   const response = await api.post("/api/token/", userData);
+  console.log(response);
   sessionStorage.setItem("accessToken", response.data.access);
   store.set(authAtom, true);
   return response;
@@ -16,16 +17,21 @@ export const login = async (userData) => {
 
 export const logout = async () => {
   const response = await api.post("/api/logout/");
-  sessionStorage.removeItem('accessToken')
-  console.log("dsf")
+  sessionStorage.removeItem("accessToken");
+  console.log("dsf");
   store.set(authAtom, false);
   return response;
 };
 
 export const createUser = (userData) => {
-  console.log(userData)
+  console.log(userData);
   const url = `${SERVER_URL}/user-api/users/`;
   return axios.post(url, userData);
+};
+
+export const getUser = (userID) => {
+  const url = `/user-api/users/${userID}/`;
+  return api.get(url);
 };
 
 export const ChangeUserPassword = (userData) => {
@@ -43,7 +49,12 @@ export const upgradeToSeller = (formData) => {
   });
 };
 
-export const getStorekeeper = (storekeeperID) => {
+export const getStorekeeper = (storekeeperName) => {
+  const url = `${SERVER_URL}/user-api/storekeepers/username/${storekeeperName}/`;
+  return axios.get(url);
+};
+
+export const getStorekeeperById = (storekeeperID) => {
   const url = `${SERVER_URL}/user-api/storekeepers/${storekeeperID}/`;
   return axios.get(url);
 };
@@ -62,5 +73,3 @@ export const productSubmission = (payload) => {
   const url = `/user-api/delivery-status/`;
   return api.post(url, payload);
 };
-
-
