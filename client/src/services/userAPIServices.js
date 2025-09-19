@@ -28,6 +28,11 @@ export const createUser = (userData) => {
   return axios.post(url, userData);
 };
 
+export const ChangeUserPassword = (userData) => {
+  const url = `/user-api/users/username/${localStorage.getItem("username")}/`;
+  return api.patch(url, userData);
+};
+
 export const upgradeToSeller = (formData) => {
   const url = `/user-api/storekeepers/`;
 

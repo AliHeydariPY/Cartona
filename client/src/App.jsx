@@ -29,6 +29,7 @@ import RemoveFromCartPopup from "./components/pop-ups/RemoveFromCartPopup";
 import Payments from "./pages/user-dashboard/Payments";
 import LoginForm from "./pages/LoginForm";
 import BottomNav from "./components/BottomNav";
+import AccountSetting from "./pages/user-dashboard/AccountSetting";
 
 function App() {
   const [removeFromCartPopup, setRremoveFromCartPopup] = useState(false);
@@ -115,6 +116,8 @@ function App() {
 
           <Route path="add-product" element={<AddProduct />} />
 
+          <Route path="setting" element={<AccountSetting />} />
+
           <Route
             path="my-products"
             element={
@@ -126,6 +129,7 @@ function App() {
               />
             }
           />
+
           <Route
             path="my-products/features/:id"
             element={

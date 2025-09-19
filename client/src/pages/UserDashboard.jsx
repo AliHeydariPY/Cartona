@@ -1,6 +1,6 @@
 import { useAtom } from "jotai";
 import { authAtom } from "../atoms/authAtom";
-import { useNavigate, useLocation, Outlet } from "react-router-dom";
+import { useNavigate, useLocation, Outlet, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 import {
@@ -99,10 +99,10 @@ const UserDashboard = () => {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-5 w-full sm:w-auto">
-                <button className="bg-gradient-to-r cursor-pointer from-blue-700 to-cyan-500 text-white px-5 py-2 sm:px-6 sm:py-3 rounded-full hover:shadow-xl hover:shadow-blue-500/50 transition-all duration-300 flex items-center justify-center font-semibold hover:scale-103 text-sm sm:text-base">
-                  Settings
+                <Link to="setting" className="bg-gradient-to-r cursor-pointer from-blue-700 to-cyan-500 text-white px-5 py-2 sm:px-6 sm:py-3 rounded-full hover:shadow-xl hover:shadow-blue-500/50 transition-all duration-300 flex items-center justify-center font-semibold hover:scale-103 text-sm sm:text-base">
+                  Setting
                   <FiSettings className="ml-2 sm:ml-3" size={18} />
-                </button>
+                </Link>
                 <button
                   onClick={() => setShowPopup(true)}
                   className="bg-white ring cursor-pointer ring-blue-700 text-blue-700 px-5 py-1.75 sm:px-6 sm:py-3 rounded-full hover:bg-blue-100 hover:shadow-md transition-all duration-300 flex items-center justify-center font-semibold hover:scale-103 text-sm sm:text-base"
