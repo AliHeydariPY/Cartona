@@ -91,8 +91,11 @@ function App() {
             path="favorites"
             element={
               <Favorites
+                reloadComponent={reloadComponent}
+                setReloadComponent={setReloadComponent}
                 setAddToCartPopup={setAddToCartPopup}
                 setSelectedProduct={setSelectedProduct}
+                setRremoveFromCartPopup={setRremoveFromCartPopup}
               />
             }
           />

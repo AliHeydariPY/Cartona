@@ -1,12 +1,14 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import toast from "react-hot-toast";
 
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { productFormSchema } from "../../../validations/productForm";
 import ProductNotFound from "../../../components/ProductNotFound";
 
 import {
+  FiX,
   FiTag,
   FiImage,
   FiDollarSign,
@@ -18,6 +20,7 @@ import {
   FiChevronDown,
   FiSave,
   FiChevronLeft,
+  FiCheckCircle,
   FiEdit,
   FiPlusCircle,
   FiTrash2,
@@ -33,9 +36,6 @@ import {
   getCategory,
   editProduct,
 } from "../../../services/productAPIServices";
-
-// همون StoreSchema که ساختی:
-// import { StoreSchema } from "./validationSchema";
 
 const EditProduct = () => {
   const { id } = useParams();
@@ -121,12 +121,13 @@ const EditProduct = () => {
   };
 
   if (notFound) return <ProductNotFound />;
-  if (!product) return;
-  
+  if (!product || !selectedCategory) return;
+
   const initialValues = {
     id: id,
     image: image[0] || null,
     name: product.name || "",
+    category: selectedCategory.id || "",
     price: product.price || "",
     stock_quantity: product.stock_quantity || "",
     description: product.description || "",
@@ -172,9 +173,8 @@ const EditProduct = () => {
           initialValues={initialValues}
           validationSchema={productFormSchema}
           enableReinitialize
-          onSubmit={(values, onSubmitProps) => {
+          onSubmit={(values) => {
             const formData = new FormData();
-
             formData.append("id", id);
             if (image[0].name) {
               formData.append("image", values.image);
@@ -197,16 +197,41 @@ const EditProduct = () => {
             );
             formData.append("description", values.description);
             formData.append("images_set", values.images_set);
-            console.log(values.images_set);
-
-            console.log(Object.fromEntries(formData.entries()));
 
             editProduct(formData)
-              .then((res) => {
-                console.log("res", res);
+              .then(() => {
+                toast.custom((t) => (
+                  <div
+                    className={`${
+                      t.visible ? "animate-enter" : "animate-leave"
+                    } transform transition-all duration-300`}
+                  >
+                    <div className="bg-gradient-to-r from-green-500 to-cyan-400 text-white px-6 py-3 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-3">
+                      <div className="bg-blue-500/20 p-2 rounded-full">
+                        <FiCheckCircle className="text-xl text-white" />
+                      </div>
+                      <div>
+                        <p className="font-medium">
+                          The product was successfully updated
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ));
               })
-              .catch((err) => {
-                console.log("err", err);
+              .catch(() => {
+                toast.custom((t) => (
+                  <div
+                    className={`${
+                      t.visible ? "animate-enter" : "animate-leave"
+                    } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
+                  >
+                    <FiX className="text-xl shrink-0" />
+                    <span className="font-medium">
+                      There was a problem updating the product
+                    </span>
+                  </div>
+                ));
               });
           }}
         >
@@ -300,6 +325,8 @@ const EditProduct = () => {
                   <BiCategory size={18} className="mr-2" /> Category*
                 </label>
 
+                <Field type="hidden" name="category" />
+
                 <div className="relative group w-full">
                   <button
                     type="button"
@@ -355,6 +382,7 @@ const EditProduct = () => {
                               onClick={() => {
                                 setSelectedCategory(sub);
                                 setIsCategoryOpen(false);
+                                setFieldValue("category", sub.id);
                                 setSelectedMainCategory(null);
                               }}
                             >
@@ -366,6 +394,11 @@ const EditProduct = () => {
                     </div>
                   )}
                 </div>
+                <ErrorMessage
+                  name="category"
+                  component="div"
+                  className="text-red-500 text-sm mt-1 ml-0.5"
+                />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

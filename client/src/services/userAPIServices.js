@@ -66,6 +66,11 @@ export const getStorekeeperPayments = () => {
   return api.get(url);
 };
 
+export const deliveryStatus = () => {
+  const url = `/user-api/delivery-status/`;
+  return api.get(url);
+};
+
 export const getBuyer = (buyerID) => {
   const url = `${SERVER_URL}/user-api/users/${buyerID}`;
   return axios.get(url);

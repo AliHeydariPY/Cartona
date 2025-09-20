@@ -17,7 +17,6 @@ export const deleteProduct = (productID) => {
 };
 
 export const editProduct = (formData) => {
-  console.log(formData.get("id"));
   const url = `/product-api/products/${formData.get("id")}/`;
   return api.patch(url, formData, {
     headers: {

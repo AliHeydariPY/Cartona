@@ -216,27 +216,9 @@ const UserDashboard = () => {
                         : "hover:bg-gradient-to-r hover:from-cyan-100 hover:to-blue-200 text-blue-800 transition-colors duration-300"
                     }`}
                     onClick={() => {
-                      if (item.id == "profile") {
-                        navigate(`/account/profile`);
-                      } else if (item.id == "cart") {
-                        navigate("/account/cart");
-                      } else if (item.id == "favorites") {
-                        navigate("/account/favorites");
-                      } else if (item.id == "notifications") {
-                        navigate("/account/notifications");
-                      } else if (item.id == "orders") {
-                        navigate("/account/orders");
-                      } else if (item.id == "chats") {
-                        navigate("/account/chats");
-                      } else if (item.id == "my-products") {
-                        navigate("/account/my-products");
-                      } else if (item.id == "add-product") {
-                        navigate("/account/add-product");
-                      } else if (item.id == "payments") {
-                        navigate("/account/payments");
-                      } else if (item.id == "home") {
-                        navigate("/");
-                      }
+                      navigate(
+                        `${item.id != "home" ? `/account/${item.id}` : "/"}`
+                      );
                     }}
                   >
                     <span>{item.icon}</span>
@@ -259,8 +241,7 @@ const UserDashboard = () => {
                     </h3>
                   </div>
                   <p className="text-xs sm:text-sm text-blue-800 mb-4 sm:mb-5">
-                    Upgrade to a seller account to sell your products on
-                    Cartona
+                    Upgrade to a seller account to sell your products on Cartona
                   </p>
                   <Link
                     to="/upgrade-to-seller"
@@ -274,6 +255,7 @@ const UserDashboard = () => {
 
             <Outlet />
           </div>
+
           <BottomNav />
         </div>
       )}

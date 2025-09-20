@@ -191,7 +191,7 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
             <div className="flex items-center mb-1 sm:mb-0">
               <FiFileText className="text-green-600 mr-3" size={22} />
               <h1 className="text-base sm:text-lg md:text-2xl font-bold text-blue-800">
-                My Orders
+                Orders
               </h1>
             </div>
             <p className="text-blue-700 text-xs sm:text-sm ml-8 sm:ml-[34px]">

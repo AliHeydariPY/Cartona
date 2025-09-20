@@ -13,6 +13,7 @@ import { getPayments } from "../../services/cartAPIServices";
 import { getProduct } from "../../services/productAPIServices";
 import SendNotePopup from "../../components/pop-ups/SendNotePopup";
 import {
+  deliveryStatus,
   getStorekeeperPayments,
   productSubmission,
 } from "../../services/userAPIServices";
@@ -21,20 +22,22 @@ const Payments = () => {
   const [payments, setPayments] = useState([]);
   const [showSendNotePopup, setShowSendNotePopup] = useState(false);
   const [payload, setPayload] = useState(null);
+  
   useEffect(() => {
     const fetchPayments = async () => {
+      const paymentsStatus = await deliveryStatus();
       const productPaymentsRes = await getStorekeeperPayments();
 
       const productPayments = await Promise.all(
         productPaymentsRes.data.map(async (productPayment) => {
+          const isSent = paymentsStatus.data.some(
+            (payment) => productPayment.id === payment.payment
+          );
+
           const product = await getProduct(productPayment.product);
-          if (
-            product.data.storekeeper == localStorage.getItem("storekeeperID")
-          ) {
-            return { ...productPayment, product: product.data };
-          } else {
-            return null;
-          }
+          console.log(isSent);
+
+          return { ...productPayment, product: product.data, is_sent: isSent };
         })
       );
       console.log(productPayments.filter(Boolean));
@@ -42,6 +45,7 @@ const Payments = () => {
     };
     fetchPayments();
   }, []);
+
   // const payments = [
   //   {
   //     id: 6,

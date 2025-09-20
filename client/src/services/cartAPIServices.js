@@ -36,3 +36,18 @@ export const getPayments = () => {
   const url = `/cart-api/product-payments/`;
   return api.get(url);
 };
+
+export const getFavorites = () => {
+  const url = `/cart-api/favorite-items/`;
+  return api.get(url);
+};
+
+export const addFavorite = (productID) => {
+  const url = `/cart-api/favorite-items/`;
+  return api.post(url, {product: productID});
+};
+
+export const deleteFavorite = (FavoriteID) => {
+  const url = `/cart-api/favorite-items/${FavoriteID}/`;
+  return api.delete(url);
+};

@@ -21,7 +21,7 @@ import {
   FiShield,
   FiX,
   FiStar,
-  FiCheckCircle
+  FiCheckCircle,
 } from "react-icons/fi";
 
 const Cart = ({
@@ -39,7 +39,7 @@ const Cart = ({
       const cartProductsRes = await getCartProducts(
         localStorage.getItem("userID")
       );
-      console.log(cartProductsRes)
+      console.log(cartProductsRes);
       const productsData = await Promise.all(
         cartProductsRes.data.map(async (item) => {
           const productRes = await getProduct(item.product);
@@ -130,7 +130,7 @@ const Cart = ({
             <div className="flex items-center mb-2 sm:mb-0">
               <FiShoppingCart className="text-blue-600 mr-3" size={22} />
               <h1 className="text-base sm:text-lg md:text-2xl font-bold text-blue-800 ">
-                Your Shopping Cart
+                Shopping Cart
               </h1>
             </div>
             <span className="ml-auto bg-blue-600 text-white px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
@@ -340,7 +340,7 @@ const Cart = ({
                       const cartID = localStorage.getItem("userID");
                       totalCartPayment(cartID).then((res) => {
                         console.log(res.data);
-                        setReloadComponent(!reloadComponent)
+                        setReloadComponent(!reloadComponent);
                         toast.custom((t) => (
                           <div
                             className={`${

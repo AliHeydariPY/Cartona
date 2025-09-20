@@ -1,23 +1,38 @@
 import { motion } from "framer-motion";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
-import { FiStar, FiShoppingCart, FiHeart, FiEye } from "react-icons/fi";
-import { FaHeart, FaRegHeart, FaClock } from "react-icons/fa";
+import {
+  FiStar,
+  
+  FiHeart,
+  FiEye,
+  FiX,
+  FiCheckCircle,
+} from "react-icons/fi";
+import { FaHeart,  FaClock } from "react-icons/fa";
 
 import { PiLightningFill } from "react-icons/pi";
 import { BiSolidOffer } from "react-icons/bi";
 
-import Navbar from "../components/Navbar";
 import ProductImageCarousel from "../components/ProductImageCarousel";
-import { getListProducts, searchProduct } from "../services/productAPIServices";
+import Navbar from "../components/Navbar";
 import SearchFilters from "../components/SearchFilters";
 import BottomNav from "../components/BottomNav";
 import ProductNotFound from "../components/ProductNotFound";
 
+import { getListProducts, searchProduct } from "../services/productAPIServices";
+import {
+  addFavorite,
+  deleteFavorite,
+  getFavorites,
+} from "../services/cartAPIServices";
+
 export default function SearchPage() {
   const { query } = useParams();
   const [products, setProducts] = useState([]);
+  const [favorites, setFavorites] = useState([]);
 
   const [showImages, setShowImages] = useState(false);
   const [mainImage, setMainImages] = useState([]);
@@ -28,37 +43,100 @@ export default function SearchPage() {
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    if (query) {
-      searchProduct(`${query}`).then((res) => {
-        if (res.data[0]) {
-          setProducts(res.data);
-        } else {
-          setNotFound(true);
-        }
-      });
-    } else {
-      getListProducts().then((res) => {
-        if (res.data[0]) {
-          setProducts(res.data);
-        } else {
-          setNotFound(true);
-        }
-      });
-    }
+    const fetchProducts = async () => {
+      const favoriteProductsRes = await getFavorites();
+
+      if (query) {
+        searchProduct(`${query}`).then((res) => {
+          if (res.data[0]) {
+            setFavorites(favoriteProductsRes.data);
+            console.log(res.data);
+
+            setProducts(res.data);
+          } else {
+            setNotFound(true);
+          }
+        });
+      } else {
+        getListProducts().then((res) => {
+          if (res.data[0]) {
+            setProducts(res.data);
+          } else {
+            setNotFound(true);
+          }
+        });
+      }
+    };
+
+    fetchProducts();
   }, [query]);
 
-  const [favorites, setFavorites] = useState(new Set());
+  const handleRemoveFavorite = async (favoriteId) => {
+    try {
+      await deleteFavorite(favoriteId);
+      setFavorites((prev) => prev.filter((item) => item.id != favoriteId));
 
-  const toggleFavorite = (productId) => {
-    setFavorites((prev) => {
-      const newFavorites = new Set(prev);
-      if (newFavorites.has(productId)) {
-        newFavorites.delete(productId);
-      } else {
-        newFavorites.add(productId);
-      }
-      return newFavorites;
-    });
+      toast.custom((t) => (
+        <div
+          className={`${
+            t.visible ? "animate-enter" : "animate-leave"
+          } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
+        >
+          <div className="bg-blue-500/20 p-2 rounded-full">
+            <FiCheckCircle className="text-xl text-white" />
+          </div>
+          <div>
+            <p className="font-medium">Removed from favorites</p>
+          </div>
+        </div>
+      ));
+    } catch {
+      toast.custom((t) => (
+        <div
+          className={`${
+            t.visible ? "animate-enter" : "animate-leave"
+          } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
+        >
+          <FiX className="text-xl shrink-0" />
+          <span className="font-medium">Failed to remove from favorites</span>
+        </div>
+      ));
+    }
+  };
+
+  const handleAddFavorite = async (productId) => {
+    try {
+      const response = await addFavorite(productId);
+      setFavorites((prev) => [...prev, response.data]);
+
+      toast.custom((t) => (
+        <div
+          className={`${
+            t.visible ? "animate-enter" : "animate-leave"
+          } transform transition-all duration-300`}
+        >
+          <div className="bg-gradient-to-r from-green-500 to-cyan-400 text-white px-6 py-3 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-3">
+            <div className="bg-blue-500/20 p-2 rounded-full">
+              <FiCheckCircle className="text-xl text-white" />
+            </div>
+            <div>
+              <p className="font-medium">Added to favorites</p>
+            </div>
+          </div>
+        </div>
+      ));
+    } catch {
+      toast.custom((t) => (
+        <div
+          className={`${
+            t.visible ? "animate-enter" : "animate-leave"
+          } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
+        >
+          <FiX className="text-xl shrink-0" />
+          <span className="font-medium">Failed to add to favorites</span>
+        </div>
+      ));
+    }
   };
 
   const openInNewTab = (url) => {
@@ -79,7 +157,7 @@ export default function SearchPage() {
 
   return (
     <>
-      {products[0] && (
+      {products[0] && favorites && (
         <>
           <Navbar />
           <div className="xl:grid xl:grid-cols-8 2xl:grid-cols-5 gap-5 mx-auto pb-20 md:pb-6 px-4 py-6 items-start">
@@ -125,17 +203,28 @@ export default function SearchPage() {
                     {window.innerWidth > 1024 && (
                       <>
                         <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <button
-                            onClick={() => toggleFavorite(product.id)}
-                            className="p-2 cursor-pointer bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-rose-100 transition-colors duration-200"
-                          >
-                            {favorites.has(product.id) ? (
-                              <FaHeart className="text-rose-500" size={16} />
+                          {(() => {
+                            const favorite = favorites.find(
+                              (fav) => fav.product === product.id
+                            );
+                            return favorite ? (
+                              <button
+                                onClick={() =>
+                                  handleRemoveFavorite(favorite.id)
+                                }
+                                className="p-2 cursor-pointer bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-rose-100 transition-colors duration-200"
+                              >
+                                <FaHeart className="text-rose-500" size={16} />
+                              </button>
                             ) : (
-                              <FiHeart className="text-rose-500" size={16} />
-                            )}
-                          </button>
-
+                              <button
+                                onClick={() => handleAddFavorite(product.id)}
+                                className="p-2 cursor-pointer bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-rose-100 transition-colors duration-200"
+                              >
+                                <FiHeart className="text-rose-500" size={16} />
+                              </button>
+                            );
+                          })()}
                           <button
                             onClick={() => {
                               setProductID(product.id);
@@ -168,16 +257,28 @@ export default function SearchPage() {
                       </h3>
                       {window.innerWidth <= 1024 && (
                         <div className="flex gap-2  duration-300">
-                          <button
-                            onClick={() => toggleFavorite(product.id)}
-                            className="p-2 cursor-pointer bg-rose-100 rounded-full hover:bg-rose-200 transition-colors duration-300"
-                          >
-                            {favorites.has(product.id) ? (
-                              <FaHeart className="text-rose-500" size={16} />
+                          {(() => {
+                            const favorite = favorites.find(
+                              (fav) => fav.product === product.id
+                            );
+                            return favorite ? (
+                              <button
+                                onClick={() =>
+                                  handleRemoveFavorite(favorite.id)
+                                }
+                                className="p-2 cursor-pointer bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-rose-100 transition-colors duration-200"
+                              >
+                                <FaHeart className="text-rose-500" size={16} />
+                              </button>
                             ) : (
-                              <FiHeart className="text-rose-500" size={16} />
-                            )}
-                          </button>
+                              <button
+                                onClick={() => handleAddFavorite(product.id)}
+                                className="p-2 cursor-pointer bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-rose-100 transition-colors duration-200"
+                              >
+                                <FiHeart className="text-rose-500" size={16} />
+                              </button>
+                            );
+                          })()}
 
                           <button
                             onClick={() => {

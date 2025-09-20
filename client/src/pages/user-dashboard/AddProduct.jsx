@@ -36,7 +36,7 @@ const AddProduct = () => {
   const [isAmazingOffer, setIsAmazingOffer] = useState(false);
   // const { setFieldValue } = useFormikContext();
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
-  const [selectedMainCategory, setSelectedMainCategory] = useState(null); 
+  const [selectedMainCategory, setSelectedMainCategory] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [mainCategories, setMainCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
@@ -236,6 +236,12 @@ const AddProduct = () => {
                   <BiCategory size={18} className="mr-2" /> Category*
                 </label>
 
+                <Field
+                  type="hidden"
+                  name="category"
+                  value={selectedCategory?.id || ""}
+                />
+
                 <div className="relative group w-full">
                   <button
                     type="button"
@@ -290,6 +296,7 @@ const AddProduct = () => {
                               className="w-full cursor-pointer text-left px-4 py-2 hover:bg-blue-50 text-blue-800 transition-colors duration-200"
                               onClick={() => {
                                 setSelectedCategory(sub);
+                                setFieldValue("category", sub.id); 
                                 setIsCategoryOpen(false);
                                 setSelectedMainCategory(null);
                               }}
@@ -302,6 +309,12 @@ const AddProduct = () => {
                     </div>
                   )}
                 </div>
+
+                <ErrorMessage
+                  name="category"
+                  component="div"
+                  className="text-red-500 text-sm mt-1 ml-0.5"
+                />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

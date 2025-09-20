@@ -8,6 +8,7 @@ export const productFormSchema = Yup.object()
       .max(50, "at most 50 characters")
       .required("required"),
     price: Yup.number().required("required"),
+    category: Yup.string().required("Category is required"),
     stock_quantity: Yup.string()
       .min(1, "at least 1 ")
       .max(4, "at most 9999 ")
