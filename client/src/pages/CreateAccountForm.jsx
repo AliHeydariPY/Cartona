@@ -4,7 +4,13 @@ import * as Yup from "yup";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { FiCheckCircle, FiX, FiEye, FiEyeOff, FiUserPlus } from "react-icons/fi";
+import {
+  FiCheckCircle,
+  FiX,
+  FiEye,
+  FiEyeOff,
+  FiUserPlus,
+} from "react-icons/fi";
 import { createUser, login } from "../services/userAPIServices";
 import { useAtom } from "jotai";
 import { authAtom } from "../atoms/authAtom";
@@ -73,6 +79,9 @@ const CreateAccountForm = () => {
                 login({
                   username: values.username,
                   password: values.password,
+                }).then(() => {
+                  setSubmitting(false);
+                  navigate("/account/profile");
                 });
 
                 toast.custom((t) => (
@@ -87,14 +96,13 @@ const CreateAccountForm = () => {
                       <FiCheckCircle className="text-xl text-white" />
                     </div>
                     <div>
-                      <p className="font-medium">Account created successfully!</p>
+                      <p className="font-medium">
+                        Account created successfully!
+                      </p>
                       <p className="text-sm opacity-90">Welcome to Cartona</p>
                     </div>
                   </motion.div>
                 ));
-                
-                setSubmitting(false);
-                navigate("/account/profile");
               })
               .catch((error) => {
                 toast.custom((t) => (
@@ -202,7 +210,9 @@ const CreateAccountForm = () => {
                 transition={{ delay: 0.6 }}
                 className="bg-blue-50/50 p-3 rounded-lg border border-blue-200"
               >
-                <p className="text-xs font-medium text-blue-700 mb-2">Password must contain:</p>
+                <p className="text-xs font-medium text-blue-700 mb-2">
+                  Password must contain:
+                </p>
                 <ul className="text-xs text-blue-600 space-y-1">
                   <li className="flex items-center">
                     <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>
@@ -242,7 +252,9 @@ const CreateAccountForm = () => {
                   ) : (
                     <FiUserPlus size={18} />
                   )}
-                  <span>{isSubmitting ? "Creating account..." : "Create Account"}</span>
+                  <span>
+                    {isSubmitting ? "Creating account..." : "Create Account"}
+                  </span>
                 </button>
               </motion.div>
 

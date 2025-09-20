@@ -1,14 +1,15 @@
+import { useNavigate } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+
 import { upgradeToSeller } from "../services/userAPIServices";
 
 import toast from "react-hot-toast";
 import { FiCheckCircle, FiX } from "react-icons/fi";
-import { useState } from "react";
 
 const UpgradeToSeller = () => {
-  const [user, setUser] = useState(localStorage.getItem("username") || "")
-
+  const user = localStorage.getItem("username") || "";
+  const navigate = useNavigate()
 
   const StoreSchema = Yup.object().shape({
     user: Yup.string()
@@ -51,11 +52,10 @@ const UpgradeToSeller = () => {
             formData.append("address", values.address);
             formData.append("image", values.image);
 
-            const response = upgradeToSeller(formData);
-            response
+            upgradeToSeller(formData)
               .then((res) => {
-                console.log(res.data);
-                localStorage.setItem("storekeeperID", res.data.id)
+                
+                localStorage.setItem("storekeeperID", res.data.id);
                 toast.custom((t) => (
                   <div
                     className={`${
@@ -75,6 +75,7 @@ const UpgradeToSeller = () => {
                     </div>
                   </div>
                 ));
+                navigate('/account/profile')
               })
               .catch((err) => {
                 console.error(err);

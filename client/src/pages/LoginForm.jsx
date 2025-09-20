@@ -66,7 +66,10 @@ const LoginForm = () => {
               username: values.username,
               password: values.password,
             })
-              .then(() => {
+              .then((res) => {
+                console.log(res.data);
+                localStorage.setItem("username", values.username);
+
                 toast.custom((t) => (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}

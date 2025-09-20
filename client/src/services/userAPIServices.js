@@ -10,6 +10,7 @@ const store = getDefaultStore();
 export const login = async (userData) => {
   const response = await api.post("/api/token/", userData);
   console.log(response);
+
   sessionStorage.setItem("accessToken", response.data.access);
   store.set(authAtom, true);
   return response;
@@ -17,6 +18,7 @@ export const login = async (userData) => {
 
 export const logout = async () => {
   const response = await api.post("/api/logout/");
+  localStorage.removeItem("username");
   sessionStorage.removeItem("accessToken");
   console.log("dsf");
   store.set(authAtom, false);

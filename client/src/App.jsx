@@ -166,7 +166,7 @@ function App() {
         <Route path="/create-account" element={<CreateAccountForm />} />
         <Route path="/login" element={<LoginForm />} />
 
-        <Route path="/upgradeToSeller" element={<UpgradeToSeller />} />
+        <Route path="/upgrade-to-seller" element={<UpgradeToSeller />} />
 
         <Route
           path="/search"

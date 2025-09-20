@@ -103,10 +103,7 @@ const Notifications = () => {
 
     return (
       <div style={{ ...style, width: "98%" }}>
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.3 }}
+        <div
           className={`p-2 sm:p-4 rounded-xl border transition-all duration-300 mb-3 sm:mb-4 ${
             notification.is_read
               ? "bg-white border-blue-100"
@@ -223,7 +220,7 @@ const Notifications = () => {
               )}
             </div>
           )}
-        </motion.div>
+        </div>
       </div>
     );
   };
