@@ -1,18 +1,17 @@
 import { useState, useEffect } from "react";
 import { Portal } from "react-portal";
 
-import { FiX } from "react-icons/fi";
-import { RiQuestionAnswerLine } from "react-icons/ri";
+import { FiX, FiEdit3 } from "react-icons/fi";
 import { RiSendPlaneFill } from "react-icons/ri";
-import { answerProductQuestion } from "../../services/commentAPIServices";
+import { editProductQuestion } from "../../services/commentAPIServices";
 
-const AnswerQuestionPopup = ({
+const EditQuestionPopup = ({
   onClose,
   question,
   reloadComponent,
   setReloadComponent,
 }) => {
-  const [answer, setAnswer] = useState("");
+  const [editedQuestion, setEditedQuestion] = useState(question.questionText);
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -27,14 +26,14 @@ const AnswerQuestionPopup = ({
   const stopPropagation = (e) => e.stopPropagation();
 
   const handleSubmit = () => {
-    if (answer.trim() === "") return;
-    answerProductQuestion(
+    if (editedQuestion.trim() === "") return;
+    editProductQuestion(
       {
-        answer_text: answer,
+        question_text: editedQuestion,
       },
       question.questionID
     ).then(() => {
-      setAnswer("");
+      setEditedQuestion("");
       handleClose();
       setReloadComponent(!reloadComponent);
     });
@@ -58,9 +57,9 @@ const AnswerQuestionPopup = ({
             <div className="flex justify-between items-center">
               <h3 className="text-xl font-bold flex items-center">
                 <span className="bg-white/25 text-white rounded-full p-1.5 mr-2">
-                  <RiQuestionAnswerLine size={20} />
+                  <FiEdit3 size={18} />
                 </span>
-                Answer Question
+                Edti Question
               </h3>
               <button
                 onClick={handleClose}
@@ -78,11 +77,10 @@ const AnswerQuestionPopup = ({
               </p>
             </div>
 
-            <textarea
-              value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-              rows={4}
-              placeholder="Write your answer here..."
+            <input
+              value={editedQuestion}
+              onChange={(e) => setEditedQuestion(e.target.value)}
+              placeholder="Edit your question..."
               className="w-full p-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
 
@@ -108,4 +106,4 @@ const AnswerQuestionPopup = ({
   );
 };
 
-export default AnswerQuestionPopup;
+export default EditQuestionPopup;

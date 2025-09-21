@@ -53,6 +53,11 @@ export const deleteProductQuestion = (questionID) => {
   return api.delete(url);
 };
 
+export const editProductQuestion = (editedQuestion, questionID) => {
+  const url = `/comments-api/product-questions/${questionID}/`;
+  return api.patch(url, editedQuestion);
+};
+
 export const answerProductQuestion = (answer, questionID) => {
   console.log(questionID);
   const url = `/comments-api/product-questions/${questionID}/`;

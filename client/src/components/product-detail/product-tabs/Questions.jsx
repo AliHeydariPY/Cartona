@@ -2,10 +2,16 @@ import { motion } from "framer-motion";
 import { containerVariants, itemVariants } from "../../../utils/animations";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { FixedSizeList as List } from "react-window";
 import toast from "react-hot-toast";
 
-import { FiX, FiCheckCircle, FiAlertCircle, FiTrash2 } from "react-icons/fi";
-import { FixedSizeList as List } from "react-window";
+import {
+  FiX,
+  FiEdit3,
+  FiCheckCircle,
+  FiAlertCircle,
+  FiTrash2,
+} from "react-icons/fi";
 import { RiQuestionAnswerLine } from "react-icons/ri";
 
 import AnswerQuestionPopup from "../../pop-ups/AnswerQuestionPopup";
@@ -13,6 +19,7 @@ import DeleteQuestionPopup from "../../pop-ups/DeleteQuestionPopup";
 
 import { sendProductQuestion } from "../../../services/commentAPIServices";
 import { getUser } from "../../../services/userAPIServices";
+import EditQuestionPopup from "../../pop-ups/EditQuestionPopup";
 
 const Questions = ({
   productQuestions,
@@ -26,9 +33,10 @@ const Questions = ({
   const [user, setUser] = useState(null);
 
   const [showAnswerPopup, setShowAnswerPopup] = useState(false);
+  const [showEditPopup, setShowEditPopup] = useState(false);
   const [showDeletePopup, setShowDeletePopup] = useState(false);
 
-  const listHeight = Math.min(productQuestions.length * 116, 450);
+  const listHeight = Math.min(productQuestions.length * 116, 464);
 
   useEffect(() => {
     getUser().then((res) => {
@@ -112,6 +120,20 @@ const Questions = ({
                 }}
               >
                 <RiQuestionAnswerLine size={18} />
+              </button>
+            )}
+            {isUserQuestion && (
+              <button
+                className="p-2 cursor-pointer rounded-full hover:bg-blue-100 text-blue-600 transition-colors duration-300"
+                onClick={() => {
+                  setQuestion({
+                    questionText: faq.question_text,
+                    questionID: faq.id,
+                  });
+                  setShowEditPopup(true);
+                }}
+              >
+                <FiEdit3 size={18} />
               </button>
             )}
             {user[0].username == seller.user || isUserQuestion ? (
@@ -292,6 +314,15 @@ const Questions = ({
       {showAnswerPopup && (
         <AnswerQuestionPopup
           onClose={() => setShowAnswerPopup(false)}
+          question={question}
+          reloadComponent={reloadComponent}
+          setReloadComponent={setReloadComponent}
+        />
+      )}
+
+      {showEditPopup && (
+        <EditQuestionPopup
+          onClose={() => setShowEditPopup(false)}
           question={question}
           reloadComponent={reloadComponent}
           setReloadComponent={setReloadComponent}
