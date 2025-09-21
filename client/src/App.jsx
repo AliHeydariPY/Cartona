@@ -18,7 +18,7 @@ import Chat from "./pages/user-dashboard/Chat";
 import Notifications from "./pages/user-dashboard/Notifications";
 
 import SearchPage from "./pages/SearchPage";
-import SubCategory from "./pages/SubCategory";
+import SubCategories from "./pages/SubCategories";
 
 import ProductFeatures from "./pages/user-dashboard/my-products/ProductFeatures";
 import ProductImages from "./pages/user-dashboard/my-products/ProductImages";
@@ -197,7 +197,7 @@ function App() {
           }
         />
 
-        <Route path="/category/:categoryId" element={<SubCategory />} />
+        <Route path="/category/:categoryId" element={<SubCategories />} />
       </Routes>
     </>
   );

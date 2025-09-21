@@ -10,13 +10,12 @@ import { BiCategory } from "react-icons/bi";
 import { FiArrowLeft, FiChevronRight, FiList } from "react-icons/fi";
 import BottomNav from "../components/BottomNav";
 
-const SubCategory = () => {
+const SubCategories = () => {
   const { categoryId } = useParams();
   const navigate = useNavigate();
   const [subCategories, setSubCategories] = useState([]);
   const [subCategoryItmes, setSubCategoryItems] = useState([]);
   const [viewMode, setViewMode] = useState("grid");
-
   const [selectedCategory, setSelectedCategory] = useState(null);
 
   useEffect(() => {
@@ -154,7 +153,7 @@ const SubCategory = () => {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.4, delay: index * 0.1 }}
                   className="group cursor-pointer border-b border-blue-100 last:border-b-0 hover:bg-blue-50 transition-colors duration-300"
-                  onClick={() => navigate(`/search/category/${subCategory.id}`)}
+                  onClick={() => navigate(`/search/category=${subCategory.id}`)}
                 >
                   <div className="p-6 flex items-center justify-between">
                     <div className="flex items-center">
@@ -166,7 +165,10 @@ const SubCategory = () => {
                           {subCategory.name}
                         </h3>
                         <p className="text-blue-600 text-sm">
-                          {subCategory.product_count || 0} products available
+                          {subCategoryItmes.map((sub) => {
+                            return sub.id == subCategory.id ? sub.num : null;
+                          })}{" "}
+                          products available
                         </p>
                       </div>
                     </div>
@@ -198,4 +200,4 @@ const SubCategory = () => {
   );
 };
 
-export default SubCategory;
+export default SubCategories;

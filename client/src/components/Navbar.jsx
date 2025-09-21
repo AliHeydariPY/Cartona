@@ -44,7 +44,6 @@ const Navbar = ({isFocus = false, setIsFocus}) => {
       inputRef.current.focus()
       setIsFocus()
     }
-
   }, [isFocus])
 
   useEffect(() => {

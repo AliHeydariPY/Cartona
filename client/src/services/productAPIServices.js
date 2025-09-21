@@ -85,13 +85,13 @@ export const searchProduct = (query) => {
 };
 
 export const getListProducts = () => {
-  const url = `/product-api/list-products/`;
+  const url = `/product-api/products/`;
   return api.get(url);
 };
 
 
 export const getSubCategoryItems = (categoryID) => {
-  const url = `/product-api/list-products/?category=${categoryID}`;
+  const url = `/product-api/products/?category=${categoryID}`;
   return api.get(url);
 };
 

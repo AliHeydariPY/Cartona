@@ -43,14 +43,15 @@ export default function SearchPage() {
   useEffect(() => {
     const fetchProducts = async () => {
       const favoriteProductsRes = await getFavorites();
-
+      
       if (query) {
         searchProduct(`${query}`).then((res) => {
           if (res.data[0]) {
             setFavorites(favoriteProductsRes.data);
-            console.log(res.data);
 
             setProducts(res.data);
+            setNotFound(false);
+
           } else {
             setNotFound(true);
           }
@@ -59,6 +60,7 @@ export default function SearchPage() {
         getListProducts().then((res) => {
           if (res.data[0]) {
             setProducts(res.data);
+            setNotFound(false);
           } else {
             setNotFound(true);
           }

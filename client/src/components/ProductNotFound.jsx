@@ -112,7 +112,7 @@ const ProductNotFound = ({ searchQuery = "", setIsFocus }) => {
           </div>
         </div>
 
-        <div className="bg-blue-50/50 p-4 text-center border-t border-blue-200">
+        <div className={`${window.location.href.includes("account") ? "" : "bg-blue-50" } p-4 text-center border-t border-blue-200`}>
           <p className="text-sm text-blue-600">
             Need help?{" "}
             <a

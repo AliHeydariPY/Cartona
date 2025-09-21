@@ -371,8 +371,7 @@ const Favorites = ({
             </div>
           )}
 
-          {/* Pagination */}
-          {favorites.length > 0 && (
+          {/* {favorites.length > 0 && (
             <div className="flex justify-center mt-8">
               <nav className="flex items-center space-x-2">
                 <button className="px-3 py-2 cursor-pointer rounded-lg border border-blue-300 text-blue-600 hover:bg-blue-50 transition-colors">
@@ -389,7 +388,7 @@ const Favorites = ({
                 </button>
               </nav>
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </motion.div>
