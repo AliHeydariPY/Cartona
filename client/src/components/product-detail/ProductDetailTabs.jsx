@@ -13,7 +13,6 @@ const ProductDetailTabs = ({
   setShowAnswerPopup,
   setQuestion,
   setReloadComponent,
-  userID,
   productQuestions,
   reloadComponent,
   product,
@@ -74,7 +73,6 @@ const ProductDetailTabs = ({
           productQuestions={productQuestions}
           setShowAnswerPopup={setShowAnswerPopup}
           setQuestion={setQuestion}
-          userID={userID}
           seller={seller}
           setReloadComponent={setReloadComponent}
           reloadComponent={reloadComponent}

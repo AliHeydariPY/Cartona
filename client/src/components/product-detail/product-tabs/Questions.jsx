@@ -1,28 +1,41 @@
 import { motion } from "framer-motion";
 import { containerVariants, itemVariants } from "../../../utils/animations";
-
-import { useState } from "react";
-import toast from "react-hot-toast";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import toast from "react-hot-toast";
+
+import { FiX, FiCheckCircle, FiAlertCircle, FiTrash2 } from "react-icons/fi";
+import { FixedSizeList as List } from "react-window";
+import { RiQuestionAnswerLine } from "react-icons/ri";
+
+import AnswerQuestionPopup from "../../pop-ups/AnswerQuestionPopup";
+import DeleteQuestionPopup from "../../pop-ups/DeleteQuestionPopup";
 
 import { sendProductQuestion } from "../../../services/commentAPIServices";
-import AnswerQuestionPopup from "../../pop-ups/AnswerQuestionPopup";
-
-import { FiX, FiCheckCircle, FiEdit3, FiAlertCircle } from "react-icons/fi";
-import { FixedSizeList as List } from "react-window";
+import { getUser } from "../../../services/userAPIServices";
 
 const Questions = ({
   productQuestions,
-  userID,
   seller,
   setReloadComponent,
   reloadComponent,
 }) => {
-  const [questionText, setQuestionText] = useState("");
   const { id } = useParams();
-  const listHeight = Math.min(productQuestions.length * 116, 450);
-  const [showAnswerPopup, setShowAnswerPopup] = useState(false);
+  const [questionText, setQuestionText] = useState("");
   const [question, setQuestion] = useState("");
+  const [user, setUser] = useState(null);
+
+  const [showAnswerPopup, setShowAnswerPopup] = useState(false);
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+
+  const listHeight = Math.min(productQuestions.length * 116, 450);
+
+  useEffect(() => {
+    getUser().then((res) => {
+      console.log(res.data);
+      setUser(res.data);
+    });
+  }, []);
 
   const showValidationError = (context) => {
     toast.custom((t) => (
@@ -45,9 +58,23 @@ const Questions = ({
     ));
   };
 
+  if (!user) {
+    return (
+      <div className="mt-6 col-span-2 2xl:col-span-1">
+        <div className="w-full bg-white/80 backdrop-blur-lg rounded-2xl p-4 border border-white/30 shadow-lg">
+          <div className="animate-pulse">
+            <div className="h-6 bg-blue-200 rounded w-1/3 mb-4"></div>
+            <div className="h-4 bg-blue-200 rounded w-full mb-2"></div>
+            <div className="h-4 bg-blue-200 rounded w-2/3 "></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const QuestionItem = ({ index, style }) => {
     const faq = productQuestions[index];
-    const isUserQuestion = faq.user == localStorage.getItem("username");
+    const isUserQuestion = faq.user == user[0].username;
 
     return (
       <div
@@ -64,27 +91,43 @@ const Questions = ({
         }`}
       >
         <div className="flex items-center justify-between">
-          <p className="font-semibold text-blue-900">{faq.user}: {faq.question_text}</p>
+          <p className="font-semibold text-blue-900">
+            {faq.user}: {faq.question_text}
+          </p>
           <div className="flex items-center gap-2">
             {isUserQuestion && (
               <span className="px-2 py-1 text-xs font-bold rounded-full bg-blue-600 text-white">
                 Your Question
               </span>
             )}
-            {userID == seller.user && !faq.answer_text && (
+            {user[0].username == seller.user && !faq.answer_text && (
               <button
                 className="p-2 cursor-pointer rounded-full hover:bg-blue-100 text-blue-600 transition-colors duration-300"
                 onClick={() => {
-                  setShowAnswerPopup(true);
                   setQuestion({
                     questionText: faq.question_text,
                     questionID: faq.id,
                   });
+                  setShowAnswerPopup(true);
                 }}
               >
-                <FiEdit3 size={18} />
+                <RiQuestionAnswerLine size={18} />
               </button>
             )}
+            {user[0].username == seller.user || isUserQuestion ? (
+              <button
+                className="p-2 cursor-pointer rounded-full hover:bg-rose-100 text-rose-500 transition-colors duration-300"
+                onClick={() => {
+                  setQuestion({
+                    questionText: faq.question_text,
+                    questionID: faq.id,
+                  });
+                  setShowDeletePopup(true);
+                }}
+              >
+                <FiTrash2 size={18} />
+              </button>
+            ) : null}
           </div>
         </div>
 
@@ -124,7 +167,6 @@ const Questions = ({
                 if (questionText.trim() !== "") {
                   sendProductQuestion({
                     product: id,
-                    user: userID,
                     question_text: questionText,
                   })
                     .then(() => {
@@ -172,14 +214,13 @@ const Questions = ({
             }}
             type="text"
             placeholder="Type your question here..."
-            className="flex-1 border border-blue-300 rounded-lg px-2 sm:px-3 py-1 sm:py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-300"
+            className="flex-1 text-blue-950 border border-blue-300 rounded-lg px-2 sm:px-3 py-1 sm:py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-300"
           />
           <button
             onClick={() => {
               if (questionText.trim() !== "") {
                 sendProductQuestion({
                   product: id,
-                  user: userID,
                   question_text: questionText,
                 })
                   .then(() => {
@@ -205,7 +246,7 @@ const Questions = ({
                     ));
                   })
                   .catch((err) => {
-                    console.log(err)
+                    console.log(err);
                     toast.custom((t) => (
                       <div
                         className={`${
@@ -251,6 +292,15 @@ const Questions = ({
       {showAnswerPopup && (
         <AnswerQuestionPopup
           onClose={() => setShowAnswerPopup(false)}
+          question={question}
+          reloadComponent={reloadComponent}
+          setReloadComponent={setReloadComponent}
+        />
+      )}
+
+      {showDeletePopup && (
+        <DeleteQuestionPopup
+          onClose={() => setShowDeletePopup(false)}
           question={question}
           reloadComponent={reloadComponent}
           setReloadComponent={setReloadComponent}

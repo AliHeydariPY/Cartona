@@ -48,6 +48,11 @@ export const sendProductQuestion = (question) => {
   return api.post(url, question);
 };
 
+export const deleteProductQuestion = (questionID) => {
+  const url = `/comments-api/product-questions/${questionID}/`;
+  return api.delete(url);
+};
+
 export const answerProductQuestion = (answer, questionID) => {
   console.log(questionID);
   const url = `/comments-api/product-questions/${questionID}/`;

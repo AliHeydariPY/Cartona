@@ -34,7 +34,6 @@ const ProductDetails = ({
 }) => {
   const { id } = useParams();
 
-  const userID = localStorage.getItem("userID");
   const [product, setProduct] = useState(null);
   const [productComments, setProductComments] = useState(null);
   const [productQuestions, setProductQuestions] = useState(null);
@@ -152,7 +151,6 @@ const ProductDetails = ({
                 setShowAnswerPopup={setShowAnswerPopup}
                 setQuestion={setQuestion}
                 setReloadComponent={setReloadComponent}
-                userID={userID}
                 productQuestions={productQuestions}
                 id={id}
                 reloadComponent={reloadComponent}

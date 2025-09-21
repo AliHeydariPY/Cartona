@@ -79,7 +79,6 @@ const SearchFilters = () => {
       setStorekeeperInfo(true);
     }
 
-    console.log(newFilters);
     setInitialFilters(newFilters);
     setIsReady(true);
   }, [query]);
@@ -262,31 +261,32 @@ const SearchFilters = () => {
                       </div>
                     )}
 
-                    {(initialFilters.category && location.pathname.includes("/search/category")) && (
-                      <div className="mb-4 p-3 rounded-lg bg-blue-100 border border-blue-300 text-blue-800 text-sm flex items-center justify-between">
-                        <span>
-                          viewing products in the{" "}
-                          <span className="font-semibold">
-                            {initialFilters.category.name}
-                          </span>{" "}
-                          category
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setInitialFilters({
-                              ...initialFilters,
-                              storekeeper: "",
-                            });
+                    {initialFilters.category &&
+                      location.pathname.includes("/search/category") && (
+                        <div className="mb-4 p-3 rounded-lg bg-blue-100 border border-blue-300 text-blue-800 text-sm flex items-center justify-between">
+                          <span>
+                            viewing products in the{" "}
+                            <span className="font-semibold">
+                              {initialFilters.category.name}
+                            </span>{" "}
+                            category
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setInitialFilters({
+                                ...initialFilters,
+                                storekeeper: "",
+                              });
 
-                            navigate("/search");
-                          }}
-                          className="text-red-600 hover:text-red-800 "
-                        >
-                          exit
-                        </button>
-                      </div>
-                    )}
+                              navigate("/search");
+                            }}
+                            className="text-red-600 hover:text-red-800 "
+                          >
+                            exit
+                          </button>
+                        </div>
+                      )}
 
                     <div className="space-y-7">
                       <div className="border-b border-blue-400 pb-4">

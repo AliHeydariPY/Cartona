@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Portal } from "react-portal";
 
-import { FiX, FiMessageSquare, FiSend } from "react-icons/fi";
-
+import { FiX } from "react-icons/fi";
+import { RiQuestionAnswerLine } from "react-icons/ri";
+import { RiSendPlaneFill } from "react-icons/ri";
 import { answerProductQuestion } from "../../services/commentAPIServices";
 
 export default function AnswerQuestionPopup({
@@ -35,7 +36,7 @@ export default function AnswerQuestionPopup({
       question.questionID
     ).then(() => {
       setAnswer("");
-      onClose();
+      handleClose();
       setReloadComponent(!reloadComponent);
     });
   };
@@ -57,11 +58,11 @@ export default function AnswerQuestionPopup({
           <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-6 text-white">
             <div className="flex justify-between items-center">
               <h3 className="text-xl font-bold flex items-center">
-                <FiMessageSquare
-                  className="mr-2 bg-white text-blue-600 rounded-full p-0.75"
-                  size={26}
-                  strokeWidth={2}
-                />
+                <span className="bg-white/25 text-white rounded-full p-1.5 mr-2">
+                  <RiQuestionAnswerLine
+                    size={20}
+                  />
+                </span>
                 Answer Question
               </h3>
               <button
@@ -99,7 +100,7 @@ export default function AnswerQuestionPopup({
                 onClick={handleSubmit}
                 className="px-4 cursor-pointer py-2 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-500 text-white flex items-center gap-2 hover:shadow-lg transition-all duration-200"
               >
-                <FiSend size={18} />
+                <RiSendPlaneFill size={18} />
                 Submit
               </button>
             </div>

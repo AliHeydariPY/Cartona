@@ -20,7 +20,7 @@ export const logout = async () => {
   const response = await api.post("/api/logout/");
   localStorage.removeItem("username");
   sessionStorage.removeItem("accessToken");
-  console.log("dsf");
+
   store.set(authAtom, false);
   return response;
 };
@@ -31,8 +31,13 @@ export const createUser = (userData) => {
   return axios.post(url, userData);
 };
 
-export const getUser = (userID) => {
+export const getUserById = (userID) => {
   const url = `/user-api/users/${userID}/`;
+  return api.get(url);
+};
+
+export const getUser = () => {
+  const url = `/user-api/users/`;
   return api.get(url);
 };
 
