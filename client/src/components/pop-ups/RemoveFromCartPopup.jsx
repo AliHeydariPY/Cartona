@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import { deleteCartProduct } from "../../services/cartAPIServices";
 import { deleteProduct } from "../../services/productAPIServices";
 
-import { FiX, FiTrash2, FiCheckCircle } from "react-icons/fi";
+import { FiX, FiTrash2, FiCheckCircle, FiStar } from "react-icons/fi";
 
 const RemoveFromCartPopup = ({
   onClose,
@@ -45,9 +45,7 @@ const RemoveFromCartPopup = ({
                 <FiCheckCircle className="text-xl text-white" />
               </div>
               <div>
-                <p className="font-medium">
-                  Product successfully deleted
-                </p>
+                <p className="font-medium">Product successfully deleted</p>
               </div>
             </div>
           </div>
@@ -67,7 +65,7 @@ const RemoveFromCartPopup = ({
         onClick={handleClose}
       >
         <div
-          className={`bg-white backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-md relative overflow-hidden transform transition-all duration-300 ${
+          className={`bg-white rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-md relative overflow-hidden transform transition-all duration-300 ${
             show ? "opacity-100 scale-100" : "opacity-0 scale-95"
           }`}
           onClick={stopPropagation}
@@ -104,9 +102,15 @@ const RemoveFromCartPopup = ({
                 <p className="text-rose-600">
                   ${Number(product.price).toFixed(2)}
                 </p>
-                <p className="text-sm text-gray-500 mt-1">
-                  Qty: {product.stock_quantity}
-                </p>
+                <div className="flex items-center mt-0.5 gap-2">
+                  <div className="flex text-sm items-center bg-red-100 px-2 py-1 rounded-full">
+                    <FiStar className="text-yellow-500 fill-yellow-500 mr-1 mb-0.5" />
+                    <span className=" text-blue-800">
+                      {product.average_rating?.toFixed(1) || "0"}
+                    </span>
+                  </div>
+                 
+                </div>
               </div>
             </div>
 

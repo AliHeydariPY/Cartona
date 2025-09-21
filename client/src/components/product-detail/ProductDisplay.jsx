@@ -11,16 +11,10 @@ import {
   deleteFavorite,
 } from "../../services/cartAPIServices";
 
-import {
-  FiShoppingCart,
-  FiHeart,
-  FiStar,
-  FiShare2,
-  FiX,
-  FiCheckCircle,
-} from "react-icons/fi";
+import { FiShoppingCart, FiHeart, FiStar, FiShare2, FiX } from "react-icons/fi";
 import { BiSolidOffer } from "react-icons/bi";
 import { FaHeart } from "react-icons/fa";
+import { IoCart, IoCartOutline } from "react-icons/io5";
 
 import ProductImageCarousel from "../ProductImageCarousel";
 
@@ -50,7 +44,6 @@ const ProductDisplay = ({
         return favoriteProductsRes.data.find((fav) => fav.product == id);
       });
 
-      console.log(favoriteProductsRes.data.find((fav) => fav.product == id));
       setIsInCart(() => {
         const hasCart = cartProductsRes.data.find(
           (cartProduct) => cartProduct.product == product.id
@@ -64,7 +57,20 @@ const ProductDisplay = ({
 
   const handleAddToCart = async () => {
     try {
-      setSelectedProduct(product);
+      setSelectedProduct(() => {
+        const currentPrice = product.discounted_price
+          ? product.discounted_price
+          : product.price;
+        const payload = {
+          image: product.image,
+          name: product.name,
+          price: currentPrice,
+          average_rating: product.average_rating,
+        };
+
+        return payload;
+      });
+
       const response = addToCart({
         product: id,
         quantity: 1,
@@ -93,12 +99,13 @@ const ProductDisplay = ({
         const currentPrice = product.discounted_price
           ? product.discounted_price
           : product.price;
+
         const payload = {
           id: isInCart.id,
           image: product.image,
           name: product.name,
           price: currentPrice,
-          stock_quantity: product.stock_quantity,
+          average_rating: product.average_rating,
         };
 
         return payload;
@@ -124,21 +131,6 @@ const ProductDisplay = ({
     try {
       await deleteFavorite(favoriteId);
       setFavoriteEntry(undefined);
-
-      toast.custom((t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
-        >
-          <div className="bg-blue-500/20 p-2 rounded-full">
-            <FiCheckCircle className="text-xl text-white" />
-          </div>
-          <div>
-            <p className="font-medium">Removed from favorites</p>
-          </div>
-        </div>
-      ));
     } catch {
       toast.custom((t) => (
         <div
@@ -154,27 +146,9 @@ const ProductDisplay = ({
   };
 
   const handleAddFavorite = async (productId) => {
-    console.log(productId)
     try {
       const response = await addFavorite(productId);
       setFavoriteEntry(response.data);
-
-      toast.custom((t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } transform transition-all duration-300`}
-        >
-          <div className="bg-gradient-to-r from-green-500 to-cyan-400 text-white px-6 py-3 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-3">
-            <div className="bg-blue-500/20 p-2 rounded-full">
-              <FiCheckCircle className="text-xl text-white" />
-            </div>
-            <div>
-              <p className="font-medium">Added to favorites</p>
-            </div>
-          </div>
-        </div>
-      ));
     } catch {
       toast.custom((t) => (
         <div
@@ -350,14 +324,15 @@ const ProductDisplay = ({
               onClick={handleRemoveFromCart}
               className="flex-1 text-base md:text-sm lg:text-base cursor-pointer py-3 rounded-lg sm:rounded-xl font-semibold transition-colors duration-300 flex items-center justify-center bg-gradient-to-r from-rose-600 to-red-500 hover:from-rose-700 hover:to-red-600 text-white"
             >
-              <FiShoppingCart className="mr-2 md:mr-1 lg:mr-2 mb-0.5" /> Remove from Cart
+               <IoCart className="text-white mr-1.5 md:mr-1 lg:mr-1.5 mb-0.5" size={20} /> Remove
+              from Cart
             </button>
           ) : (
             <button
               onClick={handleAddToCart}
               className="flex-1 text-base md:text-sm lg:text-base cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white py-3 rounded-lg sm:rounded-xl font-semibold transition-colors duration-300 flex items-center justify-center"
             >
-              <FiShoppingCart className="mr-2 md:mr-0.5 lg:mr-2 mb-0.5" /> Add to Cart
+              <IoCartOutline className="text-white mr-1.5 md:mr-1 lg:mr-1.5 mb-0.5" size={20} /> Add to Cart
             </button>
           )}
 
@@ -366,14 +341,16 @@ const ProductDisplay = ({
               onClick={() => handleRemoveFavorite(favoriteEntry.id)}
               className="flex-1 text-base md:text-sm lg:text-base cursor-pointer py-3 rounded-lg sm:rounded-xl font-semibold transition-colors duration-300 flex items-center justify-center bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white"
             >
-              <FaHeart className="mr-2 md:mr-0.5 lg:mr-2 mb-0.5" /> Remove from Wishlist
+              <FaHeart className="mr-1.5 md:mr-0.5 lg:mr-1.5 mb-0.5" /> Remove from
+              Wishlist
             </button>
           ) : (
             <button
               onClick={() => handleAddFavorite(id)}
               className="flex-1 text-base md:text-sm lg:text-base cursor-pointer bg-white ring ring-rose-300 text-rose-600 py-3 rounded-lg sm:rounded-xl font-medium hover:bg-rose-50 transition-colors duration-300 flex items-center justify-center"
             >
-              <FiHeart className=" mr-2 md:mr-0.5 lg:mr-2 mb-0.5 text-rose-500"  /> Add to Wishlist
+              <FiHeart className=" mr-1.5 md:mr-0.5 lg:mr-1.5 mb-0.5 text-rose-500" />{" "}
+              Add to Wishlist
             </button>
           )}
         </div>

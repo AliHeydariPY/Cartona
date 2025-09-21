@@ -37,7 +37,7 @@ const AddToCartPopup = ({ onClose, product }) => {
         onClick={handleClose}
       >
         <div
-          className={`bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-md relative overflow-hidden transform transition-all duration-300 ${
+          className={`bg-white rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-md relative overflow-hidden transform transition-all duration-300 ${
             show ? "opacity-100 scale-100" : "opacity-0 scale-95"
           }`}
           onClick={stopPropagation}
@@ -47,8 +47,8 @@ const AddToCartPopup = ({ onClose, product }) => {
               <h3 className="text-xl font-bold flex items-center ">
                 <FiCheck
                 strokeWidth={4}
-                  className="mr-2 bg-white text-green-500 rounded-full p-0.5"
-                  size={22}
+                  className="mr-2 bg-white/30 text-white rounded-full p-1"
+                  size={28}
                 />
                 Added to Cart!
               </h3>
@@ -63,33 +63,28 @@ const AddToCartPopup = ({ onClose, product }) => {
 
           <div className="p-6">
             <div className="flex items-center mb-6">
-              <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg flex items-center justify-center mr-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-300 via-cyan-200 to-white rounded-full shadow-inner"></div>
-              </div>
-              {/* <div className="w-22 h-22 border-2 border-blue-400 rounded-lg flex items-center justify-center mb-4 sm:mb-0 relative overflow-hidden">
+              <div className="w-22 h-22 border-2 border-blue-400 rounded-lg flex items-center justify-center mb-4 sm:mb-0 relative overflow-hidden p-1">
                 <img
                   src={product.image}
                   alt=""
-                  className="max-w-full max-h-full object-contain"
+                  className="max-w-full max-h-full object-contain rounded-md"
                 />
-              </div> */}
+              </div>
               <div className="ml-3">
                 <h4 className="font-bold text-blue-900">
                   {product.name}
                 </h4>
-                <p className="text-blue-600">${Number(product.discounted_price).toFixed(2)}</p>
-                <div className="flex items-center mt-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <FiStar
-                      key={star}
-                      className={`${
-                        star <= 4
-                          ? "text-amber-400 fill-current"
-                          : "text-gray-300"
-                      } mr-0.5`}
-                      size={14}
-                    />
-                  ))}
+                
+                <p className="text-blue-600">${Number(product.price).toFixed(2)}</p>
+
+                <div className="flex items-center mt-0.5 gap-2">
+                  <div className="flex text-sm items-center bg-blue-100 px-2 py-1 rounded-full">
+                    <FiStar className="text-yellow-500 fill-yellow-500 mr-1 mb-0.5" />
+                    <span className=" text-blue-800">
+                      {product.average_rating?.toFixed(1) || "0"}
+                    </span>
+                  </div>
+                 
                 </div>
               </div>
             </div>

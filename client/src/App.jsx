@@ -65,8 +65,8 @@ function App() {
       {addToCartPopup && (
         <AddedToCartPopup
           onClose={() => setAddToCartPopup(false)}
-          // product={selectedProduct}
-          product={{ name: "Product X", price: 249.99 }}
+          product={selectedProduct}
+          // product={{ name: "Product X", price: 249.99 }}
         />
       )}
 

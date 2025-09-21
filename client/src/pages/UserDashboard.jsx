@@ -1,7 +1,8 @@
 import { useAtom } from "jotai";
+import { useEffect, useState } from "react";
 import { authAtom } from "../atoms/authAtom";
 import { useNavigate, useLocation, Outlet, Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 import {
   FiUser,
@@ -20,6 +21,7 @@ import {
   FiFileText,
   FiBell,
   FiMessageSquare,
+  FiX,
 } from "react-icons/fi";
 import { AiOutlineStar } from "react-icons/ai";
 import { MdStorefront, MdOutlineWorkspacePremium } from "react-icons/md";
@@ -112,6 +114,21 @@ const UserDashboard = () => {
     }
   }, [isAuth]);
 
+  const handleLogout = () => {
+    logout().catch((err) => {
+      toast.custom((t) => (
+        <div
+          className={`${
+            t.visible ? "animate-enter" : "animate-leave"
+          } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
+        >
+          <FiX className="text-xl shrink-0" />
+          <span className="font-medium">{err.response.data.detail}</span>
+        </div>
+      ));
+    });
+  };
+
   return (
     <>
       {isAuth && isSeller != null && (
@@ -121,7 +138,7 @@ const UserDashboard = () => {
           {showPopup && (
             <LogoutPopup
               onClose={() => setShowPopup(false)}
-              onConfirm={() => logout()}
+              onConfirm={() => handleLogout()}
             />
           )}
 

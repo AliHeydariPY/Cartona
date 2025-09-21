@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
+
 import { FiBell, FiBellOff } from "react-icons/fi";
+import { GrLocation } from "react-icons/gr";
+import { FiStar } from "react-icons/fi";
 
 import {
   getSubscriptions,
@@ -57,7 +60,19 @@ const ProductSeller = ({ seller }) => {
 
           <button
             onClick={toggleNotifications}
-            className={`flex items-center cursor-pointer gap-1 px-3 py-1.5 rounded-full text-sm font-medium shadow transition 
+            className={`flex items-center cursor-pointer gap-1 ${
+              window.innerWidth < 640
+                ? notificationsEnabled
+                  ? "px-2.25"
+                  : "px-2"
+                : "px-2.25"
+            }  ${
+              window.innerWidth < 640
+                ? notificationsEnabled
+                  ? "py-1.5"
+                  : "py-2"
+                : "py-1.5"
+            } rounded-full text-sm font-medium shadow transition 
               ${
                 notificationsEnabled
                   ? "bg-blue-600 text-white hover:bg-blue-700"
@@ -69,14 +84,14 @@ const ProductSeller = ({ seller }) => {
                 <span className="my-0.5">
                   <FiBell className="w-4 h-4 mb-0.5" />
                 </span>
-                Notifications On
+                {window.innerWidth >= 640 && "Notifications On"}
               </>
             ) : (
               <>
                 <span>
                   <FiBellOff className="w-4 h-4" />
                 </span>
-                Enable Notifications
+                {window.innerWidth >= 640 && "Enable Notifications"}
               </>
             )}
           </button>
@@ -97,28 +112,34 @@ const ProductSeller = ({ seller }) => {
             </p>
             <p className="text-sm text-blue-700">
               Member since:{" "}
-              {new Date(seller.created_time).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "long",
-              })}
+              {seller.created_time.split(" ")[0].replace(/-/g, "/")}
             </p>
           </div>
         </div>
 
-        {seller.description && (
-          <p className="text-blue-800 text-sm mb-2 italic">
-            "{seller.description}"
-          </p>
-        )}
-        {seller.address && (
-          <div className="flex items-center gap-1 text-blue-900 text-sm mb-2">
-            <span className="font-semibold">📍 Address:</span>
-            <span>{seller.address}</span>
+        <p className="text-blue-800 text-sm mb-2 italic">
+          "{seller.description}"
+        </p>
+
+        <div className="flex items-center gap-1 text-sm mb-2">
+          <div className="flex items-center font-semibold text-blue-900">
+            <GrLocation size={18} className="text-rose-500 mr-1 mb-0.5" />
+            Address:
           </div>
-        )}
-        <div className="flex items-center gap-2">
-          <span className="font-semibold text-blue-900">⭐ Rating:</span>
-          <span className="text-blue-800">{seller.average_rating} / 5</span>
+          <span className="text-gray-700 ">{seller.address}</span>
+        </div>
+
+        <div className="flex items-center gap-2 text-sm">
+          <div className="flex items-center font-semibold text-blue-900">
+            <FiStar
+              className="text-yellow-500 fill-yellow-500 mr-1 mb-0.5"
+              size={18}
+            />
+            Rating:
+          </div>
+          <span className="text-blue-800 mt-0.5">
+            {seller.average_rating} / 5
+          </span>
         </div>
       </div>
     </div>

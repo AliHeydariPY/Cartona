@@ -5,11 +5,9 @@ import toast from "react-hot-toast";
 
 import {
   FiStar,
-  
   FiHeart,
   FiEye,
   FiX,
-  FiCheckCircle,
 } from "react-icons/fi";
 import { FaHeart,  FaClock } from "react-icons/fa";
 
@@ -75,21 +73,6 @@ export default function SearchPage() {
     try {
       await deleteFavorite(favoriteId);
       setFavorites((prev) => prev.filter((item) => item.id != favoriteId));
-
-      toast.custom((t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
-        >
-          <div className="bg-blue-500/20 p-2 rounded-full">
-            <FiCheckCircle className="text-xl text-white" />
-          </div>
-          <div>
-            <p className="font-medium">Removed from favorites</p>
-          </div>
-        </div>
-      ));
     } catch {
       toast.custom((t) => (
         <div
@@ -108,23 +91,6 @@ export default function SearchPage() {
     try {
       const response = await addFavorite(productId);
       setFavorites((prev) => [...prev, response.data]);
-
-      toast.custom((t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } transform transition-all duration-300`}
-        >
-          <div className="bg-gradient-to-r from-green-500 to-cyan-400 text-white px-6 py-3 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-3">
-            <div className="bg-blue-500/20 p-2 rounded-full">
-              <FiCheckCircle className="text-xl text-white" />
-            </div>
-            <div>
-              <p className="font-medium">Added to favorites</p>
-            </div>
-          </div>
-        </div>
-      ));
     } catch {
       toast.custom((t) => (
         <div
