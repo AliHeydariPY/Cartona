@@ -5,6 +5,8 @@ import { FiX, FiStar, FiCheckCircle, FiAlertCircle } from "react-icons/fi";
 import toast from "react-hot-toast";
 import { sendComment } from "../../services/commentAPIServices";
 
+/////////////////// response it /////////////////////
+
 const ReviewPopup = ({ onClose, product, seller, setReloadComponent }) => {
   const [show, setShow] = useState(false);
   const [selectedStars, setSelectedStars] = useState(1);

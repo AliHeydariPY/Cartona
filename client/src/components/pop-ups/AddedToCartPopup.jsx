@@ -9,6 +9,7 @@ import {
   FiChevronRight,
   FiStar,
 } from "react-icons/fi";
+import { IoCartOutline } from "react-icons/io5";
 
 const AddToCartPopup = ({ onClose, product }) => {
   const [show, setShow] = useState(false);
@@ -31,7 +32,7 @@ const AddToCartPopup = ({ onClose, product }) => {
   return (
     <Portal>
       <div
-        className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-colors duration-300 ${
+        className={`fixed inset-0 z-50 flex items-center justify-center sm:p-4 transition-colors duration-300 ${
           show ? "bg-black/30" : "bg-black/0"
         }`}
         onClick={handleClose}
@@ -42,7 +43,7 @@ const AddToCartPopup = ({ onClose, product }) => {
           }`}
           onClick={stopPropagation}
         >
-          <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-6 text-white">
+          <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-5 sm:p-6 text-white">
             <div className="flex justify-between items-center">
               <h3 className="text-xl font-bold flex items-center ">
                 <FiCheck
@@ -61,9 +62,9 @@ const AddToCartPopup = ({ onClose, product }) => {
             </div>
           </div>
 
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             <div className="flex items-center mb-6">
-              <div className="w-22 h-22 border-2 border-blue-400 rounded-lg flex items-center justify-center mb-4 sm:mb-0 relative overflow-hidden p-1">
+              <div className="min-w-22 max-w-22 h-22 border-2 border-blue-400 rounded-lg flex items-center justify-center mb-4 sm:mb-0 relative overflow-hidden p-1">
                 <img
                   src={product.image}
                   alt=""
@@ -95,9 +96,9 @@ const AddToCartPopup = ({ onClose, product }) => {
                   handleClose();
                   navigate("/account/cart");
                 }}
-                className="w-full cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-500 text-white py-3 rounded-lg font-semibold flex items-center justify-center hover:shadow-lg transition-all duration-300"
+                className="w-full cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white py-3 rounded-lg font-semibold flex items-center justify-center transition-colors duration-300"
               >
-                <FiShoppingCart className="mr-2 mb-0.5" />
+                <IoCartOutline className="mr-2 mb-0.5" size={20} />
                 View Cart & Checkout
                 <FiChevronRight className="ml-2" />
               </button>

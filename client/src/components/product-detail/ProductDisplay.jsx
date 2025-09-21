@@ -11,7 +11,7 @@ import {
   deleteFavorite,
 } from "../../services/cartAPIServices";
 
-import { FiShoppingCart, FiHeart, FiStar, FiShare2, FiX } from "react-icons/fi";
+import { FiHeart, FiStar, FiShare2, FiX } from "react-icons/fi";
 import { BiSolidOffer } from "react-icons/bi";
 import { FaHeart } from "react-icons/fa";
 import { IoCart, IoCartOutline } from "react-icons/io5";
@@ -250,7 +250,7 @@ const ProductDisplay = ({
       </div>
 
       <div className="flex flex-col">
-        <h2 className="text-2xl font-bold text-blue-900 mb-3">
+        <h2 className="text-lg sm:text-2xl font-bold text-blue-900 mb-3">
           {product.name}
         </h2>
 
@@ -322,7 +322,7 @@ const ProductDisplay = ({
           {isInCart ? (
             <button
               onClick={handleRemoveFromCart}
-              className="flex-1 text-base md:text-sm lg:text-base cursor-pointer py-3 rounded-lg sm:rounded-xl font-semibold transition-colors duration-300 flex items-center justify-center bg-gradient-to-r from-rose-600 to-red-500 hover:from-rose-700 hover:to-red-600 text-white"
+              className="flex-1 text-base md:text-sm lg:text-base cursor-pointer py-3 rounded-lg sm:rounded-xl font-semibold transition-colors duration-300 flex items-center justify-center bg-gradient-to-r from-red-600 to-rose-500 hover:from-red-700 hover:to-rose-700 text-white"
             >
                <IoCart className="text-white mr-1.5 md:mr-1 lg:mr-1.5 mb-0.5" size={20} /> Remove
               from Cart

@@ -35,7 +35,7 @@ const LogoutPopup = ({ onClose, onConfirm }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center sm:p-4 bg-black/60 backdrop-blur-sm"
             onClick={handleClose}
           >
             <motion.div
@@ -44,10 +44,10 @@ const LogoutPopup = ({ onClose, onConfirm }) => {
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
-              className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl w-full max-w-md relative overflow-hidden "
+              className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-md relative overflow-hidden "
               onClick={stopPropagation}
             >
-              <div className="bg-gradient-to-r from-red-600 to-rose-500 p-6 text-white relative overflow-hidden">
+              <div className="bg-gradient-to-r from-red-600 to-rose-600 p-5 sm:p-6 text-white relative overflow-hidden">
                 <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
                 <div className="relative z-10 flex justify-between items-center">
                   <div className="flex items-center">
@@ -71,7 +71,7 @@ const LogoutPopup = ({ onClose, onConfirm }) => {
                 </div>
               </div>
 
-              <div className="p-6">
+              <div className="p-4 sm:6">
                 <div className="flex items-center justify-center mb-4">
                   <div className="bg-red-100 p-3 rounded-full">
                     <FiLogOut className="text-red-600" size={24} />
@@ -83,28 +83,28 @@ const LogoutPopup = ({ onClose, onConfirm }) => {
                     Are you sure you want to sign out?
                   </h4>
                   <p className="text-gray-600 text-sm">
-                    You'll be logged out of your account and will need to sign in again.
+                    You'll be logged out of your account and will need to sign
+                    in again.
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <motion.button
-
+                <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3">
+                  <button
                     onClick={handleClose}
-                    className="cursor-pointer bg-white border border-gray-300 text-gray-700 py-3 rounded-xl font-medium flex items-center justify-center hover:bg-gray-100 transition-colors duration-300"
+                    className="cursor-pointer w-full bg-white border border-blue-300 text-blue-700 py-3 rounded-lg font-medium flex items-center justify-center hover:bg-blue-50 transition-colors duration-300"
                   >
                     Cancel
-                  </motion.button>
+                  </button>
 
-                  <motion.button
-
+                  <button
                     onClick={handleConfirm}
-                    className="cursor-pointer bg-gradient-to-r from-red-600 to-rose-500 text-white py-3 rounded-xl font-semibold flex items-center justify-center hover:from-red-700 hover:to-rose-600 transition-colors duration-300 shadow-lg hover:shadow-red-500/25"
+                    className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-rose-600 text-white py-3 rounded-lg font-semibold flex items-center justify-center hover:from-red-700 hover:to-rose-700 transition-colors duration-300"
                   >
-                    <FiLogOut className="mr-2" />
+                    <FiLogOut className="mr-2 mb-0.5" />
                     Sign Out
-                  </motion.button>
+                  </button>
                 </div>
+
               </div>
 
               <div className="bg-red-50/30 p-4 text-center border-t border-red-100">

@@ -1,8 +1,8 @@
 import { Portal } from "react-portal";
 import { useEffect, useState } from "react";
-import { FiX, FiTrash2 } from "react-icons/fi";
+import { FiX, FiTrash2, FiImage } from "react-icons/fi";
 
-const RemoveFeaturePopup = ({ onClose, feature, removeFeature }) => {
+const DeleteImagePopup = ({ onClose, image, removeImage }) => {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -18,13 +18,13 @@ const RemoveFeaturePopup = ({ onClose, feature, removeFeature }) => {
 
   const handleConfirm = () => {
     handleClose();
-    removeFeature();
+    removeImage();
   };
 
   return (
     <Portal>
       <div
-        className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-colors duration-300 ${
+        className={`fixed inset-0 z-50 flex items-center justify-center sm:p-4 transition-colors duration-300 ${
           show ? "bg-black/30" : "bg-black/0"
         }`}
         onClick={handleClose}
@@ -35,14 +35,13 @@ const RemoveFeaturePopup = ({ onClose, feature, removeFeature }) => {
           }`}
           onClick={stopPropagation}
         >
-          <div className="bg-gradient-to-r from-rose-600 to-red-500 p-6 text-white">
+          <div className="bg-gradient-to-r from-red-600 to-rose-600 p-5 sm:p-6 text-white">
             <div className="flex justify-between items-center">
               <h3 className="text-xl font-bold flex items-center">
-                <FiTrash2
-                  className="mr-2 bg-white/30 rounded-full p-1"
-                  size={27}
-                />
-                Remove Feature?
+                <div className="bg-white/30 rounded-full p-1.5 mr-2">
+                  <FiTrash2 size={18} />
+                </div>
+                Remove Image?
               </h3>
               <button
                 onClick={handleClose}
@@ -53,20 +52,24 @@ const RemoveFeaturePopup = ({ onClose, feature, removeFeature }) => {
             </div>
           </div>
 
-          <div className="p-6">
-            <div className="mb-6">
-              <p className="text-blue-900 font-semibold">
-                Feature Name: {feature.feature_name}
-              </p>
-              <p className="text-gray-700 mt-1">
-                Feature Value: {feature.feature_value}
-              </p>
-              <p className="text-sm text-gray-500 mt-2">
-                This feature will be removed permanently.
-              </p>
+          <div className="p-4 sm:p-6">
+            <div className="flex items-center mb-6">
+              <div className="min-w-24 max-w-24 h-24 sm:w-28 sm:h-28 border-2 border-red-400 rounded-lg flex items-center justify-center overflow-hidden p-2">
+                <img
+                  src={image.image}
+                  alt="Preview"
+                  className="max-w-full max-h-full object-contain rounded-md"
+                />
+              </div>
+              <div className="ml-3 flex-1">
+                <p className="text-blue-900 font-semibold">Image Preview</p>
+                <p className="text-sm text-gray-500 mt-1">
+                  This image will be removed permanently.
+                </p>
+              </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2 sm:gap-3">
               <button
                 onClick={handleClose}
                 className="cursor-pointer bg-white border border-blue-300 text-blue-700 py-3 rounded-lg font-medium flex items-center justify-center hover:bg-blue-50 transition-colors duration-300"
@@ -76,9 +79,9 @@ const RemoveFeaturePopup = ({ onClose, feature, removeFeature }) => {
 
               <button
                 onClick={handleConfirm}
-                className="cursor-pointer bg-gradient-to-r from-rose-600 to-red-500 text-white py-3 rounded-lg font-semibold flex items-center justify-center hover:from-rose-700 hover:to-red-600 transition-colors duration-300"
+                className="cursor-pointer bg-gradient-to-r from-red-600 to-rose-600 text-white py-3 rounded-lg font-semibold flex items-center justify-center hover:from-red-700 hover:to-rose-700 transition-colors duration-300"
               >
-                <FiTrash2 className="mr-2" />
+                <FiTrash2 className="mr-2 mb-0.5" />
                 Remove
               </button>
             </div>
@@ -89,4 +92,4 @@ const RemoveFeaturePopup = ({ onClose, feature, removeFeature }) => {
   );
 };
 
-export default RemoveFeaturePopup;
+export default DeleteImagePopup;

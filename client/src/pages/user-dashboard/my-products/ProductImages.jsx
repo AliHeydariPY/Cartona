@@ -23,7 +23,7 @@ import {
   getProducImages,
 } from "../../../services/productAPIServices";
 
-import RemoveImagePopup from "../../../components/pop-ups/RemoveImagePopup";
+import DeleteImagePopup from "../../../components/pop-ups/DeleteImagePopup";
 import ProductNotFound from "../../../components/ProductNotFound";
 
 const ProductImages = ({ reloadComponent, setReloadComponent }) => {
@@ -133,8 +133,8 @@ const ProductImages = ({ reloadComponent, setReloadComponent }) => {
               </button>
             </div>
 
-            <div className="flex items-center gap-4 mb-6 sm:mb-8 p-2 sm:p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-200">
-              <div className="flex justify-center items-center p-2 bg-white rounded-lg sm:rounded-xl border border-blue-200 shadow-inner w-24 h-24">
+            <div className="flex items-center gap-2 sm:gap-4 mb-6 sm:mb-8 p-2 sm:p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-200">
+              <div className="flex justify-center items-center p-2 bg-white rounded-lg sm:rounded-xl border border-blue-200 shadow-inner min-w-18 max-w-18 h-18 sm:min-w-24 sm:max-w-24 sm:h-24">
                 <img
                   src={product.image}
                   alt={product.name}
@@ -142,10 +142,10 @@ const ProductImages = ({ reloadComponent, setReloadComponent }) => {
                 />
               </div>
               <div>
-                <h3 className="text-base sm:text-lg md:text-xl font-semibold text-blue-900">
+                <h3 className="text-sm sm:text-lg md:text-xl font-semibold text-blue-900 ">
                   {product.name}
                 </h3>
-                <p className="text-xs sm:text-sm md:text-base text-blue-600">
+                <p className="hidden sm:block text-xs sm:text-sm md:text-base text-blue-600">
                   Managing images for this product
                 </p>
               </div>
@@ -300,7 +300,7 @@ const ProductImages = ({ reloadComponent, setReloadComponent }) => {
             </div>
 
             {showRemovePopup && (
-              <RemoveImagePopup
+              <DeleteImagePopup
                 onClose={() => setShowRemovePopup(false)}
                 image={selectedImage}
                 removeImage={handleRemoveImage}

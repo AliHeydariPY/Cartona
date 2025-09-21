@@ -15,7 +15,7 @@ import {
 } from "../../../services/productAPIServices";
 import { FaArrowLeft } from "react-icons/fa6";
 
-import RemoveFeaturePopup from "../../../components/pop-ups/RemoveFeaturePopup";
+import DeleteFeaturePopup from "../../../components/pop-ups/DeleteFeaturePopup";
 import ProductNotFound from "../../../components/ProductNotFound";
 
 const ProductFeatures = ({ reloadComponent, setReloadComponent }) => {
@@ -127,8 +127,8 @@ const ProductFeatures = ({ reloadComponent, setReloadComponent }) => {
               </button>
             </div>
 
-            <div className="flex items-center gap-4 mb-6 sm:mb-8 p-2 sm:p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-200">
-              <div className="flex justify-center items-center p-2 bg-white rounded-lg sm:rounded-xl border border-blue-200 shadow-inner w-24 h-24">
+            <div className="flex items-center gap-2 sm:gap-4 mb-6 sm:mb-8 p-2 sm:p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-200">
+              <div className="flex justify-center items-center p-2 bg-white rounded-lg sm:rounded-xl border border-blue-200 shadow-inner min-w-18 max-w-18 h-18 sm:min-w-24 sm:max-w-24 sm:h-24">
                 <img
                   src={product.image}
                   alt={product.name}
@@ -137,10 +137,10 @@ const ProductFeatures = ({ reloadComponent, setReloadComponent }) => {
               </div>
 
               <div>
-                <h3 className="text-base sm:text-lg md:text-xl font-semibold text-blue-900">
+                <h3 className="text-sm sm:text-lg md:text-xl font-semibold text-blue-900">
                   {product.name}
                 </h3>
-                <p className="text-xs sm:text-sm md:text-base text-blue-600">
+                <p className="hidden sm:block text-xs sm:text-sm md:text-base text-blue-600">
                   Managing features for this product
                 </p>
               </div>
@@ -250,7 +250,7 @@ const ProductFeatures = ({ reloadComponent, setReloadComponent }) => {
             </div>
 
             {showRemovePopup && (
-              <RemoveFeaturePopup
+              <DeleteFeaturePopup
                 onClose={() => setShowRemovePopup(false)}
                 feature={selectedFeature}
                 removeFeature={handleRemoveFeature}

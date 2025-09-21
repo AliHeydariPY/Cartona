@@ -59,7 +59,7 @@ const RemoveFromCartPopup = ({
   return (
     <Portal>
       <div
-        className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-colors duration-300 ${
+        className={`fixed inset-0 z-50 flex items-center justify-center sm:p-4 transition-colors duration-300 ${
           show ? "bg-black/40" : "bg-black/0"
         }`}
         onClick={handleClose}
@@ -70,13 +70,12 @@ const RemoveFromCartPopup = ({
           }`}
           onClick={stopPropagation}
         >
-          <div className="bg-gradient-to-r from-rose-600 to-red-500 p-6 text-white">
+          <div className="bg-gradient-to-r from-red-600 to-rose-600 p-5 sm:p-6 text-white">
             <div className="flex justify-between items-center">
               <h3 className="text-xl font-bold flex items-center">
-                <FiTrash2
-                  className="mr-2 bg-white/30 rounded-full p-1"
-                  size={27}
-                />
+                <div className="bg-white/30 rounded-full p-1.5 mr-2">
+                  <FiTrash2 size={18} />
+                </div>
                 Remove Item?
               </h3>
               <button
@@ -88,9 +87,9 @@ const RemoveFromCartPopup = ({
             </div>
           </div>
 
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             <div className="flex items-center mb-6">
-              <div className="w-22 h-22 border-2 border-red-400 rounded-lg flex items-center justify-center mb-4 sm:mb-0 relative overflow-hidden p-1">
+              <div className="min-w-22 max-w-22 h-22 border-2 border-red-400 rounded-lg flex items-center justify-center mb-4 sm:mb-0 relative overflow-hidden p-1">
                 <img
                   src={product.image}
                   alt=""
@@ -109,24 +108,23 @@ const RemoveFromCartPopup = ({
                       {product.average_rating?.toFixed(1) || "0"}
                     </span>
                   </div>
-                 
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3">
               <button
                 onClick={handleClose}
-                className="cursor-pointer bg-white border border-blue-300 text-blue-700 py-3 rounded-lg font-medium flex items-center justify-center hover:bg-blue-50 transition-colors duration-300"
+                className="cursor-pointer w-full bg-white border border-blue-300 text-blue-700 py-3 rounded-lg font-medium flex items-center justify-center hover:bg-blue-50 transition-colors duration-300"
               >
                 Cancel
               </button>
 
               <button
                 onClick={handleConfirm}
-                className="cursor-pointer bg-gradient-to-r from-rose-600 to-red-500 text-white py-3 rounded-lg font-semibold flex items-center justify-center hover:from-rose-700 hover:to-red-600 transition-colors duration-300"
+                className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-rose-600 text-white py-3 rounded-lg font-semibold flex items-center justify-center hover:from-red-700 hover:to-rose-700 transition-colors duration-300"
               >
-                <FiTrash2 className="mr-2" />
+                <FiTrash2 className="mr-2 mb-0.5" />
                 Remove
               </button>
             </div>

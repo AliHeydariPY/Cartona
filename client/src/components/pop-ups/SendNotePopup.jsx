@@ -33,7 +33,7 @@ const SendNotePopup = ({ onClose, onConfirm }) => {
   return (
     <Portal>
       <div
-        className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-colors duration-300 ${
+        className={`fixed inset-0 z-50 flex items-center justify-center sm:p-4 transition-colors duration-300 ${
           show ? "bg-black/30" : "bg-black/0"
         }`}
         onClick={handleClose}
@@ -44,7 +44,7 @@ const SendNotePopup = ({ onClose, onConfirm }) => {
           }`}
           onClick={stopPropagation}
         >
-          <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-6 text-white">
+          <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-5 sm:p-6 text-white">
             <div className="flex justify-between items-center">
               <h3 className="text-xl font-bold flex items-center">
                 <div className="mr-2 bg-white/30 rounded-full p-2">
@@ -61,7 +61,7 @@ const SendNotePopup = ({ onClose, onConfirm }) => {
             </div>
           </div>
 
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             <textarea
               ref={textareaRef}
               value={note}
@@ -70,7 +70,7 @@ const SendNotePopup = ({ onClose, onConfirm }) => {
               className="w-full h-31 border border-blue-300 rounded-lg p-3 text-gray-800 focus:ring-2 focus:ring-blue-400 focus:outline-none resize-none transition-all duration-300"
             />
 
-            <div className="grid grid-cols-2 gap-3 mt-6">
+            <div className="grid grid-cols-2 gap-3 mt-4">
               <button
                 onClick={handleClose}
                 className="cursor-pointer bg-white border border-blue-300 text-blue-700 py-3 rounded-lg font-medium flex items-center justify-center hover:bg-blue-50 transition-colors duration-300"
@@ -85,7 +85,7 @@ const SendNotePopup = ({ onClose, onConfirm }) => {
                 }`}
                 disabled={note.trim() === ""}
               >
-                <RiSendPlaneFill className="mr-2" />
+                <RiSendPlaneFill className="mr-2 mb-0.5" />
                 Send
               </button>
             </div>
