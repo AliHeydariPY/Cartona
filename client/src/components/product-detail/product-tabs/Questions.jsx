@@ -15,8 +15,8 @@ import {
 import { RiQuestionAnswerLine } from "react-icons/ri";
 
 import AnswerQuestionPopup from "../../pop-ups/AnswerQuestionPopup";
-import DeleteQuestionPopup from "../../pop-ups/DeleteQuestionPopup";
-import EditQuestionPopup from "../../pop-ups/EditQuestionPopup";
+import DeletePostPopup from "../../pop-ups/DeletePostPopup";
+import EditPostPopup from "../../pop-ups/EditPostPopup";
 
 import { sendProductQuestion } from "../../../services/commentAPIServices";
 
@@ -316,7 +316,7 @@ const Questions = ({
       )}
 
       {showEditPopup && (
-        <EditQuestionPopup
+        <EditPostPopup
           onClose={() => setShowEditPopup(false)}
           userPost={userPost}
           reloadComponent={reloadComponent}
@@ -325,7 +325,7 @@ const Questions = ({
       )}
 
       {showDeletePopup && (
-        <DeleteQuestionPopup
+        <DeletePostPopup
           onClose={() => setShowDeletePopup(false)}
           userPost={userPost}
           reloadComponent={reloadComponent}

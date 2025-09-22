@@ -7,7 +7,7 @@ import {
   deleteProductQuestion,
 } from "../../services/commentAPIServices";
 
-const DeleteQuestionPopup = ({
+const DeletePostPopup = ({
   onClose,
   userPost,
   reloadComponent,
@@ -115,4 +115,4 @@ const DeleteQuestionPopup = ({
   );
 };
 
-export default DeleteQuestionPopup;
+export default DeletePostPopup;

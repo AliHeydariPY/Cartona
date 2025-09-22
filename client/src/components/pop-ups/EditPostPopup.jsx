@@ -8,7 +8,7 @@ import {
   editComment,
 } from "../../services/commentAPIServices";
 
-const EditQuestionPopup = ({
+const EditPostPopup = ({
   onClose,
   userPost,
   reloadComponent,
@@ -185,4 +185,4 @@ const EditQuestionPopup = ({
   );
 };
 
-export default EditQuestionPopup;
+export default EditPostPopup;

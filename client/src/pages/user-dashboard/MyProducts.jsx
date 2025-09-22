@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 
 import { getStorekeeperProducts } from "../../services/productAPIServices";
 import { getStorekeeper } from "../../services/userAPIServices";
+import { PiLightningFill } from "react-icons/pi";
 
 import {
   FiEdit,
@@ -24,12 +25,11 @@ export default function MyProducts({
   const navigate = useNavigate();
 
   useEffect(() => {
-    getStorekeeper(localStorage.getItem("username"))
-      .then((res) => {
-        getStorekeeperProducts(res.data.id).then((res) => {
-          setProducts(res.data);
-        });
-      })
+    getStorekeeper(localStorage.getItem("username")).then((res) => {
+      getStorekeeperProducts(res.data.id).then((res) => {
+        setProducts(res.data);
+      });
+    });
   }, [reloadComponent]);
 
   const openInNewTab = (url) => {
@@ -64,13 +64,20 @@ export default function MyProducts({
                   onClick={() => {
                     openInNewTab(`/product/${product.id}`);
                   }}
-                  className="flex cursor-pointer justify-center items-center p-4 md:p-6 rounded-xl sm:rounded-2xl border-2 border-blue-200 shadow-inner w-full h-[260px] md:min-w-[260px] md:h-[260px]"
+                  className="relative flex cursor-pointer justify-center items-center p-4 md:p-6 rounded-xl sm:rounded-2xl border-2 border-blue-200 shadow-inner w-full h-[260px] md:min-w-[260px] md:h-[260px]"
                 >
                   <img
                     src={product.image}
                     alt={product.name}
                     className="max-w-full max-h-full object-contain rounded-md"
                   />
+
+                  {product.amazing_offer && (
+                    <div className="absolute flex top-3 left-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg z-10">
+                      <PiLightningFill className="mt-0.25 mr-0.75" size={13} />
+                      {product.amazing_offer}
+                    </div>
+                  )}
                 </div>
 
                 <div className="p-4 space-y-2">

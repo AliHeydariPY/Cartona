@@ -10,7 +10,7 @@ const api = axios.create({
   withCredentials: true,
 });
 
-let accessToken = sessionStorage.getItem("accessToken");
+let accessToken = localStorage.getItem("accessToken");
 
 let isRefreshing = false;
 let failedQueue = [];
@@ -62,18 +62,16 @@ api.interceptors.response.use(
 
         accessToken = res.data.access;
 
-        sessionStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("accessToken", accessToken);
         store.set(authAtom, true);
 
         //coming soon
         const userData = JSON.parse(atob(accessToken.split(".")[1]));
         console.log("refresh", userData);
-        getUserById(userData.user_id)
-          .then((res) => {
-            console.log(res.data.username)
-            localStorage.setItem("username", res.data.username);
-          })
-          
+        getUserById(userData.user_id).then((res) => {
+          console.log(res.data.username);
+          localStorage.setItem("username", res.data.username);
+        });
 
         getStorekeeper(userData.user_id)
           .then((res) => {
@@ -104,7 +102,7 @@ api.interceptors.response.use(
 
 export const setAccessToken = (token) => {
   accessToken = token;
-  sessionStorage.setItem("accessToken", token);
+  localStorage.setItem("accessToken", token);
   api.defaults.headers.common["Authorization"] = "Bearer " + token;
 };
 

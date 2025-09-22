@@ -66,8 +66,7 @@ const LoginForm = () => {
               username: values.username,
               password: values.password,
             })
-              .then((res) => {
-                console.log(res.data);
+              .then(() => {
                 localStorage.setItem("username", values.username);
 
                 toast.custom((t) => (

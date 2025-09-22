@@ -20,8 +20,8 @@ import {
 } from "react-icons/fi";
 import { LuReply } from "react-icons/lu";
 
-import EditQuestionPopup from "../../pop-ups/EditQuestionPopup";
-import DeleteQuestionPopup from "../../pop-ups/DeleteQuestionPopup";
+import EditPostPopup from "../../pop-ups/EditPostPopup";
+import DeletePostPopup from "../../pop-ups/DeletePostPopup";
 
 const Reviews = ({
   productComments,
@@ -405,7 +405,7 @@ const Reviews = ({
       </motion.div>
 
       {showEditPopup && (
-        <EditQuestionPopup
+        <EditPostPopup
           onClose={() => setShowEditPopup(false)}
           userPost={userPost}
           reloadComponent={reloadComponent}
@@ -414,7 +414,7 @@ const Reviews = ({
       )}
 
       {showDeletePopup && (
-        <DeleteQuestionPopup
+        <DeletePostPopup
           onClose={() => setShowDeletePopup(false)}
           userPost={userPost}
           reloadComponent={reloadComponent}
