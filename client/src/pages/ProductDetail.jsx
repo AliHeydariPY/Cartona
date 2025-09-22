@@ -65,9 +65,13 @@ const ProductDetails = ({
           prodcutData.features_set = [];
         }
 
+        console.log(prodcutData);
         setProduct(prodcutData);
+        console.log("fdsfa")
 
-        const seller = getStorekeeperById(selectedProduct.data.storekeeper);
+        const seller = getStorekeeperById(
+          selectedProduct.data.storekeeper
+        );
         seller.then((res) => {
           setSeller(res.data);
         });
@@ -111,13 +115,8 @@ const ProductDetails = ({
   useEffect(() => {
     getUser()
       .then((res) => {
-        console.log("res Df Sf sf sf ", res)
-        setUser(res.data);
+        setUser([res.data[0] ? res.data[0] : "not found"]);
       })
-      .catch((err) => {
-        console.log("err Df Sf sf sf ", err)
-        console.log(err);
-      });
   }, []);
 
   if (notFound) return <ProductNotFound />;

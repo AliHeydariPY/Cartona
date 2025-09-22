@@ -5,6 +5,7 @@ import { FiX, FiTrash2 } from "react-icons/fi";
 import {
   deleteComment,
   deleteProductQuestion,
+  deleteCommentReply,
 } from "../../services/commentAPIServices";
 
 const DeletePostPopup = ({
@@ -32,8 +33,13 @@ const DeletePostPopup = ({
         handleClose();
         setReloadComponent(!reloadComponent);
       });
-    } else {
+    } else if (userPost.type == "Review") {
       deleteComment(userPost.id).then(() => {
+        handleClose();
+        setReloadComponent(!reloadComponent);
+      });
+    } else if (userPost.type == "Reply") {
+      deleteCommentReply(userPost.id).then(() => {
         handleClose();
         setReloadComponent(!reloadComponent);
       });
@@ -87,7 +93,7 @@ const DeletePostPopup = ({
             <div className="bg-red-50 border border-red-200 p-4 rounded-xl">
               <p
                 style={{ whiteSpace: "pre-wrap" }}
-                className="text-sm font-medium text-red-900"
+                className="text-sm font-medium text-red-900 break-words whitespace-pre-wrap"
               >
                 {userPost.type[0]}: {userPost.text}
               </p>

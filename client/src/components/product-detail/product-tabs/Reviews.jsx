@@ -199,7 +199,8 @@ const Reviews = ({
                   ));
                 })
                 .catch((err) => {
-                  console.log(err);
+                  setCommentText("");
+                  setSelectedStars(1);
                   toast.custom((t) => (
                     <div
                       className={`${
@@ -208,7 +209,10 @@ const Reviews = ({
                     >
                       <FiX className="text-xl shrink-0" />
                       <span className="font-medium">
-                        {err.response.data.rating[0]}
+                        {err.response.data.detail ==
+                          "Refresh token not found."
+                            ? "To submit a review, first log in to your account"
+                            : err.response.data.detail}
                       </span>
                     </div>
                   ));
@@ -227,13 +231,13 @@ const Reviews = ({
         )}
 
         {productComments.map((comment) => {
-          const isUserQuestion = comment.user == user[0].username;
+          const isUserReview = comment.user == user[0].username;
 
           return (
             <div key={comment.id} className="space-y-1 sm:space-y-2 ">
               <div
                 className={`p-3 sm:p-4 rounded-lg sm:rounded-xl border shadow-sm ${
-                  isUserQuestion
+                  isUserReview
                     ? "bg-blue-100/50 border-2 border-blue-400 "
                     : "bg-blue-50/60 border-blue-200"
                 }`}
@@ -256,12 +260,12 @@ const Reviews = ({
                         />
                       ))}
                     </div>
-                    <span className="text-xs ml-5 text-blue-500">
+                    <span className="text-xs ml-3 text-blue-500">
                       {comment.updated_time}
                     </span>
                   </div>
-                  <div>
-                    {isUserQuestion && (
+                  <div className="space-x-2">
+                    {isUserReview && (
                       <button
                         className="p-2 cursor-pointer rounded-full hover:bg-blue-100 text-blue-600 transition-colors duration-300"
                         onClick={() => {
@@ -278,7 +282,7 @@ const Reviews = ({
                         <FiEdit3 size={18} />
                       </button>
                     )}
-                    {isUserQuestion && (
+                    {isUserReview && (
                       <button
                         className="p-2 cursor-pointer rounded-full hover:bg-rose-100 text-rose-500 transition-colors duration-300"
                         onClick={() => {
@@ -297,7 +301,7 @@ const Reviews = ({
                 </div>
                 <div
                   style={{ whiteSpace: "pre-wrap" }}
-                  className="text-blue-700 text-sm"
+                  className="text-blue-700 text-sm break-words whitespace-pre-wrap"
                 >
                   {comment.text}
                 </div>
@@ -375,27 +379,71 @@ const Reviews = ({
                       transition={{ duration: 0.3 }}
                       className="ml-3 sm:ml-6 space-y-1 sm:space-y-2 mt-1 sm:mt-2"
                     >
-                      {comment.replies.map((reply) => (
-                        <div
-                          key={reply.id}
-                          className="p-2 sm:p-3 bg-white border border-blue-200 rounded-lg sm:rounded-lg shadow-sm"
-                        >
-                          <div className="flex justify-between mb-1">
-                            <span className="font-medium text-blue-700 text-xs sm:text-sm">
-                              User {reply.user}
-                            </span>
-                            <span className="text-xs text-blue-400">
-                              {reply.updated_time}
-                            </span>
-                          </div>
-                          <p
-                            style={{ whiteSpace: "pre-wrap" }}
-                            className="text-blue-800 text-sm"
+                      {comment.replies.map((reply) => {
+                        console.log(reply);
+                        const isUserReply = reply.user == user[0].username;
+
+                        return (
+                          <div
+                            key={reply.id}
+                            className={`p-2 sm:p-3 border rounded-lg sm:rounded-lg shadow-sm ${
+                              isUserReply
+                                ? "bg-blue-100/40 border-2 border-blue-300 "
+                                : "bg-white border-blue-200"
+                            }`}
                           >
-                            {reply.text}
-                          </p>
-                        </div>
-                      ))}
+                            <div className="flex justify-between mb-1">
+                              <div className="flex items-center">
+                                <span className="font-medium text-blue-700 text-xs sm:text-sm">
+                                  User {reply.user}
+                                </span>
+                                <span className="text-xs text-blue-400 ml-3">
+                                  {reply.updated_time}
+                                </span>
+                              </div>
+                              <div className="space-x-2">
+                                {isUserReply && (
+                                  <button
+                                    className="p-2 cursor-pointer rounded-full hover:bg-blue-100 text-blue-600 transition-colors duration-300"
+                                    onClick={() => {
+                                      console.log(comment);
+                                      setUserPost({
+                                        id: reply.id,
+                                        type: "Reply",
+                                        text: reply.text,
+                                      });
+                                      setShowEditPopup(true);
+                                    }}
+                                  >
+                                    <FiEdit3 size={18} />
+                                  </button>
+                                )}
+                                {isUserReply && (
+                                  <button
+                                    className="p-2 cursor-pointer rounded-full hover:bg-rose-100 text-rose-500 transition-colors duration-300"
+                                    onClick={() => {
+                                      setUserPost({
+                                        id: reply.id,
+                                        type: "Reply",
+                                        text: reply.text,
+                                      });
+                                      setShowDeletePopup(true);
+                                    }}
+                                  >
+                                    <FiTrash2 size={18} />
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                            <p
+                              style={{ whiteSpace: "pre-wrap" }}
+                              className="text-blue-800 text-sm break-words whitespace-pre-wrap"
+                            >
+                              {reply.text}
+                            </p>
+                          </div>
+                        );
+                      })}
                     </motion.div>
                   )}
               </AnimatePresence>

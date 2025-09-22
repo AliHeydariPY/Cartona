@@ -6,6 +6,7 @@ import { RiSendPlaneFill } from "react-icons/ri";
 import {
   editProductQuestion,
   editComment,
+  editCommentReply,
 } from "../../services/commentAPIServices";
 
 const EditPostPopup = ({
@@ -45,11 +46,22 @@ const EditPostPopup = ({
         handleClose();
         setReloadComponent(!reloadComponent);
       });
-    } else {
+    } else if (userPost.type == "Review") {
       editComment(
         {
           text: editedPost,
           rating: selectedStars,
+        },
+        userPost.id
+      ).then(() => {
+        setEditedPost("");
+        handleClose();
+        setReloadComponent(!reloadComponent);
+      });
+    } else if (userPost.type == "Reply") {
+      editCommentReply(
+        {
+          text: editedPost,
         },
         userPost.id
       ).then(() => {
@@ -121,13 +133,13 @@ const EditPostPopup = ({
             )}
 
             <div className="bg-blue-50 border border-blue-200 p-4 rounded-xl">
-              <p className="text-sm font-medium text-blue-900">
+              <p className="text-sm font-medium text-blue-900 break-words whitespace-pre-wrap">
                 {userPost.type[0]}: {userPost.text}
               </p>
             </div>
 
             {userPost.type === "Review" && (
-              <div className="flex justify-center gap-2 py-3">
+              <div className="flex justify-center gap-2 py-2">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
                     key={star}
