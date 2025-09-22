@@ -1,18 +1,25 @@
 import { useState, useEffect } from "react";
 import { Portal } from "react-portal";
 
-import { FiX, FiEdit3 } from "react-icons/fi";
+import { FiX, FiEdit3, FiStar } from "react-icons/fi";
 import { RiSendPlaneFill } from "react-icons/ri";
-import { editProductQuestion } from "../../services/commentAPIServices";
+import {
+  editProductQuestion,
+  editComment,
+} from "../../services/commentAPIServices";
 
 const EditQuestionPopup = ({
   onClose,
-  question,
+  userPost,
   reloadComponent,
   setReloadComponent,
 }) => {
-  const [editedQuestion, setEditedQuestion] = useState(question.questionText);
+  const [editedPost, setEditedPost] = useState(userPost.text);
   const [show, setShow] = useState(false);
+
+  const [selectedStars, setSelectedStars] = useState(
+    userPost.rating ? userPost.rating : null
+  );
 
   useEffect(() => {
     setTimeout(() => setShow(true), 10);
@@ -26,17 +33,31 @@ const EditQuestionPopup = ({
   const stopPropagation = (e) => e.stopPropagation();
 
   const handleSubmit = () => {
-    if (editedQuestion.trim() === "") return;
-    editProductQuestion(
-      {
-        question_text: editedQuestion,
-      },
-      question.questionID
-    ).then(() => {
-      setEditedQuestion("");
-      handleClose();
-      setReloadComponent(!reloadComponent);
-    });
+    if (editedPost.trim() === "") return;
+    if (userPost.type == "Question") {
+      editProductQuestion(
+        {
+          question_text: editedPost,
+        },
+        userPost.id
+      ).then(() => {
+        setEditedPost("");
+        handleClose();
+        setReloadComponent(!reloadComponent);
+      });
+    } else {
+      editComment(
+        {
+          text: editedPost,
+          rating: selectedStars,
+        },
+        userPost.id
+      ).then(() => {
+        setEditedPost("");
+        handleClose();
+        setReloadComponent(!reloadComponent);
+      });
+    }
   };
 
   return (
@@ -59,7 +80,7 @@ const EditQuestionPopup = ({
                 <span className="bg-white/25 text-white rounded-full p-1.5 mr-2">
                   <FiEdit3 size={18} />
                 </span>
-                Edti Question
+                Edti {userPost.type}
               </h3>
               <button
                 onClick={handleClose}
@@ -70,19 +91,77 @@ const EditQuestionPopup = ({
             </div>
           </div>
 
-          <div className="p-5 sm:p-6 space-y-4">
+          <div
+            className={`p-5 sm:p-6 ${
+              userPost.type === "Review" ? "space-y-2" : "space-y-4"
+            } `}
+          >
+            {userPost.rating && (
+              <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-xl flex items-center justify-between">
+                <span className="text-sm font-semibold text-yellow-800">
+                  Previous rating:
+                </span>
+                <div className="flex items-center gap-2">
+                  {[...Array(5)].map((_, i) => (
+                    <FiStar
+                      key={i}
+                      size={18}
+                      className={`${
+                        i < userPost.rating
+                          ? "text-yellow-500 fill-yellow-500"
+                          : "text-gray-300 fill-gray-300"
+                      }`}
+                    />
+                  ))}
+                  <span className="text-sm font-medium mt-0.5 text-yellow-700">
+                    {userPost.rating}/5
+                  </span>
+                </div>
+              </div>
+            )}
+
             <div className="bg-blue-50 border border-blue-200 p-4 rounded-xl">
               <p className="text-sm font-medium text-blue-900">
-                Q: {question.questionText}
+                {userPost.type[0]}: {userPost.text}
               </p>
             </div>
 
-            <input
-              value={editedQuestion}
-              onChange={(e) => setEditedQuestion(e.target.value)}
-              placeholder="Edit your question..."
-              className="w-full p-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
+            {userPost.type === "Review" && (
+              <div className="flex justify-center gap-2 py-3">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    onClick={() => setSelectedStars(star)}
+                    className="transition-transform duration-200 hover:scale-110"
+                  >
+                    <FiStar
+                      size={28}
+                      className={`${
+                        star <= selectedStars
+                          ? "text-amber-400 fill-amber-400"
+                          : "text-gray-300 fill-gray-300"
+                      } transition-colors duration-200`}
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+            {userPost.type == "Question" ? (
+              <input
+                value={editedPost}
+                onChange={(e) => setEditedPost(e.target.value)}
+                placeholder="Edit your question..."
+                className="w-full p-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            ) : (
+              <textarea
+                rows={4}
+                value={editedPost}
+                onChange={(e) => setEditedPost(e.target.value)}
+                placeholder="Edit your review..."
+                className="w-full p-3 resize-none border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none text-blue-900 transition-all duration-300"
+              />
+            )}
 
             <div className="flex flex-col sm:flex-row-reverse gap-2 sm:gap-3">
               <button

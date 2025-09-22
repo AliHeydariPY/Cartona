@@ -3,13 +3,8 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-import {
-  FiStar,
-  FiHeart,
-  FiEye,
-  FiX,
-} from "react-icons/fi";
-import { FaHeart,  FaClock } from "react-icons/fa";
+import { FiStar, FiHeart, FiEye, FiX } from "react-icons/fi";
+import { FaHeart, FaClock } from "react-icons/fa";
 
 import { PiLightningFill } from "react-icons/pi";
 import { BiSolidOffer } from "react-icons/bi";
@@ -43,7 +38,7 @@ export default function SearchPage() {
   useEffect(() => {
     const fetchProducts = async () => {
       const favoriteProductsRes = await getFavorites();
-      
+
       if (query) {
         searchProduct(`${query}`).then((res) => {
           if (res.data[0]) {
@@ -51,7 +46,6 @@ export default function SearchPage() {
 
             setProducts(res.data);
             setNotFound(false);
-
           } else {
             setNotFound(true);
           }

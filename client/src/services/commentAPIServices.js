@@ -6,26 +6,6 @@ const SERVER_URL = "https://127.0.0.1:8000";
 export const getComments = (productID) => {
   const url = `${SERVER_URL}/comments-api/comments/product/${productID}/`;
   return axios.get(url);
-  // .then(async () => {
-  //   console.log("yes");
-  //   // const commentsWithReplies = await Promise.all(
-  //   //   comments.data.map(async (comment) => {
-  //   //     try {
-  //   //       const repliesResponse = await getCommentReplies(comment.id);
-  //   //       const replies = repliesResponse.data;
-  //   //       return { ...comment, replies };
-  //   //     } catch {
-  //   //       return { ...comment };
-  //   //     }
-  //   //   })
-  //   // );
-  //   // console.log(commentsWithReplies);
-  //   // setProductComments(commentsWithReplies);
-  // })
-  // .catch((err) => {
-  //   console.log("hello");
-  //   // setProductComments([]);
-  // });
 };
 
 export const getCommentsByUser = (userID) => {
@@ -36,6 +16,17 @@ export const getCommentsByUser = (userID) => {
 export const sendComment = (comment) => {
   const url = `/comments-api/comments/`;
   return api.post(url, comment);
+};
+
+export const editComment = (editedComment, commentID) => {
+  
+  const url = `/comments-api/comments/${commentID}/`;
+  return api.patch(url, editedComment);
+};
+
+export const deleteComment = (commentID) => {
+  const url = `/comments-api/comments/${commentID}/`;
+  return api.delete(url);
 };
 
 export const getProductQuestions = () => {

@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { convertOffsetToTimes, motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
@@ -21,7 +21,7 @@ import {
   getProductQuestions,
   getCommentReplies,
 } from "../services/commentAPIServices";
-import { getStorekeeperById } from "../services/userAPIServices";
+import { getStorekeeperById, getUser } from "../services/userAPIServices";
 import ProductNotFound from "../components/ProductNotFound";
 
 const ProductDetails = ({
@@ -41,6 +41,7 @@ const ProductDetails = ({
   const [seller, setSeller] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -107,12 +108,24 @@ const ProductDetails = ({
     fetchData();
   }, [id, reloadComponent]);
 
+  useEffect(() => {
+    getUser()
+      .then((res) => {
+        console.log("res Df Sf sf sf ", res)
+        setUser(res.data);
+      })
+      .catch((err) => {
+        console.log("err Df Sf sf sf ", err)
+        console.log(err);
+      });
+  }, []);
+
   if (notFound) return <ProductNotFound />;
 
   return (
     <>
       <CartonaLoader isLoading={isLoading} />
-      {product && productComments && seller && productQuestions && (
+      {product && productComments && seller && productQuestions && user[0] && (
         <div className="min-h-screen bg-blue-100 flex justify-center p-0 sm:p-4">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
@@ -163,6 +176,7 @@ const ProductDetails = ({
                 product={product}
                 productComments={productComments}
                 seller={seller}
+                user={user}
               />
             </div>
           </motion.div>

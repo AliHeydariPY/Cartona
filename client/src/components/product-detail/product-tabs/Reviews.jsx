@@ -10,24 +10,39 @@ import {
   sendCommentReply,
 } from "../../../services/commentAPIServices";
 
-import { FiStar, FiX, FiCheckCircle, FiAlertCircle } from "react-icons/fi";
+import {
+  FiStar,
+  FiX,
+  FiCheckCircle,
+  FiAlertCircle,
+  FiEdit3,
+  FiTrash2,
+} from "react-icons/fi";
 import { LuReply } from "react-icons/lu";
+
+import EditQuestionPopup from "../../pop-ups/EditQuestionPopup";
+import DeleteQuestionPopup from "../../pop-ups/DeleteQuestionPopup";
 
 const Reviews = ({
   productComments,
   setReloadComponent,
   reloadComponent,
   seller,
+  user,
 }) => {
   const { id } = useParams();
   const [commentText, setCommentText] = useState("");
   const [selectedStars, setSelectedStars] = useState(1);
+  const [userPost, setUserPost] = useState({});
 
   const [replyingTo, setReplyingTo] = useState(null);
   const [replyText, setReplyText] = useState("");
 
   const [openReplies, setOpenReplies] = useState(null);
   const replyInputRef = useRef(null);
+
+  const [showEditPopup, setShowEditPopup] = useState(false);
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
 
   useEffect(() => {
     if (replyInputRef.current) {
@@ -78,7 +93,6 @@ const Reviews = ({
     // sendReplyToComment({ parent: commentId, text: replyText, user: userID })
     sendCommentReply({
       comment: commentId,
-      user: localStorage.getItem("userID"),
       text: replyText,
     }).then(() => {
       setReplyText("");
@@ -103,29 +117,38 @@ const Reviews = ({
           Leave a Review
         </h4>
         <div className="flex items-center mb-2 sm:mb-4 space-x-1">
-          {[...Array(5)].map((_, i) => (
-            <FiStar
-              key={i}
-              size={22}
-              onMouseOver={() => setSelectedStars(i + 1)}
-              className={`cursor-pointer transition-colors ${
-                i < selectedStars
-                  ? "text-yellow-500 fill-yellow-500"
-                  : "text-gray-300 fill-gray-300"
-              }`}
-            />
-          ))}
+          <div className="flex justify-center gap-2 ">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                onClick={() => {
+                  console.log(star);
+                  setSelectedStars(star);
+                }}
+                className="transition-transform duration-200 hover:scale-110"
+              >
+                <FiStar
+                  size={24}
+                  className={`${
+                    star <= selectedStars
+                      ? "text-amber-400 fill-amber-400"
+                      : "text-gray-300 fill-gray-300"
+                  } transition-colors duration-200`}
+                />
+              </button>
+            ))}
+          </div>
         </div>
         <textarea
           rows={3}
           value={commentText}
           onChange={(e) => setCommentText(e.target.value)}
-          placeholder="Write your comment..."
+          placeholder="Write your review..."
           className="w-full p-2 sm:p-4 border border-blue-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-400 focus:outline-none text-blue-900 transition-all duration-300"
         />
         <button
           onClick={() => {
-            if (seller.user == localStorage.getItem("userID")) {
+            if (seller.user == user[0].username) {
               toast.custom((t) => (
                 <div
                   className={`${
@@ -146,7 +169,6 @@ const Reviews = ({
               );
             } else {
               const res = sendComment({
-                user: localStorage.getItem("userID"),
                 text: commentText,
                 rating: selectedStars,
                 product: id,
@@ -199,135 +221,206 @@ const Reviews = ({
         </button>
       </motion.div>
 
-      {/* Reviews List */}
       <motion.div variants={itemVariants} className="space-y-3 sm:space-y-4">
         {productComments.length === 0 && (
           <p className="text-blue-600">No comment have been asked yet.</p>
         )}
 
-        {productComments.map((comment) => (
-          <div key={comment.id} className="space-y-1 sm:space-y-2 ">
-            <div className="p-3 sm:p-4 bg-blue-50/60 rounded-lg sm:rounded-xl border border-blue-200 shadow-sm">
-              <div className="flex justify-between mb-1 sm:mb-2">
-                <div className="flex items-center">
-                  <span className="font-semibold text-blue-800 mr-2">
-                     {comment.user}
-                  </span>
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <FiStar
-                        key={i}
-                        size={16}
-                        className={`${
-                          i < comment.rating
-                            ? "text-yellow-500 fill-yellow-500"
-                            : "text-gray-300 fill-gray-300"
-                        }`}
-                      />
-                    ))}
+        {productComments.map((comment) => {
+          const isUserQuestion = comment.user == user[0].username;
+
+          return (
+            <div key={comment.id} className="space-y-1 sm:space-y-2 ">
+              <div
+                className={`p-3 sm:p-4 rounded-lg sm:rounded-xl border shadow-sm ${
+                  isUserQuestion
+                    ? "bg-blue-100/50 border-2 border-blue-400 "
+                    : "bg-blue-50/60 border-blue-200"
+                }`}
+              >
+                <div className="flex justify-between mb-1 sm:mb-2">
+                  <div className="flex items-center">
+                    <span className="font-semibold text-blue-800 mr-2">
+                      {comment.user}
+                    </span>
+                    <div className="flex mb-0.5">
+                      {[...Array(5)].map((_, i) => (
+                        <FiStar
+                          key={i}
+                          size={16}
+                          className={`${
+                            i < comment.rating
+                              ? "text-yellow-500 fill-yellow-500"
+                              : "text-gray-300 fill-gray-300"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-xs ml-5 text-blue-500">
+                      {comment.updated_time}
+                    </span>
+                  </div>
+                  <div>
+                    {isUserQuestion && (
+                      <button
+                        className="p-2 cursor-pointer rounded-full hover:bg-blue-100 text-blue-600 transition-colors duration-300"
+                        onClick={() => {
+                          console.log(comment);
+                          setUserPost({
+                            id: comment.id,
+                            type: "Review",
+                            text: comment.text,
+                            rating: comment.rating,
+                          });
+                          setShowEditPopup(true);
+                        }}
+                      >
+                        <FiEdit3 size={18} />
+                      </button>
+                    )}
+                    {isUserQuestion && (
+                      <button
+                        className="p-2 cursor-pointer rounded-full hover:bg-rose-100 text-rose-500 transition-colors duration-300"
+                        onClick={() => {
+                          setUserPost({
+                            id: comment.id,
+                            type: "Review",
+                            text: comment.text,
+                          });
+                          setShowDeletePopup(true);
+                        }}
+                      >
+                        <FiTrash2 size={18} />
+                      </button>
+                    )}
                   </div>
                 </div>
-                <span className="text-xs ml-2 text-blue-500">
-                  {comment.updated_time}
-                </span>
-              </div>
-              <div style={{ whiteSpace: 'pre-wrap' }} className="text-blue-700 text-sm">{comment.text}</div>
-              <div className="flex justify-between">
-                <button
-                  onClick={() => handleReply(comment.id)}
-                  className="mt-1 sm:mt-2 cursor-pointer flex items-center text-blue-600 text-sm hover:text-blue-800 transition-colors"
+                <div
+                  style={{ whiteSpace: "pre-wrap" }}
+                  className="text-blue-700 text-sm"
                 >
-                  <LuReply
-                    className="mr-1"
-                    size={16}
-                    style={{ transform: "rotate(180deg)" }}
-                  />{" "}
-                  Reply
-                </button>
-                {comment.replies && comment.replies.length > 0 && (
+                  {comment.text}
+                </div>
+                <div className="flex justify-between">
                   <button
-                    onClick={() => toggleReplies(comment.id)}
-                    className="mt-2 cursor-pointer text-blue-600 text-sm hover:text-blue-800 transition-colors"
+                    onClick={() => handleReply(comment.id)}
+                    className="mt-1 sm:mt-2 cursor-pointer flex items-center text-blue-600 text-sm hover:text-blue-800 transition-colors"
                   >
-                    {openReplies === comment.id
-                      ? "Hide Replies"
-                      : `Show Replies (${comment.replies.length})`}
+                    <LuReply
+                      className="mr-1"
+                      size={16}
+                      style={{ transform: "rotate(180deg)" }}
+                    />{" "}
+                    Reply
                   </button>
-                )}
+                  {comment.replies && comment.replies.length > 0 && (
+                    <button
+                      onClick={() => toggleReplies(comment.id)}
+                      className="mt-2 cursor-pointer text-blue-600 text-sm hover:text-blue-800 transition-colors"
+                    >
+                      {openReplies === comment.id
+                        ? "Hide Replies"
+                        : `Show Replies (${comment.replies.length})`}
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
 
-            <AnimatePresence>
-              {replyingTo === comment.id && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }} // شروع محو و کمی بالاتر
-                  animate={{ opacity: 1, y: 0 }} // پایان انیمیشن: کامل ظاهر
-                  exit={{ opacity: 0, y: -10 }} // هنگام بسته شدن: دوباره محو و بالا بره
-                  transition={{ duration: 0.3 }} // سرعت انیمیشن
-                  className="ml-3 sm:ml-6 mt-1 sm:mt-2 bg-white border border-blue-200 rounded-lg sm:rounded-lg p-2 sm:p-3 shadow-md"
-                >
-                  <textarea
-                    ref={replyInputRef}
-                    rows={2}
-                    value={replyText}
-                    onChange={(e) => setReplyText(e.target.value)}
-                    placeholder="Write your reply..."
-                    className="w-full p-1 sm:p-2 border border-blue-300 rounded-lg sm:rounded-lg focus:ring-1 focus:ring-blue-400 focus:outline-none text-blue-900 transition-all duration-300"
-                  />
-                  <div className="flex justify-end mt-1 sm:mt-2 space-x-1 sm:space-x-2">
-                    <button
-                      onClick={() => setReplyingTo(null)}
-                      className="px-2 py-1 cursor-pointer rounded-md border border-gray-300 text-gray-600 hover:bg-gray-100 text-xs sm:text-sm transition-colors duration-300"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={() => {
-                        sendReply(comment.id);
-                        setReloadComponent(!reloadComponent);
-                      }}
-                      className="px-3 py-1 cursor-pointer rounded-md bg-gradient-to-r from-blue-600 to-cyan-500 text-white hover:from-blue-700 hover:to-cyan-600 text-xs sm:text-sm transition-colors duration-300"
-                    >
-                      Send
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <AnimatePresence>
-              {openReplies === comment.id &&
-                comment.replies &&
-                comment.replies.length > 0 && (
+              <AnimatePresence>
+                {replyingTo === comment.id && (
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.3 }}
-                    className="ml-3 sm:ml-6 space-y-1 sm:space-y-2 mt-1 sm:mt-2"
+                    className="ml-3 sm:ml-6 mt-1 sm:mt-2 bg-white border border-blue-200 rounded-lg sm:rounded-lg p-2 sm:p-3 shadow-md"
                   >
-                    {comment.replies.map((reply) => (
-                      <div
-                        key={reply.id}
-                        className="p-2 sm:p-3 bg-white border border-blue-200 rounded-lg sm:rounded-lg shadow-sm"
+                    <textarea
+                      ref={replyInputRef}
+                      rows={2}
+                      value={replyText}
+                      onChange={(e) => setReplyText(e.target.value)}
+                      placeholder="Write your reply..."
+                      className="w-full p-1 sm:p-2 border border-blue-300 rounded-lg sm:rounded-lg focus:ring-1 focus:ring-blue-400 focus:outline-none text-blue-900 transition-all duration-300"
+                    />
+                    <div className="flex justify-end mt-1 sm:mt-2 space-x-1 sm:space-x-2">
+                      <button
+                        onClick={() => setReplyingTo(null)}
+                        className="px-2 py-1 cursor-pointer rounded-md border border-gray-300 text-gray-600 hover:bg-gray-100 text-xs sm:text-sm transition-colors duration-300"
                       >
-                        <div className="flex justify-between mb-1">
-                          <span className="font-medium text-blue-700 text-xs sm:text-sm">
-                            User {reply.user}
-                          </span>
-                          <span className="text-xs text-blue-400">
-                            {reply.updated_time}
-                          </span>
-                        </div>
-                         <p  style={{ whiteSpace: 'pre-wrap' }}  className="text-blue-800 text-sm">{reply.text}</p>
-                      </div>
-                    ))}
+                        Cancel
+                      </button>
+                      <button
+                        onClick={() => {
+                          sendReply(comment.id);
+                          setReloadComponent(!reloadComponent);
+                        }}
+                        className="px-3 py-1 cursor-pointer rounded-md bg-gradient-to-r from-blue-600 to-cyan-500 text-white hover:from-blue-700 hover:to-cyan-600 text-xs sm:text-sm transition-colors duration-300"
+                      >
+                        Send
+                      </button>
+                    </div>
                   </motion.div>
                 )}
-            </AnimatePresence>
-          </div>
-        ))}
+              </AnimatePresence>
+
+              <AnimatePresence>
+                {openReplies === comment.id &&
+                  comment.replies &&
+                  comment.replies.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.3 }}
+                      className="ml-3 sm:ml-6 space-y-1 sm:space-y-2 mt-1 sm:mt-2"
+                    >
+                      {comment.replies.map((reply) => (
+                        <div
+                          key={reply.id}
+                          className="p-2 sm:p-3 bg-white border border-blue-200 rounded-lg sm:rounded-lg shadow-sm"
+                        >
+                          <div className="flex justify-between mb-1">
+                            <span className="font-medium text-blue-700 text-xs sm:text-sm">
+                              User {reply.user}
+                            </span>
+                            <span className="text-xs text-blue-400">
+                              {reply.updated_time}
+                            </span>
+                          </div>
+                          <p
+                            style={{ whiteSpace: "pre-wrap" }}
+                            className="text-blue-800 text-sm"
+                          >
+                            {reply.text}
+                          </p>
+                        </div>
+                      ))}
+                    </motion.div>
+                  )}
+              </AnimatePresence>
+            </div>
+          );
+        })}
       </motion.div>
+
+      {showEditPopup && (
+        <EditQuestionPopup
+          onClose={() => setShowEditPopup(false)}
+          userPost={userPost}
+          reloadComponent={reloadComponent}
+          setReloadComponent={setReloadComponent}
+        />
+      )}
+
+      {showDeletePopup && (
+        <DeleteQuestionPopup
+          onClose={() => setShowDeletePopup(false)}
+          userPost={userPost}
+          reloadComponent={reloadComponent}
+          setReloadComponent={setReloadComponent}
+        />
+      )}
     </motion.div>
   );
 };

@@ -1,11 +1,15 @@
 import { useState, useEffect } from "react";
 import { Portal } from "react-portal";
-import { FiX, FiTrash2, FiAlertTriangle } from "react-icons/fi";
-import { deleteProductQuestion } from "../../services/commentAPIServices";
+import { FiX, FiTrash2 } from "react-icons/fi";
+
+import {
+  deleteComment,
+  deleteProductQuestion,
+} from "../../services/commentAPIServices";
 
 const DeleteQuestionPopup = ({
   onClose,
-  question,
+  userPost,
   reloadComponent,
   setReloadComponent,
 }) => {
@@ -23,12 +27,17 @@ const DeleteQuestionPopup = ({
   const stopPropagation = (e) => e.stopPropagation();
 
   const handleSubmit = () => {
-    deleteProductQuestion(question.questionID).then(() => {
-      handleClose();
-      setReloadComponent(!reloadComponent);
-    });
-
-    handleClose();
+    if (userPost.type == "Question") {
+      deleteProductQuestion(userPost.id).then(() => {
+        handleClose();
+        setReloadComponent(!reloadComponent);
+      });
+    } else {
+      deleteComment(userPost.id).then(() => {
+        handleClose();
+        setReloadComponent(!reloadComponent);
+      });
+    }
   };
 
   return (
@@ -52,7 +61,7 @@ const DeleteQuestionPopup = ({
                 <div className="bg-white/30 rounded-full p-1.5 mr-2">
                   <FiTrash2 size={18} />
                 </div>
-                <h3 className="text-xl font-bold">Delete Question</h3>
+                <h3 className="text-xl font-bold">Delete {userPost.type}</h3>
               </div>
               <button
                 onClick={handleClose}
@@ -66,17 +75,21 @@ const DeleteQuestionPopup = ({
           <div className="p-4 sm:p-6 space-y-5">
             <div className="text-center">
               <h4 className="text-lg font-semibold text-gray-800 mb-2">
-                Are you sure you want to delete this question?
+                Are you sure you want to delete this{" "}
+                {userPost.type.toLowerCase()}?
               </h4>
               <p className="text-gray-600 text-sm mb-4">
-                This action cannot be undone. The question will be permanently
-                removed.
+                This action cannot be undone. The {userPost.type.toLowerCase()}{" "}
+                will be permanently removed.
               </p>
             </div>
 
             <div className="bg-red-50 border border-red-200 p-4 rounded-xl">
-              <p className="text-sm font-medium text-red-900">
-                Q: {question.questionText}
+              <p
+                style={{ whiteSpace: "pre-wrap" }}
+                className="text-sm font-medium text-red-900"
+              >
+                {userPost.type[0]}: {userPost.text}
               </p>
             </div>
 

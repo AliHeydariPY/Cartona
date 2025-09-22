@@ -16,34 +16,26 @@ import { RiQuestionAnswerLine } from "react-icons/ri";
 
 import AnswerQuestionPopup from "../../pop-ups/AnswerQuestionPopup";
 import DeleteQuestionPopup from "../../pop-ups/DeleteQuestionPopup";
+import EditQuestionPopup from "../../pop-ups/EditQuestionPopup";
 
 import { sendProductQuestion } from "../../../services/commentAPIServices";
-import { getUser } from "../../../services/userAPIServices";
-import EditQuestionPopup from "../../pop-ups/EditQuestionPopup";
 
 const Questions = ({
   productQuestions,
   seller,
   setReloadComponent,
   reloadComponent,
+  user,
 }) => {
   const { id } = useParams();
   const [questionText, setQuestionText] = useState("");
-  const [question, setQuestion] = useState("");
-  const [user, setUser] = useState(null);
+  const [userPost, setUserPost] = useState("");
 
   const [showAnswerPopup, setShowAnswerPopup] = useState(false);
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [showDeletePopup, setShowDeletePopup] = useState(false);
 
   const listHeight = Math.min(productQuestions.length * 116, 464);
-
-  useEffect(() => {
-    getUser().then((res) => {
-      console.log(res.data);
-      setUser(res.data);
-    });
-  }, []);
 
   const showValidationError = (context) => {
     toast.custom((t) => (
@@ -112,9 +104,10 @@ const Questions = ({
               <button
                 className="p-2 cursor-pointer rounded-full hover:bg-blue-100 text-blue-600 transition-colors duration-300"
                 onClick={() => {
-                  setQuestion({
-                    questionText: faq.question_text,
-                    questionID: faq.id,
+                  setUserPost({
+                    id: faq.id,
+                    type: "Question",
+                    text: faq.question_text,
                   });
                   setShowAnswerPopup(true);
                 }}
@@ -126,9 +119,10 @@ const Questions = ({
               <button
                 className="p-2 cursor-pointer rounded-full hover:bg-blue-100 text-blue-600 transition-colors duration-300"
                 onClick={() => {
-                  setQuestion({
-                    questionText: faq.question_text,
-                    questionID: faq.id,
+                  setUserPost({
+                    id: faq.id,
+                    type: "Question",
+                    text: faq.question_text,
                   });
                   setShowEditPopup(true);
                 }}
@@ -140,9 +134,10 @@ const Questions = ({
               <button
                 className="p-2 cursor-pointer rounded-full hover:bg-rose-100 text-rose-500 transition-colors duration-300"
                 onClick={() => {
-                  setQuestion({
-                    questionText: faq.question_text,
-                    questionID: faq.id,
+                  setUserPost({
+                    id: faq.id,
+                    type: "Question",
+                    text: faq.question_text,
                   });
                   setShowDeletePopup(true);
                 }}
@@ -314,7 +309,7 @@ const Questions = ({
       {showAnswerPopup && (
         <AnswerQuestionPopup
           onClose={() => setShowAnswerPopup(false)}
-          question={question}
+          userPost={userPost}
           reloadComponent={reloadComponent}
           setReloadComponent={setReloadComponent}
         />
@@ -323,7 +318,7 @@ const Questions = ({
       {showEditPopup && (
         <EditQuestionPopup
           onClose={() => setShowEditPopup(false)}
-          question={question}
+          userPost={userPost}
           reloadComponent={reloadComponent}
           setReloadComponent={setReloadComponent}
         />
@@ -332,7 +327,7 @@ const Questions = ({
       {showDeletePopup && (
         <DeleteQuestionPopup
           onClose={() => setShowDeletePopup(false)}
-          question={question}
+          userPost={userPost}
           reloadComponent={reloadComponent}
           setReloadComponent={setReloadComponent}
         />

@@ -18,6 +18,7 @@ const ProductDetailTabs = ({
   product,
   productComments,
   seller,
+  user
 }) => {
   const [activeTab, setActiveTab] = useState("description");
 
@@ -65,6 +66,7 @@ const ProductDetailTabs = ({
           setReloadComponent={setReloadComponent}
           reloadComponent={reloadComponent}
           seller={seller}
+          user={user}
         />
       )}
 
@@ -76,6 +78,7 @@ const ProductDetailTabs = ({
           seller={seller}
           setReloadComponent={setReloadComponent}
           reloadComponent={reloadComponent}
+          user={user}
         />
       )}
     </>

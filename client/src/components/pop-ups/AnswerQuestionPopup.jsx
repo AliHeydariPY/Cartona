@@ -8,7 +8,7 @@ import { answerProductQuestion } from "../../services/commentAPIServices";
 
 const AnswerQuestionPopup = ({
   onClose,
-  question,
+  userPost,
   reloadComponent,
   setReloadComponent,
 }) => {
@@ -32,7 +32,7 @@ const AnswerQuestionPopup = ({
       {
         answer_text: answer,
       },
-      question.questionID
+      userPost.id
     ).then(() => {
       setAnswer("");
       handleClose();
@@ -74,7 +74,7 @@ const AnswerQuestionPopup = ({
           <div className="p-4 sm:p-6 space-y-4">
             <div className="bg-blue-50 border border-blue-200 p-4 rounded-xl">
               <p className="text-sm font-medium text-blue-900">
-                Q: {question.questionText}
+                Q: {userPost.text}
               </p>
             </div>
 
