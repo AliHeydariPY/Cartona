@@ -23,14 +23,12 @@ const BottomNav = () => {
   const [notifications, setNotifications] = useState([]);
   const [isAuth] = useAtom(authAtom);
 
-  const userID = localStorage.getItem("userID");
-
   useEffect(() => {
     const fetchCartItems = async () => {
-      const cartProductsRes = await getCartProducts(userID);
+      const cartProductsRes = await getCartProducts();
       setCartItems(cartProductsRes.data);
 
-      const notifRes = await getNotifications(userID);
+      const notifRes = await getNotifications();
       setNotifications(notifRes.data);
     };
 

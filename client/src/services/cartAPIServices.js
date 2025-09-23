@@ -2,9 +2,8 @@ import axios from "axios";
 import api from "../api/api";
 const SERVER_URL = "https://127.0.0.1:8000";
 
-export const getCartProducts = (userID) => {
+export const getCartProducts = () => {
   const url = `/cart-api/cart-items/`;
-  // const url = `api/cart-api/cart/4/`;
   return api.get(url);
 };
 
@@ -23,12 +22,11 @@ export const deleteCartProduct = (productID) => {
   return api.delete(url);
 };
 
-export const totalCartPayment = (cartID) => {
+export const totalCartPayment = () => {
   const url = `/cart-api/payments/`;
   return api.post(url, {
     address: "ugd",
     is_successful: true,
-    cart: cartID,
   });
 };
 

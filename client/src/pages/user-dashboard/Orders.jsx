@@ -48,7 +48,7 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
           );
           try{
             const commentRes = await getCommentsByUser(
-              localStorage.getItem("userID")
+              localStorage.getItem("userID") ////////////////// fix /////////////////////
             )
 
             return {

@@ -11,6 +11,7 @@ const ChatSidebar = ({
   selectedChat,
 }) => {
   const navigate = useNavigate();
+  console.log(conversations);
   return (
     <AnimatePresence>
       {(showSidebar || window.innerWidth >= 1280) && (
@@ -21,7 +22,6 @@ const ChatSidebar = ({
           transition={{ duration: 0.3 }}
           className="w-12/12 md:w-5/12 xl:w-80 border-r border-blue-200 bg-white/50 flex flex-col"
         >
-          {/* هدر سایدبار */}
           <div className="p-4 border-b border-blue-200">
             <div className="flex items-center justify-between mb-3 pl-1">
               <h3 className="text-lg font-semibold text-blue-900">
@@ -32,7 +32,6 @@ const ChatSidebar = ({
               </button>
             </div>
 
-            {/* جستجو */}
             <div className="relative">
               <FiSearch
                 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-400"
@@ -46,7 +45,6 @@ const ChatSidebar = ({
             </div>
           </div>
 
-          {/* لیست چت‌ها با اطلاعات محصول */}
           <div className="flex-1 overflow-y-auto  custom-chat-scroll">
             {conversations.map((conversation, inx) => (
               <div
@@ -64,7 +62,6 @@ const ChatSidebar = ({
                 } ${selectedChat?.id === conversation.id ? "bg-blue-100" : ""}`}
               >
                 <div className="flex items-start space-x-3">
-                  {/* تصویر محصول با وضعیت غیرفعال */}
                   <div
                     className={`w-16 h-16 ${
                       selectedChat?.id === conversation.id
@@ -82,7 +79,6 @@ const ChatSidebar = ({
                       className="w-full h-full object-cover"
                     />
 
-                    {/* overlay برای چت‌های غیرفعال */}
                     {!conversation.chat_enabled && (
                       <div className="absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center">
                         <FiX className="text-white" size={20} />
@@ -91,13 +87,13 @@ const ChatSidebar = ({
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    {/* نام فروشگاه و زمان با وضعیت */}
                     <div className="flex items-center justify-between mb-1">
                       <h4 className="flex font-semibold text-blue-900 truncate">
-                        {conversation.user
-                          ? conversation.user.username
-                          : conversation.store.store_name}
-                        {!conversation.user && (
+                        {conversation.buyer == localStorage.getItem("username")
+                          ? conversation.store.store_name
+                          : conversation.buyer}
+                        {conversation.buyer ==
+                          localStorage.getItem("username") && (
                           <span className="mt-1 ml-1 text-blue-800">
                             <MdStorefront size={15} />
                           </span>
@@ -113,7 +109,6 @@ const ChatSidebar = ({
                       </span>
                     </div>
 
-                    {/* نام محصول و قیمت */}
                     <div className="mb-2">
                       <p className="text-sm font-medium text-blue-800 truncate">
                         {conversation.product.name}
@@ -141,7 +136,6 @@ const ChatSidebar = ({
                       </div>
                     </div>
 
-                    {/* آخرین پیام و وضعیت */}
                     <div className="flex items-center justify-between">
                       <p className="text-sm text-blue-600 truncate max-w-[120px]">
                         {conversation.lastMessage}
@@ -153,7 +147,6 @@ const ChatSidebar = ({
                       )}
                     </div>
 
-                    {/* پیام برای چت‌های غیرفعال */}
                     {!conversation.chat_enabled && (
                       <p className="text-xs text-rose-600 mt-1">
                         Chat is no longer available

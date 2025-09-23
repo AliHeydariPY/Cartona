@@ -18,7 +18,6 @@ export default function ChatInput({
   contextMenu,
   setContextMenu,
   selectedChat,
-  userID,
 }) {
   const [emojiBox, setEmojiBox] = useState(false);
   const [textareaHeight, setTextareaHeight] = useState(0);
@@ -44,13 +43,11 @@ export default function ChatInput({
     textareaRef.current.focus();
   }, [isEditing]);
 
-  // موقعیت‌یندی ایموجی پیکر
   useEffect(() => {
     if (isEmojiVisible && textareaRef.current && emojiPickerRef.current) {
       const textareaRect = textareaRef.current.getBoundingClientRect();
       const emojiPicker = emojiPickerRef.current;
 
-      // محاسبه موقعیت
       emojiPicker.style.position = "absolute";
       emojiPicker.style.bottom = `${textareaRect.height + 10}px`;
       emojiPicker.style.right = "0";
@@ -64,7 +61,6 @@ export default function ChatInput({
 
   return (
     <div className="p-4 border-t border-blue-200 bg-white/90 relative">
-      {/* باکس ایموجی */}
       <div
         className={`fixed z-50 right-0 mr-2 emoji-picker-container ${
           emojiBox ? "emoji-enter" : "emoji-exit"
@@ -116,7 +112,6 @@ export default function ChatInput({
       )}
 
       <div className="flex items-end space-x-3 relative">
-        {/* دکمه ایموجی */}
         <button
           onClick={() => setEmojiBox(!emojiBox)}
           className={`p-2.5 cursor-pointer rounded-full transition-colors duration-300 ${
@@ -151,7 +146,6 @@ export default function ChatInput({
                 } else {
                   sendMessagse({
                     purchase: selectedChat.id,
-                    sender: userID,
                     message: message,
                   }).then((res) => {
                     fetchMessages(res.data.purchase);
@@ -196,7 +190,6 @@ export default function ChatInput({
               if (message.trim()) {
                 sendMessagse({
                   purchase: selectedChat.id,
-                  sender: localStorage.getItem("userID"),
                   message: message,
                 }).then((res) => {
                   fetchMessages(res.data.purchase);

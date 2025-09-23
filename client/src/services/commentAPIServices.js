@@ -104,7 +104,7 @@ export const getPurchasesByStorekeepre = (storekeeperID) => {
   return api.get(url);
 };
 
-export const getPurchases = (storekeeperID) => {
+export const getPurchases = () => {
   const url = `/comments-api/purchases/`;
   return api.get(url);
 };

@@ -82,6 +82,7 @@ const AccountSetting = () => {
             <FiX className="text-xl shrink-0" />
             <span className="font-medium">
               {err.response.data.old_password ||
+                err.response.data.detail ||
                 "There is a problem. Please try again later"}
             </span>
           </div>

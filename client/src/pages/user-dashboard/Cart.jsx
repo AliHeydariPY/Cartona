@@ -37,7 +37,6 @@ const Cart = ({
   useEffect(() => {
     const fetchCartItems = async () => {
       const cartProductsRes = await getCartProducts(
-        localStorage.getItem("userID")
       );
       console.log(cartProductsRes);
       const productsData = await Promise.all(
@@ -337,8 +336,7 @@ const Cart = ({
 
                   <button
                     onClick={() => {
-                      const cartID = localStorage.getItem("userID");
-                      totalCartPayment(cartID).then((res) => {
+                      totalCartPayment().then((res) => {
                         console.log(res.data);
                         setReloadComponent(!reloadComponent);
                         toast.custom((t) => (

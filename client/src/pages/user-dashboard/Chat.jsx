@@ -28,8 +28,9 @@ import {
   sendMessagse,
   deleteMessagse,
   editMessage,
+  getPurchases,
 } from "../../services/commentAPIServices";
-import { getStorekeeper, getBuyer } from "../../services/userAPIServices";
+import { getStorekeeperById, getBuyer } from "../../services/userAPIServices";
 import { getProduct } from "../../services/productAPIServices";
 import ChatInput from "./chats/ChatInput";
 
@@ -41,17 +42,16 @@ const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
   const messagesEndRef = useRef(null);
-  const userID = localStorage.getItem("userID");
   const storekeeperID = localStorage.getItem("storekeeperID");
-  
+
   useEffect(() => {
     const fetchPVs = async () => {
       try {
         let pvsByBuyer = [];
         let pvsByStorekeeper = [];
-        
+
         try {
-          const res = await getPurchasesByBuyer(userID);
+          const res = await getPurchases();
           pvsByBuyer = res?.data || [];
         } catch (error) {
           console.warn("getPurchasesByBuyer failed:", error);
@@ -67,34 +67,39 @@ const Chat = () => {
         }
 
         const allPVs = [...pvsByBuyer, ...pvsByStorekeeper];
-
         const pvs = await Promise.all(
           allPVs.map(async (pv) => {
             try {
-              const storekeeper = await getStorekeeper(pv.storekeeper);
+              const storekeeper = await getStorekeeperById(pv.storekeeper);
               const product = await getProduct(pv.product);
 
-              if (storekeeper.data.id == storekeeperID) {
-                const user = await getBuyer(pv.buyer);
-                return {
-                  user: { ...user.data },
-                  ...pv,
-                  product: { ...product.data },
-                };
-              } else {
-                return {
-                  store: { ...storekeeper.data },
-                  ...pv,
-                  product: { ...product.data },
-                };
-              }
+              return {
+                store: { ...storekeeper.data },
+                ...pv,
+                product: { ...product.data },
+              };
+              // if (storekeeper.data.user == localStorage.getItem("username")) {
+              //   const user = await getBuyer(pv.buyer);
+              //   console.log(user)
+              //   return {
+              //     user: { ...user.data },
+              //     ...pv,
+              //     product: { ...product.data },
+              //   };
+              // } else {
+              //   return {
+              //     store: { ...storekeeper.data },
+              //     ...pv,
+              //     product: { ...product.data },
+              //   };
+              // }
             } catch (err) {
               console.error("Error fetching pv details:", err);
-              return null; // اینجوری اون یکی pv خراب می‌افته بیرون
+              return null; 
             }
           })
         );
-
+        console.log(pvs);
         setConversations(pvs.filter(Boolean));
       } catch (error) {
         console.error("fetchPVs failed:", error);
@@ -102,7 +107,7 @@ const Chat = () => {
     };
 
     fetchPVs();
-  }, [userID, storekeeperID]);
+  }, [ storekeeperID]);
 
   useEffect(() => {
     if (!conversations[0]) return;
@@ -150,10 +155,10 @@ const Chat = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [prevMessage, setPrevMessage] = useState("");
 
-  // هندلر راست کلیک
   const handleContextMenu = (e, message) => {
     e.preventDefault();
-    if (message.sender != userID) return;
+
+    if (message.sender != localStorage.getItem("username")) return;
 
     const menuWidth = 100;
     const menuHeight = 200;
@@ -178,26 +183,23 @@ const Chat = () => {
     });
   };
 
-  // هندلر کلیک برای بستن منوی راست کلیک
   const handleClick = () => {
     setContextMenu((prev) => {
       return { ...prev, visible: false };
     });
   };
 
-  // هندلر شروع نگه‌داشتن (لمس یا ماوس)
   const handleTouchStart = (message) => {
-    if (message.sender != userID) return;
+    if (message.sender != localStorage.getItem("username")) return;
 
     const timer = setTimeout(() => {
       setIsSelectionMode(true);
       setSelectedMessages([message.id]);
-    }, 500); // 500ms delay for long press
+    }, 500); 
 
     setLongPressTimer(timer);
   };
 
-  // هندلر پایان نگه‌داشتن
   const handleTouchEnd = () => {
     if (longPressTimer) {
       clearTimeout(longPressTimer);
@@ -205,7 +207,6 @@ const Chat = () => {
     }
   };
 
-  // هندلر انتخاب از منوی راست کلیک
   const handleSelectOption = () => {
     setIsSelectionMode(true);
     if (contextMenu.message) {
@@ -214,7 +215,6 @@ const Chat = () => {
     setContextMenu({ visible: false, x: 0, y: 0, message: null });
   };
 
-  // هندلر حذف پیام‌ها
   const handleDeleteMessages = async (messageID) => {
     if (typeof messageID == "number") {
       deleteMessagse(messageID).then(() => {
@@ -235,7 +235,8 @@ const Chat = () => {
   };
 
   const handleMessageClick = (messageId, senderId) => {
-    if (!isSelectionMode || senderId != userID) return;
+    if (!isSelectionMode || senderId != localStorage.getItem("username"))
+      return;
     if (firstSelectMsg) {
       setFirstSelectMsg(false);
     } else {
@@ -257,7 +258,6 @@ const Chat = () => {
     setIsEditing(true);
   };
 
-  // اضافه کردن event listener برای کلیک
   useEffect(() => {
     document.addEventListener("click", handleClick);
     return () => {
@@ -289,7 +289,6 @@ const Chat = () => {
         </div>
 
         <div className="flex h-[700px] xl:h-[762px] 2xl:h-[785px]">
-          {/* Sidebar */}
           <ChatSidebar
             conversations={conversations}
             setSelectedChat={setSelectedChat}
@@ -298,14 +297,11 @@ const Chat = () => {
             selectedChat={selectedChat}
           />
 
-          {/* main section */}
           <div className="flex-1 flex flex-col">
             {selectedChat ? (
               <>
-                {/* header */}
                 <div className="p-4 border-b border-blue-200 bg-white/80">
                   <div className="flex items-center space-x-3">
-                    {/* تصویر محصول با وضعیت */}
                     <div
                       className={`w-16 h-16 ring ring-blue-400 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden relative`}
                     >
@@ -325,12 +321,14 @@ const Chat = () => {
                       <div className="flex items-center justify-between mb-1">
                         <div className="flex items-center space-x-2">
                           <h4 className="font-semibold text-blue-900">
-                            {selectedChat.user
-                              ? selectedChat.user.username
-                              : selectedChat.store.store_name}
+                            {selectedChat.buyer ==
+                            localStorage.getItem("username")
+                              ? selectedChat.store.store_name
+                              : selectedChat.buyer}
                           </h4>
                           <div className="flex items-center space-x-2">
-                            {!selectedChat.user && (
+                            {selectedChat.buyer ==
+                              localStorage.getItem("username") && (
                               <span className="px-2 py-1 bg-gradient-to-r from-blue-600 to-cyan-500 text-white text-xs font-bold rounded-full flex items-center">
                                 <MdStorefront
                                   className="mr-1 mb-0.25"
@@ -366,7 +364,6 @@ const Chat = () => {
                       </div>
                     </div>
                   </div>
-                  {/* پیام وضعیت برای چت غیرفعال */}
                   {!selectedChat.chat_enabled && (
                     <p className="text-sm text-rose-600 mt-2">
                       This chat conversation is no longer active. You can view
@@ -375,7 +372,6 @@ const Chat = () => {
                   )}
                 </div>
 
-                {/* messages */}
                 <div
                   className="flex-1 overflow-y-auto p-4 bg-gradient-to-br from-blue-50/50 to-cyan-50/50 custom-chat-scroll"
                   ref={messagesContainerRef}
@@ -405,7 +401,7 @@ const Chat = () => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         className={`flex py-2 rounded-r-2xl ${
-                          message.sender == userID
+                          message.sender == localStorage.getItem("username")
                             ? "justify-end"
                             : "justify-start"
                         }
@@ -422,7 +418,7 @@ const Chat = () => {
                       >
                         <div
                           className={`max-w-xs lg:max-w-md px-3 py-2 rounded-xl relative cursor-pointer ${
-                            message.sender == userID
+                            message.sender == localStorage.getItem("username")
                               ? "bg-gradient-to-br from-blue-600 to-cyan-500 text-white"
                               : "bg-white border border-blue-200 text-blue-900"
                           } ${
@@ -431,32 +427,33 @@ const Chat = () => {
                               : ""
                           }`}
                         >
-                          {/* حالت انتخاب پیام */}
-                          {isSelectionMode && message.sender == userID && (
-                            <div
-                              className={`absolute -left-2 -top-2 w-5 h-5 rounded-full flex items-center justify-center ${
-                                selectedMessages.includes(message.id)
-                                  ? "bg-blue-600 text-white"
-                                  : "bg-white border border-gray-300"
-                              }`}
-                            >
-                              {selectedMessages.includes(message.id) && (
-                                <FaCheck size={12} />
-                              )}
-                            </div>
-                          )}
+                          {isSelectionMode &&
+                            message.sender ==
+                              localStorage.getItem("username") && (
+                              <div
+                                className={`absolute -left-2 -top-2 w-5 h-5 rounded-full flex items-center justify-center ${
+                                  selectedMessages.includes(message.id)
+                                    ? "bg-blue-600 text-white"
+                                    : "bg-white border border-gray-300"
+                                }`}
+                              >
+                                {selectedMessages.includes(message.id) && (
+                                  <FaCheck size={12} />
+                                )}
+                              </div>
+                            )}
 
-                          {/* متن پیام */}
                           <div
                             style={{ whiteSpace: "pre-wrap" }}
+                            className="break-words whitespace-pre-wrap"
                           >{`${message.message}`}</div>
 
-                          {/* زمان ارسال + ادیت */}
                           <div className="flex items-center space-x-1 mt-1 text-xs">
                             {isEdited ? (
                               <span
                                 className={`flex items-center space-x-1 ${
-                                  message.sender == userID
+                                  message.sender ==
+                                  localStorage.getItem("username")
                                     ? "text-blue-100"
                                     : "text-blue-500"
                                 }`}
@@ -467,7 +464,8 @@ const Chat = () => {
                             ) : (
                               <span
                                 className={
-                                  message.sender == userID
+                                  message.sender ==
+                                  localStorage.getItem("username")
                                     ? "text-blue-100"
                                     : "text-blue-500"
                                 }
@@ -481,7 +479,6 @@ const Chat = () => {
                     );
                   })}
 
-                  {/* context menu */}
                   {contextMenu.visible && (
                     <Portal>
                       <div
@@ -525,7 +522,6 @@ const Chat = () => {
                     </Portal>
                   )}
 
-                  {/* نوار ابزار انتخاب */}
                   {isSelectionMode && selectedMessages.length > 0 && (
                     <div className="fixed top-44 left-1/2 xl:top-27 xl:left-2/3 2xl:left-3/5 transform -translate-x-1/2 bg-white px-4 py-2 rounded-full shadow-lg border border-gray-200 flex items-center space-x-4">
                       <span className="text-blue-600">
@@ -566,7 +562,6 @@ const Chat = () => {
                     contextMenu={contextMenu}
                     setContextMenu={setContextMenu}
                     selectedChat={selectedChat}
-                    userID={userID}
                   />
                 ) : (
                   <div className="p-4 border-t border-blue-200 bg-rose-50/80 text-center">

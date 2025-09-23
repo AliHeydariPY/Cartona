@@ -46,7 +46,6 @@ const UpgradeToSeller = () => {
           validationSchema={StoreSchema}
           onSubmit={(values, { setSubmitting }) => {
             const formData = new FormData();
-            formData.append("user", localStorage.getItem("userID"));
             formData.append("store_name", values.storeName);
             formData.append("description", values.description);
             formData.append("address", values.address);
@@ -90,7 +89,7 @@ const UpgradeToSeller = () => {
                     <div className="bg-gradient-to-r from-red-600 to-rose-500 text-white px-6 py-4 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-3">
                       <FiX className="text-xl shrink-0" />
                       <span className="font-medium">
-                        {err.response?.data?.message ||
+                        {err.response?.data?.store_name ||
                           "Upgrade failed. Please try again."}
                       </span>
                     </div>
