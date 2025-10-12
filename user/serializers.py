@@ -11,18 +11,23 @@ from comments.models import Comment
 from cart.models import ProductPayment
 
 class UserSerializer(serializers.ModelSerializer):
+    uuid = serializers.UUIDField(source='uuid_record.uuid', read_only=True)
     password = serializers.CharField(write_only=True, required=False)
     old_password = serializers.CharField(write_only=True, required=False)
+    role = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'password', 'old_password']
+        fields = ['uuid', 'username', 'password', 'old_password', 'role']
         extra_kwargs = {
             'username': {
                 'help_text': 'Required. 4 to 50 characters. Letters, digits and @/./+/-/_ only.',
                 'max_length': 50,
             }
         }
+
+    def get_role(self, obj):
+        return "storekeeper" if StoreKeeper.objects.filter(user=obj).exists() else "user"
 
     def validate_username(self, value):
         if len(value) < 5:
@@ -157,16 +162,15 @@ class StoreKeeperSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         rep = super().to_representation(instance)
         request = self.context.get('request')
-        method = request.method if request else None
 
-        if method in ['PUT', 'PATCH']:
-            if not request.data.get('image'):
+        rep['user'] = instance.user.username if instance.user else None
+
+        if request:
+            method = request.method
+            if method in ['PUT', 'PATCH'] and not request.data.get('image'):
                 rep['image'] = None
-        elif not instance.image:
-            rep['image'] = None
-
-        if method in ['GET', 'HEAD', 'OPTIONS']:
-            rep['user'] = instance.user.username if instance.user else None
+            elif not instance.image:
+                rep['image'] = None
 
         return rep
 
@@ -235,11 +239,16 @@ class DeliveryStatusSerializer(serializers.ModelSerializer):
         if 'payment' in validated_data and validated_data['payment'] != instance.payment:
             raise serializers.ValidationError({'payment': 'You cannot change the payment once set.'})
 
-        if instance.is_sent and validated_data.get('is_sent') is False:
-            raise serializers.ValidationError({'is_sent': 'You cannot mark a sent delivery as unsent.'})
-
-        if instance.sent_at and 'sent_at' in validated_data and validated_data['sent_at'] != instance.sent_at:
-            raise serializers.ValidationError({'sent_at': 'Delivery time cannot be changed once set.'})
+        if instance.is_sent:
+            if 'is_sent' in validated_data and validated_data['is_sent'] != instance.is_sent:
+                raise serializers.ValidationError(
+                    {'is_sent': 'You cannot change the delivery status after it has been marked as sent.'})
+            if 'sent_at' in validated_data and validated_data['sent_at'] != instance.sent_at:
+                raise serializers.ValidationError(
+                    {'sent_at': 'You cannot change the delivery time after it has been set.'})
+            if 'note' in validated_data and validated_data['note'] != instance.note:
+                raise serializers.ValidationError(
+                    {'note': 'You cannot change the note after the delivery has been marked as sent.'})
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
@@ -250,11 +259,46 @@ class DeliveryStatusSerializer(serializers.ModelSerializer):
 class StoreRelatedPaymentSerializer(serializers.ModelSerializer):
     paid_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
     product = serializers.IntegerField(source='product.id', read_only=True)
+    product_name = serializers.CharField(read_only=True)
     buyer = serializers.CharField(source='cart.user.username', read_only=True)
+    storekeeper_delivery = serializers.SerializerMethodField()
+    storekeeper_delivered_at = serializers.DateTimeField(
+        source='delivery_status.sent_at',
+        format='%Y-%m-%d %H:%M:%S',
+        read_only=True
+    )
+    buyer_delivery = serializers.SerializerMethodField()
+    buyer_delivered_at = serializers.DateTimeField(
+        source='delivered_at',
+        format='%Y-%m-%d %H:%M:%S',
+        read_only=True
+    )
 
     class Meta:
         model = ProductPayment
         fields = [
-            'id', 'product', 'quantity', 'total_price',
-            'paid_at', 'address', 'buyer', 'end_of_sending'
+            'id', 'product', 'product_name', 'quantity', 'total_price',
+            'paid_at', 'address', 'buyer', 'storekeeper_delivery',
+            'storekeeper_delivered_at', 'buyer_delivery', 'buyer_delivered_at'
         ]
+
+    def get_storekeeper_delivery(self, obj):
+        try:
+            delivery = ProductDeliveryStatus.objects.get(payment=obj)
+            return delivery.is_sent
+        except ProductDeliveryStatus.DoesNotExist:
+            return False
+
+    def get_storekeeper_delivered_at(self, obj):
+        try:
+            delivery_status = ProductDeliveryStatus.objects.get(payment=obj)
+            return delivery_status.sent_at
+        except ProductDeliveryStatus.DoesNotExist:
+            return None
+
+    def get_buyer_delivery(self, obj):
+        return bool(obj.is_delivered)
+
+    def get_buyer_delivered_at(self, obj):
+        return obj.delivered_at if obj.delivered_at else None
+

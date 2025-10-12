@@ -44,14 +44,6 @@ class Product(models.Model):
             self.description = self.description.strip()
         if self.amazing_offer:
             self.amazing_offer = self.amazing_offer.strip()
-
-        if self.stock_quantity == 0:
-            self.price = None
-            self.discounted_price = None
-            self.discount_percentage = None
-            self.discount_period = None
-            self.amazing_offer = None
-            self.amazing_offer_period = None
         super().save(*args, **kwargs)
 
     class Meta:

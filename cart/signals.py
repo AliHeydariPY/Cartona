@@ -25,3 +25,5 @@ def create_cart_for_new_user(sender, instance, created, **kwargs):
 def create_favorite_for_new_user(sender, instance, created, **kwargs):
     if created:
         Favorite.objects.get_or_create(user=instance)
+
+

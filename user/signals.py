@@ -1,7 +1,8 @@
 import os
-from django.db.models.signals import pre_delete, pre_save
+from django.db.models.signals import pre_delete, pre_save, post_save
 from django.dispatch import receiver
-from .models import StoreKeeper
+from django.contrib.auth import get_user_model
+from .models import StoreKeeper, UserUUID
 
 @receiver(pre_delete, sender=StoreKeeper)
 def delete_storekeeper_image(sender, instance, **kwargs):
@@ -27,3 +28,10 @@ def delete_old_storekeeper_image_on_change(sender, instance, **kwargs):
                 old_image.delete(save=False)
             except Exception:
                 pass
+
+User = get_user_model()
+
+@receiver(post_save, sender=User)
+def create_user_uuid(sender, instance, created, **kwargs):
+    if created:
+        UserUUID.objects.create(user=instance)

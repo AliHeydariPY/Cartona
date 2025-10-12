@@ -97,17 +97,25 @@ class ProductPayment(models.Model):
         on_delete=models.SET_NULL,
         related_name='product_payments',
         null=True,
-        blank=True)
+        blank=True
+    )
     product = models.ForeignKey(
         Product,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='product_payments')
+        related_name='product_payments'
+    )
+    product_name = models.TextField(
+        null=True,
+        blank=True,
+        help_text="Stores product name in case product is deleted after successful payment."
+    )
     quantity = models.PositiveIntegerField(default=1, help_text="Paid quantity of the product")
     total_price = models.PositiveIntegerField(
         help_text="Quantity × Unit price of product",
-        editable=False)
+        editable=False
+    )
     fake_card_number = models.CharField(max_length=19, default=generate_fake_card_number)
     fake_card_second_password = models.CharField(max_length=8, default=generate_fake_second_password)
     fake_card_cvv = models.CharField(max_length=4, default=generate_fake_cvv)
@@ -120,18 +128,21 @@ class ProductPayment(models.Model):
         help_text="Has the product reached the buyer?"
     )
     delivered_at = models.DateTimeField(null=True, blank=True)
-    end_of_sending = models.BooleanField(
-        default=False,
-        help_text="Has the sending process been completed?"
-    )
+    buyer_hidden = models.BooleanField(default=False, help_text="Hidden from buyer")
+    storekeeper_hidden = models.BooleanField(default=False, help_text="Hidden from storekeeper")
 
     def save(self, *args, **kwargs):
         if self.cart_item:
             self.product = self.cart_item.product
             self.quantity = self.cart_item.quantity
             self.total_price = self.cart_item.get_total_price()
+
+        if self.product and not self.product_name:
+            self.product_name = self.product.name
+
         if self.address:
             self.address = self.address.strip()
+
         super().save(*args, **kwargs)
 
     class Meta:

@@ -20,20 +20,18 @@ class CartItemViewSet(viewsets.ModelViewSet):
             return CartItem.objects.none()
         return CartItem.objects.filter(cart=cart).order_by('-id')
 
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if ProductPayment.objects.filter(cart_item=instance).exists():
+            raise PermissionDenied("This cart item has already been paid for and cannot be deleted.")
+        return super().destroy(request, *args, **kwargs)
+
     @action(detail=False, methods=['get', 'put', 'patch', 'delete'], url_path=r'product/(?P<product_id>\d+)')
     def by_product(self, request, product_id=None):
         try:
-            cart = Cart.objects.get(user=request.user)
-        except Cart.DoesNotExist:
-            raise NotFound("Cart not found.")
-
-        try:
-            item = CartItem.objects.get(cart=cart, product_id=product_id)
+            item = self.get_queryset().get(product_id=product_id)
         except CartItem.DoesNotExist:
             raise NotFound("Cart item not found for this product.")
-
-        if item.cart.user != request.user:
-            raise PermissionDenied("You do not have permission to access this item.")
 
         if request.method == 'GET':
             serializer = self.get_serializer(item)
@@ -52,14 +50,14 @@ class CartItemViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
 
         elif request.method == 'DELETE':
+            if ProductPayment.objects.filter(cart_item=item).exists():
+                raise PermissionDenied("This cart item has already been paid for and cannot be deleted.")
             self.perform_destroy(item)
             return Response(status=status.HTTP_204_NO_CONTENT)
 
 class CartViewSet(
-    mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
-    mixins.DestroyModelMixin,
     viewsets.GenericViewSet
 ):
     serializer_class = CartSerializer
@@ -67,12 +65,6 @@ class CartViewSet(
 
     def get_queryset(self):
         return Cart.objects.filter(user=self.request.user)
-
-    def perform_create(self, serializer):
-        user = self.request.user
-        if Cart.objects.filter(user=user).exists():
-            raise PermissionDenied("You already have a cart.")
-        serializer.save(user=user)
 
 class FavoriteItemViewSet(viewsets.ModelViewSet):
     serializer_class = FavoriteItemSerializer
@@ -89,17 +81,9 @@ class FavoriteItemViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get', 'put', 'patch', 'delete'], url_path=r'product/(?P<product_id>\d+)')
     def by_product(self, request, product_id=None):
         try:
-            favorite = Favorite.objects.get(user=request.user)
-        except Favorite.DoesNotExist:
-            raise NotFound("Favorite list not found.")
-
-        try:
-            item = FavoriteItem.objects.get(favorite=favorite, product_id=product_id)
+            item = self.get_queryset().get(product_id=product_id)
         except FavoriteItem.DoesNotExist:
             raise NotFound("Favorite item not found for this product.")
-
-        if item.favorite.user != request.user:
-            raise PermissionDenied("You do not have permission to access this item.")
 
         if request.method == 'GET':
             serializer = self.get_serializer(item)
@@ -122,10 +106,8 @@ class FavoriteItemViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
 class FavoriteViewSet(
-    mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
-    mixins.DestroyModelMixin,
     viewsets.GenericViewSet
 ):
     serializer_class = FavoriteSerializer
@@ -133,12 +115,6 @@ class FavoriteViewSet(
 
     def get_queryset(self):
         return Favorite.objects.filter(user=self.request.user)
-
-    def perform_create(self, serializer):
-        user = self.request.user
-        if Favorite.objects.filter(user=user).exists():
-            raise PermissionDenied("You already have a favorite list.")
-        serializer.save(user=user)
 
 class PaymentViewSet(viewsets.ModelViewSet):
     serializer_class = PaymentSerializer
@@ -195,10 +171,30 @@ class ProductPaymentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return ProductPayment.objects.filter(cart__user=self.request.user).order_by('-paid_at')
+        return ProductPayment.objects.filter(cart__user=self.request.user, buyer_hidden=False).order_by('-paid_at')
 
     def get_serializer_context(self):
         return {"request": self.request}
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        if not instance.is_successful:
+            serializer = self.get_serializer(instance)
+            serializer.perform_delete(instance)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        if not instance.is_delivered:
+            raise PermissionDenied("You cannot delete this payment until the product is delivered.")
+
+        instance.buyer_hidden = True
+
+        if instance.storekeeper_hidden and instance.buyer_hidden:
+            instance.delete()
+        else:
+            instance.save()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     def _handle_filtered_request(self, request, queryset, index, label="item"):
         queryset = queryset.order_by('-id')
@@ -230,14 +226,51 @@ class ProductPaymentViewSet(viewsets.ModelViewSet):
             serializer.save()
             return Response(serializer.data)
 
+
         elif request.method == 'DELETE':
-            obj.delete()
+
+            if obj is None:
+                raise MethodNotAllowed("DELETE", detail="You must specify an index to delete a single item.")
+
+            if not obj.is_successful:
+                serializer = self.get_serializer(obj)
+
+                serializer.perform_delete(obj)
+
+                return Response(status=status.HTTP_204_NO_CONTENT)
+
+            if not obj.is_delivered:
+                raise PermissionDenied("You cannot delete this payment until the product is delivered.")
+
+            obj.buyer_hidden = True
+
+            if obj.storekeeper_hidden and obj.buyer_hidden:
+
+                obj.delete()
+
+            else:
+
+                obj.save()
+
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=False, url_path=r'product/(?P<product_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
+    @action(detail=False, url_path=r'product/(?P<product_id>null|\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
     def by_product(self, request, product_id=None, index=None):
-        queryset = self.get_queryset().filter(product_id=product_id)
+        if product_id == 'null':
+            queryset = self.get_queryset().filter(product__isnull=True)
+        else:
+            try:
+                product_id = int(product_id)
+                queryset = self.get_queryset().filter(product_id=product_id)
+            except ValueError:
+                raise Http404("Invalid product ID.")
+
         return self._handle_filtered_request(request, queryset, index, label="product payment")
+
+    @action(detail=False, url_path=r'product-name/(?P<name>[^/]+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
+    def by_product_name(self, request, name=None, index=None):
+        queryset = self.get_queryset().filter(product_name__iexact=name.strip())
+        return self._handle_filtered_request(request, queryset, index, label="product name")
 
     @action(detail=False, url_path=r'is-delivered/(?P<is_delivered>true|false)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
     def by_delivery_status(self, request, is_delivered=None, index=None):
@@ -251,8 +284,7 @@ class ProductPaymentViewSet(viewsets.ModelViewSet):
         queryset = self.get_queryset().filter(is_successful=value)
         return self._handle_filtered_request(request, queryset, index, label="success status")
 
-    @action(detail=False, url_path=r'cart-item/(?P<cart_item_id>null|\d+)(?:/(?P<index>\d+))?',
-            methods=['get', 'put', 'patch', 'delete'])
+    @action(detail=False, url_path=r'cart-item/(?P<cart_item_id>null|\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
     def by_cart_item(self, request, cart_item_id=None, index=None):
         if cart_item_id == 'null':
             queryset = self.get_queryset().filter(cart_item__isnull=True)
@@ -265,12 +297,15 @@ class ProductPaymentViewSet(viewsets.ModelViewSet):
 
         return self._handle_filtered_request(request, queryset, index, label="cart item")
 
-    @action(
-        detail=False,
-        url_path=r'end-of-sending/(?P<end_of_sending>true|false)(?:/(?P<index>\d+))?',
-        methods=['get', 'put', 'patch', 'delete']
-    )
-    def by_end_of_sending(self, request, end_of_sending=None, index=None):
-        value = end_of_sending.lower() == 'true'
-        queryset = self.get_queryset().filter(end_of_sending=value)
-        return self._handle_filtered_request(request, queryset, index, label="end_of_sending status")
+    @action(detail=False, url_path=r'storekeeper-delivery/(?P<is_sent>true|false)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
+    def by_storekeeper_delivery(self, request, is_sent=None, index=None):
+        value = is_sent.lower() == 'true'
+
+        filtered_ids = [
+            pp.id for pp in self.get_queryset()
+            if ProductPaymentSerializer(pp, context=self.get_serializer_context()).data.get('storekeeper_delivery') == value
+        ]
+
+        queryset = self.get_queryset().filter(id__in=filtered_ids)
+        return self._handle_filtered_request(request, queryset, index, label="storekeeper delivery status")
+

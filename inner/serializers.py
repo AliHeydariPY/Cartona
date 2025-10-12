@@ -3,6 +3,7 @@ from rest_framework import serializers
 from .models import Product, Images, Types, TypesValues, Features, FrequentlyAskedQuestions, Category
 from comments.models import CommentReply
 from user.models import StoreKeeper
+from cart.models import ProductPayment, Payment
 
 class ImageSerializer(serializers.ModelSerializer):
     product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
@@ -257,6 +258,40 @@ class ProductSerializer(serializers.ModelSerializer):
             'image', 'average_rating', 'comment_count', 'category',
             'storekeeper', 'created_time', 'updated_time'
         ]
+
+    def perform_delete(self, instance):
+        affected_pps = ProductPayment.objects.filter(product=instance)
+        affected_payments = set()
+
+        for pp in affected_pps:
+            if pp.is_successful:
+                pp.product = None
+                pp.save(update_fields=['product'])
+            else:
+                payment = Payment.objects.filter(product_payments=pp, is_successful=False).first()
+                if payment:
+                    affected_payments.add(payment.id)
+                pp.delete()
+
+        for payment_id in affected_payments:
+            try:
+                payment = Payment.objects.get(id=payment_id)
+            except Payment.DoesNotExist:
+                continue
+
+            remaining_pps = payment.product_payments.all()
+
+            if not remaining_pps.exists():
+                payment.delete()
+            else:
+                payment.amount = sum(pp.total_price for pp in remaining_pps)
+                if not remaining_pps.filter(is_successful=False).exists():
+                    payment.is_successful = True
+                    payment.save(update_fields=['amount', 'is_successful'])
+                else:
+                    payment.save(update_fields=['amount'])
+
+        instance.delete()
 
     def validate_image(self, image):
         if image and hasattr(image, 'size') and image.size > 5 * 1024 * 1024:

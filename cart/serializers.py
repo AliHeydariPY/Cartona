@@ -2,6 +2,7 @@ from django.utils import timezone
 from rest_framework import serializers
 from .models import Cart, CartItem, Payment, ProductPayment, FavoriteItem, Favorite
 from inner.models import Product
+from user.models import ProductDeliveryStatus
 from comments.models import ProductPurchase, PurchaseChat
 
 class CartItemSerializer(serializers.ModelSerializer):
@@ -65,6 +66,9 @@ class CartItemSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
+        if ProductPayment.objects.filter(cart_item=instance).exists():
+            raise serializers.ValidationError("This cart item has already been paid for and cannot be modified.")
+
         if 'product' in validated_data and validated_data['product'] != instance.product:
             raise serializers.ValidationError({"product": "You cannot change the product of a cart item."})
 
@@ -78,11 +82,14 @@ class CartItemSerializer(serializers.ModelSerializer):
 class CartSerializer(serializers.ModelSerializer):
     total_items = serializers.SerializerMethodField()
     total_price = serializers.SerializerMethodField()
-    user = serializers.PrimaryKeyRelatedField(read_only=True)
+    user = serializers.SerializerMethodField()
 
     class Meta:
         model = Cart
         fields = ['id', 'user', 'total_items', 'total_price']
+
+    def get_user(self, obj):
+        return obj.user.username if obj.user else None
 
     def get_total_items(self, obj):
         return sum(item.quantity for item in obj.items.all())
@@ -130,34 +137,63 @@ class FavoriteItemSerializer(serializers.ModelSerializer):
 
 class FavoriteSerializer(serializers.ModelSerializer):
     total_items = serializers.SerializerMethodField()
-    user = serializers.PrimaryKeyRelatedField(read_only=True)
+    user = serializers.SerializerMethodField()
 
     class Meta:
         model = Favorite
         fields = ['id', 'user', 'total_items']
+
+    def get_user(self, obj):
+        return obj.user.username if obj.user else None
 
     def get_total_items(self, obj):
         return obj.items.count()
 
 class ProductPaymentSerializer(serializers.ModelSerializer):
     paid_at = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', read_only=True)
+    is_delivered = serializers.BooleanField(required=False)
     delivered_at = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', required=False)
     quantity = serializers.IntegerField(read_only=True)
     total_price = serializers.IntegerField(read_only=True)
     cart = serializers.PrimaryKeyRelatedField(read_only=True)
     product = serializers.PrimaryKeyRelatedField(read_only=True)
-    is_delivered = serializers.BooleanField(required=False)
+    product_name = serializers.CharField(read_only=True)
+    storekeeper_delivery = serializers.SerializerMethodField()
+    storekeeper_delivered_at = serializers.DateTimeField(
+        source='delivery_status.sent_at',
+        format='%Y-%m-%d %H:%M:%S',
+        read_only=True
+    )
     cart_item = serializers.PrimaryKeyRelatedField(
         queryset=CartItem.objects.all(),
         required=True
     )
-    end_of_sending = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = ProductPayment
-        fields = '__all__'
+        fields = [
+            'id',
+            'paid_at',
+            'is_delivered',
+            'delivered_at',
+            'quantity',
+            'total_price',
+            'cart',
+            'product',
+            'product_name',
+            'storekeeper_delivery',
+            'storekeeper_delivered_at',
+            'cart_item',
+            'fake_card_number',
+            'fake_card_second_password',
+            'fake_card_cvv',
+            'fake_card_expiry',
+            'address',
+            'is_successful',
+        ]
         read_only_fields = [
             'product',
+            'product_name',
             'quantity',
             'total_price',
             'fake_card_number',
@@ -166,7 +202,8 @@ class ProductPaymentSerializer(serializers.ModelSerializer):
             'fake_card_expiry',
             'paid_at',
             'cart',
-            'end_of_sending'
+            'storekeeper_delivery',
+            'storekeeper_delivered_at',
         ]
 
     SENSITIVE_FIELDS = [
@@ -176,6 +213,50 @@ class ProductPaymentSerializer(serializers.ModelSerializer):
         'fake_card_expiry',
         'product_payments'
     ]
+
+    def get_storekeeper_delivery(self, obj):
+        try:
+            delivery = ProductDeliveryStatus.objects.get(payment=obj)
+            return delivery.is_sent
+        except ProductDeliveryStatus.DoesNotExist:
+            return False
+
+    def get_storekeeper_delivered_at(self, obj):
+        try:
+            delivery_status = ProductDeliveryStatus.objects.get(payment=obj)
+            return delivery_status.sent_at
+        except ProductDeliveryStatus.DoesNotExist:
+            return None
+
+    def perform_delete(self, instance):
+        payments = instance.main_payment.all()
+
+        for payment in payments:
+            if payment.is_successful:
+                continue
+
+            remaining = payment.product_payments.exclude(id=instance.id)
+
+            if remaining.exists():
+                payment.amount = sum(pp.total_price for pp in remaining)
+                if not remaining.filter(is_successful=False).exists():
+                    payment.is_successful = True
+                    payment.save(update_fields=['amount', 'is_successful'])
+                else:
+                    payment.save(update_fields=['amount'])
+            else:
+                payment.delete()
+
+        instance.delete()
+
+    def check_payment_success_status(self, instance):
+        for payment in instance.main_payment.all():
+            if payment.is_successful:
+                continue
+
+            if not payment.product_payments.filter(is_successful=False).exists():
+                payment.is_successful = True
+                payment.save(update_fields=['is_successful'])
 
     def validate(self, attrs):
         is_delivered = attrs.get('is_delivered')
@@ -259,36 +340,42 @@ class ProductPaymentSerializer(serializers.ModelSerializer):
 
         was_successful = instance.is_successful
         new_successful = validated_data.get('is_successful', was_successful)
+
         if was_successful and not new_successful:
             raise serializers.ValidationError(
                 {'is_successful': 'You cannot mark a successful payment as unsuccessful.'})
 
-        was_delivered = instance.is_delivered
-        new_delivered = validated_data.get('is_delivered', was_delivered)
-        if was_delivered and not new_delivered:
+        if instance.is_delivered and 'is_delivered' in validated_data and not validated_data['is_delivered']:
             raise serializers.ValidationError({'is_delivered': 'You cannot mark a delivered item as undelivered.'})
 
         if 'delivered_at' in validated_data and instance.delivered_at is not None:
             raise serializers.ValidationError({'delivered_at': 'Delivery time cannot be changed once set.'})
 
+        if 'address' in validated_data and self.get_storekeeper_delivery(instance):
+            raise serializers.ValidationError(
+                {'address': 'You cannot change the address after the seller has shipped the product.'})
+
         instance.address = validated_data.get('address', instance.address)
         instance.is_successful = new_successful
-        instance.is_delivered = new_delivered
+        instance.is_delivered = validated_data.get('is_delivered', instance.is_delivered)
 
         if 'delivered_at' in validated_data:
             instance.delivered_at = validated_data['delivered_at']
 
         instance.save()
 
-        delivery_status = getattr(instance, 'delivery_status', None)
-        if instance.is_delivered and delivery_status and delivery_status.is_sent and not instance.end_of_sending:
-            instance.end_of_sending = True
-            instance.save(update_fields=['end_of_sending'])
-
         if not was_successful and new_successful:
             product = instance.product
             if product and product.stock_quantity is not None:
                 product.stock_quantity = max(product.stock_quantity - instance.quantity, 0)
+
+                if product.stock_quantity == 0:
+                    product.discounted_price = None
+                    product.discount_percentage = None
+                    product.discount_period = None
+                    product.amazing_offer = None
+                    product.amazing_offer_period = None
+
                 product.save()
 
             buyer = instance.cart.user
@@ -311,6 +398,14 @@ class ProductPaymentSerializer(serializers.ModelSerializer):
                     sender=buyer,
                     message=f"💬 Chat opened for your purchase of '{product.name}'. You can now communicate with the seller."
                 )
+
+            for payment in instance.main_payment.all():
+                if payment.is_successful:
+                    continue
+
+                if not payment.product_payments.filter(is_successful=False).exists():
+                    payment.is_successful = True
+                    payment.save(update_fields=['is_successful'])
 
         return instance
 
@@ -350,9 +445,12 @@ class PaymentSerializer(serializers.ModelSerializer):
         Payment.objects.filter(cart__user=user, is_successful=False).delete()
 
         try:
-            cart = Cart.objects.get(user=user)
+            cart = Cart.objects.prefetch_related('items').get(user=user)
         except Cart.DoesNotExist:
             raise serializers.ValidationError("No active cart found for this user.")
+
+        if not cart.items.exists():
+            raise serializers.ValidationError("Your cart is empty. You cannot create a payment without items.")
 
         validated_data['cart'] = cart
         validated_data['amount'] = cart.get_total_price()
@@ -446,41 +544,67 @@ class PaymentSerializer(serializers.ModelSerializer):
 
         if was_successful and not new_successful:
             raise serializers.ValidationError(
-                {'is_successful': 'You cannot mark a successful payment as unsuccessful.'})
+                {'is_successful': 'You cannot mark a successful payment as unsuccessful.'}
+            )
 
-        instance.address = validated_data.get('address', instance.address)
+        new_address = validated_data.get('address')
+
+        if new_address is not None:
+            for pp in instance.product_payments.all():
+                delivery_status = ProductDeliveryStatus.objects.filter(payment=pp).first()
+                if delivery_status and delivery_status.is_sent:
+                    raise serializers.ValidationError({
+                        'address': 'You cannot change the address after the seller has shipped one of the products.'
+                    })
+
+            for pp in instance.product_payments.filter(is_successful=False):
+                pp.address = new_address
+                pp.save(update_fields=['address'])
+
+            instance.address = new_address
+
         instance.is_successful = new_successful
         instance.save()
 
         if not was_successful and new_successful:
-            for pp in instance.product_payments.all():
+            for pp in instance.product_payments.filter(is_successful=False):
                 product = pp.product
                 if product and product.stock_quantity is not None:
                     product.stock_quantity = max(product.stock_quantity - pp.quantity, 0)
+
+                    if product.stock_quantity == 0:
+                        product.discounted_price = None
+                        product.discount_percentage = None
+                        product.discount_period = None
+                        product.amazing_offer = None
+                        product.amazing_offer_period = None
+
                     product.save()
 
                 pp.is_successful = True
                 pp.save(update_fields=['is_successful'])
 
-                buyer = pp.cart.user
-                storekeeper = product.storekeeper
+                if not ProductPurchase.objects.filter(payment=pp).exists():
+                    buyer = pp.cart.user
+                    storekeeper = product.storekeeper
 
-                purchase = ProductPurchase.objects.create(
-                    buyer=buyer,
-                    product=product,
-                    storekeeper=storekeeper,
-                    payment=pp
-                )
-
-                if not purchase.chat_enabled:
-                    purchase.chat_enabled = True
-                    purchase.save(update_fields=['chat_enabled'])
-
-                if not PurchaseChat.objects.filter(purchase=purchase).exists():
-                    PurchaseChat.objects.create(
-                        purchase=purchase,
-                        sender=buyer,
-                        message=f"💬 Chat opened for your purchase of '{product.name}'. You can now communicate with the seller."
+                    purchase = ProductPurchase.objects.create(
+                        buyer=buyer,
+                        product=product,
+                        storekeeper=storekeeper,
+                        payment=pp
                     )
 
+                    if not purchase.chat_enabled:
+                        purchase.chat_enabled = True
+                        purchase.save(update_fields=['chat_enabled'])
+
+                    if not PurchaseChat.objects.filter(purchase=purchase).exists():
+                        PurchaseChat.objects.create(
+                            purchase=purchase,
+                            sender=buyer,
+                            message=f"💬 Chat opened for your purchase of '{product.name}'. You can now communicate with the seller."
+                        )
+
         return instance
+

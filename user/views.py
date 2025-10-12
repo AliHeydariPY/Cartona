@@ -1,11 +1,14 @@
 from django.contrib.auth.models import User
 from django.http import Http404
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, mixins
+from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.exceptions import MethodNotAllowed, PermissionDenied, NotFound
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.filters import SearchFilter
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from .models import StoreKeeper, ProductDeliveryStatus
 from cart.models import ProductPayment
 from .serializers import (
@@ -14,20 +17,29 @@ from .serializers import (
     DeliveryStatusSerializer,
     StoreRelatedPaymentSerializer)
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    mixins.UpdateModelMixin,
+    viewsets.GenericViewSet
+):
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
+    lookup_field = 'uuid_record__uuid'
 
     def get_queryset(self):
         user = self.request.user
         if not user.is_authenticated:
             return User.objects.none()
-        return User.objects.filter(id=user.id)
+        return User.objects.filter(uuid_record__uuid=user.uuid_record.uuid)
 
-    @action(detail=False, methods=['get', 'put', 'patch', 'delete'], url_path=r'username/(?P<username>[^/.]+)', permission_classes=[IsAuthenticated])
+    @action(detail=False, methods=['get', 'put', 'patch'], url_path=r'username/(?P<username>[^/.]+)',
+            permission_classes=[IsAuthenticated])
     def by_username(self, request, username=None):
+        queryset = self.get_queryset()
         try:
-            user = User.objects.get(username=username)
+            user = queryset.get(username=username)
         except User.DoesNotExist:
             raise NotFound("User not found.")
 
@@ -45,10 +57,42 @@ class UserViewSet(viewsets.ModelViewSet):
             self.perform_update(serializer)
             return Response(serializer.data)
 
-        elif request.method == 'DELETE':
-            raise PermissionDenied("User deletion is not allowed via this endpoint.")
+    @action(detail=False, methods=['get', 'put', 'patch'], url_path=r'role/(?P<role>user|storekeeper)',
+            permission_classes=[IsAuthenticated])
+    def by_role(self, request, role=None):
+        queryset = self.get_queryset()
+        user = request.user
 
-class StoreKeeperViewSet(viewsets.ModelViewSet):
+        is_storekeeper = StoreKeeper.objects.filter(user=user).exists()
+
+        if role == 'storekeeper' and not is_storekeeper:
+            raise PermissionDenied("You are not a storekeeper.")
+        elif role == 'user' and is_storekeeper:
+            raise PermissionDenied("You are not a regular user.")
+
+        try:
+            target_user = queryset.get(id=user.id)
+        except User.DoesNotExist:
+            raise NotFound("User not found.")
+
+        if request.method == 'GET':
+            serializer = self.get_serializer(target_user)
+            return Response(serializer.data)
+
+        elif request.method in ['PUT', 'PATCH']:
+            partial = request.method == 'PATCH'
+            serializer = self.get_serializer(target_user, data=request.data, partial=partial)
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
+            return Response(serializer.data)
+
+class StoreKeeperViewSet(
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    mixins.UpdateModelMixin,
+    viewsets.GenericViewSet
+):
     serializer_class = StoreKeeperSerializer
     filter_backends = [SearchFilter]
     search_fields = ['store_name', 'description']
@@ -63,10 +107,11 @@ class StoreKeeperViewSet(viewsets.ModelViewSet):
             return StoreKeeper.objects.all().order_by('-id')
         return StoreKeeper.objects.filter(user=self.request.user).order_by('-id')
 
-    @action(detail=False, methods=['get', 'put', 'patch', 'delete'], url_path=r'username/(?P<username>[\w.@+-]+)')
+    @action(detail=False, methods=['get', 'put', 'patch'], url_path=r'username/(?P<username>[\w.@+-]+)')
     def by_username(self, request, username=None):
+        queryset = self.get_queryset()
         try:
-            storekeeper = StoreKeeper.objects.select_related('user').get(user__username=username)
+            storekeeper = queryset.select_related('user').get(user__username=username)
         except StoreKeeper.DoesNotExist:
             raise NotFound("StoreKeeper with this username not found.")
 
@@ -86,13 +131,6 @@ class StoreKeeperViewSet(viewsets.ModelViewSet):
             serializer.save()
             return Response(serializer.data)
 
-        elif request.method == 'DELETE':
-            storekeeper.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-        else:
-            raise MethodNotAllowed(request.method)
-
 class ProductDeliveryStatusViewSet(viewsets.ModelViewSet):
     serializer_class = DeliveryStatusSerializer
     permission_classes = [IsAuthenticated]
@@ -105,11 +143,24 @@ class ProductDeliveryStatusViewSet(viewsets.ModelViewSet):
             raise PermissionDenied("You are not a storekeeper.")
 
         return ProductDeliveryStatus.objects.filter(
-            payment__product__storekeeper=storekeeper
+            payment__product__storekeeper=storekeeper,
+            storekeeper_hidden=False
         ).order_by('-id')
 
     def get_serializer_context(self):
         return {"request": self.request}
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self._handle_virtual_deletion(request, instance)
+        return Response({"detail": "Delivery status has been removed from your view."}, status=status.HTTP_200_OK)
+
+    def _handle_virtual_deletion(self, request, instance):
+        user = request.user
+        if user != instance.payment.product.storekeeper.user:
+            raise PermissionDenied("You are not allowed to delete this delivery status.")
+        instance.storekeeper_hidden = True
+        instance.save()
 
     def _handle_filtered_request(self, request, queryset, index, label="item"):
         queryset = queryset.order_by('-id')
@@ -142,8 +193,10 @@ class ProductDeliveryStatusViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
 
         elif request.method == 'DELETE':
-            obj.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            if obj is None:
+                raise MethodNotAllowed("DELETE", detail="You must specify an index to delete a single item.")
+            self._handle_virtual_deletion(request, obj)
+            return Response({"detail": "Delivery status has been removed from your view."}, status=status.HTTP_200_OK)
 
     @action(detail=False, url_path=r'is-sent/(?P<is_sent>true|false)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
     def by_sent_status(self, request, is_sent=None, index=None):
@@ -161,7 +214,12 @@ class ProductDeliveryStatusViewSet(viewsets.ModelViewSet):
         queryset = self.get_queryset().filter(payment_id=payment_id)
         return self._handle_filtered_request(request, queryset, index, label="payment delivery status")
 
-class StorePaymentViewSet(viewsets.ReadOnlyModelViewSet):
+class StorePaymentViewSet(
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet
+):
     serializer_class = StoreRelatedPaymentSerializer
     permission_classes = [IsAuthenticated]
 
@@ -174,11 +232,33 @@ class StorePaymentViewSet(viewsets.ReadOnlyModelViewSet):
 
         return ProductPayment.objects.filter(
             product__storekeeper=storekeeper,
+            storekeeper_hidden=False,
             is_successful=True
         ).order_by('-paid_at')
 
     def get_serializer_context(self):
         return {"request": self.request}
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self._handle_virtual_deletion(request, instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def _handle_virtual_deletion(self, request, instance):
+        user = request.user
+
+        if user != instance.product.storekeeper.user:
+            raise PermissionDenied("You are not allowed to delete this payment.")
+
+        if not instance.is_delivered:
+            raise PermissionDenied("You cannot delete this payment until the buyer confirms delivery.")
+
+        instance.storekeeper_hidden = True
+
+        if instance.buyer_hidden and instance.storekeeper_hidden:
+            instance.delete()
+        else:
+            instance.save()
 
     def _handle_filtered_request(self, request, queryset, index, label="item"):
         queryset = queryset.order_by('-id')
@@ -211,21 +291,29 @@ class StorePaymentViewSet(viewsets.ReadOnlyModelViewSet):
             return Response(serializer.data)
 
         elif request.method == 'DELETE':
-            obj.delete()
+            if obj is None:
+                raise MethodNotAllowed("DELETE", detail="You must specify an index to delete a single item.")
+            self._handle_virtual_deletion(request, obj)
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=False, url_path=r'product/(?P<product_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
+    @action(detail=False, url_path=r'product/(?P<product_id>null|\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
     def by_product(self, request, product_id=None, index=None):
-        try:
-            product_id = int(product_id)
-        except ValueError:
-            raise Http404("Invalid product ID.")
-
-        queryset = self.get_queryset().filter(product_id=product_id)
+        if product_id == 'null':
+            queryset = self.get_queryset().filter(product__isnull=True)
+        else:
+            try:
+                product_id = int(product_id)
+                queryset = self.get_queryset().filter(product_id=product_id)
+            except ValueError:
+                raise Http404("Invalid product ID.")
         return self._handle_filtered_request(request, queryset, index, label="store payment")
 
-    @action(detail=False, url_path=r'buyer/(?P<username>[\w.@+-]+)(?:/(?P<index>\d+))?',
-            methods=['get', 'put', 'patch', 'delete'])
+    @action(detail=False, url_path=r'product-name/(?P<name>[^/]+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
+    def by_product_name(self, request, name=None, index=None):
+        queryset = self.get_queryset().filter(product_name__iexact=name.strip())
+        return self._handle_filtered_request(request, queryset, index, label="product name")
+
+    @action(detail=False, url_path=r'buyer/(?P<username>[\w.@+-]+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
     def by_buyer(self, request, username=None, index=None):
         if not username:
             raise Http404("Username is required.")
@@ -233,12 +321,84 @@ class StorePaymentViewSet(viewsets.ReadOnlyModelViewSet):
         queryset = self.get_queryset().filter(cart__user__username=username)
         return self._handle_filtered_request(request, queryset, index, label="buyer payment")
 
-    @action(
-        detail=False,
-        url_path=r'end-of-sending/(?P<end_of_sending>true|false)(?:/(?P<index>\d+))?',
-        methods=['get', 'put', 'patch', 'delete']
-    )
-    def end_of_sending(self, request, end_of_sending=None, index=None):
-        value = end_of_sending.lower() == 'true'
-        queryset = self.get_queryset().filter(end_of_sending=value)
-        return self._handle_filtered_request(request, queryset, index, label="end_of_sending payment")
+    @action(detail=False, url_path=r'storekeeper-delivery/(?P<is_sent>true|false)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
+    def by_storekeeper_delivery(self, request, is_sent=None, index=None):
+        value = is_sent.lower() == 'true'
+
+        filtered_ids = [
+            pp.id for pp in self.get_queryset()
+            if StoreRelatedPaymentSerializer(pp, context=self.get_serializer_context()).data.get('storekeeper_delivery') == value
+        ]
+
+        queryset = self.get_queryset().filter(id__in=filtered_ids)
+        return self._handle_filtered_request(request, queryset, index, label="storekeeper delivery status")
+
+    @action(detail=False, url_path=r'buyer-delivery/(?P<is_delivered>true|false)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
+    def by_buyer_delivery(self, request, is_delivered=None, index=None):
+        value = is_delivered.lower() == 'true'
+        queryset = self.get_queryset().filter(is_delivered=value)
+        return self._handle_filtered_request(request, queryset, index, label="buyer delivery status")
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        refresh_token = response.data.get('refresh')
+
+        response.data.pop('refresh', None)
+
+        response.set_cookie(
+            key='refresh_token',
+            value=refresh_token,
+            httponly=True,
+            secure=True,
+            samesite='None',
+            max_age=10 * 24 * 60 * 60
+        )
+
+        return response
+
+class RefreshAccessTokenView(APIView):
+    def post(self, request):
+        refresh_token = request.COOKIES.get('refresh_token')
+        if not refresh_token:
+            return Response({'detail': 'Refresh token not found.'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        try:
+            refresh = RefreshToken(refresh_token)
+            new_access = str(refresh.access_token)
+            new_refresh = str(refresh)
+
+            response = Response({'access': new_access})
+
+            response.set_cookie(
+                key='refresh_token',
+                value=new_refresh,
+                httponly=True,
+                secure=True,
+                samesite='None',
+                max_age=10 * 24 * 60 * 60
+            )
+
+            return response
+
+        except TokenError:
+            return Response({'detail': 'Invalid or expired refresh token.'}, status=status.HTTP_401_UNAUTHORIZED)
+
+class LogoutView(APIView):
+    def post(self, request):
+        refresh_token = request.COOKIES.get('refresh_token')
+        if not refresh_token:
+            return Response({'detail': 'Refresh token not found.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+
+            response = Response({'detail': 'Logout successful.'}, status=status.HTTP_200_OK)
+
+            response.delete_cookie('refresh_token')
+
+            return response
+
+        except TokenError:
+            return Response({'detail': 'Invalid or expired refresh token.'}, status=status.HTTP_400_BAD_REQUEST)

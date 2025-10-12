@@ -1,3 +1,4 @@
+import uuid
 from datetime import timezone
 from django.db import models
 from django.conf import settings
@@ -45,6 +46,7 @@ class ProductDeliveryStatus(models.Model):
         null=True,
         help_text="Optional seller description about shipping"
     )
+    storekeeper_hidden = models.BooleanField(default=False, help_text="Hidden from storekeeper")
 
     def save(self, *args, **kwargs):
         if self.is_sent and not self.sent_at:
@@ -57,3 +59,12 @@ class ProductDeliveryStatus(models.Model):
         verbose_name = "Product_Delivery_Status"
         verbose_name_plural = "Product_Delivery_Statuses"
         db_table = "product_delivery_status"
+
+class UserUUID(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='uuid_record')
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+
+    class Meta:
+        verbose_name = "User UUID"
+        verbose_name_plural = "User UUIDs"
+        db_table = "user_uuids"

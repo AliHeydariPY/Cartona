@@ -251,7 +251,6 @@ class ProductPurchaseViewSet(
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
     mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
     viewsets.GenericViewSet
 ):
     serializer_class = ProductPurchaseSerializer
@@ -263,11 +262,34 @@ class ProductPurchaseViewSet(
             return ProductPurchase.objects.none()
 
         return ProductPurchase.objects.filter(
-            Q(buyer=user) | Q(storekeeper__user=user)
+            Q(buyer=user, buyer_hidden=False) |
+            Q(storekeeper__user=user, storekeeper_hidden=False)
         ).order_by('-id')
 
     def get_serializer_context(self):
         return {"request": self.request}
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self._handle_virtual_deletion(request, instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def _handle_virtual_deletion(self, request, instance):
+        serializer = self.get_serializer(instance)
+        serializer.validate_deletion()
+
+        user = request.user
+        if user == instance.buyer:
+            instance.buyer_hidden = True
+        elif user == instance.storekeeper.user:
+            instance.storekeeper_hidden = True
+        else:
+            raise PermissionDenied("You are not allowed to delete this purchase.")
+
+        if instance.buyer_hidden and instance.storekeeper_hidden:
+            instance.delete()
+        else:
+            instance.save()
 
     def _handle_filtered_request(self, request, queryset, index, label="purchase"):
         queryset = queryset.order_by('-id')
@@ -300,13 +322,27 @@ class ProductPurchaseViewSet(
             return Response(serializer.data)
 
         elif request.method == 'DELETE':
-            obj.delete()
+            if obj is None:
+                raise MethodNotAllowed("DELETE", detail="You must specify an index to delete a single item.")
+            self._handle_virtual_deletion(request, obj)
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=False, url_path=r'product/(?P<product_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
+    @action(detail=False, url_path=r'product/(?P<product_id>null|\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
     def by_product(self, request, product_id=None, index=None):
-        queryset = self.get_queryset().filter(product_id=product_id)
+        if product_id == 'null':
+            queryset = self.get_queryset().filter(product__isnull=True)
+        else:
+            try:
+                product_id = int(product_id)
+                queryset = self.get_queryset().filter(product_id=product_id)
+            except ValueError:
+                raise Http404("Invalid product ID.")
         return self._handle_filtered_request(request, queryset, index, label="product purchase")
+
+    @action(detail=False, url_path=r'product-name/(?P<name>[^/]+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
+    def by_product_name(self, request, name=None, index=None):
+        queryset = self.get_queryset().filter(product_name__iexact=name.strip())
+        return self._handle_filtered_request(request, queryset, index, label="product name")
 
     @action(detail=False, url_path=r'payment/(?P<payment_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
     def by_payment(self, request, payment_id=None, index=None):
@@ -319,8 +355,7 @@ class ProductPurchaseViewSet(
         queryset = self.get_queryset().filter(chat_enabled=value)
         return self._handle_filtered_request(request, queryset, index, label="chat-enabled purchase")
 
-    @action(detail=False, url_path=r'storekeeper-delivery/(?P<sent>true|false)(?:/(?P<index>\d+))?',
-            methods=['get', 'put', 'patch', 'delete'])
+    @action(detail=False, url_path=r'storekeeper-delivery/(?P<sent>true|false)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
     def by_storekeeper_delivery(self, request, sent=None, index=None):
         value = sent.lower() == 'true'
         delivery_qs = ProductDeliveryStatus.objects.filter(payment=OuterRef('payment'))
@@ -354,13 +389,14 @@ class PurchaseChatViewSet(viewsets.ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        user = request.user
-
-        if user != instance.sender:
-            raise PermissionDenied("You can only delete your own messages.")
-
-        instance.delete()
+        self._handle_chat_deletion(request, instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def _handle_chat_deletion(self, request, chat):
+        user = request.user
+        if user != chat.sender:
+            raise PermissionDenied("You can only delete your own messages.")
+        chat.delete()
 
     def _handle_filtered_request(self, request, chats, index):
         chats = chats.order_by('-id')
@@ -393,7 +429,9 @@ class PurchaseChatViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
 
         elif request.method == 'DELETE':
-            chat.delete()
+            if chat is None:
+                raise MethodNotAllowed("DELETE", detail="You must specify an index to delete a single chat.")
+            self._handle_chat_deletion(request, chat)
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False, url_path=r'purchase/(?P<purchase_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
@@ -401,8 +439,7 @@ class PurchaseChatViewSet(viewsets.ModelViewSet):
         chats = self.get_queryset().filter(purchase_id=purchase_id)
         return self._handle_filtered_request(request, chats, index)
 
-    @action(detail=False, url_path=r'sender/(?P<username>[^/]+)(?:/(?P<index>\d+))?',
-            methods=['get', 'put', 'patch', 'delete'])
+    @action(detail=False, url_path=r'sender/(?P<username>[^/]+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
     def by_sender(self, request, username=None, index=None):
         try:
             sender = User.objects.get(username=username)
@@ -469,30 +506,36 @@ class NotificationViewSet(
             return Response(serializer.data)
 
         elif request.method == 'DELETE':
+            if obj is None:
+                raise MethodNotAllowed("DELETE", detail="You must specify an index to delete a single notification.")
             obj.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=False, url_path=r'product/(?P<product_id>\d+)(?:/(?P<index>\d+))?',
-            methods=['get', 'put', 'patch', 'delete'])
+    @action(detail=False, url_path=r'product/(?P<product_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
     def by_product(self, request, product_id=None, index=None):
         queryset = self.get_queryset().filter(product_id=product_id)
         return self._handle_filtered_request(request, queryset, index, label="product notification")
 
-    @action(detail=False, url_path=r'storekeeper/(?P<storekeeper_id>\d+)(?:/(?P<index>\d+))?',
-            methods=['get', 'put', 'patch', 'delete'])
+    @action(detail=False, url_path=r'storekeeper/(?P<storekeeper_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
     def by_storekeeper(self, request, storekeeper_id=None, index=None):
         queryset = self.get_queryset().filter(storekeeper_id=storekeeper_id)
         return self._handle_filtered_request(request, queryset, index, label="storekeeper notification")
 
-    @action(detail=False, url_path=r'is-read/(?P<is_read>true|false)(?:/(?P<index>\d+))?',
-            methods=['get', 'put', 'patch', 'delete'])
+    @action(detail=False, url_path=r'is-read/(?P<is_read>true|false)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
     def by_is_read(self, request, is_read=None, index=None):
         value = is_read.lower() == 'true'
         queryset = self.get_queryset().filter(is_read=value)
         return self._handle_filtered_request(request, queryset, index, label="read-status notification")
 
-    @action(detail=False, url_path=r'notification/(?P<notification_id>\d+)(?:/(?P<index>\d+))?',
-            methods=['get', 'put', 'patch', 'delete'])
+    @action(detail=False, url_path=r'notification/(?P<notification_id>null|\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
     def by_notification(self, request, notification_id=None, index=None):
-        queryset = self.get_queryset().filter(id=notification_id)
+        if notification_id == 'null':
+            queryset = self.get_queryset().filter(id__isnull=True)
+        else:
+            try:
+                notification_id = int(notification_id)
+                queryset = self.get_queryset().filter(id=notification_id)
+            except ValueError:
+                raise Http404("Invalid notification ID.")
         return self._handle_filtered_request(request, queryset, index, label="notification")
+

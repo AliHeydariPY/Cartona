@@ -1,5 +1,5 @@
 import os
-from django.db.models.signals import pre_delete, pre_save, post_save
+from django.db.models.signals import pre_delete, pre_save, post_save, post_delete
 from django.dispatch import receiver
 from django.utils import timezone
 from .models import Product, Images, Types, TypesValues
@@ -77,3 +77,4 @@ def create_default_color_types(sender, instance, created, **kwargs):
 
             for color in important_colors:
                 TypesValues.objects.create(type=type_obj, type_value=color)
+

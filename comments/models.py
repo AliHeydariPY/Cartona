@@ -1,5 +1,4 @@
 from django.db import models
-from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.conf import settings
 from rest_framework.exceptions import ValidationError
@@ -76,12 +75,44 @@ class ProductQuestion(models.Model):
         db_table = "Product_Questions"
 
 class ProductPurchase(models.Model):
-    buyer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='purchases')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='purchases')
-    storekeeper = models.ForeignKey(StoreKeeper, on_delete=models.CASCADE, related_name='sales')
-    payment = models.OneToOneField('cart.ProductPayment', on_delete=models.CASCADE,
-        related_name='purchase')
-    chat_enabled = models.BooleanField(default=True, help_text="Is chat between buyer and seller enabled?")
+    buyer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='purchases'
+    )
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='purchases'
+    )
+    product_name = models.TextField(
+        null=True,
+        blank=True,
+        help_text="Stores product name in case product is deleted after purchase"
+    )
+    storekeeper = models.ForeignKey(
+        StoreKeeper,
+        on_delete=models.CASCADE,
+        related_name='sales'
+    )
+    payment = models.OneToOneField(
+        'cart.ProductPayment',
+        on_delete=models.CASCADE,
+        related_name='purchase'
+    )
+    chat_enabled = models.BooleanField(
+        default=True,
+        help_text="Is chat between buyer and seller enabled?"
+    )
+    buyer_hidden = models.BooleanField(default=False, help_text="Hidden from buyer")
+    storekeeper_hidden = models.BooleanField(default=False, help_text="Hidden from storekeeper")
+
+    def save(self, *args, **kwargs):
+        if self.product and not self.product_name:
+            self.product_name = self.product.name.strip()
+        super().save(*args, **kwargs)
 
     class Meta:
         constraints = [
@@ -116,8 +147,16 @@ class PurchaseChat(models.Model):
         db_table = "Purchase_Chats"
 
 class StoreNotificationSubscription(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='store_notifications')
-    storekeeper = models.ForeignKey(StoreKeeper, on_delete=models.CASCADE, related_name='subscribers')
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='store_notifications'
+    )
+    storekeeper = models.ForeignKey(
+        StoreKeeper,
+        on_delete=models.CASCADE,
+        related_name='subscribers'
+    )
 
     class Meta:
         verbose_name = "Notification_Subscription"
@@ -126,13 +165,33 @@ class StoreNotificationSubscription(models.Model):
         unique_together = ('user', 'storekeeper')
 
 class Notification(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_notifications')
-    notification = models.ForeignKey(StoreNotificationSubscription, on_delete=models.SET_NULL,
-        blank=True, null=True, related_name='notifications')
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='user_notifications'
+    )
+    notification = models.ForeignKey(
+        StoreNotificationSubscription,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='notifications'
+    )
     message = models.TextField()
-    storekeeper = models.ForeignKey(StoreKeeper, on_delete=models.CASCADE, related_name='notifications')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='notifications')
-    is_read = models.BooleanField(default=False, help_text="Has the notification been read?")
+    storekeeper = models.ForeignKey(
+        StoreKeeper,
+        on_delete=models.CASCADE,
+        related_name='notifications'
+    )
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name='notifications'
+    )
+    is_read = models.BooleanField(
+        default=False,
+        help_text="Has the notification been read?"
+    )
 
     class Meta:
         verbose_name = "Notification"
