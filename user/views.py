@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.db.models import Q
 from django.http import Http404
 from rest_framework import viewsets, status, mixins
 from rest_framework.views import APIView
@@ -231,9 +232,10 @@ class StorePaymentViewSet(
             raise PermissionDenied("You are not a storekeeper.")
 
         return ProductPayment.objects.filter(
-            product__storekeeper=storekeeper,
-            storekeeper_hidden=False,
-            is_successful=True
+            is_successful=True,
+            storekeeper_hidden=False
+        ).filter(
+            Q(product__storekeeper=storekeeper) | Q(storekeeper=storekeeper)
         ).order_by('-paid_at')
 
     def get_serializer_context(self):
@@ -338,6 +340,17 @@ class StorePaymentViewSet(
         value = is_delivered.lower() == 'true'
         queryset = self.get_queryset().filter(is_delivered=value)
         return self._handle_filtered_request(request, queryset, index, label="buyer delivery status")
+
+    @action(detail=False, url_path=r'storekeeper/(?P<storekeeper_id>\d+)(?:/(?P<index>\d+))?',
+            methods=['get', 'put', 'patch', 'delete'])
+    def by_storekeeper(self, request, storekeeper_id=None, index=None):
+        try:
+            storekeeper_id = int(storekeeper_id)
+        except ValueError:
+            raise Http404("Invalid storekeeper ID.")
+
+        queryset = self.get_queryset().filter(storekeeper_id=storekeeper_id)
+        return self._handle_filtered_request(request, queryset, index, label="storekeeper payment")
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):

@@ -258,9 +258,10 @@ class DeliveryStatusSerializer(serializers.ModelSerializer):
 
 class StoreRelatedPaymentSerializer(serializers.ModelSerializer):
     paid_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
-    product = serializers.IntegerField(source='product.id', read_only=True)
+    product = serializers.PrimaryKeyRelatedField(read_only=True)
     product_name = serializers.CharField(read_only=True)
     buyer = serializers.CharField(source='cart.user.username', read_only=True)
+    storekeeper = serializers.PrimaryKeyRelatedField(read_only=True)
     storekeeper_delivery = serializers.SerializerMethodField()
     storekeeper_delivered_at = serializers.DateTimeField(
         source='delivery_status.sent_at',
@@ -278,7 +279,7 @@ class StoreRelatedPaymentSerializer(serializers.ModelSerializer):
         model = ProductPayment
         fields = [
             'id', 'product', 'product_name', 'quantity', 'total_price',
-            'paid_at', 'address', 'buyer', 'storekeeper_delivery',
+            'paid_at', 'address', 'buyer', 'storekeeper', 'storekeeper_delivery',
             'storekeeper_delivered_at', 'buyer_delivery', 'buyer_delivered_at'
         ]
 

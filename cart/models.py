@@ -3,8 +3,10 @@ from datetime import datetime, timedelta
 from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 from inner.models import Product
+from user.models import StoreKeeper
 
 class Cart(models.Model):
     user = models.OneToOneField(
@@ -106,6 +108,12 @@ class ProductPayment(models.Model):
         blank=True,
         related_name='product_payments'
     )
+    storekeeper = models.ForeignKey(
+        StoreKeeper,
+        on_delete=models.CASCADE,
+        related_name='product_payments',
+        help_text="Storekeeper responsible for this product"
+    )
     product_name = models.TextField(
         null=True,
         blank=True,
@@ -140,6 +148,9 @@ class ProductPayment(models.Model):
         if self.product and not self.product_name:
             self.product_name = self.product.name
 
+        if self.product and not self.storekeeper:
+            self.storekeeper = self.product.storekeeper
+
         if self.address:
             self.address = self.address.strip()
 
@@ -169,17 +180,30 @@ class Payment(models.Model):
     is_successful = models.BooleanField(default=False)
 
     def process_product_payments(self):
-        for cart_item in self.cart.items.all():
+        for cart_item in self.cart.items.select_related('product'):
+            product = cart_item.product
+            storekeeper = getattr(product, 'storekeeper', None)
+
+            if not storekeeper:
+                raise ValidationError(f"Storekeeper missing for product {getattr(product, 'pk', 'unknown')}")
+
             pp = ProductPayment.objects.create(
                 cart_item=cart_item,
                 cart=self.cart,
+                product=product,
+                storekeeper=storekeeper,
+                quantity=cart_item.quantity,
+                total_price=cart_item.get_total_price(),
                 address=self.address,
                 fake_card_number=self.fake_card_number,
                 fake_card_second_password=self.fake_card_second_password,
                 fake_card_cvv=self.fake_card_cvv,
                 fake_card_expiry=self.fake_card_expiry,
+                paid_at=self.paid_at,
+                is_successful=self.is_successful
             )
             self.product_payments.add(pp)
+
         self.amount = sum(pp.total_price for pp in self.product_payments.all())
 
     def save(self, *args, **kwargs):

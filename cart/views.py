@@ -309,3 +309,14 @@ class ProductPaymentViewSet(viewsets.ModelViewSet):
         queryset = self.get_queryset().filter(id__in=filtered_ids)
         return self._handle_filtered_request(request, queryset, index, label="storekeeper delivery status")
 
+    @action(detail=False, url_path=r'storekeeper/(?P<storekeeper_id>\d+)(?:/(?P<index>\d+))?',
+            methods=['get', 'put', 'patch', 'delete'])
+    def by_storekeeper(self, request, storekeeper_id=None, index=None):
+        try:
+            storekeeper_id = int(storekeeper_id)
+            queryset = self.get_queryset().filter(storekeeper_id=storekeeper_id)
+        except ValueError:
+            raise Http404("Invalid storekeeper ID.")
+
+        return self._handle_filtered_request(request, queryset, index, label="storekeeper")
+

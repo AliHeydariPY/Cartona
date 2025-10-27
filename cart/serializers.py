@@ -158,6 +158,7 @@ class ProductPaymentSerializer(serializers.ModelSerializer):
     cart = serializers.PrimaryKeyRelatedField(read_only=True)
     product = serializers.PrimaryKeyRelatedField(read_only=True)
     product_name = serializers.CharField(read_only=True)
+    storekeeper = serializers.PrimaryKeyRelatedField(read_only=True)
     storekeeper_delivery = serializers.SerializerMethodField()
     storekeeper_delivered_at = serializers.DateTimeField(
         source='delivery_status.sent_at',
@@ -181,6 +182,7 @@ class ProductPaymentSerializer(serializers.ModelSerializer):
             'cart',
             'product',
             'product_name',
+            'storekeeper',
             'storekeeper_delivery',
             'storekeeper_delivered_at',
             'cart_item',
@@ -202,6 +204,7 @@ class ProductPaymentSerializer(serializers.ModelSerializer):
             'fake_card_expiry',
             'paid_at',
             'cart',
+            'storekeeper',
             'storekeeper_delivery',
             'storekeeper_delivered_at',
         ]
@@ -299,17 +302,20 @@ class ProductPaymentSerializer(serializers.ModelSerializer):
             is_successful=False
         ).delete()
 
-        validated_data['product'] = cart_item.product
-        validated_data['quantity'] = cart_item.quantity
-        validated_data['total_price'] = cart_item.get_total_price()
-        validated_data['cart'] = cart_item.cart
-        validated_data['paid_at'] = timezone.now()
+        product = cart_item.product
+        validated_data.update({
+            'product': product,
+            'storekeeper': product.storekeeper,
+            'quantity': cart_item.quantity,
+            'total_price': cart_item.get_total_price(),
+            'cart': cart_item.cart,
+            'paid_at': timezone.now()
+        })
 
         pp = ProductPayment.objects.create(**validated_data)
 
         if pp.is_successful:
             buyer = pp.cart.user
-            product = pp.product
             storekeeper = product.storekeeper
 
             purchase = ProductPurchase.objects.create(
@@ -468,6 +474,13 @@ class PaymentSerializer(serializers.ModelSerializer):
             except CartItem.DoesNotExist:
                 continue
 
+            product = item.product
+            storekeeper = getattr(product, 'storekeeper', None)
+
+            if not storekeeper:
+                raise serializers.ValidationError(
+                    f"Storekeeper missing for product {getattr(product, 'pk', 'unknown')}")
+
             pp = ProductPayment.objects.filter(
                 cart_item=item,
                 cart=cart,
@@ -486,7 +499,8 @@ class PaymentSerializer(serializers.ModelSerializer):
                 pp = ProductPayment.objects.create(
                     cart_item=item,
                     cart=cart,
-                    product=item.product,
+                    product=product,
+                    storekeeper=storekeeper,
                     quantity=item.quantity,
                     total_price=item.get_total_price(),
                     address=payment.address,
@@ -513,7 +527,7 @@ class PaymentSerializer(serializers.ModelSerializer):
 
                 product = pp.product
                 buyer = pp.cart.user
-                storekeeper = product.storekeeper
+                storekeeper = pp.storekeeper
 
                 purchase = ProductPurchase.objects.create(
                     buyer=buyer,
