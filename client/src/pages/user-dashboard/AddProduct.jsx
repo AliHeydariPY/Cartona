@@ -105,10 +105,6 @@ const AddProduct = () => {
           onSubmit={(values, onSubmitProps) => {
             const formData = new FormData();
             formData.append("image", values.image);
-            formData.append(
-              "storekeeper",
-              Number(localStorage.getItem("storekeeperID"))
-            );
             formData.append("name", values.name);
             formData.append("category", Number(selectedCategory.id));
             formData.append("price", values.price);
