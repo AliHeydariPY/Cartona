@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { convertOffsetToTimes, motion } from "framer-motion";
 
-import { getPayments } from "../../services/cartAPIServices";
+import { getPayments, setAsDelivered } from "../../services/cartAPIServices";
 import { getProduct } from "../../services/productAPIServices";
 import { getStorekeeperById } from "../../services/userAPIServices";
 import {
-  getCommentsByUser,
+  getComments,
   getPurchaseByPayment,
 } from "../../services/commentAPIServices";
 
@@ -22,6 +22,7 @@ import {
   FiFileText,
   FiStar,
 } from "react-icons/fi";
+import toast from "react-hot-toast";
 
 const Orders = ({ reloadComponent, setReloadComponent }) => {
   const navigate = useNavigate();
@@ -39,35 +40,43 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
   useEffect(() => {
     const fetchPaymentsData = async () => {
       const paymentsRes = await getPayments();
-      console.log(paymentsRes)
+      console.log(paymentsRes);
+
       const payments = await Promise.all(
         paymentsRes.data.map(async (payment) => {
           const productRes = await getProduct(payment.product);
           const storekeeperRes = await getStorekeeperById(
             productRes.data.storekeeper
           );
-          try{
-            const commentRes = await getCommentsByUser(
-              localStorage.getItem("userID") ////////////////// fix /////////////////////
-            )
+          try {
+            const commentRes = await getComments(
+              productRes.data.id
+            );
 
             return {
               ...payment,
               product: productRes.data,
               storekeeper: storekeeperRes.data.store_name,
-              status: payment.is_delivered ? "Delivered" : "Pending",
+              status: payment.storekeeper_delivery
+                ? payment.is_delivered
+                  ? "Delivered"
+                  : "Shipped"
+                : "Pending",
               hasRated: commentRes.data.some((comment) => {
-                return comment.product == productRes.data.id;
+                return comment.user == localStorage.getItem("username");
               }),
-              // hasComment:
             };
           } catch {
             return {
               ...payment,
               product: productRes.data,
               storekeeper: storekeeperRes.data.store_name,
-              status: payment.is_delivered ? "Delivered" : "Pending",
-              hasRated: null,
+              status: payment.storekeeper_delivery
+                ? payment.is_delivered
+                  ? "Delivered"
+                  : "Shipped"
+                : "Pending",
+              hasRated: false,
             };
           }
         })
@@ -278,7 +287,9 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
                     {order.status === "Delivered" ? (
                       <span>Delivered on {order.delivered_at}</span>
                     ) : (
-                      <span>Est. delivery: {order.estimatedDelivery}</span>
+                      <span>
+                        Est. delivery: {order.storekeeper_delivered_at}
+                      </span>
                     )}
                   </div>
 
@@ -301,7 +312,35 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
                   </button>
 
                   {order.status === "Shipped" && (
-                    <button className="flex items-center justify-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all duration-300 text-sm font-semibold whitespace-nowrap min-w-[120px]">
+                    <button
+                      onClick={() => {
+                        setAsDelivered(order.id, {
+                          is_delivered: true,
+                          delivered_at: new Date().toISOString(),
+                        }).then(() => {
+                          toast.custom((t) => (
+                            <div
+                              className={`${
+                                t.visible ? "animate-enter" : "animate-leave"
+                              } transform transition-all duration-300`}
+                            >
+                              <div className="bg-gradient-to-r from-green-500 to-cyan-400 text-white px-6 py-3 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-3">
+                                <div className="bg-blue-500/20 p-2 rounded-full">
+                                  <FiCheckCircle className="text-xl text-white" />
+                                </div>
+                                <div>
+                                  <p className="font-medium">
+                                    Successfully registered
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          ));
+                          setReloadComponent(!reloadComponent);
+                        });
+                      }}
+                      className="flex cursor-pointer items-center justify-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all duration-300 text-sm font-semibold whitespace-nowrap min-w-[120px]"
+                    >
                       <FiCheckCircle className="mr-2" size={14} />
                       Received
                     </button>
@@ -320,7 +359,7 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
                       <button
                         onClick={() => {
                           setSelectedProduct(order.product);
-                          setSelectedSeller(order.storekeeper);
+                          setSelectedSeller(order.product.storekeeper);
                           setIsReviewOpen(true);
                         }}
                         className="flex cursor-pointer items-center justify-center px-4 py-2 bg-yellow-400 text-white rounded-lg hover:bg-yellow-500 transition-colors duration-300 text-sm font-semibold whitespace-nowrap min-w-[140px]"

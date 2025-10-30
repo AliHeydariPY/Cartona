@@ -35,6 +35,11 @@ export const getPayments = () => {
   return api.get(url);
 };
 
+export const setAsDelivered = (paymentID, editedData) => {
+  const url = `/cart-api/product-payments/${paymentID}/`;
+  return api.patch(url, editedData);
+}
+
 export const getFavorites = () => {
   const url = `/cart-api/favorite-items/`;
   return api.get(url);

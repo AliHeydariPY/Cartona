@@ -8,11 +8,6 @@ export const getComments = (productID) => {
   return axios.get(url);
 };
 
-export const getCommentsByUser = (userID) => {
-  const url = `/comments-api/comments/user/${userID}/`;
-  return api.get(url);
-};
-
 export const sendComment = (comment) => {
   const url = `/comments-api/comments/`;
   return api.post(url, comment);
