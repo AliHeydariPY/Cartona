@@ -1,28 +1,28 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams, useLocation, Link } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom";
 
 import { getCartProducts } from "../services/cartAPIServices";
 import { getNotifications } from "../services/commentAPIServices.js";
 
 import { FiSearch, FiBell } from "react-icons/fi";
-import { FaRegHeart, FaHeart } from "react-icons/fa6";
 import { IoCart, IoCartOutline } from "react-icons/io5";
 import { BiCategory } from "react-icons/bi";
 import { BiSolidCategory } from "react-icons/bi";
 import { UserCircleIcon } from "@heroicons/react/24/outline";
 import { UserCircleIcon as UserCircleSolid } from "@heroicons/react/24/solid";
-import { GoBellFill } from "react-icons/go";
+import { GoBellFill, GoHome, GoHomeFill } from "react-icons/go";
+
 import { useAtom } from "jotai";
 import { authAtom } from "../atoms/authAtom.js";
 
-const Navbar = ({isFocus = false, setIsFocus}) => {
+const Navbar = ({ isFocus = false, setIsFocus }) => {
   const navigate = useNavigate();
   const { query } = useParams();
   const [search, setSearch] = useState("");
   const [cartItems, setCartItems] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [isAuth] = useAtom(authAtom);
-  const inputRef = useRef()
+  const inputRef = useRef();
 
   useEffect(() => {
     const fetchCartItems = async () => {
@@ -37,11 +37,11 @@ const Navbar = ({isFocus = false, setIsFocus}) => {
   }, []);
 
   useEffect(() => {
-    if(isFocus) {
-      inputRef.current.focus()
-      setIsFocus()
+    if (isFocus) {
+      inputRef.current.focus();
+      setIsFocus();
     }
-  }, [isFocus])
+  }, [isFocus]);
 
   useEffect(() => {
     setSearch(() => {
@@ -83,7 +83,7 @@ const Navbar = ({isFocus = false, setIsFocus}) => {
                   }
                 }}
                 placeholder="Search products..."
-                className="rounded-l-full text-md text-blue-900 px-5 py-3.5 h-full w-full focus:outline-none border-r-0"
+                className="rounded-l-full text-md text-blue-900 pl-5 pr-1 py-3.5 h-full w-full focus:outline-none border-r-0"
               />
             </div>
             <div
@@ -92,9 +92,9 @@ const Navbar = ({isFocus = false, setIsFocus}) => {
                   navigate(`/search/search=${search}`);
                 }
               }}
-              className="relative h-full flex items-center rounded-r-full my-0.25 mr-0.25 overflow-hidden cursor-pointer bg-white"
+              className="relative h-full flex min-w-12.5 items-center rounded-r-full my-0.25 mr-0.25 overflow-hidden cursor-pointer bg-white"
             >
-              <div className="bg-gradient-to-r from-blue-600 to-cyan-500 m-1 w-11 h-10 rounded-full flex items-center justify-center">
+              <div className="bg-gradient-to-r from-blue-600 to-cyan-500 m-1 w-10 h-10 rounded-full flex items-center justify-center">
                 <FiSearch className="text-xl text-white relative z-10 " />
               </div>
 
@@ -112,15 +112,15 @@ const Navbar = ({isFocus = false, setIsFocus}) => {
               {/* have to fix */}
 
               <Link
-                to="/account/favorites"
-                className="relative group flex flex-col items-center cursor-pointer w-8 h-8 mt-3 lg:mt-2"
+                to="/"
+                className="relative group flex flex-col items-center cursor-pointer w-8 h-8 mt-2.5 lg:mt-0.5"
               >
-                <FaRegHeart className="absolute inset-0 text-xl lg:text-2xl text-blue-600 opacity-100 group-hover:opacity-0 scale-100 group-hover:scale-0 transition-all duration-300" />
+                <GoHome className="absolute inset-0 text-2xl lg:text-3xl text-blue-600 opacity-100 group-hover:opacity-0 scale-100 group-hover:scale-0 transition-all duration-300" />
 
-                <FaHeart className="absolute inset-0 text-xl lg:text-2xl text-blue-600 opacity-0 group-hover:opacity-100 scale-0 group-hover:scale-100 transition-all duration-300" />
+                <GoHomeFill className="absolute inset-0 text-2xl lg:text-3xl text-blue-600 opacity-0 group-hover:opacity-100 scale-0 group-hover:scale-100 transition-all duration-300" />
 
-                <div className="absolute -bottom-4 lg:-bottom-5.5 left-2/6 lg:left-2/5 transform -translate-x-1/2 bg-blue-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
-                  Favorite
+                <div className="absolute -bottom-4.5 lg:-bottom-6 left-2.75 lg:left-3.75 transform -translate-x-1/2 bg-blue-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+                  Home
                 </div>
               </Link>
 
