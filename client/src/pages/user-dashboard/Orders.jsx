@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { convertOffsetToTimes, motion } from "framer-motion";
 
 import { getPayments, setAsDelivered } from "../../services/cartAPIServices";
@@ -26,11 +26,14 @@ import toast from "react-hot-toast";
 
 const Orders = ({ reloadComponent, setReloadComponent }) => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [orders, setOrders] = useState([]);
-  const [filter, setFilter] = useState("All");
+  // const [filter, setFilter] = useState("All");
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedSeller, setSelectedSeller] = useState(null);
+
+  const filter = searchParams.get("filter") || "All";
 
   const filteredOrders =
     filter === "All"
@@ -41,7 +44,6 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
     const fetchPaymentsData = async () => {
       const paymentsRes = await getPayments();
       console.log(paymentsRes);
-
       const payments = await Promise.all(
         paymentsRes.data.map(async (payment) => {
           const productRes = await getProduct(payment.product);
@@ -49,9 +51,7 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
             productRes.data.storekeeper
           );
           try {
-            const commentRes = await getComments(
-              productRes.data.id
-            );
+            const commentRes = await getComments(productRes.data.id);
 
             return {
               ...payment,
@@ -157,6 +157,10 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
   // }
   //   ];
 
+  const handleFilterChange = (newFilter) => {
+    setSearchParams({ filter: newFilter });
+  };
+
   const getStatusIcon = (status) => {
     switch (status) {
       case "Pending":
@@ -217,7 +221,7 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
           {["All", "Pending", "Shipped", "Delivered"].map((status) => (
             <button
               key={status}
-              onClick={() => setFilter(status)}
+              onClick={() => handleFilterChange(status)}
               className={`px-3 sm:px-4 py-1.5 sm:py-2 cursor-pointer rounded-lg text-xs sm:text-sm font-semibold border transition-colors duration-300 ${
                 filter === status
                   ? "bg-blue-600 text-white border-blue-600"
@@ -238,8 +242,8 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
               transition={{ duration: 0.3 }}
               className="bg-gradient-to-r from-blue-50/80 to-cyan-50/80 rounded-2xl p-6 border border-blue-200/60 hover:border-blue-300 hover:shadow-lg transition-all duration-300 group"
             >
-              <div className="grid grid-cols-1 lg:grid-cols-7 xl:grid-cols-3 gap-6">
-                <div className="flex items-center space-x-4 lg:col-span-3 xl:col-span-1">
+              <div className="grid grid-cols-1 lg:grid-cols-7 xl:grid-cols-4 2xl:grid-cols-4 gap-6">
+                <div className="flex items-center space-x-4 lg:col-span-3 xl:col-span-2 2xl:col-span-2">
                   {order.product.image ? (
                     <div
                       onClick={() =>
@@ -298,7 +302,7 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
                   </p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-row gap-3 justify-center items-start lg:items-end xl:items-center lg:col-span-2 xl:col-span-1">
+                <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-col 2xl:flex-row gap-2 justify-center items-start lg:items-end xl:items-center lg:col-span-2 xl:col-span-1">
                   <button
                     onClick={() => {
                       getPurchaseByPayment(order.id).then((res) => {
@@ -341,7 +345,7 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
                       }}
                       className="flex cursor-pointer items-center justify-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all duration-300 text-sm font-semibold whitespace-nowrap min-w-[120px]"
                     >
-                      <FiCheckCircle className="mr-2" size={14} />
+                      <FiCheckCircle className="mr-2 mb-0.5" size={14} />
                       Received
                     </button>
                   )}
@@ -350,10 +354,10 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
                     (order.hasRated ? (
                       <button
                         disabled
-                        className="flex items-center justify-center px-4 py-2 bg-gray-200 text-gray-600 rounded-lg cursor-not-allowed text-sm font-semibold whitespace-nowrap min-w-[120px]"
+                        className="flex items-center justify-center 2xl:mr-2 px-4 py-2 bg-gray-200 text-gray-600 rounded-lg cursor-not-allowed text-sm font-semibold whitespace-nowrap min-w-[120px]"
                       >
-                        <FiStar className="mr-2 mb-0.5" size={16} />
-                        Already Rated
+                        <FiStar className="mr-1.5 mb-0.5" size={16} />
+                        Rated
                       </button>
                     ) : (
                       <button
@@ -362,10 +366,10 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
                           setSelectedSeller(order.product.storekeeper);
                           setIsReviewOpen(true);
                         }}
-                        className="flex cursor-pointer items-center justify-center px-4 py-2 bg-yellow-400 text-white rounded-lg hover:bg-yellow-500 transition-colors duration-300 text-sm font-semibold whitespace-nowrap min-w-[140px]"
+                        className="flex cursor-pointer items-center justify-center px-4 py-2 bg-yellow-400 text-white rounded-lg hover:bg-yellow-500 transition-colors duration-300 text-sm font-semibold whitespace-nowrap min-w-[120px]"
                       >
                         <FiStar className="mr-2 mb-0.5" size={16} />
-                        Rate Product
+                        Rate
                       </button>
                     ))}
                 </div>
