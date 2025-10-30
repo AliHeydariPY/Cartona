@@ -23,6 +23,7 @@ import {
   FiMessageSquare,
   FiX,
 } from "react-icons/fi";
+import { GoHome } from "react-icons/go";
 import { AiOutlineStar } from "react-icons/ai";
 import { MdStorefront, MdOutlineWorkspacePremium } from "react-icons/md";
 import BottomNav from "../components/BottomNav";
@@ -40,53 +41,53 @@ const UserDashboard = () => {
   const navItems = [
     {
       id: "profile",
-      icon: <FiUser className="ml-3 text-blue-700" size={18} />,
+      icon: <FiUser className="ml-3 text-blue-700 mr-0.25" size={18} />,
       label: "My Profile",
     },
 
     {
       id: "favorites",
-      icon: <FiHeart className="ml-3 text-rose-500" size={18} />,
+      icon: <FiHeart className="ml-3 text-rose-500 mr-0.25" size={18} />,
       label: "Favorites",
     },
     {
       id: "notifications",
-      icon: <FiBell className="ml-3 text-amber-500" size={18} />,
+      icon: <FiBell className="ml-3 text-amber-500 mr-0.25" size={18} />,
       label: "Notifications",
     },
     {
       id: "cart",
-      icon: <FiShoppingCart className="ml-3 text-blue-700" size={18} />,
+      icon: <FiShoppingCart className="ml-3 text-blue-700 mr-0.25" size={18} />,
       label: "Cart",
     },
     {
       id: "orders",
-      icon: <FiFileText className="ml-3 text-green-600" size={18} />,
+      icon: <FiFileText className="ml-3 text-green-600 mr-0.25" size={18} />,
       label: "Orders",
     },
     {
       id: "chats",
-      icon: <FiMessageSquare className="ml-3 text-green-600" size={18} />,
+      icon: <FiMessageSquare className="ml-3 text-green-600 mr-0.25" size={18} />,
       label: "Chats",
     },
     ...(isSeller
       ? [
           {
             id: "my-products",
-            icon: <FiPackage className="ml-3 text-amber-600" size={18} />,
+            icon: <FiPackage className="ml-3 text-amber-600 mr-0.25" size={18} />,
             label: "My Products",
           },
           {
             id: "add-product",
             icon: (
-              <FiPlusCircle className="ml-3 text-green-500 mb-0.25" size={18} />
+              <FiPlusCircle className="ml-3 text-green-500 mb-0.25 mr-0.25" size={18} />
             ),
             label: "Add Product",
           },
           {
             id: "payments",
             icon: (
-              <FiDollarSign className="ml-3 text-green-500 mb-0.25" size={18} />
+              <FiDollarSign className="ml-3 text-green-500 mb-0.25 mr-0.25" size={18} />
             ),
             label: "Payments",
           },
@@ -94,7 +95,7 @@ const UserDashboard = () => {
       : []),
     {
       id: "home",
-      icon: <FiHome className="ml-3 text-amber-500 mb-0.5" size={18} />,
+      icon: <GoHome className="ml-3 text-amber-500 mb-0.5" size={19} />,
       label: "Home",
     },
   ];
