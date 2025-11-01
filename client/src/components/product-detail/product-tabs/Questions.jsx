@@ -4,13 +4,7 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 
-import {
-  FiX,
-  FiEdit3,
-  FiCheckCircle,
-  FiAlertCircle,
-  FiTrash2,
-} from "react-icons/fi";
+import { FiX, FiEdit3, FiAlertCircle, FiTrash2 } from "react-icons/fi";
 import { RiQuestionAnswerLine } from "react-icons/ri";
 
 import AnswerQuestionPopup from "../../pop-ups/AnswerQuestionPopup";
@@ -18,6 +12,7 @@ import DeletePostPopup from "../../pop-ups/DeletePostPopup";
 import EditPostPopup from "../../pop-ups/EditPostPopup";
 
 import { sendProductQuestion } from "../../../services/commentAPIServices";
+import { successToast } from "../../../utils/toast";
 
 const Questions = ({
   productQuestions,
@@ -98,24 +93,7 @@ const Questions = ({
                     .then(() => {
                       setQuestionText("");
                       setReloadComponent(!reloadComponent);
-                      toast.custom((t) => (
-                        <div
-                          className={`${
-                            t.visible ? "animate-enter" : "animate-leave"
-                          } transform transition-all duration-300`}
-                        >
-                          <div className="bg-gradient-to-r from-green-500 to-cyan-400 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-2 sm:space-x-3">
-                            <div className="bg-blue-500/20 p-2 rounded-full">
-                              <FiCheckCircle className="text-xl text-white" />
-                            </div>
-                            <div>
-                              <p className="font-medium">
-                                Your question was successfully sent
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      ));
+                      successToast("Your question was successfully sent");
                     })
                     .catch((err) => {
                       toast.custom((t) => (
@@ -155,24 +133,7 @@ const Questions = ({
                   .then(() => {
                     setQuestionText("");
                     setReloadComponent(!reloadComponent);
-                    toast.custom((t) => (
-                      <div
-                        className={`${
-                          t.visible ? "animate-enter" : "animate-leave"
-                        } transform transition-all duration-300`}
-                      >
-                        <div className="bg-gradient-to-r from-green-500 to-cyan-400 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-2 sm:space-x-3">
-                          <div className="bg-blue-500/20 p-2 rounded-full">
-                            <FiCheckCircle className="text-xl text-white" />
-                          </div>
-                          <div>
-                            <p className="font-medium">
-                              Your question was successfully sent
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ));
+                    successToast("Your question was successfully sent");
                   })
                   .catch((err) => {
                     toast.custom((t) => (

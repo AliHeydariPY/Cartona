@@ -17,6 +17,7 @@ import { FaHeart } from "react-icons/fa";
 import { IoCart, IoCartOutline } from "react-icons/io5";
 
 import ProductImageCarousel from "../ProductImageCarousel";
+import { successToast } from "../../utils/toast";
 
 const ProductDisplay = ({
   product,
@@ -24,7 +25,7 @@ const ProductDisplay = ({
   setReloadComponent,
   setAddToCartPopup,
   setSelectedProduct,
-  setRremoveFromCartPopup,
+  setRemoveProductPopup,
 }) => {
   const { id } = useParams();
   const [currentImage, setCurrentImage] = useState(null);
@@ -110,7 +111,7 @@ const ProductDisplay = ({
 
         return payload;
       });
-      setRremoveFromCartPopup(true);
+      setRemoveProductPopup(true);
     } catch {
       toast.custom((t) => (
         <div
@@ -383,19 +384,8 @@ const ProductDisplay = ({
               onClick={() => {
                 const currentUrl = window.location.href;
                 navigator.clipboard.writeText(currentUrl).then(() => {
-                  toast.custom((t) => (
-                    <div
-                      className={`${
-                        t.visible ? "animate-enter" : "animate-leave"
-                      } transform transition-all duration-300`}
-                    >
-                      <div className="bg-gradient-to-r from-green-500 to-cyan-400 text-white px-6 py-3 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-3">
-                        <div>
-                          <p className="font-medium">Copied</p>
-                        </div>
-                      </div>
-                    </div>
-                  ));
+                  successToast("Copied");
+                  
                 });
               }}
               className="p-2 rounded-full bg-blue-100 text-blue-600 cursor-pointer hover:bg-blue-200 transition-colors duration-300"

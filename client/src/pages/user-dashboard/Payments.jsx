@@ -9,7 +9,6 @@ import {
   FiMapPin,
   FiCreditCard,
 } from "react-icons/fi";
-import { getPayments } from "../../services/cartAPIServices";
 import { getProduct } from "../../services/productAPIServices";
 import SendNotePopup from "../../components/pop-ups/SendNotePopup";
 import {
@@ -17,12 +16,13 @@ import {
   getStorekeeperPayments,
   productSubmission,
 } from "../../services/userAPIServices";
+import { successToast } from "../../utils/toast";
 
 const Payments = () => {
   const [payments, setPayments] = useState([]);
   const [showSendNotePopup, setShowSendNotePopup] = useState(false);
   const [payload, setPayload] = useState(null);
-  
+
   useEffect(() => {
     const fetchPayments = async () => {
       const paymentsStatus = await deliveryStatus();
@@ -359,24 +359,7 @@ const Payments = () => {
               onClose={() => setShowSendNotePopup(false)}
               onConfirm={(note) => {
                 productSubmission({ ...payload, note }).then(() => {
-                  toast.custom((t) => (
-                    <div
-                      className={`${
-                        t.visible ? "animate-enter" : "animate-leave"
-                      } transform transition-all duration-300`}
-                    >
-                      <div className="bg-gradient-to-r from-green-500 to-cyan-400 text-white px-6 py-3 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-3">
-                        <div className="bg-blue-500/20 p-2 rounded-full">
-                          <FiCheckCircle className="text-xl text-white" />
-                        </div>
-                        <div>
-                          <p className="font-medium">
-                            The product was successfully sent
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ));
+                  successToast("The product was successfully sent");
                 });
               }}
               payload={payload}

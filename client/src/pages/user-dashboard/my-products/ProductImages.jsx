@@ -5,16 +5,8 @@ import * as Yup from "yup";
 import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
 
-import {
-  FiPlus,
-  FiTrash2,
-  FiImage,
-  FiPlusCircle,
-  FiCheckCircle,
-  FiX,
-} from "react-icons/fi";
+import { FiPlus, FiTrash2, FiImage, FiPlusCircle, FiX } from "react-icons/fi";
 import { FaArrowLeft } from "react-icons/fa6";
-
 
 import {
   getProduct,
@@ -25,6 +17,7 @@ import {
 
 import DeleteImagePopup from "../../../components/pop-ups/DeleteImagePopup";
 import ProductNotFound from "../../../components/ProductNotFound";
+import { successToast } from "../../../utils/toast";
 
 const ProductImages = ({ reloadComponent, setReloadComponent }) => {
   const { id } = useParams();
@@ -61,22 +54,7 @@ const ProductImages = ({ reloadComponent, setReloadComponent }) => {
       resetForm();
       setFieldValue("image", null);
       setReloadComponent(!reloadComponent);
-      toast.custom((t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } transform transition-all duration-300`}
-        >
-          <div className="bg-gradient-to-r from-green-500 to-cyan-400 text-white px-6 py-3 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-3">
-            <div className="bg-blue-500/20 p-2 rounded-full">
-              <FiCheckCircle className="text-xl text-white" />
-            </div>
-            <div>
-              <p className="font-medium">The image was sent successfully</p>
-            </div>
-          </div>
-        </div>
-      ));
+      successToast("The image was sent successfully");
     });
   };
 

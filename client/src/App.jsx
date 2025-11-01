@@ -25,13 +25,13 @@ import ProductImages from "./pages/user-dashboard/my-products/ProductImages";
 import EditProduct from "./pages/user-dashboard/my-products/EditProduct";
 
 import AddedToCartPopup from "./components/pop-ups/AddedToCartPopup";
-import RemoveFromCartPopup from "./components/pop-ups/RemoveFromCartPopup";
+import RemoveProductPopup from "./components/pop-ups/RemoveProductPopup";
 import Payments from "./pages/user-dashboard/Payments";
 import LoginForm from "./pages/LoginForm";
 import AccountSetting from "./pages/user-dashboard/AccountSetting";
 
 function App() {
-  const [removeFromCartPopup, setRremoveFromCartPopup] = useState(false);
+  const [removeProductPopup, setRemoveProductPopup] = useState(false);
   const [addToCartPopup, setAddToCartPopup] = useState(false);
 
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -52,9 +52,9 @@ function App() {
         }}
       />
 
-      {removeFromCartPopup && (
-        <RemoveFromCartPopup
-          onClose={() => setRremoveFromCartPopup(false)}
+      {removeProductPopup && (
+        <RemoveProductPopup
+          onClose={() => setRemoveProductPopup(false)}
           product={selectedProduct}
           setReloadComponent={setReloadComponent}
           isRemoveCartItem={isRemoveCartItem}
@@ -78,7 +78,7 @@ function App() {
             path="cart"
             element={
               <Cart
-                setRremoveFromCartPopup={setRremoveFromCartPopup}
+                setRemoveProductPopup={setRemoveProductPopup}
                 setSelectedProduct={setSelectedProduct}
                 reloadComponent={reloadComponent}
                 setReloadComponent={setReloadComponent}
@@ -94,7 +94,7 @@ function App() {
                 setReloadComponent={setReloadComponent}
                 setAddToCartPopup={setAddToCartPopup}
                 setSelectedProduct={setSelectedProduct}
-                setRremoveFromCartPopup={setRremoveFromCartPopup}
+                setRemoveProductPopup={setRemoveProductPopup}
               />
             }
           />
@@ -124,7 +124,7 @@ function App() {
             path="my-products"
             element={
               <MyProducts
-                setRremoveFromCartPopup={setRremoveFromCartPopup}
+                setRemoveProductPopup={setRemoveProductPopup}
                 setSelectedProduct={setSelectedProduct}
                 reloadComponent={reloadComponent}
                 setIsRemoveCartItem={setIsRemoveCartItem}
@@ -161,7 +161,7 @@ function App() {
               setReloadComponent={setReloadComponent}
               setAddToCartPopup={setAddToCartPopup}
               setSelectedProduct={setSelectedProduct}
-              setRremoveFromCartPopup={setRremoveFromCartPopup}
+              setRemoveProductPopup={setRemoveProductPopup}
             />
           }
         />
@@ -178,7 +178,7 @@ function App() {
               setReloadComponent={setReloadComponent}
               setAddToCartPopup={setAddToCartPopup}
               setSelectedProduct={setSelectedProduct}
-              setRremoveFromCartPopup={setRremoveFromCartPopup}
+              setRemoveProductPopup={setRemoveProductPopup}
             />
           }
         />
@@ -191,7 +191,7 @@ function App() {
               setReloadComponent={setReloadComponent}
               setAddToCartPopup={setAddToCartPopup}
               setSelectedProduct={setSelectedProduct}
-              setRremoveFromCartPopup={setRremoveFromCartPopup}
+              setRemoveProductPopup={setRemoveProductPopup}
             />
           }
         />

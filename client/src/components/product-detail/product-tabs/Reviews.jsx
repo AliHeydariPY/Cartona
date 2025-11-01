@@ -10,18 +10,12 @@ import {
   sendCommentReply,
 } from "../../../services/commentAPIServices";
 
-import {
-  FiStar,
-  FiX,
-  FiCheckCircle,
-  FiAlertCircle,
-  FiEdit3,
-  FiTrash2,
-} from "react-icons/fi";
+import { FiStar, FiX, FiAlertCircle, FiEdit3, FiTrash2 } from "react-icons/fi";
 import { LuReply } from "react-icons/lu";
 
 import EditPostPopup from "../../pop-ups/EditPostPopup";
 import DeletePostPopup from "../../pop-ups/DeletePostPopup";
+import { successToast } from "../../../utils/toast";
 
 const Reviews = ({
   productComments,
@@ -179,24 +173,7 @@ const Reviews = ({
                   setCommentText("");
                   setSelectedStars(1);
                   setReloadComponent(!reloadComponent);
-                  toast.custom((t) => (
-                    <div
-                      className={`${
-                        t.visible ? "animate-enter" : "animate-leave"
-                      } transform transition-all duration-300`}
-                    >
-                      <div className="bg-gradient-to-r from-green-500 to-cyan-400 text-white px-6 py-3 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-3">
-                        <div className="bg-blue-500/20 p-2 rounded-full">
-                          <FiCheckCircle className="text-xl text-white" />
-                        </div>
-                        <div>
-                          <p className="font-medium">
-                            Your comment was successfully sent
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ));
+                  successToast("Your comment was successfully sent");
                 })
                 .catch((err) => {
                   setCommentText("");
@@ -209,10 +186,9 @@ const Reviews = ({
                     >
                       <FiX className="text-xl shrink-0" />
                       <span className="font-medium">
-                        {err.response.data.detail ==
-                          "Refresh token not found."
-                            ? "To submit a review, first log in to your account"
-                            : err.response.data.detail}
+                        {err.response.data.detail == "Refresh token not found."
+                          ? "To submit a review, first log in to your account"
+                          : err.response.data.detail}
                       </span>
                     </div>
                   ));

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { convertOffsetToTimes, motion } from "framer-motion";
+import { motion } from "framer-motion";
 
 import { getPayments, setAsDelivered } from "../../services/cartAPIServices";
 import { getProduct } from "../../services/productAPIServices";
@@ -22,13 +22,12 @@ import {
   FiFileText,
   FiStar,
 } from "react-icons/fi";
-import toast from "react-hot-toast";
+import { successToast } from "../../utils/toast";
 
 const Orders = ({ reloadComponent, setReloadComponent }) => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [orders, setOrders] = useState([]);
-  // const [filter, setFilter] = useState("All");
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedSeller, setSelectedSeller] = useState(null);
@@ -269,8 +268,11 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
                     <p className="text-blue-600 text-sm">
                       Sold by: {order.storekeeper}
                     </p>
-                    <p className="text-blue-800 font-bold text-sm mt-1">
+                    <p className="text-blue-800 font-bold text-sm mt-1 flex items-center gap-2">
                       ${order.total_price}
+                      <span className="text-xs text-blue-500 bg-blue-100 px-2 py-0.5 rounded-full">
+                        x{order.quantity}
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -292,7 +294,11 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
                       <span>Delivered on {order.delivered_at}</span>
                     ) : (
                       <span>
-                        Est. delivery: {order.storekeeper_delivered_at}
+                        Est. delivery:{" "}
+                        {new Date(
+                          new Date(order.storekeeper_delivered_at).getTime() +
+                            7 * 24 * 60 * 60 * 1000
+                        ).toLocaleDateString()}
                       </span>
                     )}
                   </div>
@@ -322,25 +328,18 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
                           is_delivered: true,
                           delivered_at: new Date().toISOString(),
                         }).then(() => {
-                          toast.custom((t) => (
-                            <div
-                              className={`${
-                                t.visible ? "animate-enter" : "animate-leave"
-                              } transform transition-all duration-300`}
-                            >
-                              <div className="bg-gradient-to-r from-green-500 to-cyan-400 text-white px-6 py-3 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-3">
-                                <div className="bg-blue-500/20 p-2 rounded-full">
-                                  <FiCheckCircle className="text-xl text-white" />
-                                </div>
-                                <div>
-                                  <p className="font-medium">
-                                    Successfully registered
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                          ));
-                          setReloadComponent(!reloadComponent);
+                          successToast("Successfully registered");
+                          setOrders((prev) =>
+                            prev.map((o) =>
+                              o.id === order.id
+                                ? {
+                                    ...o,
+                                    is_delivered: true,
+                                    status: "Delivered",
+                                  }
+                                : o
+                            )
+                          );
                         });
                       }}
                       className="flex cursor-pointer items-center justify-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all duration-300 text-sm font-semibold whitespace-nowrap min-w-[120px]"

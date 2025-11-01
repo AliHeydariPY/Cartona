@@ -11,8 +11,6 @@ import {
   getSubCategories,
 } from "../../services/productAPIServices";
 
-import toast from "react-hot-toast";
-
 import { BiCategory } from "react-icons/bi";
 import {
   FiPlusCircle,
@@ -26,9 +24,9 @@ import {
   FiPercent,
   FiZap,
   FiChevronDown,
-  FiCheckCircle,
   FiChevronLeft,
 } from "react-icons/fi";
+import { successToast } from "../../utils/toast";
 
 const AddProduct = () => {
   const [image, setImage] = useState({});
@@ -128,21 +126,7 @@ const AddProduct = () => {
               onSubmitProps.resetForm();
               setImage({});
               setSelectedCategory(null);
-              toast.custom((t) => (
-                <div
-                  className={`${t.visible ? "animate-enter" : "animate-leave"} 
-      transform transition-all duration-300`}
-                >
-                  <div className="bg-gradient-to-r from-green-500 to-cyan-400 text-white px-6 py-3 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-3">
-                    <div className="bg-blue-500/20 p-2 rounded-full">
-                      <FiCheckCircle className="text-xl text-white" />
-                    </div>
-                    <div>
-                      <p className="font-medium">Product added successfully</p>
-                    </div>
-                  </div>
-                </div>
-              ));
+              successToast("Product added successfully");
             });
           }}
         >
@@ -292,7 +276,7 @@ const AddProduct = () => {
                               className="w-full cursor-pointer text-left px-4 py-2 hover:bg-blue-50 text-blue-800 transition-colors duration-200"
                               onClick={() => {
                                 setSelectedCategory(sub);
-                                setFieldValue("category", sub.id); 
+                                setFieldValue("category", sub.id);
                                 setIsCategoryOpen(false);
                                 setSelectedMainCategory(null);
                               }}

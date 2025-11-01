@@ -8,7 +8,6 @@ import ProductDetailTabs from "../components/product-detail/ProductDetailTabs";
 import ProductDisplay from "../components/product-detail/ProductDisplay";
 import ProductSeller from "../components/product-detail/ProductSeller";
 
-import { FiShoppingCart } from "react-icons/fi";
 import { IoCartOutline } from "react-icons/io5";
 
 import {
@@ -31,7 +30,7 @@ const ProductDetails = ({
   setReloadComponent,
   setAddToCartPopup,
   setSelectedProduct,
-  setRremoveFromCartPopup,
+  setRemoveProductPopup,
 }) => {
   const { id } = useParams();
 
@@ -67,11 +66,9 @@ const ProductDetails = ({
 
         console.log(prodcutData);
         setProduct(prodcutData);
-        console.log("fdsfa")
+        console.log("fdsfa");
 
-        const seller = getStorekeeperById(
-          selectedProduct.data.storekeeper
-        );
+        const seller = getStorekeeperById(selectedProduct.data.storekeeper);
         seller.then((res) => {
           setSeller(res.data);
         });
@@ -113,10 +110,9 @@ const ProductDetails = ({
   }, [id, reloadComponent]);
 
   useEffect(() => {
-    getUser()
-      .then((res) => {
-        setUser([res.data[0] ? res.data[0] : "not found"]);
-      })
+    getUser().then((res) => {
+      setUser([res.data[0] ? res.data[0] : "not found"]);
+    });
   }, []);
 
   if (notFound) return <ProductNotFound />;
@@ -160,7 +156,7 @@ const ProductDetails = ({
                 setReloadComponent={setReloadComponent}
                 setAddToCartPopup={setAddToCartPopup}
                 setSelectedProduct={setSelectedProduct}
-                setRremoveFromCartPopup={setRremoveFromCartPopup}
+                setRemoveProductPopup={setRemoveProductPopup}
               />
 
               <ProductSeller seller={seller} />
