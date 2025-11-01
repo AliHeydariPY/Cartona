@@ -16,7 +16,7 @@ import {
 } from "react-icons/fi";
 
 export default function MyProducts({
-  setRremoveFromCartPopup,
+  setRemoveProductPopup,
   setSelectedProduct,
   reloadComponent,
   setIsRemoveCartItem,
@@ -148,7 +148,7 @@ export default function MyProducts({
                     <button
                       className="flex cursor-pointer items-center justify-center p-2 bg-rose-100 text-rose-700 rounded-lg hover:bg-rose-200 transition-colors duration-300"
                       onClick={() => {
-                        setRremoveFromCartPopup(true);
+                        setRemoveProductPopup(true);
                         setSelectedProduct(product);
                         setIsRemoveCartItem(false);
                       }}

@@ -1,13 +1,13 @@
 import { Portal } from "react-portal";
 import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
 
 import { deleteCartProduct } from "../../services/cartAPIServices";
 import { deleteProduct } from "../../services/productAPIServices";
 
-import { FiX, FiTrash2, FiCheckCircle, FiStar } from "react-icons/fi";
+import { FiX, FiTrash2, FiStar } from "react-icons/fi";
+import { successToast } from "../../utils/toast";
 
-const RemoveFromCartPopup = ({
+const RemoveProductPopup = ({
   onClose,
   product,
   setReloadComponent,
@@ -34,22 +34,7 @@ const RemoveFromCartPopup = ({
       deleteProduct(product.id).then(() => {
         setReloadComponent((prev) => !prev);
         handleClose();
-        toast.custom((t) => (
-          <div
-            className={`${
-              t.visible ? "animate-enter" : "animate-leave"
-            } transform transition-all duration-300`}
-          >
-            <div className="bg-gradient-to-r from-green-500 to-cyan-400 text-white px-6 py-3 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-3">
-              <div className="bg-blue-500/20 p-2 rounded-full">
-                <FiCheckCircle className="text-xl text-white" />
-              </div>
-              <div>
-                <p className="font-medium">Product successfully deleted</p>
-              </div>
-            </div>
-          </div>
-        ));
+        successToast("Product successfully deleted");
       });
     }
   };
@@ -135,4 +120,4 @@ const RemoveFromCartPopup = ({
   );
 };
 
-export default RemoveFromCartPopup;
+export default RemoveProductPopup;

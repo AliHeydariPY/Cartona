@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { FiTrash2, FiPlus, FiList, FiCheckCircle, FiX } from "react-icons/fi";
+import { FiTrash2, FiPlus, FiList, FiX } from "react-icons/fi";
 
 import toast from "react-hot-toast";
 
@@ -17,6 +17,7 @@ import { FaArrowLeft } from "react-icons/fa6";
 
 import DeleteFeaturePopup from "../../../components/pop-ups/DeleteFeaturePopup";
 import ProductNotFound from "../../../components/ProductNotFound";
+import { successToast } from "../../../utils/toast";
 
 const ProductFeatures = ({ reloadComponent, setReloadComponent }) => {
   const { id } = useParams();
@@ -57,22 +58,7 @@ const ProductFeatures = ({ reloadComponent, setReloadComponent }) => {
     addFeature(feature).then(() => {
       resetForm();
       setReloadComponent(!reloadComponent);
-      toast.custom((t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } transform transition-all duration-300`}
-        >
-          <div className="bg-gradient-to-r from-green-500 to-cyan-400 text-white px-6 py-3 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-3">
-            <div className="bg-blue-500/20 p-2 rounded-full">
-              <FiCheckCircle className="text-xl text-white" />
-            </div>
-            <div>
-              <p className="font-medium">Feature successfully submitted</p>
-            </div>
-          </div>
-        </div>
-      ));
+      successToast("Feature successfully submitted");
     });
   };
 

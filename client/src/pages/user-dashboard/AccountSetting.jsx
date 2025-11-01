@@ -4,7 +4,7 @@ import * as Yup from "yup";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 
-import { ChangeUserPassword, login } from "../../services/userAPIServices";
+import { ChangeUserPassword } from "../../services/userAPIServices";
 import {
   FiLock,
   FiEye,
@@ -13,6 +13,7 @@ import {
   FiKey,
   FiX,
 } from "react-icons/fi";
+import { successToast } from "../../utils/toast";
 
 const AccountSetting = () => {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
@@ -47,26 +48,8 @@ const AccountSetting = () => {
       password: values.confirmPassword,
     };
     ChangeUserPassword(payload)
-      .then((res) => {
-        toast.custom((t) => (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`${
-              t.visible ? "animate-enter" : "animate-leave"
-            } bg-gradient-to-r from-green-500 to-cyan-400 text-white px-6 py-4 rounded-xl shadow-lg backdrop-blur-md flex items-center space-x-3`}
-          >
-            <div className="bg-white/20 p-2 rounded-full">
-              <FiCheckCircle className="text-xl text-white" />
-            </div>
-            <div>
-              <p className="font-medium">Password changed successfully!</p>
-              <p className="text-sm opacity-90">
-                Your password has been updated
-              </p>
-            </div>
-          </motion.div>
-        ));
+      .then(() => {
+        successToast("Password changed successfully!");
         setSubmitting(false);
         resetForm();
       })

@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FiX, FiStar, FiCheckCircle, FiAlertCircle } from "react-icons/fi";
 import toast from "react-hot-toast";
 import { sendComment } from "../../services/commentAPIServices";
+import { successToast } from "../../utils/toast";
 
 /////////////////// response it /////////////////////
 
@@ -26,8 +27,6 @@ const ReviewPopup = ({ onClose, product, seller, setReloadComponent }) => {
 
   const handleSubmit = async () => {
     if (seller == localStorage.getItem("storekeeperID")) {
-      console.log("🚀 ~ handleSubmit ~ user:", seller.user)
-      console.log("🚀 ~ handleSubmit ~ localStorage:", localStorage.getItem("userID"))
       toast.custom((t) => (
         <div
           className={`${
@@ -58,22 +57,7 @@ const ReviewPopup = ({ onClose, product, seller, setReloadComponent }) => {
       setCommentText("");
       setSelectedStars(1);
       setReloadComponent((prev) => !prev);
-      toast.custom((t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } transform transition-all duration-300`}
-        >
-          <div className="bg-gradient-to-r from-green-500 to-cyan-400 text-white px-6 py-3 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-3">
-            <div className="bg-blue-500/20 p-2 rounded-full">
-              <FiCheckCircle className="text-xl text-white" />
-            </div>
-            <div>
-              <p className="font-medium">Your comment was successfully sent</p>
-            </div>
-          </div>
-        </div>
-      ));
+      successToast("Your comment was successfully sent");
       handleClose();
     } catch (err) {
       console.log(err);

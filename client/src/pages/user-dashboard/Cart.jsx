@@ -21,11 +21,11 @@ import {
   FiShield,
   FiX,
   FiStar,
-  FiCheckCircle,
 } from "react-icons/fi";
+import { successToast } from "../../utils/toast";
 
 const Cart = ({
-  setRremoveFromCartPopup,
+  setRemoveProductPopup,
   setSelectedProduct,
   reloadComponent,
   setReloadComponent,
@@ -36,8 +36,7 @@ const Cart = ({
 
   useEffect(() => {
     const fetchCartItems = async () => {
-      const cartProductsRes = await getCartProducts(
-      );
+      const cartProductsRes = await getCartProducts();
       console.log(cartProductsRes);
       const productsData = await Promise.all(
         cartProductsRes.data.map(async (item) => {
@@ -202,7 +201,7 @@ const Cart = ({
 
                           <button
                             onClick={() => {
-                              setRremoveFromCartPopup(true);
+                              setRemoveProductPopup(true);
                               setSelectedProduct(product);
                               setIsRemoveCartItem(true);
                             }}
@@ -339,24 +338,7 @@ const Cart = ({
                       totalCartPayment().then((res) => {
                         console.log(res.data);
                         setReloadComponent(!reloadComponent);
-                        toast.custom((t) => (
-                          <div
-                            className={`${
-                              t.visible ? "animate-enter" : "animate-leave"
-                            } transform transition-all duration-300`}
-                          >
-                            <div className="bg-gradient-to-r from-green-500 to-cyan-400 text-white px-6 py-3 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-3">
-                              <div className="bg-blue-500/20 p-2 rounded-full">
-                                <FiCheckCircle className="text-xl text-white" />
-                              </div>
-                              <div>
-                                <p className="font-medium">
-                                  Payment was successful
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        ));
+                        successToast("Payment was successful");
                       });
                     }}
                     className="w-full cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-500 text-white py-2 sm:py-3 rounded-lg font-semibold mt-6 hover:shadow-lg transition-all duration-300 flex items-center justify-center text-sm sm:text-base"

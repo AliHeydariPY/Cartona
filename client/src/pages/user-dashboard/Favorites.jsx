@@ -10,7 +10,6 @@ import { IoCart, IoCartOutline } from "react-icons/io5";
 import { PiLightningFill } from "react-icons/pi";
 import { BiSolidOffer } from "react-icons/bi";
 
-
 import {
   addToCart,
   deleteFavorite,
@@ -24,7 +23,7 @@ const Favorites = ({
   setSelectedProduct,
   reloadComponent,
   setReloadComponent,
-  setRremoveFromCartPopup
+  setRemoveProductPopup,
 }) => {
   const [favorites, setFavorites] = useState([]);
 
@@ -93,7 +92,7 @@ const Favorites = ({
 
         return payload;
       });
-      setRremoveFromCartPopup(true);
+      setRemoveProductPopup(true);
     } catch {
       toast.custom((t) => (
         <div
@@ -220,7 +219,7 @@ const Favorites = ({
                       {window.innerWidth > 1024 && (
                         <>
                           <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                             <button
+                            <button
                               onClick={() => handleRemoveFavorite(fav.id)}
                               className="p-2 cursor-pointer bg-rose-100 rounded-full hover:bg-rose-200 transition-colors duration-300"
                             >

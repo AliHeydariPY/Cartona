@@ -22,6 +22,7 @@ import {
   FiFileText,
   FiStar,
 } from "react-icons/fi";
+import { successToast } from "../../utils/toast";
 
 const Orders = ({ reloadComponent, setReloadComponent }) => {
   const navigate = useNavigate();
@@ -327,6 +328,7 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
                           is_delivered: true,
                           delivered_at: new Date().toISOString(),
                         }).then(() => {
+                          successToast("Successfully registered");
                           setOrders((prev) =>
                             prev.map((o) =>
                               o.id === order.id
