@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { BiCategory } from "react-icons/bi";
 import { FiChevronLeft } from "react-icons/fi";
 import {
   getMainCategories,

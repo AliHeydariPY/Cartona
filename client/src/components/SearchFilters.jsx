@@ -83,6 +83,20 @@ const SearchFilters = () => {
     setIsReady(true);
   }, [query]);
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1280) {
+        if (!isOpen) {
+          setIsOpen(true);
+        }
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const buildUrl = (values) => {
     const filtersName = Object.keys(filters);
     let url =
@@ -604,7 +618,7 @@ const SearchFilters = () => {
                       </button>
                     </div>
                   </motion.div>
-                )}
+                )} 
               </AnimatePresence>
             </div>
           </Form>
