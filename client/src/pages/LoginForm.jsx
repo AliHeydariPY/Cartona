@@ -8,6 +8,7 @@ import { FiCheckCircle, FiX, FiEye, FiEyeOff, FiLogIn } from "react-icons/fi";
 import { login } from "../services/userAPIServices";
 import { useAtom } from "jotai";
 import { authAtom } from "../atoms/authAtom";
+import { successToast } from "../utils/toast";
 
 const LoginForm = () => {
   const [isAuth, setIsAuth] = useAtom(authAtom);
@@ -69,25 +70,7 @@ const LoginForm = () => {
               .then(() => {
                 localStorage.setItem("username", values.username);
 
-                toast.custom((t) => (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={`${
-                      t.visible ? "animate-enter" : "animate-leave"
-                    } bg-gradient-to-r from-green-500 to-cyan-400 text-white px-6 py-4 rounded-xl shadow-lg backdrop-blur-md flex items-center space-x-3`}
-                  >
-                    <div className="bg-white/20 p-2 rounded-full">
-                      <FiCheckCircle className="text-xl text-white" />
-                    </div>
-                    <div>
-                      <p className="font-medium">Login successful!</p>
-                      <p className="text-sm opacity-90">
-                        Welcome back to Cartona
-                      </p>
-                    </div>
-                  </motion.div>
-                ));
+                successToast({ title: "Login successful",text: "Welcome back to Cartona"});
                 setSubmitting(false);
 
                 // navigate("/account/profile");
