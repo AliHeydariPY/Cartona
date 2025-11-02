@@ -1,7 +1,7 @@
 import { toast } from "react-hot-toast";
 import { FiCheckCircle } from "react-icons/fi";
 
-export const successToast = (text) => {
+export const successToast = (value) => {
   toast.custom((t) => (
     <div
       className={`${
@@ -12,9 +12,16 @@ export const successToast = (text) => {
         <div className="bg-blue-500/20 p-2 rounded-full">
           <FiCheckCircle className="text-xl text-white" />
         </div>
-        <div>
-          <p className="font-medium">{text}</p>
-        </div>
+        {value.title ? (
+          <div>
+            <p className="font-medium">{value.title}</p>
+            <p className="text-sm opacity-90">{value.text}</p>
+          </div>
+        ) : (
+          <div>
+            <p className="font-medium">{value}</p>
+          </div>
+        )}
       </div>
     </div>
   ));

@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { FixedSizeList as List } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
 
@@ -14,47 +14,26 @@ import {
 } from "../../services/commentAPIServices";
 
 const Notifications = () => {
-  const [filter, setFilter] = useState("All");
-  const [notifications, setNotifications] = useState([]);
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [notifications, setNotifications] = useState([]);
 
-  // {
-  //   id: 1,
-  //   user: 1,
-  //   notification: 1,
-  //   message: "🛍️ New product 'Wireless Headphones' added by TechStore.",
-  //   storekeeper_id: 1,
-  //   product_id: 2,
-  //   timestamp: "2024-01-20T14:30:00Z",
-  //   is_read: false,
-  //   type: "new_product",
-  // },
-  // {
-  //   id: 2,
-  //   user: 1,
-  //   notification: 2,
-  //   message: "🚚 Your order #12345 has been shipped!",
-  //   storekeeper_id: null,
-  //   product_id: 5,
-  //   timestamp: "2024-01-20T12:15:00Z",
-  //   is_read: true,
-  //   type: "order_update",
-  // },
-  // {
-  //   id: 3,
-  //   user: 1,
-  //   notification: 3,
-  //   message: "⭐ Your product 'Sports Shoes' received a new 5-star review!",
-  //   storekeeper_id: 2,
-  //   product_id: 8,
-  //   timestamp: "2024-01-20T10:45:00Z",
-  //   is_read: false,
-  //   type: "product_review",
-  // },
+  const filter = searchParams.get("filter") || "All";
+
+  const filteredNotifications = notifications.filter((notif) => {
+    switch (filter) {
+      case "Unread":
+        return !notif.is_read;
+      case "Read":
+        return notif.is_read;
+      case "All":
+      default:
+        return true;
+    }
+  });
 
   useEffect(() => {
     getNotifications().then((res) => {
-      console.log(res.data);
       setNotifications(res.data);
     });
   }, []);
@@ -88,13 +67,6 @@ const Notifications = () => {
   const openInNewTab = (url) => {
     window.open(url, "_blank", "noreferrer");
   };
-
-  const filteredNotifications = notifications.filter((notif) => {
-    if (filter === "All") return true;
-    if (filter === "Unread") return !notif.is_read;
-    if (filter === "Read") return notif.is_read;
-    return true;
-  });
 
   const ITEM_HEIGHT = window.innerWidth >= 640 ? 120 : 95;
 
@@ -225,6 +197,7 @@ const Notifications = () => {
     );
   };
 
+  
   return (
     <motion.div
       initial={{ opacity: 0, y: 50 }}
@@ -233,7 +206,7 @@ const Notifications = () => {
       className="lg:col-span-3"
     >
       <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-lg p-4 sm:p-6 2xl:p-8 border border-blue-400 hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300">
-        <div className="sm:flex sm:items-center justify-between mb-4">
+        <div className="sm:flex sm:items-center justify-between mb-3">
           <div className="mb-3 sm:mb-0">
             <div className="flex items-center mb-1 sm:mb-0">
               <FiBell className="text-amber-500 mr-3" size={23} />
@@ -259,11 +232,11 @@ const Notifications = () => {
           </div>
         </div>
 
-        <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:gap-3 mb-4">
+        <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:gap-3 mb-3.5">
           {["All", "Unread", "Read"].map((status) => (
             <button
               key={status}
-              onClick={() => setFilter(status)}
+              onClick={() => setSearchParams({ filter: status })}
               className={`px-3 sm:px-4 py-1.5 sm:py-2 cursor-pointer rounded-lg text-xs sm:text-sm font-semibold border transition-colors duration-300 ${
                 filter === status
                   ? "bg-blue-600 text-white border-blue-600"
@@ -290,7 +263,7 @@ const Notifications = () => {
                 <List
                   height={Math.min(
                     filteredNotifications.length * ITEM_HEIGHT,
-                    window.innerWidth < 640 ? 375 : 593
+                    window.innerWidth < 640 ? 375 : 600
                   )}
                   width={width}
                   itemCount={filteredNotifications.length}

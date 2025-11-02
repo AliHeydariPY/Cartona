@@ -39,8 +39,9 @@ export const productFormSchema = Yup.object()
       .nullable()
       .transform((v, o) => (o === "" ? null : v)),
   })
+
   .test("discount-rules", null, function (values) {
-    const { discounted_price, discount_percentage, discount_period } =
+    const { price, discounted_price, discount_percentage, discount_period } =
       values || {};
     const hasPrice = discounted_price != null && discounted_price !== "";
     const hasPercent =
@@ -77,8 +78,31 @@ export const productFormSchema = Yup.object()
       );
     }
 
+    if (hasPrice && price && discounted_price > price) {
+      errors.push(
+        this.createError({
+          path: "discounted_price",
+          message: "Discounted price cannot be greater than the original price",
+        })
+      );
+    }
+
+    if (hasPeriod) {
+      const today = new Date();
+      const periodDate = new Date(discount_period);
+      if (periodDate < today) {
+        errors.push(
+          this.createError({
+            path: "discount_period",
+            message: "Discount period cannot be before today",
+          })
+        );
+      }
+    }
+
     return errors.length ? new Yup.ValidationError(errors) : true;
   })
+
   .test("amazing-offer-rules", null, function (values) {
     const { amazing_offer, amazing_offer_period } = values || {};
     const hasOffer = !!amazing_offer;
@@ -102,6 +126,19 @@ export const productFormSchema = Yup.object()
           message: "When entering an offer period, offer title is required",
         })
       );
+    }
+
+    if (hasOfferPeriod) {
+      const today = new Date();
+      const offerDate = new Date(amazing_offer_period);
+      if (offerDate < today) {
+        errors.push(
+          this.createError({
+            path: "amazing_offer_period",
+            message: "Offer period cannot be before today",
+          })
+        );
+      }
     }
 
     return errors.length ? new Yup.ValidationError(errors) : true;

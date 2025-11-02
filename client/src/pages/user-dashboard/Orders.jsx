@@ -82,40 +82,7 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
       );
       console.log(payments);
       setOrders([
-        {
-          id: 222222,
-          product: "Sports Running Shoes",
-          storekeeper: "FashionHub",
-          status: "Delivered",
-          total_price: 89.99,
-          paid_at: "2024-01-10",
-          delivered_at: "2024-01-14",
-          image: "/shoes.jpg",
-          hasRated: false,
-        },
-        {
-          id: 11111,
-          product: "Premium Wireless Headphones",
-          storekeeper: "TechStore",
-          status: "Shipped",
-          total_price: 149.99,
-          paid_at: "2024-01-15",
-          estimatedDelivery: "2024-01-20",
-          image: "/headphones.jpg",
-          hasRated: false,
-        },
 
-        {
-          id: 333333,
-          product: "Smart Watch Series 7",
-          storekeeper: "GadgetWorld",
-          status: "Pending",
-          total_price: 249.99,
-          paid_at: "2024-01-18",
-          estimatedDelivery: "2024-01-25",
-          image: "/watch.jpg",
-          hasRated: false,
-        },
         ...payments,
       ]);
     };
@@ -198,7 +165,7 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
       className="lg:col-span-3"
     >
       <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-lg p-4 sm:p-6 2xl:p-8 border border-blue-400 hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300">
-        <div className="sm:flex sm:items-center mb-4.75">
+        <div className="sm:flex sm:items-center mb-3">
           <div className="mb-2">
             <div className="flex items-center mb-1 sm:mb-0">
               <FiFileText className="text-green-600 mr-3" size={22} />
@@ -404,7 +371,7 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
           />
         )}
 
-        {orders.length === 0 && (
+        {filteredOrders.length === 0 && (
           <div className="text-center py-12 bg-blue-50/50 rounded-2xl border border-blue-200">
             <FiPackage className="text-blue-400 mx-auto mb-4" size={48} />
             <h3 className="text-lg font-semibold text-blue-800 mb-2">

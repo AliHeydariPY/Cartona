@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, transformValueTypes } from "framer-motion";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -37,29 +37,31 @@ export default function SearchPage() {
 
   useEffect(() => {
     const fetchProducts = async () => {
-      const favoriteProductsRes = await getFavorites();
+      try {
+        let favorites = [];
 
-      if (query) {
-        searchProduct(`${query}`).then((res) => {
-          if (res.data[0]) {
-            setFavorites(favoriteProductsRes.data);
+        try {
+          const favoriteProductsRes = await getFavorites();
+          favorites = favoriteProductsRes.data;
+        } catch (error) {
+          console.warn("User not logged in, skipping favorites...");
+        }
 
-            setProducts(res.data);
-            setNotFound(false);
-          } else {
-            setNotFound(true);
-          }
-        });
-      } else {
-        getListProducts().then((res) => {
-          if (res.data[0]) {
-            setProducts(res.data);
-            setNotFound(false);
-          } else {
-            setNotFound(true);
-          }
-        });
+        const res = query ? await searchProduct(query) : await getListProducts();
+
+        if (res.data[0]) {
+          setFavorites(favorites);
+          setProducts(res.data);
+          setNotFound(false);
+        } else {
+          setNotFound(true);
+        }
+
+      } catch (error) {
+        setNotFound(true);
       }
+
+      
     };
 
     fetchProducts();
@@ -212,8 +214,8 @@ export default function SearchPage() {
                     )}
                   </div>
 
-                  <div className="p-4 space-y-3">
-                    <div className="flex justify-between">
+                  <div className="p-4 space-y-2">
+                    <div className="h-14 flex justify-between">
                       <h3 className="font-bold text-blue-900 text-lg line-clamp-2 mb-1">
                         {product.name}
                       </h3>
@@ -228,14 +230,14 @@ export default function SearchPage() {
                                 onClick={() =>
                                   handleRemoveFavorite(favorite.id)
                                 }
-                                className="p-2 cursor-pointer bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-rose-100 transition-colors duration-200"
+                                className="p-2 h-8 cursor-pointer bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-rose-100 transition-colors duration-200"
                               >
                                 <FaHeart className="text-rose-500" size={16} />
                               </button>
                             ) : (
                               <button
                                 onClick={() => handleAddFavorite(product.id)}
-                                className="p-2 cursor-pointer bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-rose-100 transition-colors duration-200"
+                                className="p-2 h-8 cursor-pointer bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-rose-100 transition-colors duration-200"
                               >
                                 <FiHeart className="text-rose-500" size={16} />
                               </button>
@@ -248,7 +250,7 @@ export default function SearchPage() {
                               setMainImages({ image: product.image });
                               setShowImages(true);
                             }}
-                            className="p-2 cursor-pointer bg-blue-100 rounded-full hover:bg-blue-200 transition-colors duration-300"
+                            className="p-2 h-8 cursor-pointer bg-blue-100 rounded-full hover:bg-blue-200 transition-colors duration-300"
                           >
                             <FiEye className="text-blue-600" size={16} />
                           </button>
@@ -312,7 +314,7 @@ export default function SearchPage() {
                   </div>
 
                   {product.discount_period ? (
-                    <div className="px-4 pb-4">
+                    <div className="h-full px-4 pb-4">
                       <div className="bg-blue-100 rounded-lg p-2">
                         <p className="text-xs flex items-center justify-center text-blue-700 font-medium text-center">
                           <FaClock className="mr-1 " size={16} /> Offer ends:{" "}
