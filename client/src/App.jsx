@@ -7,6 +7,7 @@ import CreateAccountForm from "./pages/CreateAccountForm";
 import UpgradeToSeller from "./pages/UpgradeToSeller";
 import UserDashboard from "./pages/UserDashboard";
 import ProductDetail from "./pages/ProductDetail";
+import About from "./pages/About";
 
 import Profile from "./pages/user-dashboard/Profile";
 import Favorites from "./pages/user-dashboard/Favorites";
@@ -197,6 +198,9 @@ function App() {
         />
 
         <Route path="/category/:categoryId" element={<SubCategories />} />
+
+        <Route path="/about" element={<About />} />
+
       </Routes>
     </>
   );

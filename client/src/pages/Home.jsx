@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -255,9 +255,12 @@ const Home = () => {
                 <button className="bg-gradient-to-r cursor-pointer from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white px-8 py-4 rounded-full font-semibold shadow-lg hover:shadow-xl transition-colors duration-300">
                   Start Shopping Now
                 </button>
-                <button className="bg-white cursor-pointer border-2 border-blue-600 text-blue-600 hover:bg-blue-100 px-8 py-4 rounded-full font-semibold shadow hover:shadow-md transition-all duration-300">
+                <Link
+                  to="/about"
+                  className="bg-white cursor-pointer border-2 border-blue-600 text-blue-600 hover:bg-blue-100 px-8 py-4 rounded-full font-semibold shadow hover:shadow-md transition-all duration-300"
+                >
                   Learn More
-                </button>
+                </Link>
               </div>
             </div>
           </div>
