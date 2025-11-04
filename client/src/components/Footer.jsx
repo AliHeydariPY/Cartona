@@ -7,11 +7,11 @@ import { FaYoutube } from "react-icons/fa";
 import { FiChevronLeft } from "react-icons/fi";
 import { FiShield } from "react-icons/fi";
 import { FiHeart } from "react-icons/fi";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
     <footer className="bg-gradient-to-br from-blue-900 to-cyan-800 pt-20 pb-20 md:pb-10 px-4 relative overflow-hidden ">
-
       <div className="absolute inset-0 overflow-hidden">
         {[...Array(20)].map((_, i) => (
           <div
@@ -98,13 +98,13 @@ const Footer = () => {
             <ul className="space-y-4">
               {["Contact Us", "FAQs", "Shipping", "Returns"].map((item) => (
                 <li key={item}>
-                  <a
-                    href="#"
+                  <Link
+                    to="team"
                     className="text-blue-100 hover:text-white flex items-center group transition-all duration-300"
                   >
                     <FiChevronLeft className="mr-2 mb-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     {item}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>

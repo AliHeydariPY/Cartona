@@ -59,7 +59,7 @@ const Home = () => {
                   onKeyDown={(e) => {
                     if (e.code === "Enter") {
                       if (search.trim()) {
-                        navigate(`/search/${search}`);
+                        navigate(`/search/search=${search}`);
                       }
                     }
                   }}
@@ -69,7 +69,7 @@ const Home = () => {
                 <button
                   onClick={() => {
                     if (search.trim()) {
-                      navigate(`/search/${search}`);
+                      navigate(`/search/search=${search}`);
                     }
                   }}
                   className="hero-search-button cursor-pointer"
@@ -110,7 +110,16 @@ const Home = () => {
                   <p className="text-lg md:text-xl mb-6 opacity-90">
                     Up to 50% off on selected items. Limited time offer.
                   </p>
-                  <button className="bg-white cursor-pointer text-blue-600 hover:bg-blue-100 px-8 py-3 rounded-full font-semibold shadow-lg hover:shadow-xl transition-colors duration-300">
+                  <button
+                    onClick={() => {
+                      inputRef.current?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "center",
+                      });
+                      setTimeout(() => inputRef.current?.focus(), 300);
+                    }}
+                    className="bg-white cursor-pointer text-blue-600 hover:bg-blue-100 px-8 py-3 rounded-full font-semibold shadow-lg hover:shadow-xl transition-colors duration-300"
+                  >
                     Shop Now
                   </button>
                 </div>
@@ -202,44 +211,76 @@ const Home = () => {
               </div>
             </div>
 
-            <div className="bg-white rounded-3xl shadow-xl p-10 md:p-16 mb-20 relative overflow-hidden">
-              <div className="absolute -top-20 -right-20 w-64 h-64 bg-blue-600/10 rounded-full filter blur-3xl"></div>
-              <div className="text-center max-w-4xl mx-auto">
-                <TfiQuoteRight className="text-5xl text-blue-600/20 mx-auto mb-8" />
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent mb-8">
-                  What Our Customers Say
+            <div className="bg-white/60 backdrop-blur-lg rounded-3xl shadow-lg p-10 md:p-16 mb-20 relative overflow-hidden border border-white/30">
+              <div className="absolute -top-20 -right-20 w-64 h-64 bg-gradient-to-r from-blue-600/10 to-cyan-500/10 rounded-full filter blur-3xl"></div>
+              <div className="absolute -bottom-32 -left-20 w-56 h-56 bg-cyan-500/5 rounded-full filter blur-3xl"></div>
+
+              <div className="text-center max-w-4xl mx-auto relative z-10">
+                <TfiQuoteRight className="text-6xl text-blue-600/15 mx-auto mb-8 transform hover:scale-110 transition-transform duration-300" />
+                <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent mb-8">
+                  Voices of Trust & Satisfaction
                 </h2>
+                <p className="text-blue-700/80 text-lg mb-12 max-w-2xl mx-auto">
+                  Discover why thousands of customers choose Cartona for their
+                  shopping journey
+                </p>
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  {[1, 2, 3].map((item) => (
+                  {[
+                    {
+                      name: "Sarah Johnson",
+                      role: "Frequent Shopper",
+                      text: "The seamless experience and fast delivery keep me coming back. Cartona understands what modern shoppers need!",
+                      rating: 5,
+                    },
+                    {
+                      name: "Michael Chen",
+                      role: "Tech Enthusiast",
+                      text: "Finally, an app that makes online shopping feel personal and secure. The interface is absolutely stunning!",
+                      rating: 5,
+                    },
+                    {
+                      name: "Emma Rodriguez",
+                      role: "Home Decor Lover",
+                      text: "From discovery to delivery, every step feels carefully crafted. My go-to for all home essentials!",
+                      rating: 5,
+                    },
+                  ].map((testimonial, index) => (
                     <div
-                      key={item}
-                      className="bg-blue-50/50 rounded-xl p-6 backdrop-blur-sm"
+                      key={index}
+                      className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-white/40 shadow-md hover:shadow-xl hover:scale-101 transition-all duration-300 group"
                     >
-                      <div className="flex mb-4">
-                        {[1, 2, 3, 4, 5].map((star) => (
+                      <div className="flex justify-center mb-4">
+                        {[...Array(testimonial.rating)].map((_, starIndex) => (
                           <FiStar
-                            key={star}
-                            className="text-yellow-400 fill-current"
+                            key={starIndex}
+                            className="text-yellow-400 fill-current transform group-hover:scale-110 transition-transform duration-200"
+                            style={{ transitionDelay: `${starIndex * 100}ms` }}
                           />
                         ))}
                       </div>
-                      <p className="text-blue-800 mb-4">
-                        "This is the best shopping experience I've ever had!"
+
+                      <p className="text-blue-800/90 mb-6 leading-relaxed italic">
+                        "{testimonial.text}"
                       </p>
-                      <div className="flex items-center">
-                        <div className="w-10 h-10 bg-blue-600 rounded-full mr-3"></div>
+
+                      <div className="flex items-center justify-center">
+                        <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-full mr-4 flex items-center justify-center text-white font-bold shadow-lg">
+                          {testimonial.name.charAt(0)}
+                        </div>
                         <div>
-                          <h4 className="font-medium text-blue-900">
-                            Customer {item}
+                          <h4 className="font-semibold text-blue-900 group-hover:text-blue-700 transition-colors duration-300">
+                            {testimonial.name}
                           </h4>
-                          <span className="text-sm text-blue-500">
-                            Verified Buyer
+                          <span className="text-sm text-blue-900 font-medium">
+                            {testimonial.role}
                           </span>
                         </div>
                       </div>
                     </div>
                   ))}
                 </div>
+
               </div>
             </div>
 
@@ -252,7 +293,16 @@ const Home = () => {
                 for their shopping needs.
               </p>
               <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
-                <button className="bg-gradient-to-r cursor-pointer from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white px-8 py-4 rounded-full font-semibold shadow-lg hover:shadow-xl transition-colors duration-300">
+                <button
+                  onClick={() => {
+                    inputRef.current?.scrollIntoView({
+                      behavior: "smooth",
+                      block: "center",
+                    });
+                    setTimeout(() => inputRef.current?.focus(), 600);
+                  }}
+                  className="bg-gradient-to-r cursor-pointer from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white px-8 py-4 rounded-full font-semibold shadow-lg hover:shadow-xl transition-colors duration-300"
+                >
                   Start Shopping Now
                 </button>
                 <Link

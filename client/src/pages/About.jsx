@@ -10,7 +10,7 @@ import {
   FiUsers,
 } from "react-icons/fi";
 
-import ScrollToTop from "../utils/scrollToTop";
+import ScrollToTop from "../components/ScrollToTop";
 import { Link } from "react-router-dom";
 
 const About = () => {
@@ -267,7 +267,8 @@ const About = () => {
                   role: "Frontend Developer",
                   description:
                     "Adel is the creative force behind Cartona’s frontend — focusing on smooth interactions, responsive design, and a delightful user experience.",
-                  image: "/images/adel.jpg", 
+                  image:
+                    "https://avatars.githubusercontent.com/u/176317348?v=4",
                   link: "/team/adel",
                 },
                 {
@@ -300,8 +301,11 @@ const About = () => {
                   <p className="text-blue-700 text-sm mb-4 leading-relaxed">
                     {member.description}
                   </p>
-                  <Link to="team" className="px-5 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-full text-sm font-medium shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105">
-                  View Profile
+                  <Link
+                    to="/team"
+                    className="px-5 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-full text-sm font-medium shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105"
+                  >
+                    View Profile
                   </Link>
                 </motion.div>
               ))}
