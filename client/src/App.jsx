@@ -8,6 +8,7 @@ import UpgradeToSeller from "./pages/UpgradeToSeller";
 import UserDashboard from "./pages/UserDashboard";
 import ProductDetail from "./pages/ProductDetail";
 import About from "./pages/About";
+import Team from "./pages/Team";
 
 import Profile from "./pages/user-dashboard/Profile";
 import Favorites from "./pages/user-dashboard/Favorites";
@@ -198,6 +199,8 @@ function App() {
         />
 
         <Route path="/category/:categoryId" element={<SubCategories />} />
+
+        <Route path="/team" element={<Team />} />
 
         <Route path="/about" element={<About />} />
 
