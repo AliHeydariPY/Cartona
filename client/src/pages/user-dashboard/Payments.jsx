@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import toast from "react-hot-toast";
+import { useEffect, useState } from "react";
 import {
   FiPackage,
   FiTruck,
@@ -8,105 +7,107 @@ import {
   FiDollarSign,
   FiMapPin,
   FiCreditCard,
+  FiTrendingUp,
 } from "react-icons/fi";
 import { getProduct } from "../../services/productAPIServices";
 import SendNotePopup from "../../components/pop-ups/SendNotePopup";
 import {
-  deliveryStatus,
   getStorekeeperPayments,
   productSubmission,
 } from "../../services/userAPIServices";
 import { successToast } from "../../utils/toast";
+import { useSearchParams } from "react-router-dom";
 
 const Payments = () => {
   const [payments, setPayments] = useState([]);
   const [showSendNotePopup, setShowSendNotePopup] = useState(false);
   const [payload, setPayload] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const filter = searchParams.get("filter") || "All";
 
   useEffect(() => {
     const fetchPayments = async () => {
-      const paymentsStatus = await deliveryStatus();
-      const productPaymentsRes = await getStorekeeperPayments();
+      try {
+        const productPaymentsRes = await getStorekeeperPayments();
 
-      const productPayments = await Promise.all(
-        productPaymentsRes.data.map(async (productPayment) => {
-          const isSent = paymentsStatus.data.some(
-            (payment) => productPayment.id === payment.payment
-          );
+        const productPayments = await Promise.all(
+          productPaymentsRes.data.map(async (productPayment) => {
+            try {
+              const product = await getProduct(productPayment.product);
 
-          const product = await getProduct(productPayment.product);
-          console.log(isSent);
+              return {
+                ...productPayment,
+                product: product?.data ?? null,
+              };
+            } catch (error) {
+              console.error(error);
 
-          return { ...productPayment, product: product.data, is_sent: isSent };
-        })
-      );
-      console.log(productPayments.filter(Boolean));
-      setPayments(productPayments.filter(Boolean));
+              return {
+                ...productPayment,
+                product: null,
+              };
+            }
+          })
+        );
+        console.log("🚀 ~ fetchPayments ~ productPayments:", productPayments);
+
+        setPayments(productPayments.filter(Boolean));
+      } catch (error) {
+        console.error(error);
+      }
     };
+
     fetchPayments();
   }, []);
 
-  // const payments = [
-  //   {
-  //     id: 6,
-  //     paid_at: "2025-08-31 13:30:44",
-  //     delivered_at: null,
-  //     quantity: 1,
-  //     total_price: 32,
-  //     cart: 3,
-  //     product: {
-  //       id: 5,
-  //       image:
-  //         "http://127.0.0.1:8000/media/products/2025/08/31/Screenshot_2025-05-14_221525.png",
-  //       name: "Premium Wireless Headphones",
-  //       price: "32.00",
-  //       discounted_price: "24.64",
-  //       discount_percentage: "23.00",
-  //       stock_quantity: 233,
-  //     },
-  //     is_delivered: false,
-  //     fake_card_number: "4321 3555 4269 2052",
-  //     fake_card_second_password: "392397",
-  //     fake_card_cvv: "583",
-  //     fake_card_expiry: "02/27",
-  //     address: "123 Main Street, Tehran, Iran",
-  //     is_successful: true,
-  //   },
-  //   {
-  //     id: 7,
-  //     paid_at: "2025-08-30 10:15:22",
-  //     delivered_at: "2025-08-31 09:30:00",
-  //     quantity: 2,
-  //     total_price: 89.98,
-  //     product: {
-  //       id: 8,
-  //       image: "http://127.0.0.1:8000/media/products/2025/08/30/product2.jpg",
-  //       name: "Smart Watch Series 7",
-  //       price: "44.99",
-  //       discounted_price: null,
-  //       discount_percentage: null,
-  //       stock_quantity: 45,
-  //     },
-  //     is_delivered: true,
-  //     fake_card_number: "5567 8901 2345 6789",
-  //     fake_card_second_password: "123456",
-  //     fake_card_cvv: "321",
-  //     fake_card_expiry: "12/26",
-  //     address: "456 Oak Avenue, Isfahan, Iran",
-  //     is_successful: true,
-  //   },
-  // ];
-
-  const submission = (paymentId) => {
-    console.log("Mark as delivered:", paymentId);
+  const handleFilterChange = (status) => {
+    if (status === "All") {
+      searchParams.delete("filter");
+    } else {
+      searchParams.set("filter", status);
+    }
+    setSearchParams(searchParams);
   };
 
-  const getStatusBadge = (isDelivered, deliveredAt) => {
-    if (isDelivered) {
+  const getFilteredPayments = () => {
+    switch (filter) {
+      case "Pending":
+        return payments.filter(
+          (p) => !p.storekeeper_delivery && !p.buyer_delivery
+        );
+      case "Shipped":
+        return payments.filter(
+          (p) => p.storekeeper_delivery && !p.buyer_delivery
+        );
+      case "Delivered":
+        return payments.filter(
+          (p) => p.storekeeper_delivery && p.buyer_delivery
+        );
+      default:
+        return payments;
+    }
+  };
+
+  const filteredPayments = getFilteredPayments();
+
+  const getStatusBadge = (payment) => {
+    if (payment.buyer_delivery) {
       return (
         <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium flex items-center">
           <FiCheckCircle className="mr-1" size={14} />
-          Delivered {deliveredAt && new Date(deliveredAt).toLocaleDateString()}
+          Delivered{" "}
+          {payment.buyer_delivered_at &&
+            new Date(payment.buyer_delivered_at).toLocaleDateString()}
+        </span>
+      );
+    }
+    if (payment.storekeeper_delivery) {
+      return (
+        <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium flex items-center">
+          <FiTruck className="mr-1" size={14} />
+          Shipped{" "}
+          {payment.storekeeper_delivered_at &&
+            new Date(payment.storekeeper_delivered_at).toLocaleDateString()}
         </span>
       );
     }
@@ -120,6 +121,25 @@ const Payments = () => {
 
   const formatCardNumber = (cardNumber) => {
     return cardNumber.replace(/(\d{4})/g, "$1 ").trim();
+  };
+
+  const getStatusCount = (status) => {
+    switch (status) {
+      case "Pending":
+        return payments.filter(
+          (p) => !p.storekeeper_delivery && !p.buyer_delivery
+        ).length;
+      case "Shipped":
+        return payments.filter(
+          (p) => p.storekeeper_delivery && !p.buyer_delivery
+        ).length;
+      case "Delivered":
+        return payments.filter(
+          (p) => p.storekeeper_delivery && p.buyer_delivery
+        ).length;
+      default:
+        return payments.length;
+    }
   };
 
   return (
@@ -143,27 +163,34 @@ const Payments = () => {
             </p>
           </div>
 
-          <div className="flex items-center space-x-4">
-            <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-              {payments.length} orders
-            </span>
-            <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
-              $
-              {payments
-                .reduce((total, payment) => total + payment.total_price, 0)
-                .toFixed(2)}{" "}
-              total
-            </span>
-          </div>
+          <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+            {filteredPayments.length} {filter.toLowerCase()} orders
+          </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+        <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:gap-3 mb-6">
+          {["All", "Pending", "Shipped", "Delivered"].map((status) => (
+            <button
+              key={status}
+              onClick={() => handleFilterChange(status)}
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 cursor-pointer rounded-lg text-xs sm:text-sm font-semibold border transition-colors duration-300 ${
+                filter === status
+                  ? "bg-blue-600 text-white border-blue-600"
+                  : "bg-white text-blue-700 border-blue-300 hover:bg-blue-50"
+              }`}
+            >
+              {status} ({getStatusCount(status)})
+            </button>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 md:gap-2 lg:gap-4 mb-6">
+          <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl p-4 border border-purple-200">
             <div className="flex items-center justify-between">
-              <span className="text-blue-600 text-sm">Total Revenue</span>
-              <FiDollarSign className="text-blue-500" size={18} />
+              <span className="text-purple-600 text-sm">Total Revenue</span>
+              <FiTrendingUp className="text-purple-500" size={18} />
             </div>
-            <p className="text-2xl font-bold text-blue-900">
+            <p className="text-2xl font-bold text-purple-900">
               $
               {payments
                 .reduce((total, payment) => total + payment.total_price, 0)
@@ -177,7 +204,25 @@ const Payments = () => {
               <FiPackage className="text-amber-500" size={18} />
             </div>
             <p className="text-2xl font-bold text-amber-900">
-              {payments.filter((p) => !p.is_delivered).length}
+              {
+                payments.filter(
+                  (p) => !p.storekeeper_delivery && !p.buyer_delivery
+                ).length
+              }
+            </p>
+          </div>
+
+          <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+            <div className="flex items-center justify-between">
+              <span className="text-blue-600 text-sm">Shipped</span>
+              <FiTruck className="text-blue-500" size={18} />
+            </div>
+            <p className="text-2xl font-bold text-blue-900">
+              {
+                payments.filter(
+                  (p) => p.storekeeper_delivery && !p.buyer_delivery
+                ).length
+              }
             </p>
           </div>
 
@@ -187,40 +232,30 @@ const Payments = () => {
               <FiCheckCircle className="text-green-500" size={18} />
             </div>
             <p className="text-2xl font-bold text-green-900">
-              {payments.filter((p) => p.is_delivered).length}
+              {
+                payments.filter(
+                  (p) => p.storekeeper_delivery && p.buyer_delivery
+                ).length
+              }
             </p>
           </div>
-
-          {/* <div className="bg-cyan-50 rounded-xl p-4 border border-cyan-200">
-            <div className="flex items-center justify-between">
-              <span className="text-cyan-600 text-sm">Avg. Order</span>
-              <FiCreditCard className="text-cyan-500" size={18} />
-            </div>
-            <p className="text-2xl font-bold text-cyan-900">
-              $
-              {(
-                payments.reduce(
-                  (total, payment) => total + payment.total_price,
-                  0
-                ) / payments.length || 0
-              ).toFixed(2)}
-            </p>
-          </div> */}
         </div>
 
         <div className="space-y-4">
-          {payments.length === 0 ? (
+          {filteredPayments.length === 0 ? (
             <div className="text-center py-12 bg-blue-50/50 rounded-2xl border border-blue-200">
               <FiDollarSign className="text-blue-400 mx-auto mb-4" size={48} />
               <h3 className="text-lg font-semibold text-blue-800 mb-2">
-                No payments yet
+                No {filter.toLowerCase()} payments
               </h3>
               <p className="text-blue-600">
-                Customer payments will appear here
+                {filter === "All"
+                  ? "Customer payments will appear here"
+                  : `No ${filter.toLowerCase()} payments found`}
               </p>
             </div>
           ) : (
-            payments.map((payment) => (
+            filteredPayments.map((payment) => (
               <motion.div
                 key={payment.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -232,29 +267,29 @@ const Payments = () => {
                   <div className="flex items-center space-x-4">
                     <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
                       <img
-                        src={payment.product.image}
-                        alt={payment.product.name}
+                        src={payment.product?.image}
+                        alt={payment.product?.name}
                         className="w-full h-full object-cover"
                       />
                     </div>
                     <div>
                       <h3 className="font-semibold text-blue-900 text-lg mb-1">
-                        {payment.product.name}
+                        {payment.product?.name}
                       </h3>
                       <div className="flex items-center space-x-2 mb-2">
                         <span className="text-blue-800 font-bold">
                           $
-                          {payment.product.discounted_price ||
-                            payment.product.price}
+                          {payment.product?.discounted_price ||
+                            payment.product?.price}
                         </span>
-                        {payment.product.discounted_price && (
+                        {payment.product?.discounted_price && (
                           <span className="text-sm text-rose-500 line-through">
-                            ${payment.product.price}
+                            ${payment.product?.price}
                           </span>
                         )}
-                        {payment.product.discount_percentage && (
+                        {payment.product?.discount_percentage && (
                           <span className="text-xs bg-gradient-to-r from-rose-500 to-pink-500 text-white px-2 py-0.5 rounded-full">
-                            -{payment.product.discount_percentage}%
+                            -{payment.product?.discount_percentage}%
                           </span>
                         )}
                       </div>
@@ -265,9 +300,9 @@ const Payments = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center ">
                       <span className="text-blue-700 font-medium">Total:</span>
-                      <span className="text-lg font-bold text-blue-900">
+                      <span className=" font-bold text-blue-900 ml-2">
                         ${payment.total_price.toFixed(2)}
                       </span>
                     </div>
@@ -296,45 +331,63 @@ const Payments = () => {
                   </div>
 
                   <div className="flex flex-col justify-between">
-                    <div className="mb-4">
-                      {getStatusBadge(
-                        payment.is_delivered,
-                        payment.delivered_at
-                      )}
-                    </div>
+                    <div className="mb-4">{getStatusBadge(payment)}</div>
 
-                    {!payment.is_delivered && (
+                    {!payment.buyer_delivery &&
+                      !payment.storekeeper_delivery && (
+                        <button
+                          onClick={() => {
+                            setShowSendNotePopup(true);
+                            const now = new Date().toISOString();
+                            setPayload(() => {
+                              return {
+                                payment: payment.id,
+                                is_shipped: true,
+                                shipped_at: now,
+                                note: "",
+                              };
+                            });
+                          }}
+                          className="bg-gradient-to-r cursor-pointer from-blue-600 to-cyan-500 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-cyan-600 transition-colors duration-300 font-semibold flex items-center justify-center"
+                        >
+                          <FiTruck className="mr-2 mb-0.5" size={16} />
+                          Product submission
+                        </button>
+                      )}
+
+                    {payment.is_shipped && !payment.is_delivered && (
                       <button
                         onClick={() => {
                           setShowSendNotePopup(true);
-                          // submission(payment.id);
                           const now = new Date().toISOString();
                           setPayload(() => {
                             return {
                               payment: payment.id,
-                              is_sent: true,
-                              sent_at: now,
+                              is_delivered: true,
+                              delivered_at: now,
                               note: "",
                             };
                           });
                         }}
-                        className="bg-gradient-to-r cursor-pointer  from-green-600 to-emerald-500 text-white px-4 py-2 rounded-lg hover:from-green-700 hover:to-emerald-600 transition-colors duration-300 font-semibold flex items-center justify-center"
+                        className="bg-gradient-to-r cursor-pointer from-green-600 to-emerald-500 text-white px-4 py-2 rounded-lg hover:from-green-700 hover:to-emerald-600 transition-colors duration-300 font-semibold flex items-center justify-center"
                       >
-                        <FiTruck className="mr-2 mb-0.5" size={16} />
-                        Product submission
+                        <FiCheckCircle className="mr-2 mb-0.5" size={16} />
+                        Mark as Delivered
                       </button>
                     )}
 
                     {payment.is_delivered && (
                       <div className="text-xs text-green-600">
                         Delivered on{" "}
-                        {new Date(payment.delivered_at).toLocaleDateString()}
+                        {new Date(
+                          payment.buyer_delivered_at
+                        ).toLocaleDateString()}
                       </div>
                     )}
                   </div>
                 </div>
 
-                <div className="mt-4 pt-4 border-t border-blue-200 grid grid-cols-2 md:grid-cols-4 gap-4 text-xs text-blue-600">
+                {/* <div className="mt-4 pt-4 border-t border-blue-200 grid grid-cols-2 md:grid-cols-4 gap-4 text-xs text-blue-600">
                   <div>
                     <span className="font-medium">Expiry:</span>{" "}
                     {payment.fake_card_expiry}
@@ -350,7 +403,7 @@ const Payments = () => {
                   <div>
                     <span className="font-medium">Order ID:</span> #{payment.id}
                   </div>
-                </div>
+                </div> */}
               </motion.div>
             ))
           )}
@@ -358,8 +411,31 @@ const Payments = () => {
             <SendNotePopup
               onClose={() => setShowSendNotePopup(false)}
               onConfirm={(note) => {
-                productSubmission({ ...payload, note }).then(() => {
-                  successToast("The product was successfully sent");
+                const date = new Date();
+                console.log({
+                  ...payload,
+                  note,
+                  is_sent: true,
+                  sent_at: date,
+                });
+                productSubmission({
+                  ...payload,
+                  note,
+                  is_sent: true,
+                  sent_at: date,
+                }).then(() => {
+                  successToast("The product status was successfully updated");
+                  setPayments((prev) =>
+                    prev.map((payment) =>
+                      payment.id == payload.payment
+                        ? {
+                            ...payment,
+                            storekeeper_delivered_at: date,
+                            storekeeper_delivery: true,
+                          }
+                        : payment
+                    )
+                  );
                 });
               }}
               payload={payload}
