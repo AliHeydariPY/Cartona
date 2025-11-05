@@ -208,8 +208,8 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
               transition={{ duration: 0.3 }}
               className="bg-gradient-to-r from-blue-50/80 to-cyan-50/80 rounded-2xl p-6 border border-blue-200/60 hover:border-blue-300 hover:shadow-lg transition-all duration-300 group"
             >
-              <div className="grid grid-cols-1 lg:grid-cols-7 xl:grid-cols-4 2xl:grid-cols-4 gap-6">
-                <div className="flex items-center space-x-4 lg:col-span-3 xl:col-span-2 2xl:col-span-2">
+              <div className="grid grid-cols-1 lg:grid-cols-8 xl:grid-cols-4 2xl:grid-cols-4 gap-6">
+                <div className="flex items-center space-x-4 lg:col-span-4 xl:col-span-2 2xl:col-span-2">
                   {order.product.image ? (
                     <div
                       onClick={() =>
