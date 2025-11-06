@@ -14,13 +14,15 @@ import {
   FiX,
 } from "react-icons/fi";
 import { successToast } from "../../utils/toast";
+import { useAtom } from "jotai";
+import { userAtom } from "../../atoms/userAtom";
 
 const AccountSetting = () => {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const username = localStorage.getItem("username") || "User";
+  const [user] = useAtom(userAtom);
 
   const PasswordSchema = Yup.object().shape({
     currentPassword: Yup.string()
@@ -47,7 +49,7 @@ const AccountSetting = () => {
       old_password: values.currentPassword,
       password: values.confirmPassword,
     };
-    ChangeUserPassword(payload)
+    ChangeUserPassword(payload, user.username)
       .then(() => {
         successToast("Password changed successfully!");
         setSubmitting(false);
@@ -88,8 +90,9 @@ const AccountSetting = () => {
             <FiKey className="mr-2 sm:mr-3 text-cyan-500" size={24} />
             Change Password
           </h2>
-          <div className="text-sm text-blue-600 bg-blue-100 px-3 py-1 rounded-full">
-            @{username}
+          <div className="text-sm text-blue-600 bg-blue-100 px-3 py-1 rounded-full flex items-center">
+            <span className="mb-0.75">@</span>
+            {user?.username}
           </div>
         </div>
 

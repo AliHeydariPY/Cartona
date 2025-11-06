@@ -14,6 +14,8 @@ import {
   FiStar,
   FiPackage,
 } from "react-icons/fi";
+import { useAtom } from "jotai";
+import { userAtom } from "../../atoms/userAtom";
 
 export default function MyProducts({
   setRemoveProductPopup,
@@ -23,14 +25,16 @@ export default function MyProducts({
 }) {
   const [products, setProducts] = useState([]);
   const navigate = useNavigate();
+  const [user] = useAtom(userAtom);
 
   useEffect(() => {
-    getStorekeeper(localStorage.getItem("username")).then((res) => {
+    if (!user) return;
+    getStorekeeper(user.username).then((res) => {
       getStorekeeperProducts(res.data.id).then((res) => {
         setProducts(res.data);
       });
     });
-  }, [reloadComponent]);
+  }, [reloadComponent, user]);
 
   const openInNewTab = (url) => {
     window.open(url, "_blank", "noreferrer");

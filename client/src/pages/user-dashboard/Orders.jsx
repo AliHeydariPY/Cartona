@@ -23,6 +23,8 @@ import {
   FiStar,
 } from "react-icons/fi";
 import { successToast } from "../../utils/toast";
+import { useAtom } from "jotai";
+import { userAtom } from "../../atoms/userAtom";
 
 const Orders = ({ reloadComponent, setReloadComponent }) => {
   const navigate = useNavigate();
@@ -31,6 +33,7 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedSeller, setSelectedSeller] = useState(null);
+  const [user] = useAtom(userAtom)
 
   const filter = searchParams.get("filter") || "All";
 
@@ -62,7 +65,7 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
                   : "Shipped"
                 : "Pending",
               hasRated: commentRes.data.some((comment) => {
-                return comment.user == localStorage.getItem("username");
+                return comment.user == user?.username;
               }),
             };
           } catch {

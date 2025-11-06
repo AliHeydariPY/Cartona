@@ -40,8 +40,8 @@ export const getUser = () => {
   return api.get(url);
 };
 
-export const ChangeUserPassword = (userData) => {
-  const url = `/user-api/users/username/${localStorage.getItem("username")}/`;
+export const ChangeUserPassword = (userData, username) => {
+  const url = `/user-api/users/username/${username}/`;
   return api.patch(url, userData);
 };
 
