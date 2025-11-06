@@ -2,6 +2,8 @@ import axios from "axios";
 import { getStorekeeper, getUserById } from "../services/userAPIServices";
 import { authAtom } from "../atoms/authAtom";
 import { getDefaultStore } from "jotai";
+import { tokenAtom } from "../atoms/tokenAtom";
+import { containerVariants } from "../utils/animations";
 
 const store = getDefaultStore();
 
@@ -61,8 +63,10 @@ api.interceptors.response.use(
         );
 
         accessToken = res.data.access;
-
+        
         localStorage.setItem("accessToken", accessToken);
+        console.log("🚀 ~ accessToken:", accessToken)
+        store.set(tokenAtom, accessToken);
         store.set(authAtom, true);
 
         //coming soon

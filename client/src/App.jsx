@@ -1,6 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import Home from "./pages/Home";
 import CreateAccountForm from "./pages/CreateAccountForm";
@@ -32,6 +32,11 @@ import Payments from "./pages/user-dashboard/Payments";
 import LoginForm from "./pages/LoginForm";
 import AccountSetting from "./pages/user-dashboard/AccountSetting";
 
+import { useAtom } from "jotai";
+import { userAtom } from "./atoms/userAtom";
+import { fetchUserData } from "./utils/fetchUserData";
+import { tokenAtom } from "./atoms/tokenAtom";
+
 function App() {
   const [removeProductPopup, setRemoveProductPopup] = useState(false);
   const [addToCartPopup, setAddToCartPopup] = useState(false);
@@ -40,6 +45,22 @@ function App() {
 
   const [isRemoveCartItem, setIsRemoveCartItem] = useState(true);
   const [reloadComponent, setReloadComponent] = useState(false);
+
+  const [accessToken] = useAtom(tokenAtom)
+  const [user] = useAtom(userAtom);
+
+
+  useEffect(() => {
+    if (localStorage.getItem("accessToken")) {
+
+      fetchUserData();
+    }
+  }, [accessToken]);
+
+  useEffect(() => {
+    if (!user) return;
+    localStorage.setItem("username", user.username);
+  }, [user]);
 
   return (
     <>
@@ -74,7 +95,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
 
-        <Route path="/account" element={<UserDashboard />}>
+        <Route path="/account" element={<UserDashboard user={user} />}>
           <Route path="profile" element={<Profile />} />
           <Route
             path="cart"
@@ -203,7 +224,6 @@ function App() {
         <Route path="/team" element={<Team />} />
 
         <Route path="/about" element={<About />} />
-
       </Routes>
     </>
   );

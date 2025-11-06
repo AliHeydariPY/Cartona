@@ -29,14 +29,17 @@ import { MdStorefront, MdOutlineWorkspacePremium } from "react-icons/md";
 import BottomNav from "../components/BottomNav";
 import LogoutPopup from "../components/pop-ups/LogoutPopup";
 import { getStorekeeper, logout } from "../services/userAPIServices";
+import { userAtom } from "../atoms/userAtom";
 
 const UserDashboard = () => {
   const [isAuth] = useAtom(authAtom);
+  const [user] = useAtom(userAtom);
   const navigate = useNavigate();
   const location = useLocation();
-  const [isSeller, setIsSeller] = useState(null);
+  const [isSeller, setIsSeller] = useState(user?.role == "storekeeper");
   const [showPopup, setShowPopup] = useState(false);
   const [storekeeper, setStorekeeper] = useState([]);
+  
 
   const navItems = [
     {
@@ -67,27 +70,37 @@ const UserDashboard = () => {
     },
     {
       id: "chats",
-      icon: <FiMessageSquare className="ml-3 text-green-600 mr-0.25" size={18} />,
+      icon: (
+        <FiMessageSquare className="ml-3 text-green-600 mr-0.25" size={18} />
+      ),
       label: "Chats",
     },
     ...(isSeller
       ? [
           {
             id: "my-products",
-            icon: <FiPackage className="ml-3 text-amber-600 mr-0.25" size={18} />,
+            icon: (
+              <FiPackage className="ml-3 text-amber-600 mr-0.25" size={18} />
+            ),
             label: "My Products",
           },
           {
             id: "add-product",
             icon: (
-              <FiPlusCircle className="ml-3 text-green-500 mb-0.25 mr-0.25" size={18} />
+              <FiPlusCircle
+                className="ml-3 text-green-500 mb-0.25 mr-0.25"
+                size={18}
+              />
             ),
             label: "Add Product",
           },
           {
             id: "payments",
             icon: (
-              <FiDollarSign className="ml-3 text-green-500 mb-0.25 mr-0.25" size={18} />
+              <FiDollarSign
+                className="ml-3 text-green-500 mb-0.25 mr-0.25"
+                size={18}
+              />
             ),
             label: "Payments",
           },
@@ -101,14 +114,19 @@ const UserDashboard = () => {
   ];
 
   useEffect(() => {
-    getStorekeeper(localStorage.getItem("username"))
+    console.log("🚀 ~ UserDashboard ~ user:", user);
+    if (!user) return;
+    // localStorage.setItem("username", user.username)
+
+    getStorekeeper(user.username)
       .then((res) => {
-        
+        console.log("🚀 ~ UserDashboard ~ res:", res.data);
+
         setStorekeeper(res.data);
-        setIsSeller(true);
+        setIsSeller(user.role == "storekeeper");
       })
       .catch(() => setIsSeller(false));
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     if (!isAuth) {
@@ -170,7 +188,7 @@ const UserDashboard = () => {
                 <div className="ml-3 sm:ml-4 md:ml-5">
                   <div className="flex items-center">
                     <h1 className="text-lg sm:text-2xl md:text-3xl font-extrabold text-blue-900 drop-shadow-md">
-                      {storekeeper?.user || localStorage.getItem("username")}
+                      {user?.username}
                     </h1>
                     {isSeller && (
                       <span className="ml-2 px-2 py-1 bg-gradient-to-r from-blue-600 to-cyan-500 text-white text-xs font-bold rounded-full flex items-center">
@@ -186,7 +204,7 @@ const UserDashboard = () => {
                     <p className="text-sm sm:text-base text-blue-800 font-semibold mt-1">
                       Member since:{" "}
                       {storekeeper.created_time
-                        .split(" ")[0]
+                        ?.split(" ")[0]
                         .replace(/-/g, "/")}
                       <span className="inline-block ml-2 text-green-600">
                         • Verified Store

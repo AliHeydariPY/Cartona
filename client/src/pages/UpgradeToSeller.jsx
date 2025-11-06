@@ -7,9 +7,11 @@ import { upgradeToSeller } from "../services/userAPIServices";
 import toast from "react-hot-toast";
 import { FiX } from "react-icons/fi";
 import { successToast } from "../utils/toast";
+import { useAtom } from "jotai";
+import { userAtom } from "../atoms/userAtom";
 
 const UpgradeToSeller = () => {
-  const user = localStorage.getItem("username") || "";
+  const [user] = useAtom(userAtom);
   const navigate = useNavigate();
 
   const StoreSchema = Yup.object().shape({
@@ -28,6 +30,8 @@ const UpgradeToSeller = () => {
     image: Yup.mixed().required("Please select an image"),
   });
 
+  if(!user) return
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-300 to-cyan-100 p-4">
       <div className="w-full max-w-md bg-white/20 backdrop-blur-lg rounded-2xl shadow-xl overflow-hidden">
@@ -38,7 +42,7 @@ const UpgradeToSeller = () => {
 
         <Formik
           initialValues={{
-            user: user,
+            user: user?.username,
             storeName: "",
             description: "",
             address: "",

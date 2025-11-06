@@ -2,11 +2,13 @@ import { Portal } from "react-portal";
 import { useEffect, useRef, useState } from "react";
 import { FiX, FiLogOut, FiUser, FiAlertTriangle } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAtom } from "jotai";
+import { userAtom } from "../../atoms/userAtom";
 
 const LogoutPopup = ({ onClose, onConfirm }) => {
   const [show, setShow] = useState(false);
   const popupRef = useRef();
-  const username = localStorage.getItem("username");
+  const [user] = useAtom(userAtom)
 
   useEffect(() => {
     setTimeout(() => {
@@ -58,7 +60,7 @@ const LogoutPopup = ({ onClose, onConfirm }) => {
                       <h3 className="text-xl font-bold">Sign Out</h3>
                       <div className="flex items-center">
                         <p className="text-red-100 text-sm">@</p>
-                        <p className="text-red-100 text-sm mt-1">{username}</p>
+                        <p className="text-red-100 text-sm mt-1">{user.username}</p>
                       </div>
                     </div>
                   </div>
