@@ -32,6 +32,8 @@ import Payments from "./pages/user-dashboard/Payments";
 import LoginForm from "./pages/LoginForm";
 import AccountSetting from "./pages/user-dashboard/AccountSetting";
 
+import ChangePassword from "./pages/user-dashboard/account-setting/ChangePassword";
+
 import { useAtom } from "jotai";
 import { userAtom } from "./atoms/userAtom";
 import { fetchUserData } from "./utils/fetchUserData";
@@ -46,13 +48,11 @@ function App() {
   const [isRemoveCartItem, setIsRemoveCartItem] = useState(true);
   const [reloadComponent, setReloadComponent] = useState(false);
 
-  const [accessToken] = useAtom(tokenAtom)
+  const [accessToken] = useAtom(tokenAtom);
   const [user] = useAtom(userAtom);
-
 
   useEffect(() => {
     if (localStorage.getItem("accessToken")) {
-
       fetchUserData();
     }
   }, [accessToken]);
@@ -142,6 +142,7 @@ function App() {
           <Route path="add-product" element={<AddProduct />} />
 
           <Route path="setting" element={<AccountSetting />} />
+          <Route path="setting/change-password" element={<ChangePassword />} />
 
           <Route
             path="my-products"
