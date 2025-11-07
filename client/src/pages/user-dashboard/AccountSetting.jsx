@@ -1,80 +1,63 @@
-import { useState } from "react";
-import { Formik, Form, Field, ErrorMessage } from "formik";
-import * as Yup from "yup";
+import { MdStorefront, MdOutlineWorkspacePremium } from "react-icons/md";
 import { motion } from "framer-motion";
-import toast from "react-hot-toast";
-
-import { ChangeUserPassword } from "../../services/userAPIServices";
 import {
+  FiUser,
   FiLock,
-  FiEye,
-  FiEyeOff,
-  FiCheckCircle,
-  FiKey,
-  FiX,
+  FiTrash2,
+  FiChevronRight,
+  FiSettings,
 } from "react-icons/fi";
-import { successToast } from "../../utils/toast";
+import { useNavigate } from "react-router-dom";
 import { useAtom } from "jotai";
 import { userAtom } from "../../atoms/userAtom";
 
-const AccountSetting = () => {
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
+const AccountSettings = () => {
+  const navigate = useNavigate();
   const [user] = useAtom(userAtom);
 
-  const PasswordSchema = Yup.object().shape({
-    currentPassword: Yup.string()
-      .min(8, "Current password must be at least 8 characters")
-      .required("Current password is required"),
-    newPassword: Yup.string()
-      .min(8, "New password must be at least 8 characters")
-      .matches(/[A-Z]/, "at least one uppercase letter")
-      .matches(/[a-z]/, "at least one lowercase letter")
-      .matches(/[0-9]/, "at least one number")
-      .matches(/[@$!%*?&]/, "at least one special character")
-      .notOneOf(
-        [Yup.ref("currentPassword")],
-        "New password must be different from current password"
-      )
-      .required("New password is required"),
-    confirmPassword: Yup.string()
-      .oneOf([Yup.ref("newPassword")], "Passwords must match")
-      .required("Please confirm your password"),
-  });
+  const mainSettings = [
+    // {
+    //   id: 'change-username',
+    //   title: 'Change Username',
+    //   description: 'Update your account username',
+    //   icon: FiUser,
+    //   path: 'change-username',
+    //   color: 'blue'
+    // },
+    {
+      id: "change-password",
+      title: "Change Password",
+      description: "Update your account password",
+      icon: FiLock,
+      path: "change-password",
+      color: "blue",
+    },
+  ];
 
-  const handleSubmit = (values, { setSubmitting, resetForm }) => {
-    const payload = {
-      old_password: values.currentPassword,
-      password: values.confirmPassword,
-    };
-    ChangeUserPassword(payload, user.username)
-      .then(() => {
-        successToast("Password changed successfully!");
-        setSubmitting(false);
-        resetForm();
-      })
-      .catch((err) => {
-        console.log(err);
-        toast.custom((t) => (
-          <div
-            className={`${
-              t.visible ? "animate-enter" : "animate-leave"
-            } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
-            style={{ fontFamily: "Roboto" }}
-          >
-            <FiX className="text-xl shrink-0" />
-            <span className="font-medium">
-              {err.response.data.old_password ||
-                err.response.data.detail ||
-                "There is a problem. Please try again later"}
-            </span>
-          </div>
-        ));
-        setSubmitting(false);
-        resetForm();
-      });
+  const sellerSettings = [
+    {
+      id: "store-settings",
+      title: "Store Settings",
+      description: "Manage your store information and preferences",
+      icon: MdStorefront,
+      path: "/account/store-settings",
+      color: "orange",
+    },
+  ];
+
+  const dangerSettings = [
+    {
+      id: "delete-account",
+      title: "Delete Account",
+      description: "Permanently delete your account and all data",
+      icon: FiTrash2,
+      path: "/account/delete-account",
+      color: "red",
+    },
+  ];
+
+  const handleSettingClick = (path) => {
+    navigate(path);
   };
 
   return (
@@ -85,211 +68,139 @@ const AccountSetting = () => {
       className="lg:col-span-3"
     >
       <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-xl p-5 sm:p-6 2xl:p-8 border border-blue-400 hover:shadow-lg hover:shadow-blue-400/50 transition-all duration-300">
-        <div className="flex items-center justify-between mb-6 sm:mb-8">
-          <h2 className="text-xl sm:text-2xl font-bold text-blue-800 flex items-center">
-            <FiKey className="mr-2 sm:mr-3 text-cyan-500" size={24} />
-            Change Password
-          </h2>
-          <div className="text-sm text-blue-600 bg-blue-100 px-3 py-1 rounded-full flex items-center">
-            <span className="mb-0.75">@</span>
-            {user?.username}
+        <div className="mb-8">
+          <div className="flex items-center">
+            <FiSettings className="mr-3 mb-2 text-cyan-500" size={22} />
+            <h2 className="text-xl sm:text-2xl font-bold text-blue-800 mb-2">
+              Account Settings
+            </h2>
           </div>
+          <p className="text-blue-600 text-sm sm:text-base">
+            Manage your account preferences and security settings
+          </p>
         </div>
 
-        <Formik
-          initialValues={{
-            currentPassword: "",
-            newPassword: "",
-            confirmPassword: "",
-          }}
-          validationSchema={PasswordSchema}
-          onSubmit={handleSubmit}
-        >
-          {({ isSubmitting, errors, touched }) => (
-            <Form className="space-y-6">
-              {/* Current Password */}
-              <div className="space-y-2">
-                <label className="flex items-center text-blue-800 font-medium">
-                  <FiLock className="mr-2" /> Current Password*
-                </label>
-                <div className="relative">
-                  <Field
-                    name="currentPassword"
-                    type={showCurrentPassword ? "text" : "password"}
-                    className={`w-full px-4 py-3 text-blue-800 border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent pr-12 ${
-                      errors.currentPassword && touched.currentPassword
-                        ? "border-red-300"
-                        : "border-blue-300"
-                    }`}
-                    placeholder="Enter your current password"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-400 hover:text-cyan-500 transition-colors duration-200"
-                  >
-                    {showCurrentPassword ? (
-                      <FiEyeOff size={18} />
-                    ) : (
-                      <FiEye size={18} />
-                    )}
-                  </button>
-                </div>
-                <ErrorMessage
-                  name="currentPassword"
-                  component="div"
-                  className="text-red-500 text-sm ml-0.5 flex items-center"
+        <div className="space-y-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+          >
+            <h3 className="text-lg font-semibold text-blue-800 mb-4">
+              Account Management
+            </h3>
+            <div className="space-y-3">
+              {mainSettings.map((item, index) => (
+                <motion.div
+                  key={item.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 + index * 0.1, duration: 0.4 }}
+                  className="flex items-center justify-between p-4 rounded-xl border border-blue-200 bg-blue-50 hover:bg-blue-100 cursor-pointer transition-all duration-300 group"
+                  onClick={() => handleSettingClick(item.path)}
                 >
-                  {(msg) => (
-                    <div className="flex items-center">
-                      <span className="w-1.5 h-1.5 bg-red-500 rounded-full mr-2"></span>
-                      {msg}
+                  <div className="flex items-center">
+                    <div
+                      className={`p-3 rounded-lg bg-${item.color}-100 text-${item.color}-600 mr-4 group-hover:scale-110 transition-transform duration-300`}
+                    >
+                      <item.icon className="text-lg" />
                     </div>
-                  )}
-                </ErrorMessage>
-              </div>
-
-              {/* New Password */}
-              <div className="space-y-2">
-                <label className="flex items-center text-blue-800 font-medium">
-                  <FiLock className="mr-2" /> New Password*
-                </label>
-                <div className="relative">
-                  <Field
-                    name="newPassword"
-                    type={showNewPassword ? "text" : "password"}
-                    className={`w-full px-4 py-3 text-blue-800 border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent pr-12 ${
-                      errors.newPassword && touched.newPassword
-                        ? "border-red-300"
-                        : "border-blue-300"
-                    }`}
-                    placeholder="Create a new password"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowNewPassword(!showNewPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-400 hover:text-cyan-500 transition-colors duration-200"
-                  >
-                    {showNewPassword ? (
-                      <FiEyeOff size={18} />
-                    ) : (
-                      <FiEye size={18} />
-                    )}
-                  </button>
-                </div>
-                <ErrorMessage
-                  name="newPassword"
-                  component="div"
-                  className="text-red-500 text-sm ml-0.5 flex items-center"
-                >
-                  {(msg) => (
-                    <div className="flex items-center">
-                      <span className="w-1.5 h-1.5 bg-red-500 rounded-full mr-2"></span>
-                      {msg}
+                    <div>
+                      <h3 className="font-semibold text-blue-800">
+                        {item.title}
+                      </h3>
+                      <p className="text-blue-600 text-sm">
+                        {item.description}
+                      </p>
                     </div>
-                  )}
-                </ErrorMessage>
-              </div>
+                  </div>
+                  <FiChevronRight className="text-blue-400 group-hover:text-blue-600 transition-colors duration-300" />
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
 
-              {/* Confirm Password */}
-              <div className="space-y-2">
-                <label className="flex items-center text-blue-800 font-medium">
-                  <FiLock className="mr-2" /> Confirm New Password*
-                </label>
-                <div className="relative">
-                  <Field
-                    name="confirmPassword"
-                    type={showConfirmPassword ? "text" : "password"}
-                    className={`w-full px-4 py-3 text-blue-800 border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent pr-12 ${
-                      errors.confirmPassword && touched.confirmPassword
-                        ? "border-red-300"
-                        : "border-blue-300"
-                    }`}
-                    placeholder="Confirm your new password"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-400 hover:text-cyan-500 transition-colors duration-200"
+          {user?.role == "storekeeper" && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.6 }}
+            >
+              <h3 className="text-lg font-semibold text-blue-800 mb-4">
+                Seller Account
+              </h3>
+              <div className="space-y-3">
+                {sellerSettings.map((item, index) => (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.5 + index * 0.1, duration: 0.4 }}
+                    className="flex items-center justify-between p-4 rounded-xl border border-orange-200 bg-orange-50 hover:bg-orange-100 cursor-pointer transition-all duration-300 group"
+                    onClick={() => handleSettingClick(item.path)}
                   >
-                    {showConfirmPassword ? (
-                      <FiEyeOff size={18} />
-                    ) : (
-                      <FiEye size={18} />
-                    )}
-                  </button>
-                </div>
-                <ErrorMessage
-                  name="confirmPassword"
-                  component="div"
-                  className="text-red-500 text-sm ml-0.5 flex items-center"
-                >
-                  {(msg) => (
                     <div className="flex items-center">
-                      <span className="w-1.5 h-1.5 bg-red-500 rounded-full mr-2"></span>
-                      {msg}
+                      <div
+                        className={`p-3 rounded-lg bg-orange-100 text-${item.color}-600 mr-4 group-hover:scale-110 transition-transform duration-300`}
+                      >
+                        <item.icon className="text-lg" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-orange-800">
+                          {item.title}
+                        </h3>
+                        <p className="text-orange-600 text-sm">
+                          {item.description}
+                        </p>
+                      </div>
                     </div>
-                  )}
-                </ErrorMessage>
+                    <FiChevronRight className="text-orange-400 group-hover:text-orange-600 transition-colors duration-300" />
+                  </motion.div>
+                ))}
               </div>
-
-              {/* Password Requirements */}
-              <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-200">
-                <p className="text-sm font-medium text-blue-700 mb-2">
-                  Password must contain:
-                </p>
-                <ul className="text-xs text-blue-600 space-y-1">
-                  <li className="flex items-center">
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>
-                    At least 8 characters
-                  </li>
-                  <li className="flex items-center">
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>
-                    One uppercase letter
-                  </li>
-                  <li className="flex items-center">
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>
-                    One lowercase letter
-                  </li>
-                  <li className="flex items-center">
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>
-                    One number
-                  </li>
-                  <li className="flex items-center">
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>
-                    One special character (@$!%*?&)
-                  </li>
-                </ul>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 pt-4">
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="px-6 py-3 cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-lg hover:shadow-lg transition-all duration-300 font-medium flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isSubmitting ? (
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
-                  ) : (
-                    <FiCheckCircle className="mr-2" size={18} />
-                  )}
-                  {isSubmitting ? "Updating..." : "Update Password"}
-                </button>
-
-                <button
-                  type="reset"
-                  className="px-6 py-3 cursor-pointer bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-300"
-                >
-                  Reset
-                </button>
-              </div>
-            </Form>
+            </motion.div>
           )}
-        </Formik>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.6 }}
+          >
+            <h3 className="text-lg font-semibold text-red-800 mb-4">
+              Danger Zone
+            </h3>
+            <div className="space-y-3">
+              {dangerSettings.map((item, index) => (
+                <motion.div
+                  key={item.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.7 + index * 0.1, duration: 0.4 }}
+                  className="flex items-center justify-between p-4 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100 cursor-pointer transition-all duration-300 group"
+                  onClick={() => handleSettingClick(item.path)}
+                >
+                  <div className="flex items-center">
+                    <div
+                      className={`p-3 rounded-lg bg-${item.color}-100 text-${item.color}-600 mr-4 group-hover:scale-110 transition-transform duration-300`}
+                    >
+                      <item.icon className="text-lg" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-red-800">
+                        {item.title}
+                      </h3>
+                      <p className="text-red-600 text-sm">{item.description}</p>
+                    </div>
+                  </div>
+                  <FiChevronRight className="text-red-400 group-hover:text-red-600 transition-colors duration-300" />
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
       </div>
     </motion.div>
   );
 };
 
-export default AccountSetting;
+export default AccountSettings;
