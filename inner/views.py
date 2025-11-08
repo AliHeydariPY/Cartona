@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from rest_framework.exceptions import MethodNotAllowed, PermissionDenied
 from rest_framework.filters import SearchFilter
 from .models import Product, Images, Types, Features, FrequentlyAskedQuestions, Category
+from comments.models import CommentReply
 from .serializers import (
     ProductSerializer,
     ImageSerializer,
@@ -222,6 +223,120 @@ class ProductViewSet(viewsets.ModelViewSet):
     def by_storekeeper(self, request, storekeeper_id=None, index=None):
         queryset = self.get_queryset().filter(storekeeper_id=storekeeper_id)
         return self._handle_filtered_request(request, queryset, index, label="storekeeper product")
+
+    @action(detail=False, url_path=r'comment/(?P<mode>max|min)(?:/(?P<index>\d+))?',
+            methods=['get', 'put', 'patch', 'delete'])
+    def comment(self, request, mode=None, index=None):
+        if mode not in ['max', 'min']:
+            raise ValidationError("Mode must be either 'max' or 'min'.")
+
+        queryset = self.get_queryset()
+        if request.method not in ['GET', 'HEAD', 'OPTIONS']:
+            queryset = queryset.filter(storekeeper__user=request.user)
+
+        products = []
+        for product in queryset:
+            comment_count = product.comments.count()
+            reply_count = CommentReply.objects.filter(comment__product=product).count()
+            total_count = comment_count + reply_count
+            products.append((product, total_count))
+
+        if mode == 'max':
+            products.sort(key=lambda item: item[0].id, reverse=True)
+            products.sort(key=lambda item: item[1], reverse=True)
+        else:
+            products.sort(key=lambda item: item[0].id)
+            products.sort(key=lambda item: item[1])
+
+        sorted_products = [item[0] for item in products]
+
+        if index:
+            try:
+                index = int(index)
+                if index < 1 or index > len(sorted_products):
+                    raise Http404("Invalid index.")
+                product = sorted_products[index - 1]
+            except ValueError:
+                raise Http404("Index must be a number.")
+
+            if request.method == 'GET':
+                serializer = self.get_serializer(product)
+                return Response(serializer.data)
+
+            elif request.method in ['PUT', 'PATCH']:
+                serializer = self.get_serializer(product, data=request.data, partial=(request.method == 'PATCH'))
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                return Response(serializer.data)
+
+            elif request.method == 'DELETE':
+                product.delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+
+            else:
+                raise MethodNotAllowed(request.method)
+
+        if request.method != 'GET':
+            raise MethodNotAllowed(request.method, detail="Only GET is allowed in list mode.")
+
+        serializer = self.get_serializer(sorted_products, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, url_path=r'price/(?P<mode>max|min)(?:/(?P<index>\d+))?',
+            methods=['get', 'put', 'patch', 'delete'])
+    def price(self, request, mode=None, index=None):
+        if mode not in ['max', 'min']:
+            raise ValidationError("Mode must be either 'max' or 'min'.")
+
+        queryset = self.get_queryset()
+        if request.method not in ['GET', 'HEAD', 'OPTIONS']:
+            queryset = queryset.filter(storekeeper__user=request.user)
+
+        products = []
+        for product in queryset:
+            final_price = product.discounted_price if product.discounted_price is not None else product.price
+            products.append((product, final_price))
+
+        if mode == 'max':
+            products.sort(key=lambda item: item[0].id, reverse=True)
+            products.sort(key=lambda item: item[1], reverse=True)
+        else:
+            products.sort(key=lambda item: item[0].id)
+            products.sort(key=lambda item: item[1])
+
+        sorted_products = [item[0] for item in products]
+
+        if index:
+            try:
+                index = int(index)
+                if index < 1 or index > len(sorted_products):
+                    raise Http404("Invalid index.")
+                product = sorted_products[index - 1]
+            except ValueError:
+                raise Http404("Index must be a number.")
+
+            if request.method == 'GET':
+                serializer = self.get_serializer(product)
+                return Response(serializer.data)
+
+            elif request.method in ['PUT', 'PATCH']:
+                serializer = self.get_serializer(product, data=request.data, partial=(request.method == 'PATCH'))
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                return Response(serializer.data)
+
+            elif request.method == 'DELETE':
+                product.delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+
+            else:
+                raise MethodNotAllowed(request.method)
+
+        if request.method != 'GET':
+            raise MethodNotAllowed(request.method, detail="Only GET is allowed in list mode.")
+
+        serializer = self.get_serializer(sorted_products, many=True)
+        return Response(serializer.data)
 
 class ImageViewSet(viewsets.ModelViewSet):
     serializer_class = ImageSerializer
@@ -476,3 +591,4 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
 
         serializer = self.get_serializer(categories, many=True)
         return Response(serializer.data)
+

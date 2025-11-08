@@ -143,7 +143,6 @@ class ProductPayment(models.Model):
         if self.cart_item:
             self.product = self.cart_item.product
             self.quantity = self.cart_item.quantity
-            self.total_price = self.cart_item.get_total_price()
 
         if self.product and not self.product_name:
             self.product_name = self.product.name

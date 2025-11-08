@@ -409,6 +409,16 @@ class ProductSerializer(serializers.ModelSerializer):
         if image is None or isinstance(image, str):
             validated_data['image'] = instance.image
 
+        new_price = validated_data.get('price', instance.price)
+        new_discounted_price = validated_data.get('discounted_price', instance.discounted_price)
+        old_price = instance.price
+
+        if new_price != old_price and new_discounted_price is not None:
+            try:
+                validated_data['discount_percentage'] = round(100 * (1 - new_discounted_price / new_price), 2)
+            except (ZeroDivisionError, TypeError):
+                pass
+
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
 

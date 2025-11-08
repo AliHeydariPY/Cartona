@@ -154,7 +154,7 @@ class ProductPaymentSerializer(serializers.ModelSerializer):
     is_delivered = serializers.BooleanField(required=False)
     delivered_at = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', required=False)
     quantity = serializers.IntegerField(read_only=True)
-    total_price = serializers.IntegerField(read_only=True)
+    total_price = serializers.FloatField(read_only=True)
     cart = serializers.PrimaryKeyRelatedField(read_only=True)
     product = serializers.PrimaryKeyRelatedField(read_only=True)
     product_name = serializers.CharField(read_only=True)
@@ -216,6 +216,14 @@ class ProductPaymentSerializer(serializers.ModelSerializer):
         'fake_card_expiry',
         'product_payments'
     ]
+
+    def calculate_total_price(self, cart_item):
+        if not cart_item or not cart_item.product:
+            return 0.0
+        product = cart_item.product
+        discounted_price = product.discounted_price
+        unit_price = discounted_price if discounted_price is not None else product.price
+        return float(unit_price) * cart_item.quantity
 
     def get_storekeeper_delivery(self, obj):
         try:
@@ -297,30 +305,31 @@ class ProductPaymentSerializer(serializers.ModelSerializer):
         if cart_item.cart.user != user:
             raise serializers.ValidationError("You are not allowed to use this cart item.")
 
+        total_price = self.calculate_total_price(cart_item)
+
+        validated_data.update({
+            'product': cart_item.product,
+            'storekeeper': cart_item.product.storekeeper,
+            'quantity': cart_item.quantity,
+            'total_price': total_price,
+            'cart': cart_item.cart,
+            'paid_at': timezone.now()
+        })
+
         ProductPayment.objects.filter(
             cart_item=cart_item,
             is_successful=False
         ).delete()
 
-        product = cart_item.product
-        validated_data.update({
-            'product': product,
-            'storekeeper': product.storekeeper,
-            'quantity': cart_item.quantity,
-            'total_price': cart_item.get_total_price(),
-            'cart': cart_item.cart,
-            'paid_at': timezone.now()
-        })
-
         pp = ProductPayment.objects.create(**validated_data)
 
         if pp.is_successful:
             buyer = pp.cart.user
-            storekeeper = product.storekeeper
+            storekeeper = cart_item.product.storekeeper
 
             purchase = ProductPurchase.objects.create(
                 buyer=buyer,
-                product=product,
+                product=cart_item.product,
                 storekeeper=storekeeper,
                 payment=pp
             )
@@ -332,7 +341,7 @@ class ProductPaymentSerializer(serializers.ModelSerializer):
             PurchaseChat.objects.create(
                 purchase=purchase,
                 sender=buyer,
-                message=f"💬 Chat opened for your purchase of '{product.name}'. You can now communicate with the seller."
+                message=f"💬 Chat opened for your purchase of '{cart_item.product.name}'. You can now communicate with the seller."
             )
 
         return pp
@@ -367,6 +376,10 @@ class ProductPaymentSerializer(serializers.ModelSerializer):
 
         if 'delivered_at' in validated_data:
             instance.delivered_at = validated_data['delivered_at']
+
+        if not was_successful and new_successful:
+            cart_item = CartItem.objects.select_related('product').filter(pk=instance.cart_item_id).first()
+            instance.total_price = self.calculate_total_price(cart_item)
 
         instance.save()
 
@@ -466,6 +479,8 @@ class PaymentSerializer(serializers.ModelSerializer):
 
         payment = super().create(validated_data)
 
+        ProductPayment.objects.filter(cart=cart, is_successful=False).delete()
+
         product_payments = []
 
         for item in cart.items.select_related('product'):
@@ -546,6 +561,8 @@ class PaymentSerializer(serializers.ModelSerializer):
                         sender=buyer,
                         message=f"💬 Chat opened for your purchase of '{product.name}'. You can now communicate with the seller."
                     )
+
+        payment.refresh_from_db()
 
         return payment
 

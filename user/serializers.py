@@ -15,10 +15,11 @@ class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=False)
     old_password = serializers.CharField(write_only=True, required=False)
     role = serializers.SerializerMethodField()
+    storekeeper_id = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = User
-        fields = ['uuid', 'username', 'password', 'old_password', 'role']
+        fields = ['uuid', 'username', 'password', 'old_password', 'role', 'storekeeper_id']
         extra_kwargs = {
             'username': {
                 'help_text': 'Required. 4 to 50 characters. Letters, digits and @/./+/-/_ only.',
@@ -28,6 +29,10 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_role(self, obj):
         return "storekeeper" if StoreKeeper.objects.filter(user=obj).exists() else "user"
+
+    def get_storekeeper_id(self, obj):
+        storekeeper = StoreKeeper.objects.filter(user=obj).first()
+        return storekeeper.id if storekeeper else None
 
     def validate_username(self, value):
         if len(value) < 5:
