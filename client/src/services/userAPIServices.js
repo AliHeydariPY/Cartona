@@ -50,6 +50,11 @@ export const ChangeUserName = (userData, username) => {
   return api.patch(url, userData);
 };
 
+export const changeStoreInfo = (storeData,storekeeperName) => {
+  const url = `/user-api/storekeepers/username/${storekeeperName}/`;
+  return api.patch(url,storeData);
+};
+
 export const upgradeToSeller = (formData) => {
   const url = `/user-api/storekeepers/`;
 

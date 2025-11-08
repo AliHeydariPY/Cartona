@@ -34,6 +34,7 @@ import AccountSetting from "./pages/user-dashboard/AccountSetting";
 
 import ChangePassword from "./pages/user-dashboard/account-setting/ChangePassword";
 import ChangeUsername from "./pages/user-dashboard/account-setting/ChangeUsername";
+import StoreSetting from "./pages/user-dashboard/account-setting/StoreSetting";
 
 import { useAtom } from "jotai";
 import { userAtom } from "./atoms/userAtom";
@@ -145,7 +146,8 @@ function App() {
           <Route path="setting" element={<AccountSetting />} />
           <Route path="setting/change-password" element={<ChangePassword />} />
           <Route path="setting/change-username" element={<ChangeUsername />} />
-          
+          <Route path="setting/store-setting" element={<StoreSetting />} />
+
           <Route
             path="my-products"
             element={
