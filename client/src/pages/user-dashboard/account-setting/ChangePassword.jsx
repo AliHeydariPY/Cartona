@@ -129,7 +129,6 @@ const ChangePassword = () => {
         >
           {({ isSubmitting, errors, touched }) => (
             <Form className="space-y-4 sm:space-y-6">
-              {/* Current Password */}
               <div className="space-y-1 sm:space-y-2">
                 <label className="flex items-center text-blue-800 font-medium text-sm sm:text-base">
                   <FiLock className="mr-1 sm:mr-2 flex-shrink-0" size={14} />
@@ -173,7 +172,6 @@ const ChangePassword = () => {
               </div>
 
 
-              {/* New Password */}
               <div className="space-y-1 sm:space-y-2">
                 <label className="flex items-center text-blue-800 font-medium text-sm sm:text-base">
                   <FiLock className="mr-1 sm:mr-2 flex-shrink-0" size={14} />
@@ -217,7 +215,6 @@ const ChangePassword = () => {
               </div>
 
 
-              {/* Confirm Password */}
               <div className="space-y-1 sm:space-y-2">
                 <label className="flex items-center text-blue-800 font-medium text-sm sm:text-base">
                   <FiLock className="mr-1 sm:mr-2 flex-shrink-0" size={14} />

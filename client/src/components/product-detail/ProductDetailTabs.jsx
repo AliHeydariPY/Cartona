@@ -4,9 +4,6 @@ import Informations from "./product-tabs/Informations";
 import Reviews from "./product-tabs/Reviews";
 import Questions from "./product-tabs/Questions";
 
-import { MdOutlineDescription } from "react-icons/md";
-import { IoInformationCircleOutline } from "react-icons/io5";
-
 import { FiMessageSquare, FiHelpCircle,FiInfo  } from "react-icons/fi";
 
 const ProductDetailTabs = ({
@@ -33,7 +30,7 @@ const ProductDetailTabs = ({
           }`}
           onClick={() => setActiveTab("description")}
         >
-          <FiInfo size={18} className=""/>
+          <FiInfo size={18} className="mb-0.5"/>
           Information
         </button>
         <button
@@ -54,7 +51,7 @@ const ProductDetailTabs = ({
               : "text-blue-400 hover:text-blue-600"
           }`}
         >
-          <FiHelpCircle size={19}/> Questions ({productQuestions.length})
+          <FiHelpCircle size={19} className="mb-0.5"/> Questions ({productQuestions.length})
         </button>
       </div>
 
