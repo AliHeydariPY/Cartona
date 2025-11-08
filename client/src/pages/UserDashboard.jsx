@@ -44,13 +44,12 @@ const UserDashboard = () => {
   const navItems = [
     {
       id: "profile",
-      icon: <FiUser className="ml-3 text-blue-700 mr-0.25" size={18} />,
+      icon: <FiUser className="ml-3 text-sky-600 mr-0.25 mb-0.5" size={18} />,
       label: "My Profile",
     },
-
     {
       id: "favorites",
-      icon: <FiHeart className="ml-3 text-rose-500 mr-0.25" size={18} />,
+      icon: <FiHeart className="ml-3 text-pink-500 mr-0.25" size={18} />,
       label: "Favorites",
     },
     {
@@ -60,55 +59,41 @@ const UserDashboard = () => {
     },
     {
       id: "cart",
-      icon: <FiShoppingCart className="ml-3 text-blue-700 mr-0.25" size={18} />,
+      icon: <FiShoppingCart className="ml-3 text-blue-500 mr-0.25" size={18} />,
       label: "Cart",
     },
     {
       id: "orders",
-      icon: <FiFileText className="ml-3 text-green-600 mr-0.25" size={18} />,
+      icon: <FiFileText className="ml-3 text-teal-600 mr-0.25" size={18} />,
       label: "Orders",
     },
     {
       id: "chats",
-      icon: (
-        <FiMessageSquare className="ml-3 text-green-600 mr-0.25" size={18} />
-      ),
+      icon: <FiMessageSquare className="ml-3 text-purple-500 mr-0.25" size={18} />,
       label: "Chats",
     },
     ...(isSeller
       ? [
           {
             id: "my-products",
-            icon: (
-              <FiPackage className="ml-3 text-amber-600 mr-0.25" size={18} />
-            ),
+            icon: <FiPackage className="ml-3 text-orange-400 mr-0.25" size={18} />,
             label: "My Products",
           },
           {
             id: "add-product",
-            icon: (
-              <FiPlusCircle
-                className="ml-3 text-green-500 mb-0.25 mr-0.25"
-                size={18}
-              />
-            ),
+            icon: <FiPlusCircle className="ml-3 text-emerald-500 mb-0.25 mr-0.25" size={18} />,
             label: "Add Product",
           },
           {
             id: "payments",
-            icon: (
-              <FiDollarSign
-                className="ml-3 text-green-500 mb-0.25 mr-0.25"
-                size={18}
-              />
-            ),
+            icon: <FiDollarSign className="ml-3 text-lime-500 mb-0.25 mr-0.25" size={18} />,
             label: "Payments",
           },
         ]
       : []),
     {
       id: "home",
-      icon: <GoHome className="ml-3 text-amber-500 mb-0.5" size={19} />,
+      icon: <GoHome className="ml-3 text-indigo-400 mb-0.5" size={19} />,
       label: "Home",
     },
   ];
