@@ -454,6 +454,14 @@ class PaymentSerializer(serializers.ModelSerializer):
         'product_payments'
     ]
 
+    def calculate_total_price(self, cart_item):
+        if not cart_item or not cart_item.product:
+            return 0.0
+        product = cart_item.product
+        discounted_price = product.discounted_price
+        unit_price = discounted_price if discounted_price is not None else product.price
+        return float(unit_price) * cart_item.quantity
+
     def create(self, validated_data):
         request = self.context.get('request')
         user = getattr(request, 'user', None)
@@ -472,10 +480,11 @@ class PaymentSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Your cart is empty. You cannot create a payment without items.")
 
         validated_data['cart'] = cart
-        validated_data['amount'] = cart.get_total_price()
 
         for field in self.SENSITIVE_FIELDS:
             validated_data.pop(field, None)
+
+        validated_data['amount'] = 0
 
         payment = super().create(validated_data)
 
@@ -496,6 +505,8 @@ class PaymentSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     f"Storekeeper missing for product {getattr(product, 'pk', 'unknown')}")
 
+            total_price = self.calculate_total_price(item)
+
             pp = ProductPayment.objects.filter(
                 cart_item=item,
                 cart=cart,
@@ -509,6 +520,7 @@ class PaymentSerializer(serializers.ModelSerializer):
                 pp.address = payment.address
                 pp.paid_at = timezone.now()
                 pp.is_successful = payment.is_successful
+                pp.total_price = total_price
                 pp.save()
             else:
                 pp = ProductPayment.objects.create(
@@ -517,7 +529,7 @@ class PaymentSerializer(serializers.ModelSerializer):
                     product=product,
                     storekeeper=storekeeper,
                     quantity=item.quantity,
-                    total_price=item.get_total_price(),
+                    total_price=total_price,
                     address=payment.address,
                     fake_card_number=payment.fake_card_number,
                     fake_card_second_password=payment.fake_card_second_password,
@@ -612,8 +624,9 @@ class PaymentSerializer(serializers.ModelSerializer):
 
                     product.save()
 
+                pp.total_price = self.calculate_total_price(pp.cart_item)
                 pp.is_successful = True
-                pp.save(update_fields=['is_successful'])
+                pp.save(update_fields=['is_successful', 'total_price'])
 
                 if not ProductPurchase.objects.filter(payment=pp).exists():
                     buyer = pp.cart.user
@@ -636,6 +649,9 @@ class PaymentSerializer(serializers.ModelSerializer):
                             sender=buyer,
                             message=f"💬 Chat opened for your purchase of '{product.name}'. You can now communicate with the seller."
                         )
+
+            instance.amount = sum(pp.total_price for pp in instance.product_payments.all())
+            instance.save(update_fields=['amount'])
 
         return instance
 

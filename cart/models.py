@@ -161,62 +161,63 @@ class ProductPayment(models.Model):
         db_table = "product_payments"
 
 class Payment(models.Model):
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='payments')
+    cart = models.ForeignKey(
+        Cart,
+        on_delete=models.CASCADE,
+        related_name='payments'
+    )
+
     amount = models.PositiveIntegerField(
         help_text="Final amount paid for the entire shopping cart",
-        editable=False)
+        editable=False
+    )
+
     product_payments = models.ManyToManyField(
         ProductPayment,
         related_name='main_payment',
         blank=True,
-        help_text="List of partial payments related to this overall payment")
-    fake_card_number = models.CharField(max_length=19, default=generate_fake_card_number)
-    fake_card_second_password = models.CharField(max_length=8, default=generate_fake_second_password)
-    fake_card_cvv = models.CharField(max_length=4, default=generate_fake_cvv)
-    fake_card_expiry = models.CharField(max_length=5, default=generate_fake_expiry)
-    paid_at = models.DateTimeField(default=timezone.now)
-    address = models.TextField(help_text="Payer's address")
-    is_successful = models.BooleanField(default=False)
+        help_text="List of partial payments related to this overall payment"
+    )
 
-    def process_product_payments(self):
-        for cart_item in self.cart.items.select_related('product'):
-            product = cart_item.product
-            storekeeper = getattr(product, 'storekeeper', None)
+    fake_card_number = models.CharField(
+        max_length=19,
+        default=generate_fake_card_number
+    )
 
-            if not storekeeper:
-                raise ValidationError(f"Storekeeper missing for product {getattr(product, 'pk', 'unknown')}")
+    fake_card_second_password = models.CharField(
+        max_length=8,
+        default=generate_fake_second_password
+    )
 
-            pp = ProductPayment.objects.create(
-                cart_item=cart_item,
-                cart=self.cart,
-                product=product,
-                storekeeper=storekeeper,
-                quantity=cart_item.quantity,
-                total_price=cart_item.get_total_price(),
-                address=self.address,
-                fake_card_number=self.fake_card_number,
-                fake_card_second_password=self.fake_card_second_password,
-                fake_card_cvv=self.fake_card_cvv,
-                fake_card_expiry=self.fake_card_expiry,
-                paid_at=self.paid_at,
-                is_successful=self.is_successful
-            )
-            self.product_payments.add(pp)
+    fake_card_cvv = models.CharField(
+        max_length=4,
+        default=generate_fake_cvv
+    )
 
-        self.amount = sum(pp.total_price for pp in self.product_payments.all())
+    fake_card_expiry = models.CharField(
+        max_length=5,
+        default=generate_fake_expiry
+    )
+
+    paid_at = models.DateTimeField(
+        default=timezone.now
+    )
+
+    address = models.TextField(
+        help_text="Payer's address"
+    )
+
+    is_successful = models.BooleanField(
+        default=False
+    )
 
     def save(self, *args, **kwargs):
         if self.address:
             self.address = self.address.strip()
-
-        if not self.pk:
-            super().save(*args, **kwargs)
-            self.process_product_payments()
-            Payment.objects.filter(pk=self.pk).update(amount=self.amount)
-        else:
-            super().save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "cart_payment"
         verbose_name_plural = "cart_payments"
         db_table = "cart_payments"
+
