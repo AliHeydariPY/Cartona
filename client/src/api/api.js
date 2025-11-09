@@ -3,7 +3,6 @@ import { getStorekeeper, getUserById } from "../services/userAPIServices";
 import { authAtom } from "../atoms/authAtom";
 import { getDefaultStore } from "jotai";
 import { tokenAtom } from "../atoms/tokenAtom";
-import { containerVariants } from "../utils/animations";
 
 const store = getDefaultStore();
 
@@ -13,6 +12,21 @@ const api = axios.create({
 });
 
 let accessToken = localStorage.getItem("accessToken");
+
+const updateAccessToken = () => {
+  accessToken = localStorage.getItem("accessToken");
+  console.log("🔄 AccessToken updated:", accessToken);
+};
+
+const setupLocalStorageListener = () => {
+  window.addEventListener("storage", (event) => {
+    if (event.key === "accessToken") {
+      updateAccessToken();
+    }
+  });
+};
+
+setupLocalStorageListener();
 
 let isRefreshing = false;
 let failedQueue = [];
@@ -29,6 +43,12 @@ const processQueue = (error, token = null) => {
 };
 
 api.interceptors.request.use((config) => {
+  const currentToken = localStorage.getItem("accessToken");
+  if (currentToken && currentToken !== accessToken) {
+    accessToken = currentToken;
+  }
+
+  console.log("🔑 accessToken in request:", accessToken);
   if (accessToken) {
     config.headers["Authorization"] = `Bearer ${accessToken}`;
   }
@@ -63,26 +83,26 @@ api.interceptors.response.use(
         );
 
         accessToken = res.data.access;
-        
+
         localStorage.setItem("accessToken", accessToken);
-        console.log("🚀 ~ accessToken:", accessToken)
+        console.log("🚀 New accessToken:", accessToken);
         store.set(tokenAtom, accessToken);
         store.set(authAtom, true);
 
-        //coming soon
         const userData = JSON.parse(atob(accessToken.split(".")[1]));
-        console.log("refresh", userData);
+        console.log("🔄 refresh user data:", userData);
+
         getUserById(userData.user_id).then((res) => {
-          console.log(res.data.username);
+          console.log("👤 Username:", res.data.username);
           localStorage.setItem("username", res.data.username);
         });
 
         getStorekeeper(userData.user_id)
           .then((res) => {
-            console.log(res);
+            console.log("🏪 Storekeeper data:", res);
           })
           .catch((err) => {
-            console.log(err);
+            console.log("❌ Storekeeper error:", err);
           });
 
         api.defaults.headers.common["Authorization"] = "Bearer " + accessToken;
@@ -93,7 +113,6 @@ api.interceptors.response.use(
       } catch (err) {
         processQueue(err, null);
         store.set(authAtom, false);
-
         return Promise.reject(err);
       } finally {
         isRefreshing = false;
@@ -108,6 +127,15 @@ export const setAccessToken = (token) => {
   accessToken = token;
   localStorage.setItem("accessToken", token);
   api.defaults.headers.common["Authorization"] = "Bearer " + token;
+};
+
+export const getAccessToken = () => {
+  return accessToken;
+};
+
+export const refreshAccessToken = () => {
+  updateAccessToken();
+  return accessToken;
 };
 
 export default api;

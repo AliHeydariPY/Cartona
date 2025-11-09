@@ -2,7 +2,6 @@ import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { authAtom } from "../atoms/authAtom";
 import { useNavigate, useLocation, Outlet, Link } from "react-router-dom";
-import toast from "react-hot-toast";
 
 import {
   FiUser,
@@ -28,7 +27,7 @@ import { AiOutlineStar } from "react-icons/ai";
 import { MdStorefront, MdOutlineWorkspacePremium } from "react-icons/md";
 import BottomNav from "../components/BottomNav";
 import LogoutPopup from "../components/pop-ups/LogoutPopup";
-import { getStorekeeper, logout } from "../services/userAPIServices";
+import { getStorekeeper } from "../services/userAPIServices";
 import { userAtom } from "../atoms/userAtom";
 
 const UserDashboard = () => {
@@ -119,20 +118,7 @@ const UserDashboard = () => {
     }
   }, [isAuth]);
 
-  const handleLogout = () => {
-    logout().catch((err) => {
-      toast.custom((t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
-        >
-          <FiX className="text-xl shrink-0" />
-          <span className="font-medium">{err.response.data.detail}</span>
-        </div>
-      ));
-    });
-  };
+  
 
   return (
     <>
@@ -143,7 +129,6 @@ const UserDashboard = () => {
           {showPopup && (
             <LogoutPopup
               onClose={() => setShowPopup(false)}
-              onConfirm={() => handleLogout()}
             />
           )}
 
