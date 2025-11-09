@@ -67,7 +67,9 @@ const ChatSidebar = ({
                 <div
                   key={inx}
                   onClick={() => {
-                    setShowSidebar(false);
+                    if (window.innerWidth < 1280) {
+                      setShowSidebar(false);
+                    }
                     setSelectedChat(conversation);
                     // fetchMessages(conversation.id);
                     navigate(`/account/chats/${conversation.id}`);

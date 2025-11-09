@@ -2,18 +2,15 @@ import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { convertOffsetToTimes, motion, number } from "framer-motion";
 import { Portal } from "react-portal";
-import TextareaAutosize from "react-textarea-autosize";
 import { FaRegCircleCheck } from "react-icons/fa6";
 
-import { RiSendPlaneFill, RiCloseLine, RiEdit2Line } from "react-icons/ri";
+import { RiEdit2Line } from "react-icons/ri";
 import {
   FiMenu,
   FiX,
   FiShoppingBag,
   FiLock,
   FiRefreshCcw,
-  FiCheckSquare,
-  FiEdit,
   FiTrash2,
 } from "react-icons/fi";
 import { MdStorefront } from "react-icons/md";
@@ -164,7 +161,7 @@ const Chat = () => {
   const handleContextMenu = (e, message) => {
     e.preventDefault();
 
-    if (message.sender != localStorage.getItem("username")) return;
+    if (message.sender != localStorage.getItem("username") || !selectedChat?.chat_enabled) return;
 
     const menuWidth = 100;
     const menuHeight = 200;
@@ -196,7 +193,7 @@ const Chat = () => {
   };
 
   const handleTouchStart = (message) => {
-    if (message.sender != localStorage.getItem("username")) return;
+    if (message.sender != localStorage.getItem("username") || !selectedChat?.chat_enabled) return;
 
     const timer = setTimeout(() => {
       setIsSelectionMode(true);
@@ -265,7 +262,7 @@ const Chat = () => {
   };
 
   useEffect(() => {
-    document.addEventListener("click", handleClick);
+      document.addEventListener("click", handleClick);
     return () => {
       document.removeEventListener("click", handleClick);
     };
