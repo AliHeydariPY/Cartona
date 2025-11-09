@@ -18,8 +18,9 @@ export default function ChatInput({
   contextMenu,
   setContextMenu,
   selectedChat,
+  emojiBox,
+  setEmojiBox,
 }) {
-  const [emojiBox, setEmojiBox] = useState(false);
   const [textareaHeight, setTextareaHeight] = useState(0);
   const [isEmojiVisible, setIsEmojiVisible] = useState(false);
   const emojiPickerRef = useRef(null);

@@ -20,7 +20,6 @@ import { MdStorefront } from "react-icons/md";
 import { FaCheck } from "react-icons/fa6";
 import { TbEditCircle } from "react-icons/tb";
 
-import ChatSidebar from "./chats/ChatSidebar";
 import {
   getPurchaseChats,
   getPurchasesByBuyer,
@@ -32,15 +31,18 @@ import {
 } from "../../services/commentAPIServices";
 import { getStorekeeperById, getBuyer } from "../../services/userAPIServices";
 import { getProduct } from "../../services/productAPIServices";
+
+import ChatSidebar from "./chats/ChatSidebar";
 import ChatInput from "./chats/ChatInput";
 
 const Chat = () => {
   const { chatID } = useParams();
   const [selectedChat, setSelectedChat] = useState(null);
-  const [showSidebar, setShowSidebar] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(true);
   const [conversations, setConversations] = useState([]);
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
+  const [emojiBox, setEmojiBox] = useState(false);
   const messagesEndRef = useRef(null);
   const storekeeperID = localStorage.getItem("storekeeperID");
 
@@ -95,7 +97,7 @@ const Chat = () => {
               // }
             } catch (err) {
               console.error("Error fetching pv details:", err);
-              return null; 
+              return null;
             }
           })
         );
@@ -107,7 +109,7 @@ const Chat = () => {
     };
 
     fetchPVs();
-  }, [ storekeeperID]);
+  }, [storekeeperID]);
 
   useEffect(() => {
     if (!conversations[0]) return;
@@ -137,6 +139,10 @@ const Chat = () => {
     } catch {
       setMessages([]);
     }
+  };
+
+  const openInNewTab = (url) => {
+    window.open(url, "_blank", "noreferrer");
   };
 
   ///////////////////////////FIX////////////////////////////////
@@ -195,7 +201,7 @@ const Chat = () => {
     const timer = setTimeout(() => {
       setIsSelectionMode(true);
       setSelectedMessages([message.id]);
-    }, 500); 
+    }, 500);
 
     setLongPressTimer(timer);
   };
@@ -277,6 +283,9 @@ const Chat = () => {
           <button
             onClick={() => {
               setShowSidebar(!showSidebar);
+              if (!showSidebar) {
+                setEmojiBox(false);
+              }
               setIsSelectionMode(false);
               setSelectedMessages([]);
             }}
@@ -300,10 +309,13 @@ const Chat = () => {
           <div className="flex-1 flex flex-col">
             {selectedChat ? (
               <>
-                <div className="p-4 border-b border-blue-200 bg-white/80">
+                <div className="p-4 border-b border-blue-200 bg-white/80 ">
                   <div className="flex items-center space-x-3">
                     <div
-                      className={`w-16 h-16 ring ring-blue-400 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden relative`}
+                      className={`w-16 h-16 ring cursor-pointer ring-blue-400 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden relative`}
+                      onClick={() =>
+                        openInNewTab(`/product/${selectedChat.product.id}`)
+                      }
                     >
                       <img
                         src={selectedChat.product.image}
@@ -562,6 +574,8 @@ const Chat = () => {
                     contextMenu={contextMenu}
                     setContextMenu={setContextMenu}
                     selectedChat={selectedChat}
+                    emojiBox={emojiBox}
+                    setEmojiBox={setEmojiBox}
                   />
                 ) : (
                   <div className="p-4 border-t border-blue-200 bg-rose-50/80 text-center">
