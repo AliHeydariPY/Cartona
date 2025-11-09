@@ -15,6 +15,7 @@ import { createUser, login } from "../services/userAPIServices";
 import { useAtom } from "jotai";
 import { authAtom } from "../atoms/authAtom";
 import { successToast } from "../utils/toast";
+import { fetchUserData } from "../utils/fetchUserData";
 
 const CreateAccountForm = () => {
   const [isAuth] = useAtom(authAtom);
@@ -75,11 +76,12 @@ const CreateAccountForm = () => {
             })
               .then((res) => {
                 localStorage.setItem("username", res.data.username);
-
+                
                 login({
                   username: values.username,
                   password: values.password,
                 }).then(() => {
+                  fetchUserData();
                   setSubmitting(false);
                   navigate("/account/profile");
                 });

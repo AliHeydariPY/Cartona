@@ -9,6 +9,7 @@ import { login } from "../services/userAPIServices";
 import { useAtom } from "jotai";
 import { authAtom } from "../atoms/authAtom";
 import { successToast } from "../utils/toast";
+import { fetchUserData } from "../utils/fetchUserData";
 
 const LoginForm = () => {
   const [isAuth, setIsAuth] = useAtom(authAtom);
@@ -68,9 +69,13 @@ const LoginForm = () => {
               password: values.password,
             })
               .then(() => {
+                fetchUserData();
                 localStorage.setItem("username", values.username);
 
-                successToast({ title: "Login successful",text: "Welcome back to Cartona"});
+                successToast({
+                  title: "Login successful",
+                  text: "Welcome back to Cartona",
+                });
                 setSubmitting(false);
 
                 // navigate("/account/profile");

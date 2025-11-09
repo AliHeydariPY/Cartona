@@ -30,15 +30,11 @@ const ChangeUsername = () => {
         "New username must be different from current username"
       )
       .required("New username is required"),
-    // currentPassword: Yup.string()
-    //   .min(8, "Password must be at least 8 characters")
-    //   .required("Current password is required to confirm changes"),
   });
 
   const handleSubmit = (values, { setSubmitting, resetForm }) => {
     const payload = {
       username: values.newUsername,
-      // current_password: values.currentPassword,
     };
 
     ChangeUserName(payload, user.username)
@@ -58,9 +54,8 @@ const ChangeUsername = () => {
           >
             <FiX className="text-lg sm:text-xl shrink-0" />
             <span className="font-medium text-sm sm:text-base">
-              {err.response?.data?.current_password ||
-                err.response?.data?.detail ||
-                err.response?.data?.new_username ||
+              {err.response?.data?.detail ||
+                err.response?.data?.username ||
                 "There is a problem. Please try again later"}
             </span>
           </div>
@@ -108,12 +103,11 @@ const ChangeUsername = () => {
         <Formik
           initialValues={{
             newUsername: "",
-            // currentPassword: "",
           }}
           validationSchema={UsernameSchema}
           onSubmit={handleSubmit}
         >
-          {({ isSubmitting, errors, touched, values }) => (
+          {({ isSubmitting, errors, touched }) => (
             <Form className="space-y-4 sm:space-y-6">
               <div className="space-y-1 sm:space-y-2">
                 <label className="flex items-center text-blue-800 font-medium text-sm sm:text-base">
@@ -127,17 +121,10 @@ const ChangeUsername = () => {
                     className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-blue-800 border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent pr-10 sm:pr-12 text-sm sm:text-base ${
                       errors.newUsername && touched.newUsername
                         ? "border-red-300"
-                        : values.newUsername && !errors.newUsername
-                        ? "border-green-300"
                         : "border-blue-300"
                     }`}
                     placeholder="Enter new username"
                   />
-                  {values.newUsername && !errors.newUsername && (
-                    <div className="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 text-green-500">
-                      <FiCheckCircle size={18} />
-                    </div>
-                  )}
                 </div>
                 <ErrorMessage
                   name="newUsername"
@@ -152,35 +139,6 @@ const ChangeUsername = () => {
                   )}
                 </ErrorMessage>
               </div>
-
-              {/* <div className="space-y-1 sm:space-y-2">
-                <label className="flex items-center text-blue-800 font-medium text-sm sm:text-base">
-                  <FiUser className="mr-1 sm:mr-2 flex-shrink-0" size={14} />
-                  Current Password*
-                </label>
-                <Field
-                  name="currentPassword"
-                  type="password"
-                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-blue-800 border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-sm sm:text-base ${
-                    errors.currentPassword && touched.currentPassword
-                      ? "border-red-300"
-                      : "border-blue-300"
-                  }`}
-                  placeholder="Enter your current password to confirm"
-                />
-                <ErrorMessage
-                  name="currentPassword"
-                  component="div"
-                  className="text-red-500 text-xs sm:text-sm ml-0.5 flex items-center"
-                >
-                  {(msg) => (
-                    <div className="flex items-center">
-                      <span className="w-1.5 h-1.5 bg-red-500 rounded-full mr-1 sm:mr-2 flex-shrink-0"></span>
-                      <span className="text-xs sm:text-sm">{msg}</span>
-                    </div>
-                  )}
-                </ErrorMessage>
-              </div> */}
 
               <div className="bg-blue-50/50 p-3 sm:p-4 rounded-lg border border-blue-200">
                 <p className="text-xs sm:text-sm font-medium text-blue-700 mb-2">

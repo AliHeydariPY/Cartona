@@ -3,7 +3,8 @@ import { useState, useRef, useEffect } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 import { RiSendPlaneFill, RiCloseLine, RiEdit2Line } from "react-icons/ri";
 import { FaCheck } from "react-icons/fa";
-import { FiSmile } from "react-icons/fi";
+import { FiSmile, FiX } from "react-icons/fi";
+import toast from "react-hot-toast";
 
 export default function ChatInput({
   isEditing,
@@ -18,11 +19,10 @@ export default function ChatInput({
   contextMenu,
   setContextMenu,
   selectedChat,
+  emojiBox,
+  setEmojiBox,
 }) {
-  const [emojiBox, setEmojiBox] = useState(false);
   const [textareaHeight, setTextareaHeight] = useState(0);
-  const [isEmojiVisible, setIsEmojiVisible] = useState(false);
-  const emojiPickerRef = useRef(null);
   const textareaRef = useRef();
 
   useEffect(() => {
@@ -43,20 +43,56 @@ export default function ChatInput({
     textareaRef.current.focus();
   }, [isEditing]);
 
-  useEffect(() => {
-    if (isEmojiVisible && textareaRef.current && emojiPickerRef.current) {
-      const textareaRect = textareaRef.current.getBoundingClientRect();
-      const emojiPicker = emojiPickerRef.current;
-
-      emojiPicker.style.position = "absolute";
-      emojiPicker.style.bottom = `${textareaRect.height + 10}px`;
-      emojiPicker.style.right = "0";
-    }
-  }, [isEmojiVisible, textareaHeight]);
-
   const addEmoji = (emojiData) => {
     setMessage((prev) => prev + emojiData.emoji);
     textareaRef.current.focus();
+  };
+
+  const handleEditMsg = (payload) => {
+    editMessage(payload)
+      .then(() => {
+        fetchMessages(chatID);
+        setMessage("");
+        setIsEditing(false);
+      })
+      .catch((err) => {
+        setMessage("");
+        toast.custom((t) => (
+          <div
+            className={`${
+              t.visible ? "animate-enter" : "animate-leave"
+            } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
+          >
+            <FiX className="text-xl shrink-0" />
+            <span className="font-medium">
+              {err.response.data.non_field_errors}
+            </span>
+          </div>
+        ));
+      });
+  };
+
+  const handleSendMsg = (payload) => {
+    sendMessagse(payload)
+      .then((res) => {
+        fetchMessages(res.data.purchase);
+        setMessage("");
+      })
+      .catch((err) => {
+        setMessage("");
+        toast.custom((t) => (
+          <div
+            className={`${
+              t.visible ? "animate-enter" : "animate-leave"
+            } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
+          >
+            <FiX className="text-xl shrink-0" />
+            <span className="font-medium">
+              {err.response.data.non_field_errors}
+            </span>
+          </div>
+        ));
+      });
   };
 
   return (
@@ -67,11 +103,6 @@ export default function ChatInput({
         }`}
         style={{
           bottom: isEditing ? textareaHeight + 42 + 44 : textareaHeight + 42,
-        }}
-        onAnimationEnd={() => {
-          if (!emojiBox) {
-            // بعد از پایان انیمیشن خروج، display را none کنید
-          }
         }}
       >
         <EmojiPicker
@@ -135,21 +166,14 @@ export default function ChatInput({
               e.preventDefault();
               if (message.trim() !== "") {
                 if (isEditing) {
-                  editMessage({
+                  handleEditMsg({
                     ...contextMenu.message,
                     message: message,
-                  }).then(() => {
-                    fetchMessages(chatID);
-                    setMessage("");
-                    setIsEditing(false);
                   });
                 } else {
-                  sendMessagse({
+                  handleSendMsg({
                     purchase: selectedChat.id,
                     message: message,
-                  }).then((res) => {
-                    fetchMessages(res.data.purchase);
-                    setMessage("");
                   });
                 }
               }
@@ -166,16 +190,12 @@ export default function ChatInput({
 
         {isEditing ? (
           <button
-            onClick={() => {
-              editMessage({
+            onClick={() =>
+              handleEditMsg({
                 ...contextMenu.message,
                 message: message,
-              }).then(() => {
-                fetchMessages(chatID);
-                setMessage("");
-                setIsEditing(false);
-              });
-            }}
+              })
+            }
             className={`p-3 rounded-full transition-colors duration-300 ${
               message.trim()
                 ? "bg-gradient-to-r from-blue-600 to-cyan-500 text-white hover:from-blue-700 hover:to-cyan-600 cursor-pointer"
@@ -188,12 +208,9 @@ export default function ChatInput({
           <button
             onClick={() => {
               if (message.trim()) {
-                sendMessagse({
+                handleSendMsg({
                   purchase: selectedChat.id,
                   message: message,
-                }).then((res) => {
-                  fetchMessages(res.data.purchase);
-                  setMessage("");
                 });
               }
             }}

@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import toast from "react-hot-toast";
 
 import { MdStorefront } from "react-icons/md";
 import {
@@ -16,7 +15,6 @@ import { userAtom } from "../../atoms/userAtom";
 import { useState } from "react";
 
 import LogoutPopup from "../../components/pop-ups/LogoutPopup";
-import { logout } from "../../services/userAPIServices";
 
 const AccountSettings = () => {
   const navigate = useNavigate();
@@ -67,23 +65,6 @@ const AccountSettings = () => {
     navigate(path);
   };
 
-  const handleLogout = () => {
-    logout().catch((err) => {
-      toast.custom((t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } bg-gradient-to-r from-red-500 to-rose-600 text-white px-4 py-3 sm:px-6 sm:py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
-        >
-          <FiX className="text-lg sm:text-xl shrink-0" />
-          <span className="font-medium text-sm sm:text-base">
-            {err.response?.data?.detail}
-          </span>
-        </div>
-      ));
-    });
-  };
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 50 }}
@@ -95,7 +76,6 @@ const AccountSettings = () => {
         {showPopup && (
           <LogoutPopup
             onClose={() => setShowPopup(false)}
-            onConfirm={() => handleLogout()}
           />
         )}
 

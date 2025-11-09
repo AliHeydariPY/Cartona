@@ -1,14 +1,16 @@
+import { motion, AnimatePresence } from "framer-motion";
 import { Portal } from "react-portal";
 import { useEffect, useRef, useState } from "react";
-import { FiX, FiLogOut, FiUser, FiAlertTriangle } from "react-icons/fi";
-import { motion, AnimatePresence } from "framer-motion";
+import { FiX, FiLogOut, FiAlertTriangle } from "react-icons/fi";
 import { useAtom } from "jotai";
 import { userAtom } from "../../atoms/userAtom";
+import { logout } from "../../services/userAPIServices";
+import toast from "react-hot-toast";
 
-const LogoutPopup = ({ onClose, onConfirm }) => {
+const LogoutPopup = ({ onClose }) => {
   const [show, setShow] = useState(false);
   const popupRef = useRef();
-  const [user] = useAtom(userAtom)
+  const [user] = useAtom(userAtom);
 
   useEffect(() => {
     setTimeout(() => {
@@ -24,7 +26,18 @@ const LogoutPopup = ({ onClose, onConfirm }) => {
   const stopPropagation = (e) => e.stopPropagation();
 
   const handleConfirm = () => {
-    onConfirm();
+    logout().catch((err) => {
+      toast.custom((t) => (
+        <div
+          className={`${
+            t.visible ? "animate-enter" : "animate-leave"
+          } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
+        >
+          <FiX className="text-xl shrink-0" />
+          <span className="font-medium">{err.response.data.detail}</span>
+        </div>
+      ));
+    });
     handleClose();
   };
 
@@ -60,7 +73,9 @@ const LogoutPopup = ({ onClose, onConfirm }) => {
                       <h3 className="text-xl font-bold">Sign Out</h3>
                       <div className="flex items-center">
                         <p className="text-red-100 text-sm">@</p>
-                        <p className="text-red-100 text-sm mt-1">{user.username}</p>
+                        <p className="text-red-100 text-sm mt-1">
+                          {user.username}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -106,7 +121,6 @@ const LogoutPopup = ({ onClose, onConfirm }) => {
                     Sign Out
                   </button>
                 </div>
-
               </div>
 
               <div className="bg-red-50/30 p-4 text-center border-t border-red-100">
