@@ -38,13 +38,12 @@ const Chat = () => {
   const { chatID } = useParams();
   const [user] = useAtom(userAtom)
   const [selectedChat, setSelectedChat] = useState(null);
-  const [showSidebar, setShowSidebar] = useState(true);
+  const [showSidebar, setShowSidebar] = useState(window.innerWidth >= 1280 ? true : false);
   const [conversations, setConversations] = useState([]);
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
   const [emojiBox, setEmojiBox] = useState(false);
   const messagesEndRef = useRef(null);
-  const storekeeperID = localStorage.getItem("storekeeperID");
 
   useEffect(() => {
     const fetchPVs = async () => {
@@ -59,9 +58,9 @@ const Chat = () => {
           console.warn("getPurchasesByBuyer failed:", error);
         }
 
-        if (storekeeperID) {
+        if (user.storekeeper_id) {
           try {
-            const res = await getPurchasesByStorekeepre(storekeeperID);
+            const res = await getPurchasesByStorekeepre(user.storekeeper_id);
             pvsByStorekeeper = res?.data || [];
           } catch (error) {
             console.warn("getPurchasesByStorekeepre failed:", error);
@@ -109,7 +108,7 @@ const Chat = () => {
     };
 
     fetchPVs();
-  }, [storekeeperID]);
+  }, [user]);
 
   useEffect(() => {
     if (!conversations[0]) return;
@@ -332,7 +331,7 @@ const Chat = () => {
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
                         <div className="flex items-center space-x-2">
-                          <h4 className="font-semibold text-blue-900">
+                          <h4 className="font-semibold text-blue-900 truncate max-w-[180px]">
                             {selectedChat.buyer ==
                             user?.username
                               ? selectedChat.store.store_name

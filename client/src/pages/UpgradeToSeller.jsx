@@ -57,8 +57,7 @@ const UpgradeToSeller = () => {
             formData.append("image", values.image);
 
             upgradeToSeller(formData)
-              .then((res) => {
-                localStorage.setItem("storekeeperID", res.data.id);
+              .then(() => {
                 successToast("Account upgraded to seller successfully!");
 
                 navigate("/account/profile");

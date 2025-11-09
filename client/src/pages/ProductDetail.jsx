@@ -133,7 +133,7 @@ const ProductDetails = ({
                 <div className="flex items-start mb-0">
                   <span>
                     <IoCartOutline
-                      className="text-blue-600 mr-2 mt-1"
+                      className="text-blue-600 mr-2 mt-2"
                       size={22}
                     />
                   </span>
