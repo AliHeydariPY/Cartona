@@ -1,8 +1,10 @@
 import { motion, AnimatePresence } from "framer-motion";
+import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { FiMessageSquare, FiSearch, FiX, FiLock } from "react-icons/fi";
 import { MdStorefront } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
+import { userAtom } from "../../../atoms/userAtom";
 
 const ChatSidebar = ({
   conversations,
@@ -12,6 +14,7 @@ const ChatSidebar = ({
   selectedChat,
 }) => {
   const navigate = useNavigate();
+  const [user] = useAtom(userAtom);
 
   useEffect(() => {
     const handleResize = () => {
@@ -109,13 +112,16 @@ const ChatSidebar = ({
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
-                        <h4 className="flex font-semibold text-blue-900 truncate">
+                        <div className="flex font-semibold text-blue-900">
+
+                        <h4 className=" truncate max-w-[160px]">
                           {conversation.buyer ==
-                          localStorage.getItem("username")
+                          user?.username
                             ? conversation.store.store_name
                             : conversation.buyer}
+                        </h4>
                           {conversation.buyer ==
-                            localStorage.getItem("username") && (
+                            user?.username && (
                             <span className="mt-1 ml-1 text-blue-800">
                               <MdStorefront size={15} />
                             </span>
@@ -125,7 +131,7 @@ const ChatSidebar = ({
                               <FiLock />
                             </span>
                           )}
-                        </h4>
+                        </div>
                         <span className="text-xs text-blue-500 whitespace-nowrap">
                           {conversation.time}
                         </span>

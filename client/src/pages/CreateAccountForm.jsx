@@ -74,9 +74,7 @@ const CreateAccountForm = () => {
               username: values.username,
               password: values.password,
             })
-              .then((res) => {
-                localStorage.setItem("username", res.data.username);
-                
+              .then(() => {
                 login({
                   username: values.username,
                   password: values.password,

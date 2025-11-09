@@ -70,7 +70,6 @@ const LoginForm = () => {
             })
               .then(() => {
                 fetchUserData();
-                localStorage.setItem("username", values.username);
 
                 successToast({
                   title: "Login successful",

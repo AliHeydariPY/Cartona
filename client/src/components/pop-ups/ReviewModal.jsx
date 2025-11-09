@@ -26,19 +26,6 @@ const ReviewPopup = ({ onClose, product, seller, setReloadComponent }) => {
   const stopPropagation = (e) => e.stopPropagation();
 
   const handleSubmit = async () => {
-    if (seller == localStorage.getItem("storekeeperID")) {
-      toast.custom((t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
-        >
-          <FiX className="text-xl shrink-0" />
-          <span className="font-medium">The seller cannot leave comments</span>
-        </div>
-      ));
-      return;
-    }
 
     if (commentText.trim() === "") {
       showValidationError("Please write your comment before submitting");

@@ -102,7 +102,6 @@ const Reviews = ({
       variants={containerVariants}
       className="space-y-5 sm:space-y-6 mt-5 sm:mt-6"
     >
-      {/* Leave a Review */}
       <motion.div
         variants={itemVariants}
         className="bg-white/80 border border-blue-200 p-3 sm:p-6 rounded-lg sm:rounded-2xl shadow-lg"
@@ -142,22 +141,7 @@ const Reviews = ({
         />
         <button
           onClick={() => {
-            if (seller.user == user[0].username) {
-              toast.custom((t) => (
-                <div
-                  className={`${
-                    t.visible ? "animate-enter" : "animate-leave"
-                  } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
-                >
-                  <FiX className="text-xl shrink-0" />
-                  <span className="font-medium">
-                    The seller cannot leave comments
-                  </span>
-                </div>
-              ));
-              setCommentText("");
-              setSelectedStars(1);
-            } else if (commentText.trim() == "") {
+             if (commentText.trim() == "") {
               showValidationError(
                 "Please write your comment before submitting"
               );
