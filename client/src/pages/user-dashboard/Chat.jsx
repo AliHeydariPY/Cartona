@@ -31,9 +31,12 @@ import { getProduct } from "../../services/productAPIServices";
 
 import ChatSidebar from "./chats/ChatSidebar";
 import ChatInput from "./chats/ChatInput";
+import { useAtom } from "jotai";
+import { userAtom } from "../../atoms/userAtom";
 
 const Chat = () => {
   const { chatID } = useParams();
+  const [user] = useAtom(userAtom)
   const [selectedChat, setSelectedChat] = useState(null);
   const [showSidebar, setShowSidebar] = useState(true);
   const [conversations, setConversations] = useState([]);
@@ -77,7 +80,7 @@ const Chat = () => {
                 ...pv,
                 product: { ...product.data },
               };
-              // if (storekeeper.data.user == localStorage.getItem("username")) {
+              // if (storekeeper.data.user == user?.username) {
               //   const user = await getBuyer(pv.buyer);
               //   console.log(user)
               //   return {
@@ -161,7 +164,7 @@ const Chat = () => {
   const handleContextMenu = (e, message) => {
     e.preventDefault();
 
-    if (message.sender != localStorage.getItem("username") || !selectedChat?.chat_enabled) return;
+    if (message.sender != user.username || !selectedChat?.chat_enabled) return;
 
     const menuWidth = 100;
     const menuHeight = 200;
@@ -193,7 +196,7 @@ const Chat = () => {
   };
 
   const handleTouchStart = (message) => {
-    if (message.sender != localStorage.getItem("username") || !selectedChat?.chat_enabled) return;
+    if (message.sender != user.username || !selectedChat?.chat_enabled) return;
 
     const timer = setTimeout(() => {
       setIsSelectionMode(true);
@@ -238,7 +241,7 @@ const Chat = () => {
   };
 
   const handleMessageClick = (messageId, senderId) => {
-    if (!isSelectionMode || senderId != localStorage.getItem("username"))
+    if (!isSelectionMode || senderId != user.username)
       return;
     if (firstSelectMsg) {
       setFirstSelectMsg(false);
@@ -331,13 +334,13 @@ const Chat = () => {
                         <div className="flex items-center space-x-2">
                           <h4 className="font-semibold text-blue-900">
                             {selectedChat.buyer ==
-                            localStorage.getItem("username")
+                            user?.username
                               ? selectedChat.store.store_name
                               : selectedChat.buyer}
                           </h4>
                           <div className="flex items-center space-x-2">
                             {selectedChat.buyer ==
-                              localStorage.getItem("username") && (
+                              user?.username && (
                               <span className="px-2 py-1 bg-gradient-to-r from-blue-600 to-cyan-500 text-white text-xs font-bold rounded-full flex items-center">
                                 <MdStorefront
                                   className="mr-1 mb-0.25"
@@ -410,7 +413,7 @@ const Chat = () => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         className={`flex py-2 rounded-r-2xl ${
-                          message.sender == localStorage.getItem("username")
+                          message.sender == user?.username
                             ? "justify-end"
                             : "justify-start"
                         }
@@ -427,7 +430,7 @@ const Chat = () => {
                       >
                         <div
                           className={`max-w-xs lg:max-w-md px-3 py-2 rounded-xl relative cursor-pointer ${
-                            message.sender == localStorage.getItem("username")
+                            message.sender == user?.username
                               ? "bg-gradient-to-br from-blue-600 to-cyan-500 text-white"
                               : "bg-white border border-blue-200 text-blue-900"
                           } ${
@@ -438,7 +441,7 @@ const Chat = () => {
                         >
                           {isSelectionMode &&
                             message.sender ==
-                              localStorage.getItem("username") && (
+                              user?.username && (
                               <div
                                 className={`absolute -left-2 -top-2 w-5 h-5 rounded-full flex items-center justify-center ${
                                   selectedMessages.includes(message.id)
@@ -462,7 +465,7 @@ const Chat = () => {
                               <span
                                 className={`flex items-center space-x-1 ${
                                   message.sender ==
-                                  localStorage.getItem("username")
+                                  user?.username
                                     ? "text-blue-100"
                                     : "text-blue-500"
                                 }`}
@@ -474,7 +477,7 @@ const Chat = () => {
                               <span
                                 className={
                                   message.sender ==
-                                  localStorage.getItem("username")
+                                  user?.username
                                     ? "text-blue-100"
                                     : "text-blue-500"
                                 }

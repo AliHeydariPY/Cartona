@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getStorekeeper, getUserById } from "../services/userAPIServices";
+import { getStorekeeper } from "../services/userAPIServices";
 import { authAtom } from "../atoms/authAtom";
 import { getDefaultStore } from "jotai";
 import { tokenAtom } from "../atoms/tokenAtom";
@@ -91,11 +91,6 @@ api.interceptors.response.use(
 
         const userData = JSON.parse(atob(accessToken.split(".")[1]));
         console.log("🔄 refresh user data:", userData);
-
-        getUserById(userData.user_id).then((res) => {
-          console.log("👤 Username:", res.data.username);
-          localStorage.setItem("username", res.data.username);
-        });
 
         getStorekeeper(userData.user_id)
           .then((res) => {

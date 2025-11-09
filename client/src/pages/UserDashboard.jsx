@@ -100,7 +100,6 @@ const UserDashboard = () => {
   useEffect(() => {
     console.log("🚀 ~ UserDashboard ~ user:", user);
     if (!user) return;
-    // localStorage.setItem("username", user.username)
 
     getStorekeeper(user.username)
       .then((res) => {

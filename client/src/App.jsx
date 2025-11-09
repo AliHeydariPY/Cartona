@@ -59,11 +59,6 @@ function App() {
     }
   }, [accessToken]);
 
-  useEffect(() => {
-    if (!user) return;
-    localStorage.setItem("username", user.username);
-  }, [user]);
-
   return (
     <>
       <Toaster
