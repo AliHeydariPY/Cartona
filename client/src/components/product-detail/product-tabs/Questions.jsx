@@ -29,6 +29,9 @@ const Questions = ({
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [showDeletePopup, setShowDeletePopup] = useState(false);
 
+  const [visibleCount, setVisibleCount] = useState(6);
+
+
   const showValidationError = (context) => {
     toast.custom((t) => (
       <div
@@ -154,7 +157,7 @@ const Questions = ({
               No questions have been asked yet.
             </div>
           ) : (
-            productQuestions.map((faq) => {
+            productQuestions.slice(0, visibleCount).map((faq) => {
               const isUserQuestion = faq.user == user[0].username;
 
               return (
@@ -238,6 +241,25 @@ const Questions = ({
               );
             })
           )}
+          {productQuestions.length > 5 && (
+          <div className="flex justify-center pt-3 mt-5 border-t border-blue-400 ">
+            {visibleCount < productQuestions.length ? (
+              <button
+                onClick={() => setVisibleCount(visibleCount + 6)}
+                className="px-4 py-2 cursor-pointer rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-300"
+              >
+                Show more
+              </button>
+            ) : (
+              <button
+                onClick={() => setVisibleCount(6)}
+                className="px-4 py-2 cursor-pointer rounded-lg border border-blue-400 text-blue-600 hover:bg-blue-50 transition-colors duration-300"
+              >
+                Show less
+              </button>
+            )}
+          </div>
+        )}
         </div>
       </motion.div>
 

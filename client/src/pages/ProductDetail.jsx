@@ -66,7 +66,6 @@ const ProductDetails = ({
 
         console.log(prodcutData);
         setProduct(prodcutData);
-        console.log("fdsfa");
 
         const seller = getStorekeeperById(selectedProduct.data.storekeeper);
         seller.then((res) => {

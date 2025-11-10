@@ -21,7 +21,6 @@ const Reviews = ({
   productComments,
   setReloadComponent,
   reloadComponent,
-  seller,
   user,
 }) => {
   const { id } = useParams();
@@ -38,15 +37,13 @@ const Reviews = ({
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [showDeletePopup, setShowDeletePopup] = useState(false);
 
+  const [visibleCount, setVisibleCount] = useState(5);
+
   useEffect(() => {
     if (replyInputRef.current) {
       replyInputRef.current.focus();
     }
   }, [replyingTo]);
-
-  useEffect(() => {
-    console.log(productComments);
-  }, [productComments]);
 
   const showValidationError = (context) => {
     toast.custom((t) => (
@@ -92,7 +89,6 @@ const Reviews = ({
       setReplyText("");
       setReplyingTo(null);
     });
-    console.log("Reply sent to comment:", commentId, "text:", replyText);
   };
 
   return (
@@ -182,7 +178,7 @@ const Reviews = ({
           <p className="text-blue-600">No comment have been asked yet.</p>
         )}
 
-        {productComments.map((comment) => {
+        {productComments.slice(0, visibleCount).map((comment) => {
           const isUserReview = comment.user == user[0].username;
 
           return (
@@ -402,6 +398,25 @@ const Reviews = ({
             </div>
           );
         })}
+        {productComments.length > 5 && (
+          <div className="flex justify-center pt-3 mt-5 border-t border-blue-400 ">
+            {visibleCount < productComments.length ? (
+              <button
+                onClick={() => setVisibleCount(visibleCount + 5)}
+                className="px-4 py-2 cursor-pointer rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-300"
+              >
+                Show more
+              </button>
+            ) : (
+              <button
+                onClick={() => setVisibleCount(5)}
+                className="px-4 py-2 cursor-pointer rounded-lg border border-blue-400 text-blue-600 hover:bg-blue-50 transition-colors duration-300"
+              >
+                Show less
+              </button>
+            )}
+          </div>
+        )}
       </motion.div>
 
       {showEditPopup && (
