@@ -3,8 +3,8 @@ import { useState, useRef, useEffect } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 import { RiSendPlaneFill, RiCloseLine, RiEdit2Line } from "react-icons/ri";
 import { FaCheck } from "react-icons/fa";
-import { FiSmile, FiX } from "react-icons/fi";
-import toast from "react-hot-toast";
+import { FiSmile } from "react-icons/fi";
+import { errorToast } from "../../../utils/toast";
 
 export default function ChatInput({
   isEditing,
@@ -57,18 +57,7 @@ export default function ChatInput({
       })
       .catch((err) => {
         setMessage("");
-        toast.custom((t) => (
-          <div
-            className={`${
-              t.visible ? "animate-enter" : "animate-leave"
-            } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
-          >
-            <FiX className="text-xl shrink-0" />
-            <span className="font-medium">
-              {err.response.data.non_field_errors}
-            </span>
-          </div>
-        ));
+        errorToast(err.response.data.non_field_errors);
       });
   };
 
@@ -80,18 +69,7 @@ export default function ChatInput({
       })
       .catch((err) => {
         setMessage("");
-        toast.custom((t) => (
-          <div
-            className={`${
-              t.visible ? "animate-enter" : "animate-leave"
-            } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
-          >
-            <FiX className="text-xl shrink-0" />
-            <span className="font-medium">
-              {err.response.data.non_field_errors}
-            </span>
-          </div>
-        ));
+        errorToast(err.response.data.non_field_errors);
       });
   };
 

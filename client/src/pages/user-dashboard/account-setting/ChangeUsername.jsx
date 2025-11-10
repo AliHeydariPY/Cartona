@@ -1,13 +1,12 @@
+import { motion } from "framer-motion";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { motion } from "framer-motion";
-import toast from "react-hot-toast";
 
 import { ChangeUserName } from "../../../services/userAPIServices";
 
-import { FiUser, FiCheckCircle, FiX, FiEdit3, FiAtSign } from "react-icons/fi";
+import { FiUser, FiCheckCircle, FiEdit3, FiAtSign } from "react-icons/fi";
 import { FaArrowLeft } from "react-icons/fa";
-import { successToast } from "../../../utils/toast";
+import { errorToast, successToast } from "../../../utils/toast";
 import { useAtom } from "jotai";
 import { userAtom } from "../../../atoms/userAtom";
 import { useNavigate } from "react-router-dom";
@@ -45,23 +44,14 @@ const ChangeUsername = () => {
         resetForm();
       })
       .catch((err) => {
-        toast.custom((t) => (
-          <div
-            className={`${
-              t.visible ? "animate-enter" : "animate-leave"
-            } bg-gradient-to-r from-red-500 to-rose-600 text-white px-4 py-3 sm:px-6 sm:py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
-            style={{ fontFamily: "Roboto" }}
-          >
-            <FiX className="text-lg sm:text-xl shrink-0" />
-            <span className="font-medium text-sm sm:text-base">
-              {err.response?.data?.detail ||
-                err.response?.data?.username ||
-                "There is a problem. Please try again later"}
-            </span>
-          </div>
-        ));
+        const errorMessage =
+          err.response?.data?.detail ||
+          err.response?.data?.username ||
+          "There is a problem. Please try again later";
+
+        errorToast(errorMessage);
+
         setSubmitting(false);
-        resetForm();
       });
   };
 

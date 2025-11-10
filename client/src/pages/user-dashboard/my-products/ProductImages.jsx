@@ -2,10 +2,9 @@ import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { Formik, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { FiPlus, FiTrash2, FiImage, FiPlusCircle, FiX } from "react-icons/fi";
+import { FiPlus, FiTrash2, FiImage, FiPlusCircle } from "react-icons/fi";
 import { FaArrowLeft } from "react-icons/fa6";
 
 import {
@@ -17,7 +16,7 @@ import {
 
 import DeleteImagePopup from "../../../components/pop-ups/DeleteImagePopup";
 import ProductNotFound from "../../../components/ProductNotFound";
-import { successToast } from "../../../utils/toast";
+import { errorToast, successToast } from "../../../utils/toast";
 
 const ProductImages = ({ reloadComponent, setReloadComponent }) => {
   const { id } = useParams();
@@ -61,16 +60,7 @@ const ProductImages = ({ reloadComponent, setReloadComponent }) => {
   const handleRemoveImage = () => {
     deleteImage(selectedImage.id).then(() => {
       setReloadComponent(!reloadComponent);
-      toast.custom((t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } bg-gradient-to-r from-red-600 to-rose-500 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
-        >
-          <FiX className="text-xl shrink-0" />
-          <span className="font-medium">Image successfully removed</span>
-        </div>
-      ));
+      errorToast("Image successfully removed");
     });
   };
 

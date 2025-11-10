@@ -4,11 +4,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FiX, FiStar, FiCheckCircle, FiAlertCircle } from "react-icons/fi";
 import toast from "react-hot-toast";
 import { sendComment } from "../../services/commentAPIServices";
-import { successToast } from "../../utils/toast";
+import { errorToast, successToast } from "../../utils/toast";
 
 /////////////////// response it /////////////////////
 
-const ReviewPopup = ({ onClose, product, seller, setReloadComponent }) => {
+const ReviewPopup = ({ onClose, product, setReloadComponent }) => {
   const [show, setShow] = useState(false);
   const [selectedStars, setSelectedStars] = useState(1);
   const [commentText, setCommentText] = useState("");
@@ -26,7 +26,6 @@ const ReviewPopup = ({ onClose, product, seller, setReloadComponent }) => {
   const stopPropagation = (e) => e.stopPropagation();
 
   const handleSubmit = async () => {
-
     if (commentText.trim() === "") {
       showValidationError("Please write your comment before submitting");
       return;
@@ -47,17 +46,7 @@ const ReviewPopup = ({ onClose, product, seller, setReloadComponent }) => {
       successToast("Your comment was successfully sent");
       handleClose();
     } catch (err) {
-      console.log(err);
-      toast.custom((t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
-        >
-          <FiX className="text-xl shrink-0" />
-          <span className="font-medium">{err.response.data.rating[0]}</span>
-        </div>
-      ));
+      errorToast(err.response.data.rating[0]);
     } finally {
       setIsSubmitting(false);
     }

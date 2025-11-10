@@ -4,9 +4,7 @@ import * as Yup from "yup";
 
 import { upgradeToSeller } from "../services/userAPIServices";
 
-import toast from "react-hot-toast";
-import { FiX } from "react-icons/fi";
-import { successToast } from "../utils/toast";
+import { errorToast, successToast } from "../utils/toast";
 import { useAtom } from "jotai";
 import { userAtom } from "../atoms/userAtom";
 
@@ -30,7 +28,7 @@ const UpgradeToSeller = () => {
     image: Yup.mixed().required("Please select an image"),
   });
 
-  if(!user) return
+  if (!user) return;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-300 to-cyan-100 p-4">
@@ -49,7 +47,7 @@ const UpgradeToSeller = () => {
             image: null,
           }}
           validationSchema={StoreSchema}
-          onSubmit={(values, { setSubmitting }) => {
+          onSubmit={(values) => {
             const formData = new FormData();
             formData.append("store_name", values.storeName);
             formData.append("description", values.description);
@@ -63,24 +61,11 @@ const UpgradeToSeller = () => {
                 navigate("/account/profile");
               })
               .catch((err) => {
-                console.error(err);
+                const errorMessage =
+                  err.response?.data?.store_name ||
+                  "Upgrade failed. Please try again.";
 
-                toast.custom((t) => (
-                  <div
-                    className={`${
-                      t.visible ? "animate-enter" : "animate-leave"
-                    } 
-      transform transition-all duration-300`}
-                  >
-                    <div className="bg-gradient-to-r from-red-600 to-rose-500 text-white px-6 py-4 rounded-xl shadow-lg border border-white/30 backdrop-blur-md flex items-center space-x-3">
-                      <FiX className="text-xl shrink-0" />
-                      <span className="font-medium">
-                        {err.response?.data?.store_name ||
-                          "Upgrade failed. Please try again."}
-                      </span>
-                    </div>
-                  </div>
-                ));
+                errorToast(errorMessage);            
               });
           }}
         >

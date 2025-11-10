@@ -9,8 +9,6 @@ import {
 } from "../../services/cartAPIServices";
 import { getProduct } from "../../services/productAPIServices";
 
-import toast from "react-hot-toast";
-
 import {
   FiShoppingCart,
   FiTrash2,
@@ -19,10 +17,9 @@ import {
   FiPlus,
   FiMinus,
   FiShield,
-  FiX,
   FiStar,
 } from "react-icons/fi";
-import { successToast } from "../../utils/toast";
+import { errorToast, successToast } from "../../utils/toast";
 
 const Cart = ({
   setRemoveProductPopup,
@@ -82,20 +79,10 @@ const Cart = ({
         )
       );
     } catch (error) {
-      toast.custom((t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
-          style={{ fontFamily: "Roboto" }}
-        >
-          <FiX className="text-xl shrink-0" />
-          <span className="font-medium">
-            {error.response?.data?.non_field_errors?.[0] ||
-              "You can't have more than 10"}
-          </span>
-        </div>
-      ));
+      const errorMessage =
+        error.response?.data?.non_field_errors?.[0] ||
+        "You can't have more than 10";
+      errorToast(errorMessage);
     }
   };
 

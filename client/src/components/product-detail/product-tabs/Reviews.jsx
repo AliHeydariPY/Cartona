@@ -15,7 +15,7 @@ import { LuReply } from "react-icons/lu";
 
 import EditPostPopup from "../../pop-ups/EditPostPopup";
 import DeletePostPopup from "../../pop-ups/DeletePostPopup";
-import { successToast } from "../../../utils/toast";
+import { errorToast, successToast } from "../../../utils/toast";
 
 const Reviews = ({
   productComments,
@@ -141,7 +141,7 @@ const Reviews = ({
         />
         <button
           onClick={() => {
-             if (commentText.trim() == "") {
+            if (commentText.trim() == "") {
               showValidationError(
                 "Please write your comment before submitting"
               );
@@ -162,20 +162,12 @@ const Reviews = ({
                 .catch((err) => {
                   setCommentText("");
                   setSelectedStars(1);
-                  toast.custom((t) => (
-                    <div
-                      className={`${
-                        t.visible ? "animate-enter" : "animate-leave"
-                      } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
-                    >
-                      <FiX className="text-xl shrink-0" />
-                      <span className="font-medium">
-                        {err.response.data.detail == "Refresh token not found."
-                          ? "To submit a review, first log in to your account"
-                          : err.response.data.detail}
-                      </span>
-                    </div>
-                  ));
+                  const errorMessage =
+                    err.response.data.detail == "Refresh token not found."
+                      ? "To submit a review, first log in to your account"
+                      : err.response.data.detail;
+
+                  errorToast(errorMessage);
                 });
             }
           }}
