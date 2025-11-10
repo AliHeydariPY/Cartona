@@ -29,8 +29,7 @@ const Questions = ({
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [showDeletePopup, setShowDeletePopup] = useState(false);
 
-  const [visibleCount, setVisibleCount] = useState(6);
-
+  const [visibleCount, setVisibleCount] = useState(5);
 
   const showValidationError = (context) => {
     toast.custom((t) => (
@@ -99,12 +98,12 @@ const Questions = ({
                       successToast("Your question was successfully sent");
                     })
                     .catch((err) => {
-                      const errorMessage  =
+                      const errorMessage =
                         err.response.data.detail == "Refresh token not found."
                           ? "To ask a question, first log in to your account"
                           : err.response.data.detail;
 
-                      errorToast(errorMessage );
+                      errorToast(errorMessage);
                     });
                 } else {
                   showValidationError(
@@ -130,12 +129,12 @@ const Questions = ({
                     successToast("Your question was successfully sent");
                   })
                   .catch((err) => {
-                    const errorMessage  =
+                    const errorMessage =
                       err.response.data.detail == "Refresh token not found."
                         ? "To ask a question, first log in to your account"
                         : err.response.data.detail;
 
-                    errorToast(errorMessage );
+                    errorToast(errorMessage);
                   });
               } else {
                 showValidationError(
@@ -151,9 +150,9 @@ const Questions = ({
       </motion.div>
 
       <motion.div variants={itemVariants}>
-        <div className="space-y-4 sm:space-y-3 mt-5 sm:mt-6">
+        <div className="space-y-3 xs:space-y-4 mt-4 xs:mt-5 sm:mt-6">
           {productQuestions.length === 0 ? (
-            <div className="text-blue-600">
+            <div className="text-blue-600 text-sm xs:text-base text-center py-4 xs:py-6">
               No questions have been asked yet.
             </div>
           ) : (
@@ -163,25 +162,37 @@ const Questions = ({
               return (
                 <div
                   key={faq.id}
-                  className={`p-3 sm:p-4 border rounded-lg sm:rounded-xl shadow space-y-1 sm:space-y-2 transition ${
+                  className={`p-3 xs:p-4 border rounded-lg sm:rounded-xl shadow-sm space-y-2 xs:space-y-3 transition-all duration-300 ${
                     isUserQuestion
                       ? "bg-blue-100/50 border-2 border-blue-400"
                       : "bg-blue-50/60 border-blue-200"
                   }`}
                 >
-                  <div className="flex items-center justify-between ">
-                    <p className="font-semibold text-blue-900 break-words whitespace-pre-wrap break-all">
-                      {faq.user}: {faq.question_text}
-                    </p>
-                    <div className="flex items-center gap-2">
+                  <div className="flex flex-col xs:flex-row xs:items-start xs:justify-between gap-2 xs:gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1 xs:mb-2">
+                        <span className="font-medium text-blue-800 text-sm xs:text-base truncate">
+                          {faq.user}
+                        </span>
+                        <span className="text-blue-600 hidden xs:inline">
+                          :
+                        </span>
+                      </div>
+                      <p className="text-blue-900 text-sm xs:text-base leading-relaxed whitespace-pre-wrap break-words word-break-break-all overflow-hidden">
+                        {faq.question_text}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-1 xs:gap-2 self-end xs:self-start flex-shrink-0">
                       {isUserQuestion && (
-                        <span className="px-2 py-1 text-xs font-bold rounded-full bg-blue-600 text-white">
+                        <span className="px-2 py-1 text-xs font-bold rounded-full bg-blue-600 text-white whitespace-nowrap">
                           Your Question
                         </span>
                       )}
+
                       {user[0].username == seller.user && !faq.answer_text && (
                         <button
-                          className="p-2 cursor-pointer rounded-full hover:bg-blue-100 text-blue-600 transition-colors duration-300"
+                          className="p-1.5 xs:p-2 cursor-pointer rounded-full hover:bg-blue-100 text-blue-600 transition-colors duration-300 flex-shrink-0"
                           onClick={() => {
                             setUserPost({
                               id: faq.id,
@@ -190,13 +201,18 @@ const Questions = ({
                             });
                             setShowAnswerPopup(true);
                           }}
+                          title="Answer question"
                         >
-                          <RiQuestionAnswerLine size={18} />
+                          <RiQuestionAnswerLine
+                            size={16}
+                            className="xs:size-[18px]"
+                          />
                         </button>
                       )}
+
                       {isUserQuestion && (
                         <button
-                          className="p-2 cursor-pointer rounded-full hover:bg-blue-100 text-blue-600 transition-colors duration-300"
+                          className="p-1.5 xs:p-2 cursor-pointer rounded-full hover:bg-blue-100 text-blue-600 transition-colors duration-300 flex-shrink-0"
                           onClick={() => {
                             setUserPost({
                               id: faq.id,
@@ -205,13 +221,15 @@ const Questions = ({
                             });
                             setShowEditPopup(true);
                           }}
+                          title="Edit question"
                         >
-                          <FiEdit3 size={18} />
+                          <FiEdit3 size={16} className="xs:size-[18px]" />
                         </button>
                       )}
-                      {user[0].username == seller.user || isUserQuestion ? (
+
+                      {(user[0].username == seller.user || isUserQuestion) && (
                         <button
-                          className="p-2 cursor-pointer rounded-full hover:bg-rose-100 text-rose-500 transition-colors duration-300"
+                          className="p-1.5 xs:p-2 cursor-pointer rounded-full hover:bg-rose-100 text-rose-500 transition-colors duration-300 flex-shrink-0"
                           onClick={() => {
                             setUserPost({
                               id: faq.id,
@@ -220,19 +238,20 @@ const Questions = ({
                             });
                             setShowDeletePopup(true);
                           }}
+                          title="Delete question"
                         >
-                          <FiTrash2 size={18} />
+                          <FiTrash2 size={16} className="xs:size-[18px]" />
                         </button>
-                      ) : null}
+                      )}
                     </div>
                   </div>
 
                   {faq.answer_text && (
-                    <div className="flex items-start gap-2 mt-1 sm:mt-2">
-                      <span className="px-2 py-1 text-xs font-semibold bg-blue-200 text-blue-800 rounded-lg">
+                    <div className="flex flex-col xs:flex-row xs:items-start gap-2 xs:gap-3 mt-2 xs:mt-3 pt-2 xs:pt-3 border-t border-blue-200">
+                      <span className="px-2 py-1 text-xs font-semibold bg-blue-200 text-blue-800 rounded-lg whitespace-nowrap flex-shrink-0 self-start">
                         Storekeeper
                       </span>
-                      <p className="text-blue-700 text-sm mt-0.5">
+                      <p className="text-blue-700 text-sm xs:text-base leading-relaxed whitespace-pre-wrap break-words word-break-break-all flex-1">
                         {faq.answer_text}
                       </p>
                     </div>
@@ -241,25 +260,26 @@ const Questions = ({
               );
             })
           )}
+
           {productQuestions.length > 5 && (
-          <div className="flex justify-center pt-3 mt-5 border-t border-blue-400 ">
-            {visibleCount < productQuestions.length ? (
-              <button
-                onClick={() => setVisibleCount(visibleCount + 6)}
-                className="px-4 py-2 cursor-pointer rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-300"
-              >
-                Show more
-              </button>
-            ) : (
-              <button
-                onClick={() => setVisibleCount(6)}
-                className="px-4 py-2 cursor-pointer rounded-lg border border-blue-400 text-blue-600 hover:bg-blue-50 transition-colors duration-300"
-              >
-                Show less
-              </button>
-            )}
-          </div>
-        )}
+            <div className="flex justify-center pt-3 xs:pt-4 mt-4 xs:mt-5 border-t border-blue-300">
+              {visibleCount < productQuestions.length ? (
+                <button
+                  onClick={() => setVisibleCount(visibleCount + 5)}
+                  className="px-4 xs:px-6 py-2 cursor-pointer rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-300 text-sm xs:text-base font-medium"
+                >
+                  Show more questions
+                </button>
+              ) : (
+                <button
+                  onClick={() => setVisibleCount(5)}
+                  className="px-4 xs:px-6 py-2 cursor-pointer rounded-lg border border-blue-400 text-blue-600 hover:bg-blue-50 transition-colors duration-300 text-sm xs:text-base font-medium"
+                >
+                  Show less
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </motion.div>
 

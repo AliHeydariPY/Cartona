@@ -182,42 +182,51 @@ const Reviews = ({
           const isUserReview = comment.user == user[0].username;
 
           return (
-            <div key={comment.id} className="space-y-1 sm:space-y-2 ">
+            <div key={comment.id} className="space-y-2 xs:space-y-3">
               <div
-                className={`p-3 sm:p-4 rounded-lg sm:rounded-xl border shadow-sm ${
+                className={`p-3 xs:p-4 rounded-lg sm:rounded-xl border shadow-sm ${
                   isUserReview
-                    ? "bg-blue-100/50 border-2 border-blue-400 "
+                    ? "bg-blue-100/50 border-2 border-blue-400"
                     : "bg-blue-50/60 border-blue-200"
                 }`}
               >
-                <div className="flex justify-between mb-1 sm:mb-2">
-                  <div className="flex items-center">
-                    <span className="font-semibold text-blue-800 mr-2">
-                      {comment.user}
-                    </span>
-                    <div className="flex mb-0.5">
-                      {[...Array(5)].map((_, i) => (
-                        <FiStar
-                          key={i}
-                          size={16}
-                          className={`${
-                            i < comment.rating
-                              ? "text-yellow-500 fill-yellow-500"
-                              : "text-gray-300 fill-gray-300"
-                          }`}
-                        />
-                      ))}
+                <div className="flex flex-col xs:flex-row xs:items-start xs:justify-between gap-2 xs:gap-3 mb-2 xs:mb-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1 xs:mb-2">
+                      <span className="font-semibold text-blue-800 text-sm xs:text-base truncate">
+                        {comment.user}
+                      </span>
+
+                      <div className="flex items-center gap-2">
+                        <div className="flex mb-0.5">
+                          {[...Array(5)].map((_, i) => (
+                            <FiStar
+                              key={i}
+                              size={14}
+                              className={`xs:size-[16px] ${
+                                i < comment.rating
+                                  ? "text-yellow-500 fill-yellow-500"
+                                  : "text-gray-300 fill-gray-300"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-xs text-blue-500 whitespace-nowrap">
+                          {comment.updated_time}
+                        </span>
+                      </div>
                     </div>
-                    <span className="text-xs ml-3 text-blue-500">
-                      {comment.updated_time}
-                    </span>
+
+                    <div className="text-blue-700 text-sm xs:text-base leading-relaxed whitespace-pre-wrap break-words word-break-break-all">
+                      {comment.text}
+                    </div>
                   </div>
-                  <div className="space-x-2">
+
+                  <div className="flex items-center gap-1 xs:gap-2 self-end xs:self-start flex-shrink-0">
                     {isUserReview && (
                       <button
-                        className="p-2 cursor-pointer rounded-full hover:bg-blue-100 text-blue-600 transition-colors duration-300"
+                        className="p-1.5 xs:p-2 cursor-pointer rounded-full hover:bg-blue-100 text-blue-600 transition-colors duration-300 flex-shrink-0"
                         onClick={() => {
-                          console.log(comment);
                           setUserPost({
                             id: comment.id,
                             type: "Review",
@@ -226,13 +235,14 @@ const Reviews = ({
                           });
                           setShowEditPopup(true);
                         }}
+                        title="Edit review"
                       >
-                        <FiEdit3 size={18} />
+                        <FiEdit3 size={16} className="xs:size-[18px]" />
                       </button>
                     )}
                     {isUserReview && (
                       <button
-                        className="p-2 cursor-pointer rounded-full hover:bg-rose-100 text-rose-500 transition-colors duration-300"
+                        className="p-1.5 xs:p-2 cursor-pointer rounded-full hover:bg-rose-100 text-rose-500 transition-colors duration-300 flex-shrink-0"
                         onClick={() => {
                           setUserPost({
                             id: comment.id,
@@ -241,34 +251,31 @@ const Reviews = ({
                           });
                           setShowDeletePopup(true);
                         }}
+                        title="Delete review"
                       >
-                        <FiTrash2 size={18} />
+                        <FiTrash2 size={16} className="xs:size-[18px]" />
                       </button>
                     )}
                   </div>
                 </div>
-                <div
-                  style={{ whiteSpace: "pre-wrap" }}
-                  className="text-blue-700 text-sm break-words whitespace-pre-wrap"
-                >
-                  {comment.text}
-                </div>
-                <div className="flex justify-between">
+
+                <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between gap-2 xs:gap-4 mt-2 xs:mt-3">
                   <button
                     onClick={() => handleReply(comment.id)}
-                    className="mt-1 sm:mt-2 cursor-pointer flex items-center text-blue-600 text-sm hover:text-blue-800 transition-colors"
+                    className="cursor-pointer flex items-center text-blue-600 text-xs xs:text-sm hover:text-blue-800 transition-colors self-start"
                   >
                     <LuReply
                       className="mr-1"
-                      size={16}
+                      size={14}
                       style={{ transform: "rotate(180deg)" }}
-                    />{" "}
+                    />
                     Reply
                   </button>
+
                   {comment.replies && comment.replies.length > 0 && (
                     <button
                       onClick={() => toggleReplies(comment.id)}
-                      className="mt-2 cursor-pointer text-blue-600 text-sm hover:text-blue-800 transition-colors"
+                      className="cursor-pointer text-blue-600 text-xs xs:text-sm hover:text-blue-800 transition-colors self-start xs:self-auto"
                     >
                       {openReplies === comment.id
                         ? "Hide Replies"
@@ -285,7 +292,7 @@ const Reviews = ({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.3 }}
-                    className="ml-3 sm:ml-6 mt-1 sm:mt-2 bg-white border border-blue-200 rounded-lg sm:rounded-lg p-2 sm:p-3 shadow-md"
+                    className="ml-2 xs:ml-4 sm:ml-6 mt-1 xs:mt-2 bg-white border border-blue-200 rounded-lg p-2 xs:p-3 shadow-md"
                   >
                     <textarea
                       ref={replyInputRef}
@@ -293,12 +300,12 @@ const Reviews = ({
                       value={replyText}
                       onChange={(e) => setReplyText(e.target.value)}
                       placeholder="Write your reply..."
-                      className="w-full p-1 sm:p-2 border border-blue-300 rounded-lg sm:rounded-lg focus:ring-1 focus:ring-blue-400 focus:outline-none text-blue-900 transition-all duration-300"
+                      className="w-full p-2 xs:p-3 border border-blue-300 rounded-lg focus:ring-1 focus:ring-blue-400 focus:outline-none text-blue-900 text-sm xs:text-base transition-all duration-300 resize-none"
                     />
-                    <div className="flex justify-end mt-1 sm:mt-2 space-x-1 sm:space-x-2">
+                    <div className="flex justify-end mt-2 xs:mt-3 gap-2">
                       <button
                         onClick={() => setReplyingTo(null)}
-                        className="px-2 py-1 cursor-pointer rounded-md border border-gray-300 text-gray-600 hover:bg-gray-100 text-xs sm:text-sm transition-colors duration-300"
+                        className="px-3 xs:px-4 py-1.5 xs:py-2 cursor-pointer rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100 text-xs xs:text-sm transition-colors duration-300"
                       >
                         Cancel
                       </button>
@@ -307,9 +314,9 @@ const Reviews = ({
                           sendReply(comment.id);
                           setReloadComponent(!reloadComponent);
                         }}
-                        className="px-3 py-1 cursor-pointer rounded-md bg-gradient-to-r from-blue-600 to-cyan-500 text-white hover:from-blue-700 hover:to-cyan-600 text-xs sm:text-sm transition-colors duration-300"
+                        className="px-3 xs:px-4 py-1.5 xs:py-2 cursor-pointer rounded-lg bg-gradient-to-r from-blue-600 to-cyan-500 text-white hover:from-blue-700 hover:to-cyan-600 text-xs xs:text-sm transition-colors duration-300 font-medium"
                       >
-                        Send
+                        Send Reply
                       </button>
                     </div>
                   </motion.div>
@@ -325,36 +332,40 @@ const Reviews = ({
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.3 }}
-                      className="ml-3 sm:ml-6 space-y-1 sm:space-y-2 mt-1 sm:mt-2"
+                      className="ml-2 xs:ml-4 sm:ml-6 space-y-2 xs:space-y-3 mt-2 xs:mt-3"
                     >
                       {comment.replies.map((reply) => {
-                        console.log(reply);
                         const isUserReply = reply.user == user[0].username;
 
                         return (
                           <div
                             key={reply.id}
-                            className={`p-2 sm:p-3 border rounded-lg sm:rounded-lg shadow-sm ${
+                            className={`p-2 xs:p-3 border rounded-lg shadow-sm ${
                               isUserReply
-                                ? "bg-blue-100/40 border-2 border-blue-300 "
+                                ? "bg-blue-100/40 border-2 border-blue-300"
                                 : "bg-white border-blue-200"
                             }`}
                           >
-                            <div className="flex justify-between mb-1">
-                              <div className="flex items-center">
-                                <span className="font-medium text-blue-700 text-xs sm:text-sm">
-                                  User {reply.user}
-                                </span>
-                                <span className="text-xs text-blue-400 ml-3">
-                                  {reply.updated_time}
-                                </span>
+                            <div className="flex flex-col xs:flex-row xs:items-start xs:justify-between gap-2 xs:gap-3">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1 xs:mb-2">
+                                  <span className="font-medium text-blue-700 text-xs xs:text-sm">
+                                    User {reply.user}
+                                  </span>
+                                  <span className="text-xs text-blue-400 whitespace-nowrap">
+                                    {reply.updated_time}
+                                  </span>
+                                </div>
+                                <p className="text-blue-800 text-sm xs:text-base leading-relaxed whitespace-pre-wrap break-words word-break-break-all">
+                                  {reply.text}
+                                </p>
                               </div>
-                              <div className="space-x-2">
-                                {isUserReply && (
+
+                              {isUserReply && (
+                                <div className="flex items-center gap-1 xs:gap-2 self-end xs:self-start flex-shrink-0">
                                   <button
-                                    className="p-2 cursor-pointer rounded-full hover:bg-blue-100 text-blue-600 transition-colors duration-300"
+                                    className="p-1 xs:p-1.5 cursor-pointer rounded-full hover:bg-blue-100 text-blue-600 transition-colors duration-300"
                                     onClick={() => {
-                                      console.log(comment);
                                       setUserPost({
                                         id: reply.id,
                                         type: "Reply",
@@ -362,13 +373,15 @@ const Reviews = ({
                                       });
                                       setShowEditPopup(true);
                                     }}
+                                    title="Edit reply"
                                   >
-                                    <FiEdit3 size={18} />
+                                    <FiEdit3
+                                      size={14}
+                                      className="xs:size-[16px]"
+                                    />
                                   </button>
-                                )}
-                                {isUserReply && (
                                   <button
-                                    className="p-2 cursor-pointer rounded-full hover:bg-rose-100 text-rose-500 transition-colors duration-300"
+                                    className="p-1 xs:p-1.5 cursor-pointer rounded-full hover:bg-rose-100 text-rose-500 transition-colors duration-300"
                                     onClick={() => {
                                       setUserPost({
                                         id: reply.id,
@@ -377,18 +390,16 @@ const Reviews = ({
                                       });
                                       setShowDeletePopup(true);
                                     }}
+                                    title="Delete reply"
                                   >
-                                    <FiTrash2 size={18} />
+                                    <FiTrash2
+                                      size={14}
+                                      className="xs:size-[16px]"
+                                    />
                                   </button>
-                                )}
-                              </div>
+                                </div>
+                              )}
                             </div>
-                            <p
-                              style={{ whiteSpace: "pre-wrap" }}
-                              className="text-blue-800 text-sm break-words whitespace-pre-wrap"
-                            >
-                              {reply.text}
-                            </p>
                           </div>
                         );
                       })}
@@ -398,19 +409,20 @@ const Reviews = ({
             </div>
           );
         })}
+
         {productComments.length > 5 && (
-          <div className="flex justify-center pt-3 mt-5 border-t border-blue-400 ">
+          <div className="flex justify-center pt-3 xs:pt-4 mt-4 xs:mt-5 border-t border-blue-300">
             {visibleCount < productComments.length ? (
               <button
                 onClick={() => setVisibleCount(visibleCount + 5)}
-                className="px-4 py-2 cursor-pointer rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-300"
+                className="px-4 xs:px-6 py-2 cursor-pointer rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-300 text-sm xs:text-base font-medium"
               >
-                Show more
+                Show more reviews
               </button>
             ) : (
               <button
                 onClick={() => setVisibleCount(5)}
-                className="px-4 py-2 cursor-pointer rounded-lg border border-blue-400 text-blue-600 hover:bg-blue-50 transition-colors duration-300"
+                className="px-4 xs:px-6 py-2 cursor-pointer rounded-lg border border-blue-400 text-blue-600 hover:bg-blue-50 transition-colors duration-300 text-sm xs:text-base font-medium"
               >
                 Show less
               </button>
