@@ -1,14 +1,12 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import toast from "react-hot-toast";
 
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { productFormSchema } from "../../../validations/productForm";
 import ProductNotFound from "../../../components/ProductNotFound";
 
 import {
-  FiX,
   FiTag,
   FiImage,
   FiDollarSign,
@@ -35,7 +33,7 @@ import {
   getCategory,
   editProduct,
 } from "../../../services/productAPIServices";
-import { successToast } from "../../../utils/toast";
+import { errorToast, successToast } from "../../../utils/toast";
 
 const EditProduct = () => {
   const { id } = useParams();
@@ -199,18 +197,7 @@ const EditProduct = () => {
                 successToast("The product was successfully updated");
               })
               .catch(() => {
-                toast.custom((t) => (
-                  <div
-                    className={`${
-                      t.visible ? "animate-enter" : "animate-leave"
-                    } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
-                  >
-                    <FiX className="text-xl shrink-0" />
-                    <span className="font-medium">
-                      There was a problem updating the product
-                    </span>
-                  </div>
-                ));
+                errorToast("There was a problem updating the product");
               });
           }}
         >

@@ -1,11 +1,10 @@
+import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { motion } from "framer-motion";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { FiTrash2, FiPlus, FiList, FiX } from "react-icons/fi";
+import { FiTrash2, FiPlus, FiList } from "react-icons/fi";
 
-import toast from "react-hot-toast";
 
 import {
   getProduct,
@@ -17,7 +16,7 @@ import { FaArrowLeft } from "react-icons/fa6";
 
 import DeleteFeaturePopup from "../../../components/pop-ups/DeleteFeaturePopup";
 import ProductNotFound from "../../../components/ProductNotFound";
-import { successToast } from "../../../utils/toast";
+import { errorToast, successToast } from "../../../utils/toast";
 
 const ProductFeatures = ({ reloadComponent, setReloadComponent }) => {
   const { id } = useParams();
@@ -65,16 +64,7 @@ const ProductFeatures = ({ reloadComponent, setReloadComponent }) => {
   const handleRemoveFeature = () => {
     deleteFeature(selectedFeature.id).then(() => {
       setReloadComponent(!reloadComponent);
-      toast.custom((t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } bg-gradient-to-r from-red-600 to-rose-500 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
-        >
-          <FiX className="text-xl shrink-0" />
-          <span className="font-medium">Feature successfully removed</span>
-        </div>
-      ));
+      errorToast("Feature successfully removed");
     });
   };
 

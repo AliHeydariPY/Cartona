@@ -1,9 +1,8 @@
 import { motion, transformValueTypes } from "framer-motion";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
 
-import { FiStar, FiHeart, FiEye, FiX } from "react-icons/fi";
+import { FiStar, FiHeart, FiEye } from "react-icons/fi";
 import { FaHeart, FaClock } from "react-icons/fa";
 
 import { PiLightningFill } from "react-icons/pi";
@@ -21,6 +20,7 @@ import {
   deleteFavorite,
   getFavorites,
 } from "../services/cartAPIServices";
+import { errorToast } from "../utils/toast";
 
 export default function SearchPage() {
   const { query } = useParams();
@@ -47,7 +47,9 @@ export default function SearchPage() {
           console.warn("User not logged in, skipping favorites...");
         }
 
-        const res = query ? await searchProduct(query) : await getListProducts();
+        const res = query
+          ? await searchProduct(query)
+          : await getListProducts();
 
         if (res.data[0]) {
           setFavorites(favorites);
@@ -56,12 +58,9 @@ export default function SearchPage() {
         } else {
           setNotFound(true);
         }
-
       } catch (error) {
         setNotFound(true);
       }
-
-      
     };
 
     fetchProducts();
@@ -72,16 +71,7 @@ export default function SearchPage() {
       await deleteFavorite(favoriteId);
       setFavorites((prev) => prev.filter((item) => item.id != favoriteId));
     } catch {
-      toast.custom((t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
-        >
-          <FiX className="text-xl shrink-0" />
-          <span className="font-medium">Failed to remove from favorites</span>
-        </div>
-      ));
+      errorToast("Failed to remove from favorites");
     }
   };
 
@@ -90,16 +80,7 @@ export default function SearchPage() {
       const response = await addFavorite(productId);
       setFavorites((prev) => [...prev, response.data]);
     } catch {
-      toast.custom((t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
-        >
-          <FiX className="text-xl shrink-0" />
-          <span className="font-medium">Failed to add to favorites</span>
-        </div>
-      ));
+      errorToast("Failed to add to favorites");
     }
   };
 

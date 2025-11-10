@@ -1,7 +1,7 @@
 import { toast } from "react-hot-toast";
-import { FiCheckCircle } from "react-icons/fi";
+import { FiCheckCircle, FiX } from "react-icons/fi";
 
-export const successToast = (value) => {
+export const successToast = (message) => {
   toast.custom((t) => (
     <div
       className={`${
@@ -12,17 +12,30 @@ export const successToast = (value) => {
         <div className="bg-blue-500/20 p-2 rounded-full">
           <FiCheckCircle className="text-xl text-white" />
         </div>
-        {value.title ? (
+        {message.title ? (
           <div>
-            <p className="font-medium">{value.title}</p>
-            <p className="text-sm opacity-90">{value.text}</p>
+            <p className="font-medium">{message.title}</p>
+            <p className="text-sm opacity-90">{message.text}</p>
           </div>
         ) : (
           <div>
-            <p className="font-medium">{value}</p>
+            <p className="font-medium">{message}</p>
           </div>
         )}
       </div>
+    </div>
+  ));
+};
+
+export const errorToast = (text) => {
+  toast.custom((t) => (
+    <div
+      className={`${
+        t.visible ? "animate-enter" : "animate-leave"
+      } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
+    >
+      <FiX className="text-xl shrink-0" />
+      <span className="font-medium">{text || "There is a problem"}</span>
     </div>
   ));
 };

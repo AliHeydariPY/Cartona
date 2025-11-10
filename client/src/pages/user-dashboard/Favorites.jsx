@@ -1,8 +1,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
 
-import { FiHeart, FiX, FiCheckCircle, FiStar } from "react-icons/fi";
+import { FiHeart, FiStar } from "react-icons/fi";
 
 import { FaHeart, FaClock } from "react-icons/fa";
 import { IoCart, IoCartOutline } from "react-icons/io5";
@@ -17,6 +16,7 @@ import {
   getFavorites,
 } from "../../services/cartAPIServices";
 import { getProduct } from "../../services/productAPIServices";
+import { errorToast } from "../../utils/toast";
 
 const Favorites = ({
   setAddToCartPopup,
@@ -61,16 +61,7 @@ const Favorites = ({
         setReloadComponent(!reloadComponent);
       });
     } catch {
-      toast.custom((t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
-        >
-          <FiX className="text-xl shrink-0" />
-          <span className="font-medium">Failed to add product to cart</span>
-        </div>
-      ));
+      errorToast("Failed to add product to cart");
     }
   };
 
@@ -94,18 +85,7 @@ const Favorites = ({
       });
       setRemoveProductPopup(true);
     } catch {
-      toast.custom((t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
-        >
-          <FiX className="text-xl shrink-0" />
-          <span className="font-medium">
-            Failed to remove product from cart
-          </span>
-        </div>
-      ));
+      errorToast("Failed to remove product from cart");
     }
   };
 
@@ -113,32 +93,9 @@ const Favorites = ({
     try {
       await deleteFavorite(favoriteId);
       setFavorites((prev) => prev.filter((item) => item.id != favoriteId));
-
-      toast.custom((t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
-        >
-          <div className="bg-blue-500/20 p-2 rounded-full">
-            <FiCheckCircle className="text-xl text-white" />
-          </div>
-          <div>
-            <p className="font-medium">Removed from favorites</p>
-          </div>
-        </div>
-      ));
+      errorToast("Removed from favorites");
     } catch {
-      toast.custom((t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
-        >
-          <FiX className="text-xl shrink-0" />
-          <span className="font-medium">Failed to remove from favorites</span>
-        </div>
-      ));
+      errorToast("Failed to remove from favorites");
     }
   };
 

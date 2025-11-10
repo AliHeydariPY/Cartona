@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { motion } from "framer-motion";
-import toast from "react-hot-toast";
 
 import { ChangeUserPassword } from "../../../services/userAPIServices";
 import {
@@ -11,10 +10,9 @@ import {
   FiEyeOff,
   FiCheckCircle,
   FiKey,
-  FiX,
 } from "react-icons/fi";
 import { FaArrowLeft } from "react-icons/fa";
-import { successToast } from "../../../utils/toast";
+import { errorToast, successToast } from "../../../utils/toast";
 import { useAtom } from "jotai";
 import { userAtom } from "../../../atoms/userAtom";
 import { useNavigate } from "react-router-dom";
@@ -59,22 +57,12 @@ const ChangePassword = () => {
         resetForm();
       })
       .catch((err) => {
-        console.log(err);
-        toast.custom((t) => (
-          <div
-            className={`${
-              t.visible ? "animate-enter" : "animate-leave"
-            } bg-gradient-to-r from-red-500 to-rose-600 text-white px-4 py-3 sm:px-6 sm:py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
-            style={{ fontFamily: "Roboto" }}
-          >
-            <FiX className="text-lg sm:text-xl shrink-0" />
-            <span className="font-medium text-sm sm:text-base">
-              {err.response?.data?.old_password ||
-                err.response?.data?.detail ||
-                "There is a problem. Please try again later"}
-            </span>
-          </div>
-        ));
+        const errorMessage  =
+          err.response?.data?.old_password ||
+          err.response?.data?.detail ||
+          "There is a problem. Please try again later";
+        errorToast(errorMessage );
+
         setSubmitting(false);
         resetForm();
       });
@@ -91,23 +79,20 @@ const ChangePassword = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
           <div className="flex flex-col sm:flex-row">
             <div className="flex items-center ">
-
-
-            <FiKey
-              className="text-cyan-500 mr-2 sm:mr-3 flex-shrink-0"
-              size={20}
+              <FiKey
+                className="text-cyan-500 mr-2 sm:mr-3 flex-shrink-0"
+                size={20}
               />
-            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-blue-800">
-              Change Password
-            </h2>
-              </div>
+              <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-blue-800">
+                Change Password
+              </h2>
+            </div>
             <div className="sm:ml-3 mt-1 text-xs sm:text-sm text-blue-600 bg-blue-100 px-2 sm:px-3 py-1 rounded-full flex items-center self-start sm:self-auto">
               <span className="mb-0.5">@</span>
               {user?.username}
             </div>
           </div>
           <div className="flex items-center gap-2 ">
-            
             <button
               onClick={() => navigate(-1)}
               className="flex items-center justify-center w-full sm:w-auto cursor-pointer sm:mb-0 gap-2 px-3 sm:px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors duration-300 text-sm sm:text-base"
@@ -171,7 +156,6 @@ const ChangePassword = () => {
                 </ErrorMessage>
               </div>
 
-
               <div className="space-y-1 sm:space-y-2">
                 <label className="flex items-center text-blue-800 font-medium text-sm sm:text-base">
                   <FiLock className="mr-1 sm:mr-2 flex-shrink-0" size={14} />
@@ -213,7 +197,6 @@ const ChangePassword = () => {
                   )}
                 </ErrorMessage>
               </div>
-
 
               <div className="space-y-1 sm:space-y-2">
                 <label className="flex items-center text-blue-800 font-medium text-sm sm:text-base">
@@ -284,7 +267,6 @@ const ChangePassword = () => {
                   </li>
                 </ul>
               </div>
-
 
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-3 sm:pt-4">
                 <button

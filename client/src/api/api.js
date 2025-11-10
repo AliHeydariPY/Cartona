@@ -48,7 +48,6 @@ api.interceptors.request.use((config) => {
     accessToken = currentToken;
   }
 
-  console.log("🔑 accessToken in request:", accessToken);
   if (accessToken) {
     config.headers["Authorization"] = `Bearer ${accessToken}`;
   }
@@ -85,7 +84,6 @@ api.interceptors.response.use(
         accessToken = res.data.access;
 
         localStorage.setItem("accessToken", accessToken);
-        console.log("🚀 New accessToken:", accessToken);
         store.set(tokenAtom, accessToken);
         store.set(authAtom, true);
 

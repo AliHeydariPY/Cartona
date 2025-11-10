@@ -1,18 +1,17 @@
+import { motion } from "framer-motion";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import toast from "react-hot-toast";
-import { FiCheckCircle, FiX, FiEye, FiEyeOff, FiLogIn } from "react-icons/fi";
+import { FiX, FiEye, FiEyeOff, FiLogIn } from "react-icons/fi";
 import { login } from "../services/userAPIServices";
 import { useAtom } from "jotai";
 import { authAtom } from "../atoms/authAtom";
-import { successToast } from "../utils/toast";
+import { errorToast, successToast } from "../utils/toast";
 import { fetchUserData } from "../utils/fetchUserData";
 
 const LoginForm = () => {
-  const [isAuth, setIsAuth] = useAtom(authAtom);
+  const [isAuth] = useAtom(authAtom);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
@@ -79,21 +78,9 @@ const LoginForm = () => {
 
                 // navigate("/account/profile");
               })
-              .catch((err) => {
-                toast.custom((t) => (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={`${
-                      t.visible ? "animate-enter" : "animate-leave"
-                    } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg backdrop-blur-md flex items-center space-x-3`}
-                  >
-                    <FiX className="text-xl shrink-0" />
-                    <span className="font-medium">
-                      Username or password is incorrect
-                    </span>
-                  </motion.div>
-                ));
+              .catch(() => {
+                errorToast("Username or password is incorrect");
+
                 setSubmitting(false);
               });
           }}

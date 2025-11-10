@@ -2,16 +2,15 @@ import { useNavigate } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { motion } from "framer-motion";
-import toast from "react-hot-toast";
+
 import {
-  FiX,
   FiMapPin,
   FiEdit3,
   FiImage,
   FiUser,
   FiArrowLeft,
 } from "react-icons/fi";
-import { successToast } from "../../../utils/toast";
+import { errorToast, successToast } from "../../../utils/toast";
 import { useAtom } from "jotai";
 import { userAtom } from "../../../atoms/userAtom";
 import { MdStorefront } from "react-icons/md";
@@ -20,9 +19,6 @@ import {
   changeStoreInfo,
   getStorekeeper,
 } from "../../../services/userAPIServices";
-
-// You'll need to create this API service
-// import { updateSellerInfo } from "../services/userAPIServices";
 
 const StoreSetting = () => {
   const [user, setUser] = useAtom(userAtom);
@@ -51,11 +47,11 @@ const StoreSetting = () => {
     image: Yup.mixed()
       .nullable()
       .test("fileSize", "Image size must be less than 5MB", (value) => {
-        if (!value) return true; // No file is acceptable for update
+        if (!value) return true;
         return value.size <= 5 * 1024 * 1024;
       })
       .test("fileType", "Only image files are allowed", (value) => {
-        if (!value) return true; // No file is acceptable for update
+        if (!value) return true;
         return ["image/jpeg", "image/jpg", "image/png", "image/webp"].includes(
           value.type
         );
@@ -64,7 +60,6 @@ const StoreSetting = () => {
   console.log(storeInfo);
   if (!user || !storeInfo) return null;
 
-  // Pre-fill with existing seller data if available
   const initialValues = {
     storeName: storeInfo.store_name || "",
     description: storeInfo.description || "",
@@ -88,7 +83,6 @@ const StoreSetting = () => {
       .then((res) => {
         successToast("Store information updated successfully!");
 
-        // Update user atom with new store info
         setUser((prev) => ({
           ...prev,
           store: "new",
@@ -103,23 +97,14 @@ const StoreSetting = () => {
         // resetForm();
       })
       .catch((err) => {
-        console.error(err);
-        toast.custom((t) => (
-          <div
-            className={`${
-              t.visible ? "animate-enter" : "animate-leave"
-            } bg-gradient-to-r from-red-500 to-rose-600 text-white px-4 py-3 sm:px-6 sm:py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
-            style={{ fontFamily: "Roboto" }}
-          >
-            <FiX className="text-lg sm:text-xl shrink-0" />
-            <span className="font-medium text-sm sm:text-base">
-              {err.response?.data?.store_name ||
-                err.response?.data?.address ||
-                err.response?.data?.detail ||
-                "Update failed. Please try again."}
-            </span>
-          </div>
-        ));
+        const errorMessage =
+          err.response?.data?.store_name ||
+          err.response?.data?.address ||
+          err.response?.data?.detail ||
+          "Update failed. Please try again.";
+
+        errorToast(errorMessage);
+
         setSubmitting(false);
       });
   };
@@ -132,7 +117,6 @@ const StoreSetting = () => {
       className="lg:col-span-3"
     >
       <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-xl p-4 sm:p-6 2xl:p-8 border border-blue-400 hover:shadow-lg hover:shadow-blue-400/50 transition-all duration-300">
-        {/* Header Section */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
             <div className="flex items-center">
@@ -173,7 +157,6 @@ const StoreSetting = () => {
         >
           {({ setFieldValue, values, isSubmitting, errors, touched }) => (
             <Form className="space-y-4 sm:space-y-6">
-              {/* Store Name */}
               <div className="space-y-1 sm:space-y-2">
                 <label className="flex items-center text-blue-800 font-medium text-sm sm:text-base">
                   <FiEdit3 className="mr-1 sm:mr-2 flex-shrink-0" size={14} />
@@ -203,7 +186,6 @@ const StoreSetting = () => {
                 </ErrorMessage>
               </div>
 
-              {/* Store Description */}
               <div className="space-y-1 sm:space-y-2">
                 <label className="flex items-center text-blue-800 font-medium text-sm sm:text-base">
                   <FiEdit3 className="mr-1 sm:mr-2 flex-shrink-0" size={14} />
@@ -239,7 +221,6 @@ const StoreSetting = () => {
                 </div>
               </div>
 
-              {/* Store Address */}
               <div className="space-y-1 sm:space-y-2">
                 <label className="flex items-center text-blue-800 font-medium text-sm sm:text-base">
                   <FiMapPin className="mr-1 sm:mr-2 flex-shrink-0" size={14} />
@@ -270,14 +251,12 @@ const StoreSetting = () => {
                 </ErrorMessage>
               </div>
 
-              {/* Store Image */}
               <div className="space-y-1 sm:space-y-2">
                 <label className="flex items-center text-blue-800 font-medium text-sm sm:text-base">
                   <FiImage className="mr-1 sm:mr-2 flex-shrink-0" size={14} />
                   Store Image
                 </label>
                 <div className="space-y-3">
-                  {/* Current Image Preview */}
                   {user.store?.image && !values.image && (
                     <div className="flex items-center space-x-3 p-3 bg-blue-50/50 rounded-lg border border-blue-200">
                       <img
@@ -296,7 +275,6 @@ const StoreSetting = () => {
                     </div>
                   )}
 
-                  {/* New Image Upload */}
                   <div className="relative">
                     <input
                       id="image"
@@ -309,7 +287,6 @@ const StoreSetting = () => {
                       className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-blue-800 text-sm sm:text-base file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                     />
 
-                    {/* New Image Preview */}
                     {values.image && (
                       <div className="mt-3 p-3 bg-green-50/50 rounded-lg border border-green-200">
                         <p className="text-sm text-green-700 font-medium mb-2">
@@ -345,7 +322,6 @@ const StoreSetting = () => {
                 </p>
               </div>
 
-              {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-3 sm:pt-4">
                 <button
                   type="submit"
@@ -368,7 +344,6 @@ const StoreSetting = () => {
                 </button>
               </div>
 
-              {/* Information Note */}
               <div className="bg-blue-50/50 p-3 sm:p-4 rounded-lg border border-blue-200">
                 <p className="text-xs sm:text-sm font-medium text-blue-700 flex items-start">
                   <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2 mt-1.5 flex-shrink-0"></span>

@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
-import toast from "react-hot-toast";
-
 import {
   getCartProducts,
   addToCart,
@@ -17,7 +15,7 @@ import { FaHeart } from "react-icons/fa";
 import { IoCart, IoCartOutline } from "react-icons/io5";
 
 import ProductImageCarousel from "../ProductImageCarousel";
-import { successToast } from "../../utils/toast";
+import { errorToast, successToast } from "../../utils/toast";
 
 const ProductDisplay = ({
   product,
@@ -81,16 +79,7 @@ const ProductDisplay = ({
         setReloadComponent(!reloadComponent);
       });
     } catch {
-      toast.custom((t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
-        >
-          <FiX className="text-xl shrink-0" />
-          <span className="font-medium">Failed to add product to cart</span>
-        </div>
-      ));
+      errorToast("Failed to add product to cart");
     }
   };
 
@@ -113,18 +102,7 @@ const ProductDisplay = ({
       });
       setRemoveProductPopup(true);
     } catch {
-      toast.custom((t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
-        >
-          <FiX className="text-xl shrink-0" />
-          <span className="font-medium">
-            Failed to remove product from cart
-          </span>
-        </div>
-      ));
+      errorToast("Failed to remove product from cart");
     }
   };
 
@@ -133,16 +111,7 @@ const ProductDisplay = ({
       await deleteFavorite(favoriteId);
       setFavoriteEntry(undefined);
     } catch {
-      toast.custom((t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
-        >
-          <FiX className="text-xl shrink-0" />
-          <span className="font-medium">Failed to remove from favorites</span>
-        </div>
-      ));
+      errorToast("Failed to remove from favorites");
     }
   };
 
@@ -151,16 +120,7 @@ const ProductDisplay = ({
       const response = await addFavorite(productId);
       setFavoriteEntry(response.data);
     } catch {
-      toast.custom((t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
-        >
-          <FiX className="text-xl shrink-0" />
-          <span className="font-medium">Failed to add to favorites</span>
-        </div>
-      ));
+      errorToast("Failed to add to favorites");
     }
   };
 
@@ -325,15 +285,22 @@ const ProductDisplay = ({
               onClick={handleRemoveFromCart}
               className="flex-1 text-base md:text-sm lg:text-base cursor-pointer py-3 rounded-lg sm:rounded-xl font-semibold transition-colors duration-300 flex items-center justify-center bg-gradient-to-r from-red-600 to-rose-500 hover:from-red-700 hover:to-rose-700 text-white"
             >
-               <IoCart className="text-white mr-1.5 md:mr-1 lg:mr-1.5 mb-0.5" size={20} /> Remove
-              from Cart
+              <IoCart
+                className="text-white mr-1.5 md:mr-1 lg:mr-1.5 mb-0.5"
+                size={20}
+              />{" "}
+              Remove from Cart
             </button>
           ) : (
             <button
               onClick={handleAddToCart}
               className="flex-1 text-base md:text-sm lg:text-base cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white py-3 rounded-lg sm:rounded-xl font-semibold transition-colors duration-300 flex items-center justify-center"
             >
-              <IoCartOutline className="text-white mr-1.5 md:mr-1 lg:mr-1.5 mb-0.5" size={20} /> Add to Cart
+              <IoCartOutline
+                className="text-white mr-1.5 md:mr-1 lg:mr-1.5 mb-0.5"
+                size={20}
+              />{" "}
+              Add to Cart
             </button>
           )}
 
@@ -342,8 +309,8 @@ const ProductDisplay = ({
               onClick={() => handleRemoveFavorite(favoriteEntry.id)}
               className="flex-1 text-base md:text-sm lg:text-base cursor-pointer py-3 rounded-lg sm:rounded-xl font-semibold transition-colors duration-300 flex items-center justify-center bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white"
             >
-              <FaHeart className="mr-1.5 md:mr-0.5 lg:mr-1.5 mb-0.5" /> Remove from
-              Wishlist
+              <FaHeart className="mr-1.5 md:mr-0.5 lg:mr-1.5 mb-0.5" /> Remove
+              from Wishlist
             </button>
           ) : (
             <button
@@ -385,7 +352,6 @@ const ProductDisplay = ({
                 const currentUrl = window.location.href;
                 navigator.clipboard.writeText(currentUrl).then(() => {
                   successToast("Copied");
-                  
                 });
               }}
               className="p-2 rounded-full bg-blue-100 text-blue-600 cursor-pointer hover:bg-blue-200 transition-colors duration-300"

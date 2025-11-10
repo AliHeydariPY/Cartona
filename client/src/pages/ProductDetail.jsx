@@ -66,7 +66,6 @@ const ProductDetails = ({
 
         console.log(prodcutData);
         setProduct(prodcutData);
-        console.log("fdsfa");
 
         const seller = getStorekeeperById(selectedProduct.data.storekeeper);
         seller.then((res) => {
@@ -133,7 +132,7 @@ const ProductDetails = ({
                 <div className="flex items-start mb-0">
                   <span>
                     <IoCartOutline
-                      className="text-blue-600 mr-2 mt-2"
+                      className="text-blue-600 mr-2 mt-1 md:mt-2"
                       size={22}
                     />
                   </span>
