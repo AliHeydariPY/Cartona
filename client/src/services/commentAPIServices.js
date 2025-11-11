@@ -104,6 +104,12 @@ export const getPurchases = () => {
   return api.get(url);
 };
 
+
+export const deletePurchases = (chatID) => {
+  const url = `/comments-api/purchases/${chatID}/`;
+  return api.delete(url);
+}
+
 export const getPurchaseByPayment = (paymentID) => {
   const url = `/comments-api/purchases/payment/${paymentID}/`;
   return api.get(url);

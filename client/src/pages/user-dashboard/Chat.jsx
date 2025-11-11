@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { convertOffsetToTimes, motion, number } from "framer-motion";
 import { Portal } from "react-portal";
 import { FaRegCircleCheck } from "react-icons/fa6";
@@ -25,6 +25,7 @@ import {
   deleteMessagse,
   editMessage,
   getPurchases,
+  deletePurchases,
 } from "../../services/commentAPIServices";
 import { getStorekeeperById, getBuyer } from "../../services/userAPIServices";
 import { getProduct } from "../../services/productAPIServices";
@@ -33,17 +34,23 @@ import ChatSidebar from "./chats/ChatSidebar";
 import ChatInput from "./chats/ChatInput";
 import { useAtom } from "jotai";
 import { userAtom } from "../../atoms/userAtom";
+import DeleteChatPopup from "../../components/pop-ups/DeleteChatPopup";
+import { errorToast, successToast } from "../../utils/toast";
 
 const Chat = () => {
   const { chatID } = useParams();
-  const [user] = useAtom(userAtom)
+  const navigate = useNavigate();
+  const [user] = useAtom(userAtom);
   const [selectedChat, setSelectedChat] = useState(null);
-  const [showSidebar, setShowSidebar] = useState(window.innerWidth >= 1280 ? true : false);
+  const [showSidebar, setShowSidebar] = useState(
+    window.innerWidth >= 1280 ? true : false
+  );
   const [conversations, setConversations] = useState([]);
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
   const [emojiBox, setEmojiBox] = useState(false);
   const messagesEndRef = useRef(null);
+  const [deletePopup, setDeletePopup] = useState(null);
 
   useEffect(() => {
     const fetchPVs = async () => {
@@ -240,8 +247,7 @@ const Chat = () => {
   };
 
   const handleMessageClick = (messageId, senderId) => {
-    if (!isSelectionMode || senderId != user.username)
-      return;
+    if (!isSelectionMode || senderId != user.username) return;
     if (firstSelectMsg) {
       setFirstSelectMsg(false);
     } else {
@@ -264,11 +270,29 @@ const Chat = () => {
   };
 
   useEffect(() => {
-      document.addEventListener("click", handleClick);
+    document.addEventListener("click", handleClick);
     return () => {
       document.removeEventListener("click", handleClick);
     };
   }, []);
+
+  const handleDeleteChat = (chatId) => {
+    deletePurchases(chatId)
+      .then((res) => {
+        console.log(res);
+        setConversations((prev) =>
+          prev.filter((conversation) => {
+            return conversation.id != chatId;
+          })
+        );
+        successToast("Chat successfully deleted");
+        navigate("/account/chats");
+      })
+      .catch(() => {
+        errorToast("There is a problem");
+      });
+    console.log("Deleting chat:", chatId);
+  };
 
   return (
     <motion.div
@@ -296,7 +320,7 @@ const Chat = () => {
           <div className="w-10"></div>
         </div>
 
-        <div className="flex h-[700px] xl:h-[762px] 2xl:h-[785px]">
+        <div className="flex h-[700px] xl:h-[762px] 2xl:h-[780px]">
           <ChatSidebar
             conversations={conversations}
             setSelectedChat={setSelectedChat}
@@ -332,14 +356,12 @@ const Chat = () => {
                       <div className="flex items-center justify-between mb-1">
                         <div className="flex items-center space-x-2">
                           <h4 className="font-semibold text-blue-900 truncate max-w-[180px]">
-                            {selectedChat.buyer ==
-                            user?.username
+                            {selectedChat.buyer == user?.username
                               ? selectedChat.store.store_name
                               : selectedChat.buyer}
                           </h4>
                           <div className="flex items-center space-x-2">
-                            {selectedChat.buyer ==
-                              user?.username && (
+                            {selectedChat.buyer == user?.username && (
                               <span className="px-2 py-1 bg-gradient-to-r from-blue-600 to-cyan-500 text-white text-xs font-bold rounded-full flex items-center">
                                 <MdStorefront
                                   className="mr-1 mb-0.25"
@@ -387,6 +409,18 @@ const Chat = () => {
                   className="flex-1 overflow-y-auto p-4 bg-gradient-to-br from-blue-50/50 to-cyan-50/50 custom-chat-scroll"
                   ref={messagesContainerRef}
                 >
+                  {!selectedChat.chat_enabled && (
+                    <div className="fixed bottom-20 right-4 md:right-8 z-50">
+                      <button
+                        onClick={() => setDeletePopup(selectedChat)}
+                        className="bg-red-500 hover:bg-red-600 text-white p-3 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 flex items-center justify-center"
+                        title="Delete Chat"
+                      >
+                        <FiTrash2 size={20} />
+                      </button>
+                    </div>
+                  )}
+
                   {messages.map((message) => {
                     const dates = [message.edited_at, message.sent_at];
                     const comparison = dates.map((time) => {
@@ -439,8 +473,7 @@ const Chat = () => {
                           }`}
                         >
                           {isSelectionMode &&
-                            message.sender ==
-                              user?.username && (
+                            message.sender == user?.username && (
                               <div
                                 className={`absolute -left-2 -top-2 w-5 h-5 rounded-full flex items-center justify-center ${
                                   selectedMessages.includes(message.id)
@@ -463,8 +496,7 @@ const Chat = () => {
                             {isEdited ? (
                               <span
                                 className={`flex items-center space-x-1 ${
-                                  message.sender ==
-                                  user?.username
+                                  message.sender == user?.username
                                     ? "text-blue-100"
                                     : "text-blue-500"
                                 }`}
@@ -475,8 +507,7 @@ const Chat = () => {
                             ) : (
                               <span
                                 className={
-                                  message.sender ==
-                                  user?.username
+                                  message.sender == user?.username
                                     ? "text-blue-100"
                                     : "text-blue-500"
                                 }
@@ -602,6 +633,13 @@ const Chat = () => {
           </div>
         </div>
       </div>
+      {deletePopup && (
+        <DeleteChatPopup
+          onClose={() => setDeletePopup(null)}
+          chat={deletePopup}
+          onConfirm={handleDeleteChat}
+        />
+      )}
     </motion.div>
   );
 };
