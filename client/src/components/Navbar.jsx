@@ -56,17 +56,20 @@ const Navbar = ({ isFocus = false, setIsFocus }) => {
 
   return (
     <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 rounded-b-2xl md:rounded-none">
-      <div className="max-w-7xl mx-auto py-2 px-4">
+      <div className="max-w-7xl mx-auto py-2 px-2 lg:px-4">
         <div className="grid grid-cols-6 items-center justify-between h-16">
           <div className=" hidden md:grid col-span-2 md:col-span-1">
             <div className="flex items-center">
+              <img src="../../public/CartonaLogo.png" alt="" />
+              {/* <img src="../../public/CartonaLogo.png" alt="" /> */}
+
               <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
                 Cartona
               </h1>
             </div>
           </div>
 
-          <div className="flex items-center col-span-6 md:col-span-3 my-2  group p-0.25 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-4xl">
+          <div className="flex ml-5 items-center col-span-6 md:col-span-3 my-2  group p-0.25 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-4xl">
             <div className="w-full bg-white h-12 rounded-l-full ml-0.25">
               <input
                 type="text"

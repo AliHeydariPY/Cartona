@@ -138,7 +138,7 @@ const ProductSeller = ({ seller }) => {
             Rating:
           </div>
           <span className="text-blue-800 mt-0.5">
-            {seller.average_rating} / 5
+            {seller.average_rating || "No points yet"} / 5
           </span>
         </div>
       </div>
