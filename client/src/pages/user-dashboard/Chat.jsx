@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { convertOffsetToTimes, motion, number } from "framer-motion";
+import { motion } from "framer-motion";
 import { Portal } from "react-portal";
 import { FaRegCircleCheck } from "react-icons/fa6";
 
@@ -19,7 +19,6 @@ import { TbEditCircle } from "react-icons/tb";
 
 import {
   getPurchaseChats,
-  getPurchasesByBuyer,
   getPurchasesByStorekeepre,
   sendMessagse,
   deleteMessagse,
@@ -27,7 +26,7 @@ import {
   getPurchases,
   deletePurchases,
 } from "../../services/commentAPIServices";
-import { getStorekeeperById, getBuyer } from "../../services/userAPIServices";
+import { getStorekeeperById } from "../../services/userAPIServices";
 import { getProduct } from "../../services/productAPIServices";
 
 import ChatSidebar from "./chats/ChatSidebar";
@@ -51,6 +50,10 @@ const Chat = () => {
   const [emojiBox, setEmojiBox] = useState(false);
   const messagesEndRef = useRef(null);
   const [deletePopup, setDeletePopup] = useState(null);
+  
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
 
   useEffect(() => {
     const fetchPVs = async () => {
@@ -86,21 +89,6 @@ const Chat = () => {
                 ...pv,
                 product: { ...product.data },
               };
-              // if (storekeeper.data.user == user?.username) {
-              //   const user = await getBuyer(pv.buyer);
-              //   console.log(user)
-              //   return {
-              //     user: { ...user.data },
-              //     ...pv,
-              //     product: { ...product.data },
-              //   };
-              // } else {
-              //   return {
-              //     store: { ...storekeeper.data },
-              //     ...pv,
-              //     product: { ...product.data },
-              //   };
-              // }
             } catch (err) {
               console.error("Error fetching pv details:", err);
               return null;
@@ -116,6 +104,30 @@ const Chat = () => {
 
     fetchPVs();
   }, [user]);
+
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    const query = searchQuery.toLowerCase().trim();
+    const results = conversations.filter(conversation => {
+      const productName = conversation.product?.name?.toLowerCase() || '';
+      const storeName = conversation.store?.store_name?.toLowerCase() || '';
+      const buyerName = conversation.buyer?.toLowerCase() || '';
+
+      return (
+        productName.includes(query) ||
+        storeName.includes(query) ||
+        buyerName.includes(query) ||
+        productName.split(/\s+/).some(word => word.startsWith(query)) ||
+        storeName.split(/\s+/).some(word => word.startsWith(query))
+      );
+    });
+
+    setSearchResults(results);
+  }, [searchQuery, conversations]);
 
   useEffect(() => {
     if (!conversations[0]) return;
@@ -294,6 +306,11 @@ const Chat = () => {
     console.log("Deleting chat:", chatId);
   };
 
+  const clearSearch = () => {
+    setSearchQuery("");
+    setIsSearchFocused(false);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 50 }}
@@ -327,6 +344,12 @@ const Chat = () => {
             showSidebar={showSidebar}
             setShowSidebar={setShowSidebar}
             selectedChat={selectedChat}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            searchResults={searchResults}
+            isSearchFocused={isSearchFocused}
+            setIsSearchFocused={setIsSearchFocused}
+            clearSearch={clearSearch}
           />
 
           <div className="flex-1 flex flex-col">
@@ -380,7 +403,7 @@ const Chat = () => {
 
                         <button
                           onClick={() => fetchMessages(selectedChat.id)}
-                          className="p-2 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow hover:from-blue-600 hover:to-cyan-600 transition-all duration-300"
+                          className="p-2 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow hover:from-blue-600 hover:to-cyan-600 transition-colors duration-300"
                           title="Refresh messages"
                         >
                           <FiRefreshCcw
