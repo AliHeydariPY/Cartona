@@ -28,12 +28,15 @@ import { userAtom } from "../../atoms/userAtom";
 
 const Orders = ({ reloadComponent, setReloadComponent }) => {
   const navigate = useNavigate();
+  const [user] = useAtom(userAtom);
+
   const [searchParams, setSearchParams] = useSearchParams();
   const [orders, setOrders] = useState([]);
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedSeller, setSelectedSeller] = useState(null);
-  const [user] = useAtom(userAtom);
+
+  const [visibleCount, setVisibleCount] = useState(4);
 
   const filter = searchParams.get("filter") || "All";
 
@@ -183,7 +186,7 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
         </div>
 
         <div className="space-y-6">
-          {filteredOrders.map((order) => (
+          {filteredOrders.slice(0, visibleCount).map((order) => (
             <motion.div
               key={order.id}
               initial={{ opacity: 0, scale: 0.95 }}
@@ -347,6 +350,32 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
               </div>
             </motion.div>
           ))}
+
+          {filteredOrders.length > 4 && (
+            <div className="flex justify-center pt-3 xs:pt-4 mt-4 xs:mt-5 border-t border-blue-300">
+              {visibleCount < filteredOrders.length ? (
+                <button
+                  onClick={() =>
+                    setVisibleCount(() => {
+                      console.log(visibleCount);
+
+                      return visibleCount + 4;
+                    })
+                  }
+                  className="px-4 xs:px-6 py-2 cursor-pointer rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-300 text-sm xs:text-base font-medium"
+                >
+                  Show more questions
+                </button>
+              ) : (
+                <button
+                  onClick={() => setVisibleCount(4)}
+                  className="px-4 xs:px-6 py-2 cursor-pointer rounded-lg border border-blue-400 text-blue-600 hover:bg-blue-50 transition-colors duration-300 text-sm xs:text-base font-medium"
+                >
+                  Show less
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {isReviewOpen && (
