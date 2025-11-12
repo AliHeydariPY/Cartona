@@ -126,16 +126,20 @@ const Cart = ({
           <div className="grid grid-cols-1 gap-6">
             <div className="space-y-6">
               {cartItems.length === 0 ? (
-                <div className="bg-white/95 backdrop-blur-xl rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-200">
-                  <h3 className="text-lg sm:text-xl font-bold text-blue-800 mb-2">
+                <div className="text-center py-12 bg-blue-50/50 rounded-2xl border border-blue-200">
+                  <FiShoppingCart
+                    className="text-blue-400 mx-auto mb-4"
+                    size={48}
+                  />
+                  <h3 className="text-lg font-semibold text-blue-800 mb-2">
                     Your cart is empty
                   </h3>
-                  <p className="text-sm sm:text-base text-blue-600 mb-4">
+                  <p className="text-blue-600 mb-6">
                     Start shopping to add items to your cart
                   </p>
                   <button
                     onClick={() => navigate("/")}
-                    className="bg-gradient-to-r cursor-pointer from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full transition-colors duration-300 text-sm sm:text-base"
+                    className="bg-gradient-to-r cursor-pointer from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white px-6 py-3 rounded-full transition-colors duration-300 text-sm font-medium"
                   >
                     Continue Shopping
                   </button>
