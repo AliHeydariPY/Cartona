@@ -1,6 +1,6 @@
+import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { motion } from "framer-motion";
 
 import { getPayments, setAsDelivered } from "../../services/cartAPIServices";
 import { getProduct } from "../../services/productAPIServices";
@@ -22,18 +22,21 @@ import {
   FiFileText,
   FiStar,
 } from "react-icons/fi";
-import { successToast } from "../../utils/toast";
+import { errorToast, successToast } from "../../utils/toast";
 import { useAtom } from "jotai";
 import { userAtom } from "../../atoms/userAtom";
 
 const Orders = ({ reloadComponent, setReloadComponent }) => {
   const navigate = useNavigate();
+  const [user] = useAtom(userAtom);
+
   const [searchParams, setSearchParams] = useSearchParams();
   const [orders, setOrders] = useState([]);
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedSeller, setSelectedSeller] = useState(null);
-  const [user] = useAtom(userAtom)
+
+  const [visibleCount, setVisibleCount] = useState(4);
 
   const filter = searchParams.get("filter") || "All";
 
@@ -43,6 +46,8 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
       : orders.filter((order) => order.status === filter);
 
   useEffect(() => {
+    if (!user) return;
+
     const fetchPaymentsData = async () => {
       const paymentsRes = await getPayments();
       console.log(paymentsRes);
@@ -84,47 +89,24 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
         })
       );
       console.log(payments);
-      setOrders([
-
-        ...payments,
-      ]);
+      setOrders([...payments]);
     };
 
     fetchPaymentsData();
-  }, [reloadComponent]);
+  }, [reloadComponent, user]);
 
-  //   const orders = [
-  // {
-  //   id: 1,
-  //   product: "Premium Wireless Headphones",
-  //   seller: "TechStore",
-  //   status: "Shipped",
-  //   price: "$149.99",
-  //   orderDate: "2024-01-15",
-  //   estimatedDelivery: "2024-01-20",
-  //   image: "/headphones.jpg"
-  // },
-  // {
-  //   id: 2,
-  //   product: "Sports Running Shoes",
-  //   seller: "FashionHub",
-  //   status: "Delivered",
-  //   price: "$89.99",
-  //   orderDate: "2024-01-10",
-  //   deliveredDate: "2024-01-14",
-  //   image: "/shoes.jpg"
-  // },
-  // {
-  //   id: 3,
-  //   product: "Smart Watch Series 7",
-  //   seller: "GadgetWorld",
-  //   status: "Pending",
-  //   price: "$249.99",
-  //   orderDate: "2024-01-18",
-  //   estimatedDelivery: "2024-01-25",
-  //   image: "/watch.jpg"
-  // }
-  //   ];
+  const getStatusCount = (status) => {
+    switch (status) {
+      case "Pending":
+        return orders.filter((ord) => ord.status == "Pending").length;
+      case "Shipped":
+        return orders.filter((ord) => ord.status == "Shipped").length;
+      case "Delivered":
+        return orders.filter((ord) => ord.status == "Delivered").length;
+      default:
+        return orders.length;
+    }
+  };
 
   const handleFilterChange = (newFilter) => {
     setSearchParams({ filter: newFilter });
@@ -198,12 +180,13 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
               }`}
             >
               {status}
+              <span className="ml-1">({getStatusCount(status)})</span>
             </button>
           ))}
         </div>
 
         <div className="space-y-6">
-          {filteredOrders.map((order) => (
+          {filteredOrders.slice(0, visibleCount).map((order) => (
             <motion.div
               key={order.id}
               initial={{ opacity: 0, scale: 0.95 }}
@@ -281,9 +264,13 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
                 <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-col 2xl:flex-row gap-2 justify-center items-start lg:items-end xl:items-center lg:col-span-2 xl:col-span-1">
                   <button
                     onClick={() => {
-                      getPurchaseByPayment(order.id).then((res) => {
-                        navigate(`/account/chats/${res.data[0].id}`);
-                      });
+                      getPurchaseByPayment(order.id)
+                        .then((res) => {
+                          navigate(`/account/chats/${res.data[0].id}`);
+                        })
+                        .catch((err) => {
+                          errorToast(err.response.data.detail);
+                        });
                     }}
                     className="flex cursor-pointer items-center justify-center px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-lg hover:from-blue-700 hover:to-cyan-600 transition-colors duration-300 text-sm font-semibold whitespace-nowrap min-w-[120px]"
                   >
@@ -363,6 +350,32 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
               </div>
             </motion.div>
           ))}
+
+          {filteredOrders.length > 4 && (
+            <div className="flex justify-center pt-3 xs:pt-4 mt-4 xs:mt-5 border-t border-blue-300">
+              {visibleCount < filteredOrders.length ? (
+                <button
+                  onClick={() =>
+                    setVisibleCount(() => {
+                      console.log(visibleCount);
+
+                      return visibleCount + 4;
+                    })
+                  }
+                  className="px-4 xs:px-6 py-2 cursor-pointer rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-300 text-sm xs:text-base font-medium"
+                >
+                  Show more questions
+                </button>
+              ) : (
+                <button
+                  onClick={() => setVisibleCount(4)}
+                  className="px-4 xs:px-6 py-2 cursor-pointer rounded-lg border border-blue-400 text-blue-600 hover:bg-blue-50 transition-colors duration-300 text-sm xs:text-base font-medium"
+                >
+                  Show less
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {isReviewOpen && (

@@ -35,10 +35,15 @@ export const getPayments = () => {
   return api.get(url);
 };
 
+export const getPayment = (paymentID) => {
+  const url = `/cart-api/product-payments/${paymentID}`;
+  return api.get(url);
+};
+
 export const setAsDelivered = (paymentID, editedData) => {
   const url = `/cart-api/product-payments/${paymentID}/`;
   return api.patch(url, editedData);
-}
+};
 
 export const getFavorites = () => {
   const url = `/cart-api/favorite-items/`;
@@ -47,7 +52,7 @@ export const getFavorites = () => {
 
 export const addFavorite = (productID) => {
   const url = `/cart-api/favorite-items/`;
-  return api.post(url, {product: productID});
+  return api.post(url, { product: productID });
 };
 
 export const deleteFavorite = (FavoriteID) => {

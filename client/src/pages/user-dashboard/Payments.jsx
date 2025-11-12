@@ -8,6 +8,7 @@ import {
   FiMapPin,
   FiCreditCard,
   FiTrendingUp,
+  FiMessageSquare,
 } from "react-icons/fi";
 import { getProduct } from "../../services/productAPIServices";
 import SendNotePopup from "../../components/pop-ups/SendNotePopup";
@@ -15,14 +16,19 @@ import {
   getStorekeeperPayments,
   productSubmission,
 } from "../../services/userAPIServices";
-import { successToast } from "../../utils/toast";
-import { useSearchParams } from "react-router-dom";
+import { errorToast, successToast } from "../../utils/toast";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { getPurchaseByPayment } from "../../services/commentAPIServices";
+import { getPayment } from "../../services/cartAPIServices";
 
 const Payments = () => {
+  const navigate = useNavigate();
   const [payments, setPayments] = useState([]);
   const [showSendNotePopup, setShowSendNotePopup] = useState(false);
   const [payload, setPayload] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
+  const [visibleCount, setVisibleCount] = useState(4);
+
   const filter = searchParams.get("filter") || "All";
 
   useEffect(() => {
@@ -34,14 +40,23 @@ const Payments = () => {
           productPaymentsRes.data.map(async (productPayment) => {
             try {
               const product = await getProduct(productPayment.product);
-
-              return {
-                ...productPayment,
-                product: product?.data ?? null,
-              };
+              try {
+                const payment = await getPayment(productPayment.id);
+                console.log(payment);
+                return {
+                  ...productPayment,
+                  product: product?.data ?? null,
+                  fake_card_cvv: payment.data.fake_card_cvv,
+                  fake_card_expiry: payment.data.fake_card_expiry,
+                  fake_card_number: payment.data.fake_card_number,
+                };
+              } catch (error) {
+                return {
+                  ...productPayment,
+                  product: product?.data ?? null,
+                };
+              }
             } catch (error) {
-              console.error(error);
-
               return {
                 ...productPayment,
                 product: null,
@@ -161,7 +176,10 @@ const Payments = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 sm:mb-8 gap-4">
           <div className="mb-2">
             <div className="flex items-center mb-1">
-              <FiDollarSign className="text-green-500 mr-2 sm:mr-3 flex-shrink-0" size={20} />
+              <FiDollarSign
+                className="text-green-500 mr-2 sm:mr-3 flex-shrink-0"
+                size={20}
+              />
               <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-blue-800">
                 Payments
               </h1>
@@ -197,8 +215,13 @@ const Payments = () => {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
           <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-purple-200">
             <div className="flex items-center justify-between">
-              <span className="text-purple-600 text-xs sm:text-sm">Total Revenue</span>
-              <FiTrendingUp className="text-purple-500 flex-shrink-0" size={16} />
+              <span className="text-purple-600 text-xs sm:text-sm">
+                Total Revenue
+              </span>
+              <FiTrendingUp
+                className="text-purple-500 flex-shrink-0"
+                size={16}
+              />
             </div>
             <p className="text-lg sm:text-xl lg:text-2xl font-bold text-purple-900 mt-1">
               $
@@ -238,8 +261,13 @@ const Payments = () => {
 
           <div className="bg-green-50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-green-200">
             <div className="flex items-center justify-between">
-              <span className="text-green-600 text-xs sm:text-sm">Delivered</span>
-              <FiCheckCircle className="text-green-500 flex-shrink-0" size={16} />
+              <span className="text-green-600 text-xs sm:text-sm">
+                Delivered
+              </span>
+              <FiCheckCircle
+                className="text-green-500 flex-shrink-0"
+                size={16}
+              />
             </div>
             <p className="text-lg sm:text-xl lg:text-2xl font-bold text-green-900 mt-1">
               {
@@ -254,7 +282,10 @@ const Payments = () => {
         <div className="space-y-4">
           {filteredPayments.length === 0 ? (
             <div className="text-center py-8 sm:py-12 bg-blue-50/50 rounded-xl sm:rounded-2xl border border-blue-200">
-              <FiDollarSign className="text-blue-400 mx-auto mb-3 sm:mb-4" size={32} />
+              <FiDollarSign
+                className="text-blue-400 mx-auto mb-3 sm:mb-4"
+                size={32}
+              />
               <h3 className="text-base sm:text-lg font-semibold text-blue-800 mb-2">
                 No {filter.toLowerCase()} payments
               </h3>
@@ -265,7 +296,7 @@ const Payments = () => {
               </p>
             </div>
           ) : (
-            filteredPayments.map((payment) => (
+            filteredPayments.slice(0, visibleCount).map((payment) => (
               <motion.div
                 key={payment.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -309,30 +340,54 @@ const Payments = () => {
                     </div>
                   </div>
 
-                  <div className="space-y-2 col-span-2">
-                    <div className="flex items-center">
-                      <span className="text-blue-700 font-medium text-sm sm:text-base">Total:</span>
-                      <span className="font-bold text-blue-900 text-sm sm:text-base ml-2">
-                        ${payment.total_price.toFixed(2)}
-                      </span>
-                    </div>
+                  <div className="h-full flex items-center col-span-2">
+                    <div className=" space-y-2 ">
+                      <div className="flex items-center">
+                        <span className="text-blue-700 font-medium text-sm sm:text-base">
+                          Total:
+                        </span>
+                        <span className="font-bold text-blue-900 text-sm sm:text-base ml-2">
+                          ${payment.total_price.toFixed(2)}
+                        </span>
+                      </div>
 
-                    <div className="flex items-center space-x-2">
-                      <FiMapPin className="text-blue-500 flex-shrink-0" size={14} />
-                      <span className="text-xs sm:text-sm text-blue-600 truncate">
-                        {payment.address}
-                      </span>
-                    </div>
+                      <div className="flex items-center space-x-2">
+                        <FiMapPin
+                          className="text-blue-500 flex-shrink-0"
+                          size={14}
+                        />
+                        <span className="text-xs sm:text-sm text-blue-600 truncate">
+                          {payment.address}
+                        </span>
+                      </div>
 
-                    <p className="text-xs text-blue-500">
-                      Paid: {new Date(payment.paid_at).toLocaleDateString()} •
-                      {new Date(payment.paid_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </p>
+                      <p className="text-xs text-blue-500">
+                        Paid: {new Date(payment.paid_at).toLocaleDateString()} •
+                        {new Date(payment.paid_at).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                    </div>
                   </div>
 
                   <div className="flex flex-col justify-between col-span-2 space-y-3 sm:space-y-4">
                     <div>{getStatusBadge(payment)}</div>
-
+                    <button
+                      onClick={() => {
+                        getPurchaseByPayment(payment.id)
+                          .then((res) => {
+                            navigate(`/account/chats/${res.data[0].id}`);
+                          })
+                          .catch((err) => {
+                            errorToast(err.response.data.detail);
+                          });
+                      }}
+                      className="flex cursor-pointer items-center justify-center px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-lg hover:from-blue-700 hover:to-cyan-600 transition-colors duration-300 text-sm font-semibold whitespace-nowrap min-w-[120px]"
+                    >
+                      <FiMessageSquare className="mr-2 mb-0.5" size={14} />
+                      Chat
+                    </button>
                     {!payment.buyer_delivery &&
                       !payment.storekeeper_delivery && (
                         <button
@@ -348,16 +403,58 @@ const Payments = () => {
                               };
                             });
                           }}
-                          className="bg-gradient-to-r cursor-pointer from-blue-600 to-cyan-500 text-white px-3 sm:px-4 py-2 rounded-lg hover:from-blue-700 hover:to-cyan-600 transition-colors duration-300 font-semibold flex items-center justify-center text-xs sm:text-sm"
+                          className="bg-green-500 cursor-pointer  text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-green-600 transition-colors duration-300 font-semibold flex items-center justify-center text-xs sm:text-sm"
                         >
                           <FiTruck className="mr-2 flex-shrink-0" size={14} />
                           <span className="truncate">Product submission</span>
                         </button>
-                      )}                   
+                      )}
+                  </div>
+                </div>
+                <div className="mt-4 pt-4 border-t border-blue-200 grid grid-cols-2 md:grid-cols-5 gap-4 text-xs text-blue-600">
+                  <div className="md:col-span-2">
+                    <span className="font-medium">Card Number:</span>{" "}
+                    {payment.fake_card_number}
+                  </div>
+                  <div>
+                    <span className="font-medium">CVV:</span>{" "}
+                    {payment.fake_card_cvv}
+                  </div>
+                  <div>
+                    <span className="font-medium">Expiry:</span>{" "}
+                    {payment.fake_card_expiry}
+                  </div>
+                  <div>
+                    <span className="font-medium">Order ID:</span> #{payment.id}
                   </div>
                 </div>
               </motion.div>
             ))
+          )}
+          {filteredPayments.length > 4 && (
+            <div className="flex justify-center pt-3 xs:pt-4 mt-4 xs:mt-5 border-t border-blue-300">
+              {visibleCount < filteredPayments.length ? (
+                <button
+                  onClick={() =>
+                    setVisibleCount(() => {
+                      console.log(visibleCount);
+
+                      return visibleCount + 4;
+                    })
+                  }
+                  className="px-4 xs:px-6 py-2 cursor-pointer rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-300 text-sm xs:text-base font-medium"
+                >
+                  Show more questions
+                </button>
+              ) : (
+                <button
+                  onClick={() => setVisibleCount(4)}
+                  className="px-4 xs:px-6 py-2 cursor-pointer rounded-lg border border-blue-400 text-blue-600 hover:bg-blue-50 transition-colors duration-300 text-sm xs:text-base font-medium"
+                >
+                  Show less
+                </button>
+              )}
+            </div>
           )}
           {showSendNotePopup && (
             <SendNotePopup
