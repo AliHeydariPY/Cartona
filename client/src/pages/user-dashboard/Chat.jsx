@@ -12,6 +12,7 @@ import {
   FiLock,
   FiRefreshCcw,
   FiTrash2,
+  FiMessageSquare,
 } from "react-icons/fi";
 import { MdStorefront } from "react-icons/md";
 import { FaCheck } from "react-icons/fa6";
@@ -50,7 +51,7 @@ const Chat = () => {
   const [emojiBox, setEmojiBox] = useState(false);
   const messagesEndRef = useRef(null);
   const [deletePopup, setDeletePopup] = useState(null);
-  
+
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
@@ -112,17 +113,17 @@ const Chat = () => {
     }
 
     const query = searchQuery.toLowerCase().trim();
-    const results = conversations.filter(conversation => {
-      const productName = conversation.product?.name?.toLowerCase() || '';
-      const storeName = conversation.store?.store_name?.toLowerCase() || '';
-      const buyerName = conversation.buyer?.toLowerCase() || '';
+    const results = conversations.filter((conversation) => {
+      const productName = conversation.product?.name?.toLowerCase() || "";
+      const storeName = conversation.store?.store_name?.toLowerCase() || "";
+      const buyerName = conversation.buyer?.toLowerCase() || "";
 
       return (
         productName.includes(query) ||
         storeName.includes(query) ||
         buyerName.includes(query) ||
-        productName.split(/\s+/).some(word => word.startsWith(query)) ||
-        storeName.split(/\s+/).some(word => word.startsWith(query))
+        productName.split(/\s+/).some((word) => word.startsWith(query)) ||
+        storeName.split(/\s+/).some((word) => word.startsWith(query))
       );
     });
 
@@ -318,8 +319,8 @@ const Chat = () => {
       transition={{ duration: 0.4 }}
       className="lg:col-span-3"
     >
-      <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-lg border border-blue-400 hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 overflow-hidden">
-        <div className="xl:hidden flex items-center justify-between p-4 border-b border-blue-200">
+      <div className="bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-lg border border-blue-400 hover:shadow-xl hover:shadow-blue-500/50 transition-all duration-300 overflow-hidden">
+        <div className="xl:hidden flex items-center justify-between p-3 sm:p-4 border-b border-blue-200">
           <button
             onClick={() => {
               setShowSidebar(!showSidebar);
@@ -329,15 +330,17 @@ const Chat = () => {
               setIsSelectionMode(false);
               setSelectedMessages([]);
             }}
-            className="p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
+            className="p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors flex-shrink-0"
           >
-            {showSidebar ? <FiX size={20} /> : <FiMenu size={20} />}
+            {showSidebar ? <FiX size={18} /> : <FiMenu size={18} />}
           </button>
-          <h2 className="text-lg font-semibold text-blue-900">Messages</h2>
-          <div className="w-10"></div>
+          <h2 className="text-base sm:text-lg font-semibold text-blue-900 truncate px-2">
+            Messages
+          </h2>
+          <div className="w-8 sm:w-10"></div>
         </div>
 
-        <div className="flex h-[700px] xl:h-[762px] 2xl:h-[780px]">
+        <div className="flex h-[500px] xs:h-[550px] sm:h-[600px] lg:h-[650px] xl:h-[700px] 2xl:h-[780px]">
           <ChatSidebar
             conversations={conversations}
             setSelectedChat={setSelectedChat}
@@ -352,13 +355,13 @@ const Chat = () => {
             clearSearch={clearSearch}
           />
 
-          <div className="flex-1 flex flex-col">
+          <div className="flex-1 flex flex-col min-w-0">
             {selectedChat ? (
               <>
-                <div className="p-4 border-b border-blue-200 bg-white/80 ">
-                  <div className="flex items-center space-x-3">
+                <div className="p-3 sm:p-4 border-b border-blue-200 bg-white/80 flex-shrink-0">
+                  <div className="flex items-center gap-2 sm:gap-3">
                     <div
-                      className={`w-16 h-16 ring cursor-pointer ring-blue-400 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden relative`}
+                      className={`w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 ring cursor-pointer ring-blue-400 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden relative`}
                       onClick={() =>
                         openInNewTab(`/product/${selectedChat.product.id}`)
                       }
@@ -370,32 +373,29 @@ const Chat = () => {
                       />
                       {!selectedChat.chat_enabled && (
                         <div className="absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center">
-                          <FiX className="text-white" size={24} />
+                          <FiX className="text-white" size={18} />
                         </div>
                       )}
                     </div>
 
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <div className="flex items-center space-x-2">
-                          <h4 className="font-semibold text-blue-900 truncate max-w-[180px]">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1 gap-2">
+                        <div className="flex items-center gap-1 sm:gap-2 min-w-0 flex-1">
+                          <h4 className="font-semibold text-blue-900 text-sm sm:text-base truncate">
                             {selectedChat.buyer == user?.username
                               ? selectedChat.store.store_name
                               : selectedChat.buyer}
                           </h4>
-                          <div className="flex items-center space-x-2">
+                          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                             {selectedChat.buyer == user?.username && (
                               <span className="px-2 py-1 bg-gradient-to-r from-blue-600 to-cyan-500 text-white text-xs font-bold rounded-full flex items-center">
-                                <MdStorefront
-                                  className="mr-1 mb-0.25"
-                                  size={15}
-                                />{" "}
-                                SELLER
+                                <MdStorefront className="sm:mr-1" size={12} />
+                                <span className="hidden sm:inline">SELLER</span>
                               </span>
                             )}
                             {!selectedChat.chat_enabled && (
-                              <span className="bg-gray-500 text-white text-xs px-2 py-1 rounded-full">
-                                Chat Closed
+                              <span className="bg-gray-500 text-white text-xs px-2 py-1 rounded-full whitespace-nowrap">
+                                Closed
                               </span>
                             )}
                           </div>
@@ -403,25 +403,25 @@ const Chat = () => {
 
                         <button
                           onClick={() => fetchMessages(selectedChat.id)}
-                          className="p-2 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow hover:from-blue-600 hover:to-cyan-600 transition-colors duration-300"
+                          className="p-1.5 sm:p-2 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow hover:from-blue-600 hover:to-cyan-600 transition-colors duration-300 flex-shrink-0"
                           title="Refresh messages"
                         >
                           <FiRefreshCcw
-                            size={18}
-                            className="animate-spin-slow-once"
+                            size={16}
+                            className="sm:size-[18px] animate-spin-slow-once"
                           />
                         </button>
                       </div>
 
-                      <div className="flex justify-between">
-                        <p className="text-sm text-blue-800 font-medium mb-1">
+                      <div className="flex justify-between items-center">
+                        <p className="text-xs sm:text-sm text-blue-800 font-medium truncate min-w-0">
                           {selectedChat.product.name}
                         </p>
                       </div>
                     </div>
                   </div>
                   {!selectedChat.chat_enabled && (
-                    <p className="text-sm text-rose-600 mt-2">
+                    <p className="text-xs sm:text-sm text-rose-600 mt-2">
                       This chat conversation is no longer active. You can view
                       previous messages but cannot send new ones.
                     </p>
@@ -429,17 +429,17 @@ const Chat = () => {
                 </div>
 
                 <div
-                  className="flex-1 overflow-y-auto p-4 bg-gradient-to-br from-blue-50/50 to-cyan-50/50 custom-chat-scroll"
+                  className="flex-1 overflow-y-auto p-3 sm:p-4 bg-gradient-to-br from-blue-50/50 to-cyan-50/50 custom-chat-scroll min-h-0"
                   ref={messagesContainerRef}
                 >
                   {!selectedChat.chat_enabled && (
-                    <div className="fixed bottom-20 right-4 md:right-8 z-50">
+                    <div className="fixed bottom-16 right-3 sm:right-4 md:right-6 z-50">
                       <button
                         onClick={() => setDeletePopup(selectedChat)}
-                        className="bg-red-500 hover:bg-red-600 text-white p-3 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 flex items-center justify-center"
+                        className="bg-red-500 hover:bg-red-600 text-white p-2 sm:p-3 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 flex items-center justify-center"
                         title="Delete Chat"
                       >
-                        <FiTrash2 size={20} />
+                        <FiTrash2 size={16} className="sm:size-[20px]" />
                       </button>
                     </div>
                   )}
@@ -468,12 +468,16 @@ const Chat = () => {
                         key={message.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className={`flex py-2 rounded-r-2xl ${
+                        className={`flex py-1 sm:py-2 rounded-r-2xl ${
                           message.sender == user?.username
                             ? "justify-end"
                             : "justify-start"
                         }
-      ${selectedMessages.includes(message.id) ? "bg-blue-100" : null}`}
+                    ${
+                      selectedMessages.includes(message.id)
+                        ? "bg-blue-100"
+                        : null
+                    }`}
                         onContextMenu={(e) => handleContextMenu(e, message)}
                         onTouchStart={() => handleTouchStart(message)}
                         onTouchEnd={handleTouchEnd}
@@ -485,34 +489,37 @@ const Chat = () => {
                         }
                       >
                         <div
-                          className={`max-w-xs lg:max-w-md px-3 py-2 rounded-xl relative cursor-pointer ${
+                          className={`max-w-[85%] xs:max-w-xs sm:max-w-sm lg:max-w-md px-3 py-2 rounded-xl relative cursor-pointer ${
                             message.sender == user?.username
                               ? "bg-gradient-to-br from-blue-600 to-cyan-500 text-white"
                               : "bg-white border border-blue-200 text-blue-900"
                           } ${
                             selectedMessages.includes(message.id)
-                              ? "ring-2 ring-blue-500 ring-offset-2"
+                              ? "ring-2 ring-blue-500 ring-offset-1 sm:ring-offset-2"
                               : ""
                           }`}
                         >
                           {isSelectionMode &&
                             message.sender == user?.username && (
                               <div
-                                className={`absolute -left-2 -top-2 w-5 h-5 rounded-full flex items-center justify-center ${
+                                className={`absolute -left-1 -top-1 sm:-left-2 sm:-top-2 w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center ${
                                   selectedMessages.includes(message.id)
                                     ? "bg-blue-600 text-white"
                                     : "bg-white border border-gray-300"
                                 }`}
                               >
                                 {selectedMessages.includes(message.id) && (
-                                  <FaCheck size={12} />
+                                  <FaCheck
+                                    size={10}
+                                    className="sm:size-[12px]"
+                                  />
                                 )}
                               </div>
                             )}
 
                           <div
                             style={{ whiteSpace: "pre-wrap" }}
-                            className="break-words whitespace-pre-wrap"
+                            className="break-words whitespace-pre-wrap text-sm sm:text-base"
                           >{`${message.message}`}</div>
 
                           <div className="flex items-center space-x-1 mt-1 text-xs">
@@ -524,7 +531,7 @@ const Chat = () => {
                                     : "text-blue-500"
                                 }`}
                               >
-                                <RiEdit2Line className="mb-0.5" size={13} />
+                                <RiEdit2Line className="mb-0.5" size={11} />
                                 <span>{editTime}</span>
                               </span>
                             ) : (
@@ -547,40 +554,42 @@ const Chat = () => {
                   {contextMenu.visible && (
                     <Portal>
                       <div
-                        className="bg-white/95 backdrop-blur-sm text-blue-950 border border-gray-200 rounded-lg shadow-xl  z-50"
+                        className="bg-white/95 backdrop-blur-sm text-blue-950 border border-gray-200 rounded-lg shadow-xl z-50"
                         style={{
                           position: "fixed",
                           top: contextMenu.y,
-                          left: contextMenu.x - 90,
+                          left: Math.max(10, contextMenu.x - 80),
+                          right: 10,
+                          maxWidth: "200px",
                         }}
                       >
                         <div
-                          className="flex items-center gap-2 px-3 py-3 hover:bg-blue-100 cursor-pointer"
+                          className="flex items-center gap-2 px-3 py-2 hover:bg-blue-100 cursor-pointer text-sm"
                           onClick={handleSelectOption}
                         >
-                          <FaRegCircleCheck className="text-blue-600 mb-0.5" />
+                          <FaRegCircleCheck
+                            className="text-blue-600"
+                            size={14}
+                          />
                           <span>Select</span>
                         </div>
 
                         <div
-                          className="flex items-center gap-1 px-3 py-3 hover:bg-blue-100 cursor-pointer"
+                          className="flex items-center gap-1 px-3 py-2 hover:bg-blue-100 cursor-pointer text-sm"
                           onClick={handleEditMessage}
                         >
-                          <TbEditCircle
-                            size={20}
-                            className="text-green-600 mb-0.5"
-                          />
+                          <TbEditCircle size={16} className="text-green-600" />
                           <span>Edit</span>
                         </div>
 
                         <div
-                          className="flex items-center gap-2 px-3 py-3 hover:bg-blue-100 cursor-pointer text-red-600"
+                          className="flex items-center gap-2 px-3 py-2 hover:bg-blue-100 cursor-pointer text-red-600 text-sm"
                           onClick={() => {
                             setSelectedMessages([contextMenu.message.id, 3]);
                             handleDeleteMessages(contextMenu.message.id);
                           }}
                         >
-                          <FiTrash2 className="mb-0.5" />
+                          <FiTrash2 size={14} />
                           <span>Delete</span>
                         </div>
                       </div>
@@ -588,13 +597,13 @@ const Chat = () => {
                   )}
 
                   {isSelectionMode && selectedMessages.length > 0 && (
-                    <div className="fixed top-44 left-1/2 xl:top-27 xl:left-2/3 2xl:left-3/5 transform -translate-x-1/2 bg-white px-4 py-2 rounded-full shadow-lg border border-gray-200 flex items-center space-x-4">
-                      <span className="text-blue-600">
+                    <div className="fixed top-32 sm:top-36 md:top-40 left-1/2 transform -translate-x-1/2 bg-white px-3 sm:px-4 py-2 rounded-full shadow-lg border border-gray-200 flex items-center space-x-2 sm:space-x-4 text-sm z-50">
+                      <span className="text-blue-600 whitespace-nowrap">
                         {selectedMessages.length} selected
                       </span>
                       <button
                         onClick={handleDeleteMessages}
-                        className="bg-red-500 text-white px-3 py-1 rounded-full hover:bg-red-600 transition-colors"
+                        className="bg-red-500 text-white px-2 sm:px-3 py-1 rounded-full hover:bg-red-600 transition-colors text-xs sm:text-sm"
                       >
                         Delete
                       </button>
@@ -603,7 +612,7 @@ const Chat = () => {
                           setIsSelectionMode(false);
                           setSelectedMessages([]);
                         }}
-                        className="text-gray-500 hover:text-gray-700"
+                        className="text-gray-500 hover:text-gray-700 text-xs sm:text-sm"
                       >
                         Cancel
                       </button>
@@ -631,25 +640,40 @@ const Chat = () => {
                     setEmojiBox={setEmojiBox}
                   />
                 ) : (
-                  <div className="p-4 border-t border-blue-200 bg-rose-50/80 text-center">
-                    <p className="text-rose-700 text-sm">
-                      <FiLock className="inline mr-2 mb-1" />
+                  <div className="p-3 sm:p-4 border-t border-blue-200 bg-rose-50/80 text-center flex-shrink-0">
+                    <p className="text-rose-700 text-xs sm:text-sm">
+                      <FiLock
+                        className="inline mr-1 sm:mr-2 mb-0.5"
+                        size={14}
+                      />
                       This chat is closed. You can no longer send messages.
                     </p>
                   </div>
                 )}
               </>
             ) : (
-              <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-blue-50 to-cyan-50">
-                <div className="text-center text-blue-600">
-                  <FiShoppingBag
-                    size={48}
-                    className="mx-auto mb-4 opacity-60"
-                  />
-                  <h3 className="text-xl font-semibold mb-2">
-                    Select a conversation
-                  </h3>
-                  <p>Choose a product chat to start messaging</p>
+              <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-blue-50 to-cyan-50 p-4">
+                <div className="text-center text-blue-600 w-full max-w-[280px] xs:max-w-xs sm:max-w-sm md:max-w-md">
+                  <div className="bg-blue-50/70 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-blue-200">
+                    <FiMessageSquare
+                      className="text-blue-400 mx-auto mb-3 sm:mb-4"
+                      size={40}
+                    />
+
+                    <h3 className="text-base sm:text-lg font-semibold text-blue-800 mb-2">
+                      Select a conversation
+                    </h3>
+
+                    <p className="text-blue-600 text-sm sm:text-base mb-4 sm:mb-6">
+                      Choose a product chat to start messaging
+                    </p>
+
+                    <div className="flex justify-center space-x-2 opacity-50">
+                      <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                      <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                      <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
