@@ -8,7 +8,8 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 from .models import StoreKeeper, ProductDeliveryStatus
 from inner.models import Product
 from comments.models import Comment
-from cart.models import ProductPayment
+from cart.models import ProductPayment, Favorite, FavoriteItem, Cart, CartItem
+from cart.serializers import FavoriteItemSerializer, CartItemSerializer, ProductPaymentSerializer
 
 class UserSerializer(serializers.ModelSerializer):
     uuid = serializers.UUIDField(source='uuid_record.uuid', read_only=True)
@@ -308,3 +309,35 @@ class StoreRelatedPaymentSerializer(serializers.ModelSerializer):
     def get_buyer_delivered_at(self, obj):
         return obj.delivered_at if obj.delivered_at else None
 
+class UserActivitySummarySerializer(serializers.Serializer):
+    recent_favorites = serializers.SerializerMethodField()
+    recent_cart_items = serializers.SerializerMethodField()
+    recent_successful_payments = serializers.SerializerMethodField()
+
+    def get_recent_favorites(self, obj):
+        user = self.context['request'].user
+        try:
+            favorite = Favorite.objects.get(user=user)
+        except Favorite.DoesNotExist:
+            return []
+
+        items = FavoriteItem.objects.filter(favorite=favorite).order_by('-id')[:4]
+        return FavoriteItemSerializer(items, many=True, context=self.context).data
+
+    def get_recent_cart_items(self, obj):
+        user = self.context['request'].user
+        try:
+            cart = Cart.objects.get(user=user)
+        except Cart.DoesNotExist:
+            return []
+
+        items = CartItem.objects.filter(cart=cart).order_by('-id')[:4]
+        return CartItemSerializer(items, many=True, context=self.context).data
+
+    def get_recent_successful_payments(self, obj):
+        user = self.context['request'].user
+        items = ProductPayment.objects.filter(
+            cart__user=user,
+            is_successful=True
+        ).order_by('-id')[:4]
+        return ProductPaymentSerializer(items, many=True, context=self.context).data

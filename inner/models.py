@@ -19,6 +19,20 @@ class Category(models.Model):
         verbose_name_plural = "categories"
         db_table = "categories"
 
+class CollectionModel(models.Model):
+    collection_name = models.TextField()
+    storekeeper = models.ForeignKey(StoreKeeper, on_delete=models.CASCADE, related_name='collections')
+
+    def save(self, *args, **kwargs):
+        if self.collection_name:
+            self.collection_name = self.collection_name.strip()
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = "Collection"
+        verbose_name_plural = "Collections"
+        db_table = "collections"
+
 class Product(models.Model):
     name = models.TextField()
     price = models.DecimalField(max_digits=20, decimal_places=2, null=True)
@@ -36,6 +50,13 @@ class Product(models.Model):
     updated_time = models.DateTimeField(auto_now=True)
     storekeeper = models.ForeignKey(StoreKeeper, on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
+    collection = models.ForeignKey(
+        CollectionModel,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='products'
+    )
 
     def save(self, *args, **kwargs):
         if self.name:
@@ -59,34 +80,6 @@ class Images(models.Model):
         verbose_name = "Image"
         verbose_name_plural = "Images"
         db_table = "Images"
-
-class Types(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    type_name = models.TextField()
-
-    def save(self, *args, **kwargs):
-        if self.type_name:
-            self.type_name = self.type_name.strip()
-        super().save(*args, **kwargs)
-
-    class Meta:
-        verbose_name = "Type"
-        verbose_name_plural = "Types"
-        db_table = "Types"
-
-class TypesValues(models.Model):
-    type = models.ForeignKey(Types, on_delete=models.CASCADE, related_name="typesvalues_set")
-    type_value = models.TextField()
-
-    def save(self, *args, **kwargs):
-        if self.type_value:
-            self.type_value = self.type_value.strip()
-        super().save(*args, **kwargs)
-
-    class Meta:
-        verbose_name = "Types_Value"
-        verbose_name_plural = "Types_Values"
-        db_table = "Types_Values"
 
 class Features(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)

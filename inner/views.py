@@ -9,16 +9,15 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.exceptions import MethodNotAllowed, PermissionDenied
 from rest_framework.filters import SearchFilter
-from .models import Product, Images, Types, Features, FrequentlyAskedQuestions, Category
+from .models import Product, Images, Features, FrequentlyAskedQuestions, Category, CollectionModel
 from comments.models import CommentReply
 from .serializers import (
     ProductSerializer,
     ImageSerializer,
-    TypesSerializer,
     FeatureSerializer,
     FAQSerializer,
     CategorySerializer,
-)
+    CollectionModelSerializer)
 
 class ProductFilter(django_filters.FilterSet):
     min_rating = django_filters.CharFilter(
@@ -224,6 +223,20 @@ class ProductViewSet(viewsets.ModelViewSet):
         queryset = self.get_queryset().filter(storekeeper_id=storekeeper_id)
         return self._handle_filtered_request(request, queryset, index, label="storekeeper product")
 
+    @action(detail=False, url_path=r'collection/(?P<collection_id>null|\d+)(?:/(?P<index>\d+))?',
+            methods=['get', 'put', 'patch', 'delete'])
+    def by_collection(self, request, collection_id=None, index=None):
+        if collection_id == 'null':
+            queryset = self.get_queryset().filter(collection__isnull=True)
+        else:
+            try:
+                collection_id = int(collection_id)
+                queryset = self.get_queryset().filter(collection_id=collection_id)
+            except ValueError:
+                raise Http404("Invalid collection ID.")
+
+        return self._handle_filtered_request(request, queryset, index, label="collection product")
+
     @action(detail=False, url_path=r'comment/(?P<mode>max|min)(?:/(?P<index>\d+))?',
             methods=['get', 'put', 'patch', 'delete'])
     def comment(self, request, mode=None, index=None):
@@ -394,62 +407,6 @@ class ImageViewSet(viewsets.ModelViewSet):
         queryset = self.get_queryset().filter(product_id=product_id)
         return self._handle_filtered_request(request, queryset, index, label="product image")
 
-class TypesViewSet(viewsets.ModelViewSet):
-    serializer_class = TypesSerializer
-
-    def get_permissions(self):
-        if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
-            return [AllowAny()]
-        return [IsAuthenticated()]
-
-    def get_queryset(self):
-        if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
-            return Types.objects.all().order_by('-id')
-        user = self.request.user
-        return Types.objects.filter(product__storekeeper__user=user).order_by('-id')
-
-    def get_serializer_context(self):
-        return {"request": self.request}
-
-    def _handle_filtered_request(self, request, queryset, index, label="type"):
-        queryset = queryset.order_by('-id')
-
-        if not queryset.exists():
-            raise Http404(f"No {label}s found.")
-
-        if not index and request.method != 'GET':
-            raise MethodNotAllowed(request.method, detail="Only GET is allowed in list mode.")
-
-        if index:
-            try:
-                index = int(index)
-                if index < 1 or index > queryset.count():
-                    raise Http404("Invalid index.")
-                obj = queryset[index - 1]
-            except ValueError:
-                raise Http404("Index must be a number.")
-        else:
-            obj = None
-
-        if request.method == 'GET':
-            serializer = self.get_serializer(obj if index else queryset, many=not index)
-            return Response(serializer.data)
-
-        elif request.method in ['PUT', 'PATCH']:
-            serializer = self.get_serializer(obj, data=request.data, partial=(request.method == 'PATCH'))
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data)
-
-        elif request.method == 'DELETE':
-            obj.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @action(detail=False, url_path=r'product/(?P<product_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
-    def product(self, request, product_id=None, index=None):
-        queryset = self.get_queryset().filter(product_id=product_id)
-        return self._handle_filtered_request(request, queryset, index, label="product type")
-
 class FeatureViewSet(viewsets.ModelViewSet):
     serializer_class = FeatureSerializer
 
@@ -591,4 +548,64 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
 
         serializer = self.get_serializer(categories, many=True)
         return Response(serializer.data)
+
+class CollectionModelViewSet(viewsets.ModelViewSet):
+    serializer_class = CollectionModelSerializer
+
+    def get_permissions(self):
+        if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+    def get_queryset(self):
+        if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return CollectionModel.objects.all()
+        return CollectionModel.objects.filter(storekeeper__user=self.request.user)
+
+    def get_serializer_context(self):
+        return {"request": self.request}
+
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        serializer.perform_delete(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=False, url_path=r'storekeeper/(?P<storekeeper_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
+    def by_storekeeper(self, request, storekeeper_id=None, index=None):
+        queryset = self.get_queryset().filter(storekeeper_id=storekeeper_id).order_by('-id')
+
+        if not queryset.exists():
+            raise Http404("No collections found for this storekeeper.")
+
+        if not index and request.method != 'GET':
+            raise MethodNotAllowed(request.method, detail="Only GET is allowed in list mode.")
+
+        if index:
+            try:
+                index = int(index)
+                if index < 1 or index > queryset.count():
+                    raise Http404("Invalid index.")
+                obj = queryset[index - 1]
+            except ValueError:
+                raise Http404("Index must be a number.")
+        else:
+            obj = None
+
+        if request.method == 'GET':
+            serializer = self.get_serializer(obj if index else queryset, many=not index)
+            return Response(serializer.data)
+
+        elif request.method in ['PUT', 'PATCH']:
+            serializer = self.get_serializer(obj, data=request.data, partial=(request.method == 'PATCH'))
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+
+        elif request.method == 'DELETE':
+            if obj is None:
+                raise MethodNotAllowed("DELETE", detail="You must specify an index to delete a single collection.")
+            serializer = self.get_serializer(obj)
+            serializer.perform_delete(obj)
+            return Response(status=status.HTTP_204_NO_CONTENT)
 

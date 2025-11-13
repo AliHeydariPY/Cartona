@@ -1,8 +1,8 @@
 import os
-from django.db.models.signals import pre_delete, pre_save, post_save, post_delete
+from django.db.models.signals import pre_delete, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
-from .models import Product, Images, Types, TypesValues
+from .models import Product, Images
 
 @receiver(pre_delete, sender=Product)
 def delete_product_image(sender, instance, **kwargs):
@@ -66,15 +66,4 @@ def clear_expired_fields(sender, instance, **kwargs):
     if instance.amazing_offer_period and instance.amazing_offer_period < now:
         instance.amazing_offer = None
         instance.amazing_offer_period = None
-
-@receiver(post_save, sender=Product)
-def create_default_color_types(sender, instance, created, **kwargs):
-    if created:
-        if not Types.objects.filter(product=instance, type_name__iexact='color').exists():
-            type_obj = Types.objects.create(product=instance, type_name='color')
-
-            important_colors = ['black', 'white', 'red', 'blue', 'green', 'yellow', 'gray']
-
-            for color in important_colors:
-                TypesValues.objects.create(type=type_obj, type_value=color)
 

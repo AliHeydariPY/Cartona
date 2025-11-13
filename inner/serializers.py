@@ -1,6 +1,6 @@
 from rest_framework.exceptions import PermissionDenied
 from rest_framework import serializers
-from .models import Product, Images, Types, TypesValues, Features, FrequentlyAskedQuestions, Category
+from .models import Product, Images, Features, FrequentlyAskedQuestions, Category, CollectionModel
 from comments.models import CommentReply
 from user.models import StoreKeeper
 from cart.models import ProductPayment, Payment
@@ -84,67 +84,6 @@ class ImageSerializer(serializers.ModelSerializer):
             rep['image'] = None
 
         return rep
-
-class TypesValueSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = TypesValues
-        fields = ['type_value']
-
-class TypesSerializer(serializers.ModelSerializer):
-    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
-    typesvalues_set = TypesValueSerializer(many=True)
-
-    class Meta:
-        model = Types
-        fields = ['id', 'product', 'type_name', 'typesvalues_set']
-
-    def validate(self, attrs):
-        product = attrs.get('product')
-        request = self.context.get('request')
-        user = request.user if request else None
-
-        if product and user and user.is_authenticated:
-            if product.storekeeper.user != user:
-                raise serializers.ValidationError({'product': 'You do not own this product.'})
-
-        return attrs
-
-    def create(self, validated_data):
-        request = self.context.get('request')
-        user = request.user if request else None
-        product = validated_data.get('product')
-
-        if product.storekeeper.user != user:
-            raise PermissionDenied("You do not have permission to add types to this product.")
-
-        values_data = validated_data.pop('typesvalues_set', [])
-        type_obj = Types.objects.create(**validated_data)
-
-        for value in values_data:
-            TypesValues.objects.create(type=type_obj, type_value=value['type_value'])
-
-        return type_obj
-
-    def update(self, instance, validated_data):
-        request = self.context.get('request')
-        user = request.user if request else None
-        product = instance.product
-
-        if product.storekeeper.user != user:
-            raise PermissionDenied("You do not have permission to update this type.")
-
-        values_data = validated_data.pop('typesvalues_set', [])
-
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        instance.save()
-
-        instance.typesvalues_set.all().delete()
-        for value in values_data:
-            TypesValues.objects.create(type=instance, type_value=value['type_value'])
-
-        return instance
 
 class FeatureSerializer(serializers.ModelSerializer):
     product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
@@ -247,6 +186,7 @@ class ProductSerializer(serializers.ModelSerializer):
     comment_count = serializers.SerializerMethodField()
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
     storekeeper = serializers.PrimaryKeyRelatedField(read_only=True)
+    collection = serializers.PrimaryKeyRelatedField(queryset=CollectionModel.objects.all(), required=False, allow_null=True)
     created_time = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
     updated_time = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
 
@@ -256,7 +196,7 @@ class ProductSerializer(serializers.ModelSerializer):
             'id', 'name', 'description', 'price', 'discounted_price', 'discount_percentage',
             'discount_period', 'amazing_offer', 'amazing_offer_period', 'stock_quantity',
             'image', 'average_rating', 'comment_count', 'category',
-            'storekeeper', 'created_time', 'updated_time'
+            'storekeeper', 'collection', 'created_time', 'updated_time'
         ]
 
     def perform_delete(self, instance):
@@ -300,14 +240,12 @@ class ProductSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         rep = super().to_representation(instance)
-
         request = self.context.get('request')
         method = request.method if request else None
 
         if method in ['PUT', 'PATCH']:
             if not request.data.get('image'):
                 rep['image'] = None
-
         elif not instance.image:
             rep['image'] = None
 
@@ -337,8 +275,14 @@ class ProductSerializer(serializers.ModelSerializer):
         amazing_offer = data.get('amazing_offer')
         amazing_offer_period = data.get('amazing_offer_period')
         stock_quantity = data.get('stock_quantity', getattr(self.instance, 'stock_quantity', None))
+        collection = data.get('collection')
 
         errors = {}
+
+        request = self.context.get('request')
+        user = request.user if request and request.user.is_authenticated else None
+        if collection and collection.storekeeper.user != user:
+            errors['collection'] = "You can only assign collections that belong to you."
 
         old_discounted_price = getattr(self.instance, 'discounted_price', None)
         old_discount_percentage = getattr(self.instance, 'discount_percentage', None)
@@ -390,6 +334,10 @@ class ProductSerializer(serializers.ModelSerializer):
         if requested_storekeeper and requested_storekeeper != storekeeper:
             raise serializers.ValidationError("You cannot assign another storekeeper's product.")
 
+        collection = validated_data.get('collection')
+        if collection and collection.storekeeper != storekeeper:
+            raise serializers.ValidationError({'collection': "You can only assign collections that belong to you."})
+
         validated_data['storekeeper'] = storekeeper
 
         image = validated_data.get('image')
@@ -404,6 +352,10 @@ class ProductSerializer(serializers.ModelSerializer):
 
         if instance.storekeeper.user != user:
             raise serializers.ValidationError("You cannot update another storekeeper's product.")
+
+        collection = validated_data.get('collection')
+        if collection and collection.storekeeper.user != user:
+            raise serializers.ValidationError({'collection': "You can only assign collections that belong to you."})
 
         image = validated_data.get('image', None)
         if image is None or isinstance(image, str):
@@ -429,3 +381,39 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ['id', 'name', 'description', 'parent']
+
+class ProductSummarySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ['id', 'name']
+
+class CollectionModelSerializer(serializers.ModelSerializer):
+    storekeeper = serializers.PrimaryKeyRelatedField(read_only=True)
+    products = ProductSummarySerializer(many=True, read_only=True)
+
+    class Meta:
+        model = CollectionModel
+        fields = ['id', 'collection_name', 'storekeeper', 'products']
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        try:
+            storekeeper = StoreKeeper.objects.get(user=user)
+        except StoreKeeper.DoesNotExist:
+            raise serializers.ValidationError("You are not registered as a storekeeper.")
+
+        validated_data['storekeeper'] = storekeeper
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        user = self.context['request'].user
+        if instance.storekeeper.user != user:
+            raise serializers.ValidationError("You cannot edit another storekeeper's collection.")
+        return super().update(instance, validated_data)
+
+    def perform_delete(self, instance):
+        user = self.context['request'].user
+        if instance.storekeeper.user != user:
+            raise serializers.ValidationError("You cannot delete another storekeeper's collection.")
+        instance.delete()
+

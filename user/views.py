@@ -16,7 +16,8 @@ from .serializers import (
     UserSerializer,
     StoreKeeperSerializer,
     DeliveryStatusSerializer,
-    StoreRelatedPaymentSerializer)
+    StoreRelatedPaymentSerializer,
+    UserActivitySummarySerializer)
 
 class UserViewSet(
     mixins.CreateModelMixin,
@@ -351,6 +352,13 @@ class StorePaymentViewSet(
 
         queryset = self.get_queryset().filter(storekeeper_id=storekeeper_id)
         return self._handle_filtered_request(request, queryset, index, label="storekeeper payment")
+
+class UserActivitySummaryViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated]
+
+    def list(self, request):
+        serializer = UserActivitySummarySerializer({}, context={'request': request})
+        return Response(serializer.data)
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
