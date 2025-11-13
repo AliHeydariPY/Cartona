@@ -76,6 +76,7 @@ function App() {
         <RemoveProductPopup
           onClose={() => setRemoveProductPopup(false)}
           product={selectedProduct}
+          selectedProduct={selectedProduct}
           setReloadComponent={setReloadComponent}
           isRemoveCartItem={isRemoveCartItem}
         />
@@ -85,7 +86,6 @@ function App() {
         <AddedToCartPopup
           onClose={() => setAddToCartPopup(false)}
           product={selectedProduct}
-          // product={{ name: "Product X", price: 249.99 }}
         />
       )}
 
@@ -99,6 +99,7 @@ function App() {
             element={
               <Cart
                 setRemoveProductPopup={setRemoveProductPopup}
+                selectedProduct={selectedProduct}
                 setSelectedProduct={setSelectedProduct}
                 reloadComponent={reloadComponent}
                 setReloadComponent={setReloadComponent}

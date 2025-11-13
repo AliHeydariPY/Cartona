@@ -291,8 +291,7 @@ const Chat = () => {
 
   const handleDeleteChat = (chatId) => {
     deletePurchases(chatId)
-      .then((res) => {
-        console.log(res);
+      .then(() => {
         setConversations((prev) =>
           prev.filter((conversation) => {
             return conversation.id != chatId;
@@ -304,7 +303,6 @@ const Chat = () => {
       .catch(() => {
         errorToast("There is a problem");
       });
-    console.log("Deleting chat:", chatId);
   };
 
   const clearSearch = () => {
@@ -340,7 +338,7 @@ const Chat = () => {
           <div className="w-8 sm:w-10"></div>
         </div>
 
-        <div className="flex h-[500px] xs:h-[550px] sm:h-[600px] lg:h-[650px] xl:h-[700px] 2xl:h-[780px]">
+        <div className="flex h-[500px] xs:h-[550px] sm:h-[600px] lg:h-[695px] xl:h-[764px] 2xl:h-[780px]">
           <ChatSidebar
             conversations={conversations}
             setSelectedChat={setSelectedChat}

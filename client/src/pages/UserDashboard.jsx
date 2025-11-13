@@ -5,22 +5,16 @@ import { useNavigate, useLocation, Outlet, Link } from "react-router-dom";
 
 import {
   FiUser,
-  FiShoppingBag,
   FiHeart,
   FiSettings,
-  FiCreditCard,
   FiLogOut,
-  FiHome,
-  FiShield,
   FiPackage,
   FiShoppingCart,
-  FiUsers,
   FiDollarSign,
   FiPlusCircle,
   FiFileText,
   FiBell,
   FiMessageSquare,
-  FiX,
 } from "react-icons/fi";
 import { GoHome } from "react-icons/go";
 import { AiOutlineStar } from "react-icons/ai";
@@ -38,7 +32,6 @@ const UserDashboard = () => {
   const [isSeller, setIsSeller] = useState(user?.role == "storekeeper");
   const [showPopup, setShowPopup] = useState(false);
   const [storekeeper, setStorekeeper] = useState([]);
-  
 
   const navItems = [
     {
@@ -68,24 +61,38 @@ const UserDashboard = () => {
     },
     {
       id: "chats",
-      icon: <FiMessageSquare className="ml-3 text-purple-500 mr-0.25" size={18} />,
+      icon: (
+        <FiMessageSquare className="ml-3 text-purple-500 mr-0.25" size={18} />
+      ),
       label: "Chats",
     },
     ...(isSeller
       ? [
           {
             id: "my-products",
-            icon: <FiPackage className="ml-3 text-orange-400 mr-0.25" size={18} />,
+            icon: (
+              <FiPackage className="ml-3 text-orange-400 mr-0.25" size={18} />
+            ),
             label: "My Products",
           },
           {
             id: "add-product",
-            icon: <FiPlusCircle className="ml-3 text-emerald-500 mb-0.25 mr-0.25" size={18} />,
+            icon: (
+              <FiPlusCircle
+                className="ml-3 text-emerald-500 mb-0.25 mr-0.25"
+                size={18}
+              />
+            ),
             label: "Add Product",
           },
           {
             id: "payments",
-            icon: <FiDollarSign className="ml-3 text-lime-500 mb-0.25 mr-0.25" size={18} />,
+            icon: (
+              <FiDollarSign
+                className="ml-3 text-lime-500 mb-0.25 mr-0.25"
+                size={18}
+              />
+            ),
             label: "Payments",
           },
         ]
@@ -117,19 +124,13 @@ const UserDashboard = () => {
     }
   }, [isAuth]);
 
-  
-
   return (
     <>
       {isAuth && isSeller != null && (
         <div className="min-h-screen bg-gradient-to-b from-blue-700/30 via-cyan-600/20 to-blue-400/20 p-4 sm:p-7 lg:p-5 xl:p-9 relative overflow-hidden">
           <div className="absolute -top-24 -right-24 w-60 h-60 sm:w-72 sm:h-72 md:w-80 md:h-80 bg-cyan-500/40 rounded-full blur-3xl animate-pulse"></div>
           <div className="absolute bottom-8 left-4 w-72 h-72 sm:w-80 sm:h-80 md:w-96 md:h-96 bg-blue-700/30 rounded-full blur-3xl animate-pulse delay-1500"></div>
-          {showPopup && (
-            <LogoutPopup
-              onClose={() => setShowPopup(false)}
-            />
-          )}
+          {showPopup && <LogoutPopup onClose={() => setShowPopup(false)} />}
 
           <div className="relative bg-white/90 backdrop-blur-3xl rounded-2xl sm:rounded-3xl shadow-2xl p-4 sm:p-6 2xl:p-8 mb-4 sm:mb-7 lg:mb-5 xl:mb-9 border border-blue-400 transition-transform duration-300 hover:scale-[1.004] hover:shadow-blue-500/60">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-0">
@@ -234,7 +235,7 @@ const UserDashboard = () => {
               </nav>
 
               {!isSeller && (
-                <div className="mt-4 2xl:mt-6 bg-gradient-to-br from-blue-700/20 via-cyan-600/20 to-teal-500/20 p-4 sm:p-5 md:p-6 rounded-2xl border border-blue-300/70 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300">
+                <div className="mt-4 2xl:mt-4.5 bg-gradient-to-br from-blue-700/20 via-cyan-600/20 to-teal-500/20 p-4 sm:p-5 md:p-6 rounded-2xl border border-blue-300/70 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300">
                   <div className="flex items-center mb-3 sm:mb-4">
                     <span>
                       <MdStorefront
