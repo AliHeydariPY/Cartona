@@ -7,7 +7,6 @@ import {
   FiLogOut,
   FiChevronRight,
   FiSettings,
-  FiX,
 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { useAtom } from "jotai";
@@ -73,11 +72,7 @@ const AccountSettings = () => {
       className="lg:col-span-3"
     >
       <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-xl p-4 sm:p-6 2xl:p-8 border border-blue-400 hover:shadow-lg hover:shadow-blue-400/50 transition-all duration-300">
-        {showPopup && (
-          <LogoutPopup
-            onClose={() => setShowPopup(false)}
-          />
-        )}
+        {showPopup && <LogoutPopup onClose={() => setShowPopup(false)} />}
 
         <div className="mb-6 sm:mb-8">
           <div className="flex items-center mb-2">

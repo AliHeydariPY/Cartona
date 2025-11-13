@@ -22,12 +22,14 @@ export const deleteCartProduct = (productID) => {
   return api.delete(url);
 };
 
-export const totalCartPayment = () => {
+export const totalCartPayment = (payload) => {
   const url = `/cart-api/payments/`;
-  return api.post(url, {
-    address: "ugd",
-    is_successful: true,
-  });
+  return api.post(url, payload);
+};
+
+export const singleCartPayment = (payload) => {
+  const url = `/cart-api/product-payments/`;
+  return api.post(url, payload);
 };
 
 export const getPayments = () => {
