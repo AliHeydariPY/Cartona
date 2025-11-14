@@ -25,6 +25,7 @@ import {
 import { errorToast, successToast } from "../../utils/toast";
 import { useAtom } from "jotai";
 import { userAtom } from "../../atoms/userAtom";
+import { SectionLoader } from "../../components/SectionLoader";
 
 const Orders = ({ reloadComponent, setReloadComponent }) => {
   const navigate = useNavigate();
@@ -37,6 +38,7 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
   const [selectedSeller, setSelectedSeller] = useState(null);
 
   const [visibleCount, setVisibleCount] = useState(4);
+  const [isLoading, setIsLoading] = useState(true);
 
   const filter = searchParams.get("filter") || "All";
 
@@ -49,47 +51,52 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
     if (!user) return;
 
     const fetchPaymentsData = async () => {
-      const paymentsRes = await getPayments();
-      console.log(paymentsRes);
-      const payments = await Promise.all(
-        paymentsRes.data.map(async (payment) => {
-          const productRes = await getProduct(payment.product);
-          const storekeeperRes = await getStorekeeperById(
-            productRes.data.storekeeper
-          );
-          try {
-            const commentRes = await getComments(productRes.data.id);
+      try {
+        const paymentsRes = await getPayments();
+        console.log(paymentsRes);
+        const payments = await Promise.all(
+          paymentsRes.data.map(async (payment) => {
+            const productRes = await getProduct(payment.product);
+            const storekeeperRes = await getStorekeeperById(
+              productRes.data.storekeeper
+            );
+            try {
+              const commentRes = await getComments(productRes.data.id);
 
-            return {
-              ...payment,
-              product: productRes.data,
-              storekeeper: storekeeperRes.data.store_name,
-              status: payment.storekeeper_delivery
-                ? payment.is_delivered
-                  ? "Delivered"
-                  : "Shipped"
-                : "Pending",
-              hasRated: commentRes.data.some((comment) => {
-                return comment.user == user?.username;
-              }),
-            };
-          } catch {
-            return {
-              ...payment,
-              product: productRes.data,
-              storekeeper: storekeeperRes.data.store_name,
-              status: payment.storekeeper_delivery
-                ? payment.is_delivered
-                  ? "Delivered"
-                  : "Shipped"
-                : "Pending",
-              hasRated: false,
-            };
-          }
-        })
-      );
-      console.log(payments);
-      setOrders([...payments]);
+              return {
+                ...payment,
+                product: productRes.data,
+                storekeeper: storekeeperRes.data.store_name,
+                status: payment.storekeeper_delivery
+                  ? payment.is_delivered
+                    ? "Delivered"
+                    : "Shipped"
+                  : "Pending",
+                hasRated: commentRes.data.some((comment) => {
+                  return comment.user == user?.username;
+                }),
+              };
+            } catch {
+              return {
+                ...payment,
+                product: productRes.data,
+                storekeeper: storekeeperRes.data.store_name,
+                status: payment.storekeeper_delivery
+                  ? payment.is_delivered
+                    ? "Delivered"
+                    : "Shipped"
+                  : "Pending",
+                hasRated: false,
+              };
+            }
+          })
+        );
+        console.log(payments);
+        setIsLoading(false);
+        setOrders([...payments]);
+      } catch (error) {
+        setIsLoading(false);
+      }
     };
 
     fetchPaymentsData();
@@ -387,16 +394,20 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
           />
         )}
 
-        {filteredOrders.length === 0 && (
-          <div className="text-center py-12 bg-blue-50/50 rounded-2xl border border-blue-200">
-            <FiPackage className="text-blue-400 mx-auto mb-4" size={48} />
-            <h3 className="text-lg font-semibold text-blue-800 mb-2">
-              No orders yet
-            </h3>
-            <p className="text-blue-600">
-              Your orders will appear here once you make a purchase.
-            </p>
-          </div>
+        {isLoading ? (
+          <SectionLoader chatLoader={false} />
+        ) : (
+          filteredOrders.length === 0 && (
+            <div className="text-center py-12 bg-blue-50/50 rounded-2xl border border-blue-200">
+              <FiFileText className="text-blue-400 mx-auto mb-4" size={48} />
+              <h3 className="text-lg font-semibold text-blue-800 mb-2">
+                No orders yet
+              </h3>
+              <p className="text-blue-600">
+                Your orders will appear here once you make a purchase.
+              </p>
+            </div>
+          )
         )}
       </div>
     </motion.div>

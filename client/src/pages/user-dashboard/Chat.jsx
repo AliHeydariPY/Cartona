@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, use } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Portal } from "react-portal";
@@ -56,6 +56,8 @@ const Chat = () => {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
 
+  const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
     const fetchPVs = async () => {
       try {
@@ -97,6 +99,7 @@ const Chat = () => {
           })
         );
         console.log(pvs);
+        setIsLoading(false);
         setConversations(pvs.filter(Boolean));
       } catch (error) {
         console.error("fetchPVs failed:", error);
@@ -340,6 +343,7 @@ const Chat = () => {
 
         <div className="flex h-[500px] xs:h-[550px] sm:h-[600px] lg:h-[695px] xl:h-[764px] 2xl:h-[780px]">
           <ChatSidebar
+            isLoading={isLoading}
             conversations={conversations}
             setSelectedChat={setSelectedChat}
             showSidebar={showSidebar}

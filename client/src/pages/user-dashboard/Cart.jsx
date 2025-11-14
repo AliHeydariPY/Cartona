@@ -24,6 +24,7 @@ import { errorToast, successToast } from "../../utils/toast";
 import PaymentAddressPopup from "../../components/pop-ups/PaymentAddressPopup";
 import { MdOutlinePayments } from "react-icons/md";
 import RemoveProductPopup from "../../components/pop-ups/RemoveProductPopup";
+import { SectionLoader } from "../../components/SectionLoader";
 
 const Cart = () => {
   const navigate = useNavigate();
@@ -34,6 +35,7 @@ const Cart = () => {
   const [showRemovePopup, setShowRemovePopup] = useState(false);
 
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchCartItems = async () => {
@@ -54,6 +56,7 @@ const Cart = () => {
         })
       );
 
+      setIsLoading(false);
       setCartItems(productsData);
     };
 
@@ -165,26 +168,31 @@ const Cart = () => {
 
         <div className="grid grid-cols-1 gap-4 sm:gap-6">
           <div className="space-y-4 sm:space-y-6">
-            {cartItems.length === 0 ? (
-              <div className="text-center py-8 sm:py-12 bg-blue-50/50 rounded-xl sm:rounded-2xl border border-blue-200">
-                <FiShoppingCart
-                  className="text-blue-400 mx-auto mb-3 sm:mb-4"
-                  size={32}
-                />
-                <h3 className="text-base sm:text-lg font-semibold text-blue-800 mb-2">
-                  Your cart is empty
-                </h3>
-                <p className="text-blue-600 text-sm sm:text-base mb-4 sm:mb-6">
-                  Start shopping to add items to your cart
-                </p>
-                <button
-                  onClick={() => navigate("/")}
-                  className="bg-gradient-to-r cursor-pointer from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full transition-colors duration-300 text-sm sm:text-base font-medium"
-                >
-                  Continue Shopping
-                </button>
-              </div>
+            {isLoading ? (
+              <SectionLoader chatLoader={true} />
             ) : (
+              cartItems.length === 0 && (
+                <div className="text-center py-8 sm:py-12 bg-blue-50/50 rounded-xl sm:rounded-2xl border border-blue-200">
+                  <FiShoppingCart
+                    className="text-blue-400 mx-auto mb-3 sm:mb-4"
+                    size={32}
+                  />
+                  <h3 className="text-base sm:text-lg font-semibold text-blue-800 mb-2">
+                    Your cart is empty
+                  </h3>
+                  <p className="text-blue-600 text-sm sm:text-base mb-4 sm:mb-6">
+                    Start shopping to add items to your cart
+                  </p>
+                  <button
+                    onClick={() => navigate("/")}
+                    className="bg-gradient-to-r cursor-pointer from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full transition-colors duration-300 text-sm sm:text-base font-medium"
+                  >
+                    Continue Shopping
+                  </button>
+                </div>
+              )
+            )}
+            {cartItems.length > 0 && (
               <div className="bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-200">
                 {cartItems.map((product) => (
                   <div
@@ -246,8 +254,6 @@ const Cart = () => {
                           </button>
                           <button
                             onClick={() => {
-                              // setRemoveProductPopup(true);
-                              console.log(product);
                               setSelectedProduct(product);
                               setShowRemovePopup(true);
                             }}

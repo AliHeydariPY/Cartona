@@ -8,6 +8,8 @@ import {
   FiTruck,
   FiClock,
   FiDollarSign,
+  FiFileText,
+  FiChevronRight,
 } from "react-icons/fi";
 import { IoCart, IoCartOutline } from "react-icons/io5";
 
@@ -23,11 +25,10 @@ import { FaClock, FaHeart } from "react-icons/fa";
 import { PiLightningFill } from "react-icons/pi";
 import { BiSolidOffer } from "react-icons/bi";
 import { errorToast } from "../../utils/toast";
+import { useNavigate } from "react-router-dom";
 
-const Profile = ({
-  setAddToCartPopup,
-  setSelectedProduct,
-}) => {
+const Profile = ({ setAddToCartPopup, setSelectedProduct }) => {
+  const navigate = useNavigate();
   const [userActivity, setUserActivity] = useState({});
   const [recentFavorites, setRecentFavorites] = useState(
     userActivity.recent_favorites || []
@@ -35,6 +36,11 @@ const Profile = ({
 
   const { recent_cart_items = [], recent_successful_payments = [] } =
     userActivity || {};
+
+  console.log(
+    "🚀 ~ Profile ~ recent_successful_payments:",
+    recent_successful_payments
+  );
 
   useEffect(() => {
     const fetchData = async () => {
@@ -224,86 +230,168 @@ const Profile = ({
           </div>
         </div> */}
 
-        {/* Recent Orders */}
-        <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-lg p-5 sm:p-6 2xl:p-8 border border-blue-400 hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300">
-          <h2 className="text-xl sm:text-2xl font-bold text-blue-900 mb-6 sm:mb-8 flex items-center">
-            <FiShoppingCart className="mr-2 sm:mr-3 text-blue-600" size={22} />
-            Recent Orders
-          </h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm sm:text-base">
-              <thead>
-                <tr className="text-left border-b border-blue-300">
-                  {["Product", "Date", "Amount", "Status", "Delivery"].map(
-                    (head, i) => (
-                      <th
-                        key={i}
-                        className="pb-3 sm:pb-4 px-4 sm:px-6 text-blue-900 font-semibold"
+        <div className="bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-lg p-4 sm:p-5 lg:p-6 2xl:p-8 border border-blue-400 hover:shadow-xl hover:shadow-blue-500/50 transition-all duration-300">
+          <div className="flex items-center justify-between mb-4 sm:mb-6 lg:mb-8">
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-blue-900 flex items-center">
+              <FiFileText className="mr-2 sm:mr-3 text-green-600" size={22} />
+              Recent Orders
+            </h2>
+            {recent_successful_payments.length > 0 && (
+              <button
+                onClick={() => navigate("/account/orders")}
+                className="text-sm bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-3 sm:px-4 py-1.5 rounded-lg hover:shadow-lg transition-all duration-300 font-medium"
+              >
+                View All
+              </button>
+            )}
+          </div>
+
+          <div className="lg:hidden space-y-3">
+            {recent_successful_payments.slice(0, 4).map((order) => {
+              const statusInfo = getStatusInfo(order);
+              const StatusIcon = statusInfo.icon;
+
+              return (
+                <div
+                  key={order.id}
+                  className="bg-white border border-blue-200 rounded-lg p-3 sm:p-4 hover:shadow-md hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50 transition-colors duration-200 group group"
+                  onClick={() => navigate("/account/orders")}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <div className="w-8 h-8 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:from-blue-200 group-hover:to-cyan-200 transition-colors duration-200">
+                        <FiPackage size={14} className="text-blue-600" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <span className="font-semibold text-blue-800 text-sm block truncate">
+                          {order.product_name}
+                        </span>
+                        <span className="text-xs text-blue-600">
+                          Qty: {order.quantity}
+                        </span>
+                      </div>
+                    </div>
+                    <span className="font-bold text-blue-900 text-base flex-shrink-0 ml-2">
+                      ${order.total_price.toFixed(2)}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span
+                        className={`px-2.5 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 ${
+                          statusInfo.color === "green"
+                            ? "bg-green-100 text-green-900 border border-green-200"
+                            : statusInfo.color === "blue"
+                            ? "bg-blue-100 text-blue-900 border border-blue-200"
+                            : "bg-amber-100 text-amber-900 border border-amber-200"
+                        }`}
                       >
-                        {head}
-                      </th>
-                    )
-                  )}
-                </tr>
+                        <StatusIcon size={10} />
+                        <span>{statusInfo.text}</span>
+                      </span>
+                    </div>
+
+                    <div className="text-right">
+                      <p className="text-blue-700 text-xs font-medium">
+                        {formatDate(order.paid_at)}
+                      </p>
+                      <p className="text-blue-500 text-xs">
+                        {formatTime(order.paid_at)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+            {recent_successful_payments.length === 0 && (
+              <div className="text-center py-12 bg-blue-50/50 rounded-2xl border border-blue-200">
+                <FiFileText className="text-blue-400 mx-auto mb-4" size={30} />
+                <h3 className="text-lg font-semibold text-blue-800 mb-2">
+                  No orders yet
+                </h3>
+                <p className="text-blue-600">
+                  Your orders will appear here once you make a purchase.
+                </p>
+              </div>
+            )}
+          </div>
+
+          <div className="hidden lg:block overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+              {recent_successful_payments.length > 0 && (
+                  <tr className="text-left border-b border-blue-300 bg-gradient-to-r from-blue-50 to-cyan-50">
+                    {["Product", "Date & Time", "Amount", "Status"].map(
+                      (head, i) => (
+                        <th
+                          key={i}
+                          className="pb-3 px-4 lg:px-6 text-blue-900 font-semibold text-sm whitespace-nowrap first:rounded-tl-lg last:rounded-tr-lg"
+                        >
+                          {head}
+                        </th>
+                      )
+                    )}
+                  </tr>
+              )}
               </thead>
               <tbody>
-                {recent_successful_payments.slice(0, 5).map((order) => {
+                {recent_successful_payments.slice(0, 4).map((order) => {
                   const statusInfo = getStatusInfo(order);
                   const StatusIcon = statusInfo.icon;
 
                   return (
                     <tr
                       key={order.id}
-                      className="border-b border-blue-100 hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50 transition-all duration-200 cursor-pointer"
+                      onClick={() => navigate("/account/orders")}
+                      className="border-b border-blue-100 hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50 transition-colors duration-200 group"
                     >
-                      <td className="py-3 sm:py-5 px-4 sm:px-6">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg flex items-center justify-center">
-                            <FiPackage size={14} className="text-blue-600" />
+                      <td className="py-4 px-4 lg:px-6">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:from-blue-200 group-hover:to-cyan-200 transition-colors duration-200">
+                            <FiPackage size={16} className="text-blue-600" />
                           </div>
-                          <span className="font-semibold text-blue-800 max-w-[120px] truncate">
-                            {order.product_name}
-                          </span>
+                          <div className="min-w-0">
+                            <span className="font-semibold text-blue-800 block truncate max-w-[180px] 2xl:max-w-[220px]">
+                              {order.product_name}
+                            </span>
+                            <span className="text-xs text-blue-600 mt-0.5">
+                              Quantity: {order.quantity}
+                            </span>
+                          </div>
                         </div>
                       </td>
-                      <td className="py-3 sm:py-5 px-4 sm:px-6 text-blue-700">
+
+                      <td className="py-4 px-4 lg:px-6">
                         <div className="flex flex-col">
-                          <span className="text-sm">
+                          <span className="text-blue-700 font-medium text-sm whitespace-nowrap">
                             {formatDate(order.paid_at)}
                           </span>
-                          <span className="text-xs text-blue-500">
+                          <span className="text-blue-500 text-xs">
                             {formatTime(order.paid_at)}
                           </span>
                         </div>
                       </td>
-                      <td className="py-3 sm:py-5 px-4 sm:px-6 font-semibold text-blue-800">
-                        ${order.total_price.toFixed(2)}
+
+                      <td className="py-4 px-4 lg:px-6">
+                        <span className="font-bold text-blue-900 text-base whitespace-nowrap">
+                          ${order.total_price.toFixed(2)}
+                        </span>
                       </td>
-                      <td className="py-3 sm:py-5 px-4 sm:px-6">
+
+                      <td className="py-4 px-4 lg:px-6">
                         <span
-                          className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm shadow-sm font-semibold flex items-center space-x-1 w-fit ${
+                          className={`px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 w-fit whitespace-nowrap border ${
                             statusInfo.color === "green"
-                              ? "bg-green-100 text-green-900"
+                              ? "bg-green-100 text-green-900 border-green-200"
                               : statusInfo.color === "blue"
-                              ? "bg-blue-100 text-blue-900"
-                              : "bg-amber-100 text-amber-900"
+                              ? "bg-blue-100 text-blue-900 border-blue-200"
+                              : "bg-amber-100 text-amber-900 border-amber-200"
                           }`}
                         >
                           <StatusIcon size={12} />
                           <span>{statusInfo.text}</span>
-                        </span>
-                      </td>
-                      <td className="py-3 sm:py-5 px-4 sm:px-6">
-                        <span
-                          className={`text-xs font-medium ${
-                            order.storekeeper_delivery
-                              ? "text-green-600"
-                              : "text-amber-600"
-                          }`}
-                        >
-                          {order.storekeeper_delivery
-                            ? "Store Delivery"
-                            : "Standard"}
                         </span>
                       </td>
                     </tr>
@@ -313,15 +401,19 @@ const Profile = ({
             </table>
 
             {recent_successful_payments.length === 0 && (
-              <div className="text-center py-8 text-blue-600">
-                <FiShoppingCart size={32} className="mx-auto mb-3 opacity-50" />
-                <p>No recent orders found</p>
+              <div className="text-center py-12 bg-blue-50/50 rounded-2xl border border-blue-200">
+                <FiFileText className="text-blue-400 mx-auto mb-4" size={30} />
+                <h3 className="text-lg font-semibold text-blue-800 mb-2">
+                  No orders yet
+                </h3>
+                <p className="text-blue-600">
+                  Your orders will appear here once you make a purchase.
+                </p>
               </div>
             )}
           </div>
         </div>
 
-        {/* Recent Favorites */}
         <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-lg p-5 sm:p-6 2xl:p-8 border border-blue-400 hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300">
           <h2 className="text-xl sm:text-2xl font-bold text-blue-900 mb-6 sm:mb-8 flex items-center">
             <FiHeart className="mr-2 sm:mr-3 text-rose-500" size={22} />
@@ -329,7 +421,6 @@ const Profile = ({
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
             {recentFavorites.slice(0, 3).map((fav) => {
-              console.log(fav.product);
               const product = fav.product;
 
               return (
@@ -521,18 +612,19 @@ const Profile = ({
             })}
 
             {recentFavorites.length === 0 && (
-              <div className="col-span-full text-center py-8 text-blue-600">
-                <FiHeart size={32} className="mx-auto mb-3 opacity-50" />
-                <p>No favorites yet</p>
-                <p className="text-sm text-blue-500 mt-1">
-                  Start adding products to your favorites!
+              <div className="text-center col-span-full py-12 bg-blue-50/50 rounded-2xl border border-blue-200">
+                <FiHeart className="text-blue-400 mx-auto mb-4" size={30} />
+                <h3 className="text-lg font-semibold text-blue-800 mb-2">
+                  No favorites yet
+                </h3>
+                <p className="text-blue-600">
+                  Your favorite products will appear here
                 </p>
               </div>
             )}
           </div>
         </div>
 
-        {/* Cart Items */}
         <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-lg p-5 sm:p-6 2xl:p-8 border border-blue-400 hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300">
           <h2 className="text-xl sm:text-2xl font-bold text-blue-900 mb-6 sm:mb-8 flex items-center">
             <IoCartOutline className="mr-2 sm:mr-3 text-blue-600" size={22} />
@@ -567,11 +659,16 @@ const Profile = ({
             ))}
 
             {recent_cart_items.length === 0 && (
-              <div className="text-center py-8 text-blue-600">
-                <IoCartOutline size={32} className="mx-auto mb-3 opacity-50" />
-                <p>Your cart is empty</p>
-                <p className="text-sm text-blue-500 mt-1">
-                  Add some products to get started!
+              <div className="text-center py-8 sm:py-12 bg-blue-50/50 rounded-xl sm:rounded-2xl border border-blue-200">
+                <FiShoppingCart
+                  className="text-blue-400 mx-auto mb-3 sm:mb-4"
+                  size={32}
+                />
+                <h3 className="text-base sm:text-lg font-semibold text-blue-800 mb-2">
+                  Your cart is empty
+                </h3>
+                <p className="text-blue-600 text-sm sm:text-base">
+                  Start shopping to add items to your cart
                 </p>
               </div>
             )}
