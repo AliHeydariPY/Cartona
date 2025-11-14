@@ -22,7 +22,7 @@ import {
   FiPlusCircle,
   FiTrash2,
 } from "react-icons/fi";
-import { BiCategory } from "react-icons/bi";
+import { BiCategory, BiCollection } from "react-icons/bi";
 
 import { FaArrowLeft } from "react-icons/fa6";
 
@@ -32,8 +32,11 @@ import {
   getProduct,
   getCategory,
   editProduct,
+  getCollections,
+  getCollection,
 } from "../../../services/productAPIServices";
 import { errorToast, successToast } from "../../../utils/toast";
+import CreateCollectionPopup from "../../../components/pop-ups/CreateCollectionPopup";
 
 const EditProduct = () => {
   const { id } = useParams();
@@ -51,6 +54,14 @@ const EditProduct = () => {
   const [mainCategories, setMainCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
   const [notFound, setNotFound] = useState(false);
+
+  const [collections, setCollections] = useState([]);
+  const [isCollectionOpen, setIsCollectionOpen] = useState(false);
+  const [selectedCollection, setSelectedCollection] = useState(
+    product?.collection || null
+  );
+  const [isCollectionEnabled, setIsCollectionEnabled] = useState();
+  const [isCreatePopupOpen, setIsCreatePopupOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -71,6 +82,20 @@ const EditProduct = () => {
 
         const category = await getCategory(selectedProduct.data.category);
         setSelectedCategory(category.data);
+
+        const collections = await getCollections();
+        setCollections(collections.data);
+        
+        if (selectedProduct.data.collection) {
+
+          const selcetedColl = await getCollection(
+            selectedProduct.data.collection
+          );
+          setIsCollectionEnabled(true);
+          setSelectedCollection(selcetedColl.data);
+        } else {
+          setIsCollectionEnabled(false);
+        }
       } catch {
         setNotFound(true);
       }
@@ -138,6 +163,7 @@ const EditProduct = () => {
     amazing_offer_period: product.amazing_offer_period
       ? new Date(product.amazing_offer_period).toISOString().split("T")[0]
       : "",
+    collection: product.collection || "",
     images_set: product.images_set || [],
   };
 
@@ -189,6 +215,7 @@ const EditProduct = () => {
               "amazing_offer_period",
               values.amazing_offer_period
             );
+            formData.append("collection", values.collection);
             formData.append("description", values.description);
             formData.append("images_set", values.images_set);
 
@@ -552,6 +579,101 @@ const EditProduct = () => {
                   </div>
                 )}
               </div>
+
+              {/* COLLECTION SELECTOR */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center text-blue-800 font-medium">
+                    <BiCollection className="mr-2" /> Collection
+                  </label>
+
+                  {/* Toggle */}
+                  <label className="inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="sr-only peer"
+                      checked={isCollectionEnabled}
+                      onChange={() => {
+                        if (isCollectionEnabled) {
+                          // خاموش می‌شود
+                          setSelectedCollection(null);
+                          setFieldValue("collection", "");
+                        }
+                        setIsCollectionEnabled(!isCollectionEnabled);
+                      }}
+                    />
+
+                    <div
+                      className="relative w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-500 transition-colors
+                      peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] 
+                      after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full 
+                      after:h-5 after:w-5 after:transition-all"
+                    ></div>
+                  </label>
+                </div>
+
+                <Field type="hidden" name="collection" />
+
+                {/* Selector appears only when toggle is ON */}
+                {isCollectionEnabled && (
+                  <div className="relative group w-full">
+                    <button
+                      type="button"
+                      className="flex justify-between w-full items-center bg-white border border-blue-300 rounded-lg px-4 py-3 text-blue-800 hover:border-blue-400 transition-colors duration-300 text-left"
+                      onClick={() => setIsCollectionOpen(!isCollectionOpen)}
+                    >
+                      <span>
+                        {selectedCollection
+                          ? selectedCollection.collection_name
+                          : "Select a collection"}
+                      </span>
+
+                      <FiChevronDown
+                        className={`ml-2 transform ${
+                          isCollectionOpen ? "rotate-180" : ""
+                        } transition-transform duration-300`}
+                        size={16}
+                      />
+                    </button>
+
+                    {isCollectionOpen && (
+                      <div className="absolute w-full z-20 mt-1 bg-white rounded-lg shadow-xl border border-blue-200 max-h-64 overflow-y-auto">
+                        <button
+                          type="button"
+                          className="w-full text-left px-4 py-2 cursor-pointer bg-blue-50 hover:bg-blue-100
+      text-blue-700 font-medium transition-colors duration-200 border-b border-blue-200"
+                          onClick={() => setIsCreatePopupOpen(true)}
+                        >
+                          + Create new collection
+                        </button>
+                        {collections.map((col) => (
+                          <button
+                            key={col.id}
+                            type="button"
+                            className="w-full cursor-pointer text-left px-4 py-2 hover:bg-blue-50 text-blue-800 transition-colors duration-200"
+                            onClick={() => {
+                              setSelectedCollection(col);
+                              setFieldValue("collection", col.id);
+                              setIsCollectionOpen(false);
+                            }}
+                          >
+                            {col.collection_name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {isCreatePopupOpen && (
+                <CreateCollectionPopup
+                  onClose={() => setIsCreatePopupOpen(false)}
+                  setCollections={setCollections}
+                  setSelectedCollection={setSelectedCollection}
+                  setFieldValue={setFieldValue}
+                />
+              )}
 
               <div className="space-y-2">
                 <label className="flex items-center text-blue-800 font-medium">
