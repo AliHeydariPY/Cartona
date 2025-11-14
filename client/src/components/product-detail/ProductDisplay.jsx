@@ -5,11 +5,12 @@ import {
   getCartProducts,
   addToCart,
   getFavorites,
-  addFavorite,
   deleteFavorite,
+  addFavorite,
+  deleteCartProduct,
 } from "../../services/cartAPIServices";
 
-import { FiHeart, FiStar, FiShare2, FiX } from "react-icons/fi";
+import { FiHeart, FiStar, FiShare2 } from "react-icons/fi";
 import { BiSolidOffer } from "react-icons/bi";
 import { FaHeart } from "react-icons/fa";
 import { IoCart, IoCartOutline } from "react-icons/io5";
@@ -19,11 +20,8 @@ import { errorToast, successToast } from "../../utils/toast";
 
 const ProductDisplay = ({
   product,
-  reloadComponent,
-  setReloadComponent,
   setAddToCartPopup,
   setSelectedProduct,
-  setRemoveProductPopup,
 }) => {
   const { id } = useParams();
   const [currentImage, setCurrentImage] = useState(null);
@@ -52,7 +50,7 @@ const ProductDisplay = ({
     };
 
     fetchCartItems();
-  }, [reloadComponent]);
+  }, []);
 
   const handleAddToCart = async () => {
     try {
@@ -70,14 +68,13 @@ const ProductDisplay = ({
         return payload;
       });
 
-      const response = addToCart({
+      const response = await addToCart({
         product: id,
         quantity: 1,
       });
-      response.then(() => {
-        setAddToCartPopup(true);
-        setReloadComponent(!reloadComponent);
-      });
+      console.log(response);
+      setIsInCart(response.data);
+      setAddToCartPopup(true);
     } catch {
       errorToast("Failed to add product to cart");
     }
@@ -85,22 +82,8 @@ const ProductDisplay = ({
 
   const handleRemoveFromCart = async () => {
     try {
-      setSelectedProduct(() => {
-        const currentPrice = product.discounted_price
-          ? product.discounted_price
-          : product.price;
-
-        const payload = {
-          id: isInCart.id,
-          image: product.image,
-          name: product.name,
-          price: currentPrice,
-          average_rating: product.average_rating,
-        };
-
-        return payload;
-      });
-      setRemoveProductPopup(true);
+      await deleteCartProduct(isInCart.id);
+      setIsInCart(null);
     } catch {
       errorToast("Failed to remove product from cart");
     }
@@ -314,7 +297,7 @@ const ProductDisplay = ({
             </button>
           ) : (
             <button
-              onClick={() => handleAddFavorite(id)}
+              onClick={() => handleAddFavorite(product.id)}
               className="flex-1 text-base md:text-sm lg:text-base cursor-pointer bg-white ring ring-rose-300 text-rose-600 py-3 rounded-lg sm:rounded-xl font-medium hover:bg-rose-50 transition-colors duration-300 flex items-center justify-center"
             >
               <FiHeart className=" mr-1.5 md:mr-0.5 lg:mr-1.5 mb-0.5 text-rose-500" />{" "}

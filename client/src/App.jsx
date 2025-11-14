@@ -27,7 +27,6 @@ import ProductImages from "./pages/user-dashboard/my-products/ProductImages";
 import EditProduct from "./pages/user-dashboard/my-products/EditProduct";
 
 import AddedToCartPopup from "./components/pop-ups/AddedToCartPopup";
-import RemoveProductPopup from "./components/pop-ups/RemoveProductPopup";
 import Payments from "./pages/user-dashboard/Payments";
 import LoginForm from "./pages/LoginForm";
 import AccountSetting from "./pages/user-dashboard/AccountSetting";
@@ -42,12 +41,10 @@ import { fetchUserData } from "./utils/fetchUserData";
 import { tokenAtom } from "./atoms/tokenAtom";
 
 function App() {
-  const [removeProductPopup, setRemoveProductPopup] = useState(false);
   const [addToCartPopup, setAddToCartPopup] = useState(false);
 
   const [selectedProduct, setSelectedProduct] = useState(null);
 
-  const [isRemoveCartItem, setIsRemoveCartItem] = useState(true);
   const [reloadComponent, setReloadComponent] = useState(false);
 
   const [accessToken] = useAtom(tokenAtom);
@@ -72,16 +69,6 @@ function App() {
         }}
       />
 
-      {removeProductPopup && (
-        <RemoveProductPopup
-          onClose={() => setRemoveProductPopup(false)}
-          product={selectedProduct}
-          selectedProduct={selectedProduct}
-          setReloadComponent={setReloadComponent}
-          isRemoveCartItem={isRemoveCartItem}
-        />
-      )}
-
       {addToCartPopup && (
         <AddedToCartPopup
           onClose={() => setAddToCartPopup(false)}
@@ -93,29 +80,22 @@ function App() {
         <Route path="/" element={<Home />} />
 
         <Route path="/account" element={<UserDashboard user={user} />}>
-          <Route path="profile" element={<Profile />} />
           <Route
-            path="cart"
+            path="profile"
             element={
-              <Cart
-                setRemoveProductPopup={setRemoveProductPopup}
-                selectedProduct={selectedProduct}
+              <Profile
+                setAddToCartPopup={setAddToCartPopup}
                 setSelectedProduct={setSelectedProduct}
-                reloadComponent={reloadComponent}
-                setReloadComponent={setReloadComponent}
-                setIsRemoveCartItem={setIsRemoveCartItem}
               />
             }
           />
+          <Route path="cart" element={<Cart />} />
           <Route
             path="favorites"
             element={
               <Favorites
-                reloadComponent={reloadComponent}
-                setReloadComponent={setReloadComponent}
                 setAddToCartPopup={setAddToCartPopup}
                 setSelectedProduct={setSelectedProduct}
-                setRemoveProductPopup={setRemoveProductPopup}
               />
             }
           />
@@ -148,10 +128,6 @@ function App() {
             path="my-products"
             element={
               <MyProducts
-                setRemoveProductPopup={setRemoveProductPopup}
-                setSelectedProduct={setSelectedProduct}
-                reloadComponent={reloadComponent}
-                setIsRemoveCartItem={setIsRemoveCartItem}
               />
             }
           />
@@ -185,7 +161,6 @@ function App() {
               setReloadComponent={setReloadComponent}
               setAddToCartPopup={setAddToCartPopup}
               setSelectedProduct={setSelectedProduct}
-              setRemoveProductPopup={setRemoveProductPopup}
             />
           }
         />
@@ -194,31 +169,9 @@ function App() {
 
         <Route path="/upgrade-to-seller" element={<UpgradeToSeller />} />
 
-        <Route
-          path="/search"
-          element={
-            <SearchPage
-              reloadComponent={reloadComponent}
-              setReloadComponent={setReloadComponent}
-              setAddToCartPopup={setAddToCartPopup}
-              setSelectedProduct={setSelectedProduct}
-              setRemoveProductPopup={setRemoveProductPopup}
-            />
-          }
-        />
+        <Route path="/search" element={<SearchPage />} />
 
-        <Route
-          path="/search/:query"
-          element={
-            <SearchPage
-              reloadComponent={reloadComponent}
-              setReloadComponent={setReloadComponent}
-              setAddToCartPopup={setAddToCartPopup}
-              setSelectedProduct={setSelectedProduct}
-              setRemoveProductPopup={setRemoveProductPopup}
-            />
-          }
-        />
+        <Route path="/search/:query" element={<SearchPage />} />
 
         <Route path="/category/:categoryId" element={<SubCategories />} />
 

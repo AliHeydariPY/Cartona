@@ -20,6 +20,7 @@ import { errorToast, successToast } from "../../utils/toast";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { getPurchaseByPayment } from "../../services/commentAPIServices";
 import { getPayment } from "../../services/cartAPIServices";
+import { SectionLoader } from "../../components/SectionLoader";
 
 const Payments = () => {
   const navigate = useNavigate();
@@ -28,6 +29,8 @@ const Payments = () => {
   const [payload, setPayload] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const [visibleCount, setVisibleCount] = useState(4);
+
+  const [isLoading, setIsLoading] = useState(true);
 
   const filter = searchParams.get("filter") || "All";
 
@@ -65,7 +68,7 @@ const Payments = () => {
           })
         );
         console.log("🚀 ~ fetchPayments ~ productPayments:", productPayments);
-
+        setIsLoading(false);
         setPayments(productPayments.filter(Boolean));
       } catch (error) {
         console.error(error);
@@ -138,10 +141,6 @@ const Payments = () => {
     );
   };
 
-  const formatCardNumber = (cardNumber) => {
-    return cardNumber.replace(/(\d{4})/g, "$1 ").trim();
-  };
-
   const getStatusCount = (status) => {
     switch (status) {
       case "Pending":
@@ -188,8 +187,7 @@ const Payments = () => {
               Manage customer payments and deliveries
             </p>
           </div>
-
-          <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs sm:text-sm font-medium self-start sm:self-auto">
+          <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs sm:text-sm font-medium self-start xs:self-auto">
             {filteredPayments.length} {filter.toLowerCase()} orders
           </span>
         </div>
@@ -280,157 +278,160 @@ const Payments = () => {
         </div>
 
         <div className="space-y-4">
-          {filteredPayments.length === 0 ? (
-            <div className="text-center py-8 sm:py-12 bg-blue-50/50 rounded-xl sm:rounded-2xl border border-blue-200">
-              <FiDollarSign
-                className="text-blue-400 mx-auto mb-3 sm:mb-4"
-                size={32}
-              />
-              <h3 className="text-base sm:text-lg font-semibold text-blue-800 mb-2">
-                No {filter.toLowerCase()} payments
-              </h3>
-              <p className="text-blue-600 text-sm">
-                {filter === "All"
-                  ? "Customer payments will appear here"
-                  : `No ${filter.toLowerCase()} payments found`}
-              </p>
-            </div>
+          {isLoading ? (
+            <SectionLoader chatLoader={false} />
           ) : (
-            filteredPayments.slice(0, visibleCount).map((payment) => (
-              <motion.div
-                key={payment.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="bg-gradient-to-r from-blue-50/80 to-cyan-50/80 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-blue-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300"
-              >
-                <div className="grid grid-cols-1 lg:grid-cols-7 gap-4 sm:gap-6">
-                  <div className="flex items-center col-span-3 space-x-3 sm:space-x-4">
-                    <div
-                      onClick={() =>
-                        openInNewTab(`/product/${payment.product.id}`)
-                      }
-                      className="w-16 h-16 sm:w-20 sm:h-20 cursor-pointer border-2 bg-white border-blue-400 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden p-1"
-                    >
-                      <img
-                        src={payment.product?.image}
-                        alt=""
-                        className="w-full h-full object-contain rounded-md"
+            filteredPayments.length === 0 && (
+              <div className="text-center py-8 sm:py-12 bg-blue-50/50 rounded-xl sm:rounded-2xl border border-blue-200">
+                <FiDollarSign
+                  className="text-blue-400 mx-auto mb-3 sm:mb-4"
+                  size={32}
+                />
+                <h3 className="text-base sm:text-lg font-semibold text-blue-800 mb-2">
+                  No {filter.toLowerCase()} payments yet
+                </h3>
+                <p className="text-blue-600 text-sm">
+                  {filter === "All"
+                    ? "Customer payments will appear here"
+                    : `No ${filter.toLowerCase()} payments found`}
+                </p>
+              </div>
+            )
+          )}
+
+          {filteredPayments.slice(0, visibleCount).map((payment) => (
+            <motion.div
+              key={payment.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="bg-gradient-to-r from-blue-50/80 to-cyan-50/80 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-blue-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300"
+            >
+              <div className="grid grid-cols-1 lg:grid-cols-7 gap-4 sm:gap-6">
+                <div className="flex items-center col-span-3 space-x-3 sm:space-x-4">
+                  <div
+                    onClick={() =>
+                      openInNewTab(`/product/${payment.product.id}`)
+                    }
+                    className="w-16 h-16 sm:w-20 sm:h-20 cursor-pointer border-2 bg-white border-blue-400 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden p-1"
+                  >
+                    <img
+                      src={payment.product?.image}
+                      alt=""
+                      className="w-full h-full object-contain rounded-md"
+                    />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-semibold text-blue-900 text-base sm:text-lg mb-1 truncate">
+                      {payment.product?.name}
+                    </h3>
+                    <div className="flex items-center space-x-2 mb-2">
+                      <span className="text-blue-800 font-bold text-sm sm:text-base">
+                        $
+                        {payment.product?.discounted_price ||
+                          payment.product?.price}
+                      </span>
+                      {payment.product?.discounted_price && (
+                        <span className="text-xs sm:text-sm text-rose-500 line-through">
+                          ${payment.product?.price}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs sm:text-sm text-blue-600">
+                      Qty: {payment.quantity}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="h-full flex items-center col-span-2">
+                  <div className=" space-y-2 ">
+                    <div className="flex items-center">
+                      <span className="text-blue-700 font-medium text-sm sm:text-base">
+                        Total:
+                      </span>
+                      <span className="font-bold text-blue-900 text-sm sm:text-base ml-2">
+                        ${payment.total_price.toFixed(2)}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <FiMapPin
+                        className="text-blue-500 flex-shrink-0"
+                        size={14}
                       />
+                      <span className="text-xs sm:text-sm text-blue-600 truncate">
+                        {payment.address}
+                      </span>
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-semibold text-blue-900 text-base sm:text-lg mb-1 truncate">
-                        {payment.product?.name}
-                      </h3>
-                      <div className="flex items-center space-x-2 mb-2">
-                        <span className="text-blue-800 font-bold text-sm sm:text-base">
-                          $
-                          {payment.product?.discounted_price ||
-                            payment.product?.price}
-                        </span>
-                        {payment.product?.discounted_price && (
-                          <span className="text-xs sm:text-sm text-rose-500 line-through">
-                            ${payment.product?.price}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs sm:text-sm text-blue-600">
-                        Qty: {payment.quantity}
-                      </p>
-                    </div>
+
+                    <p className="text-xs text-blue-500">
+                      Paid: {new Date(payment.paid_at).toLocaleDateString()} •
+                      {new Date(payment.paid_at).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
                   </div>
+                </div>
 
-                  <div className="h-full flex items-center col-span-2">
-                    <div className=" space-y-2 ">
-                      <div className="flex items-center">
-                        <span className="text-blue-700 font-medium text-sm sm:text-base">
-                          Total:
-                        </span>
-                        <span className="font-bold text-blue-900 text-sm sm:text-base ml-2">
-                          ${payment.total_price.toFixed(2)}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center space-x-2">
-                        <FiMapPin
-                          className="text-blue-500 flex-shrink-0"
-                          size={14}
-                        />
-                        <span className="text-xs sm:text-sm text-blue-600 truncate">
-                          {payment.address}
-                        </span>
-                      </div>
-
-                      <p className="text-xs text-blue-500">
-                        Paid: {new Date(payment.paid_at).toLocaleDateString()} •
-                        {new Date(payment.paid_at).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col justify-between col-span-2 space-y-3 sm:space-y-4">
-                    <div>{getStatusBadge(payment)}</div>
+                <div className="flex flex-col justify-between col-span-2 space-y-3 sm:space-y-4">
+                  <div>{getStatusBadge(payment)}</div>
+                  <button
+                    onClick={() => {
+                      getPurchaseByPayment(payment.id)
+                        .then((res) => {
+                          navigate(`/account/chats/${res.data[0].id}`);
+                        })
+                        .catch((err) => {
+                          errorToast(err.response.data.detail);
+                        });
+                    }}
+                    className="flex cursor-pointer items-center justify-center px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-lg hover:from-blue-700 hover:to-cyan-600 transition-colors duration-300 text-sm font-semibold whitespace-nowrap min-w-[120px]"
+                  >
+                    <FiMessageSquare className="mr-2 mb-0.5" size={14} />
+                    Chat
+                  </button>
+                  {!payment.buyer_delivery && !payment.storekeeper_delivery && (
                     <button
                       onClick={() => {
-                        getPurchaseByPayment(payment.id)
-                          .then((res) => {
-                            navigate(`/account/chats/${res.data[0].id}`);
-                          })
-                          .catch((err) => {
-                            errorToast(err.response.data.detail);
-                          });
+                        setShowSendNotePopup(true);
+                        const now = new Date().toISOString();
+                        setPayload(() => {
+                          return {
+                            payment: payment.id,
+                            is_shipped: true,
+                            shipped_at: now,
+                            note: "",
+                          };
+                        });
                       }}
-                      className="flex cursor-pointer items-center justify-center px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-lg hover:from-blue-700 hover:to-cyan-600 transition-colors duration-300 text-sm font-semibold whitespace-nowrap min-w-[120px]"
+                      className="bg-green-500 cursor-pointer  text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-green-600 transition-colors duration-300 font-semibold flex items-center justify-center text-xs sm:text-sm"
                     >
-                      <FiMessageSquare className="mr-2 mb-0.5" size={14} />
-                      Chat
+                      <FiTruck className="mr-2 flex-shrink-0" size={14} />
+                      <span className="truncate">Product submission</span>
                     </button>
-                    {!payment.buyer_delivery &&
-                      !payment.storekeeper_delivery && (
-                        <button
-                          onClick={() => {
-                            setShowSendNotePopup(true);
-                            const now = new Date().toISOString();
-                            setPayload(() => {
-                              return {
-                                payment: payment.id,
-                                is_shipped: true,
-                                shipped_at: now,
-                                note: "",
-                              };
-                            });
-                          }}
-                          className="bg-green-500 cursor-pointer  text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-green-600 transition-colors duration-300 font-semibold flex items-center justify-center text-xs sm:text-sm"
-                        >
-                          <FiTruck className="mr-2 flex-shrink-0" size={14} />
-                          <span className="truncate">Product submission</span>
-                        </button>
-                      )}
-                  </div>
+                  )}
                 </div>
-                <div className="mt-4 pt-4 border-t border-blue-200 grid grid-cols-2 md:grid-cols-5 gap-4 text-xs text-blue-600">
-                  <div className="md:col-span-2">
-                    <span className="font-medium">Card Number:</span>{" "}
-                    {payment.fake_card_number}
-                  </div>
-                  <div>
-                    <span className="font-medium">CVV:</span>{" "}
-                    {payment.fake_card_cvv}
-                  </div>
-                  <div>
-                    <span className="font-medium">Expiry:</span>{" "}
-                    {payment.fake_card_expiry}
-                  </div>
-                  <div>
-                    <span className="font-medium">Order ID:</span> #{payment.id}
-                  </div>
+              </div>
+              <div className="mt-4 pt-4 border-t border-blue-200 grid grid-cols-2 md:grid-cols-5 gap-4 text-xs text-blue-600">
+                <div className="md:col-span-2">
+                  <span className="font-medium">Card Number:</span>{" "}
+                  {payment.fake_card_number}
                 </div>
-              </motion.div>
-            ))
-          )}
+                <div>
+                  <span className="font-medium">CVV:</span>{" "}
+                  {payment.fake_card_cvv}
+                </div>
+                <div>
+                  <span className="font-medium">Expiry:</span>{" "}
+                  {payment.fake_card_expiry}
+                </div>
+                <div>
+                  <span className="font-medium">Order ID:</span> #{payment.id}
+                </div>
+              </div>
+            </motion.div>
+          ))}
           {filteredPayments.length > 4 && (
             <div className="flex justify-center pt-3 xs:pt-4 mt-4 xs:mt-5 border-t border-blue-300">
               {visibleCount < filteredPayments.length ? (

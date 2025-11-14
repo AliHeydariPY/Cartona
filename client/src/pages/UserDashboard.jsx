@@ -105,7 +105,6 @@ const UserDashboard = () => {
   ];
 
   useEffect(() => {
-    console.log("🚀 ~ UserDashboard ~ user:", user);
     if (!user) return;
 
     getStorekeeper(user.username)

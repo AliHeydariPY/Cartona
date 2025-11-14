@@ -18,29 +18,32 @@ import {
   FiStar,
   FiPackage,
 } from "react-icons/fi";
+import RemoveProductPopup from "../../components/pop-ups/RemoveProductPopup";
+import { SectionLoader } from "../../components/SectionLoader";
 
-export default function MyProducts({
-  setRremoveFromCartPopup,
-  setSelectedProduct,
-  reloadComponent,
-  setIsRemoveCartItem,
-}) {
+export default function MyProducts() {
   const navigate = useNavigate();
+  const [user] = useAtom(userAtom);
+
   const [products, setProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [showAllProducts, setShowAllProducts] = useState(false);
 
-  const [user] = useAtom(userAtom);
+  const [showRemovePopup, setShowRemovePopup] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
     getStorekeeper(user.username).then((res) => {
       getStorekeeperProducts(res.data.id).then((res) => {
+        setIsLoading(false);
         setProducts(res.data);
       });
     });
-  }, [reloadComponent, user]);
+  }, [user]);
 
   const filteredProducts = useMemo(() => {
     if (!searchQuery.trim()) return products;
@@ -161,202 +164,218 @@ export default function MyProducts({
           </motion.div>
         )}
 
-        {filteredProducts.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-12"
-          >
-            {searchQuery ? (
-              <div className="space-y-4">
-                <FiSearch className="text-6xl text-blue-300 mx-auto" />
-                <h3 className="text-xl font-bold text-blue-800">
-                  No products found
-                </h3>
-                <p className="text-blue-600 max-w-md mx-auto">
-                  No products match your search for "
-                  <span className="font-semibold">{searchQuery}</span>". Try
-                  different keywords or check your spelling.
-                </p>
-                <button
-                  onClick={clearSearch}
-                  className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-6 py-2 rounded-full font-medium hover:shadow-lg transition-all duration-300 mt-4"
-                >
-                  View all products
-                </button>
-              </div>
-            ) : (
-              <div className="text-gray-500 space-y-2">
-                <FiPackage className="text-4xl mx-auto mb-4 text-blue-300" />
-                <p className="text-lg">You haven't added any products yet.</p>
-                <p className="text-sm">
-                  Start by adding your first product to see it here.
-                </p>
-              </div>
-            )}
-          </motion.div>
+        {isLoading ? (
+          <SectionLoader chatLoader={false} />
         ) : (
-          <>
+          filteredProducts.length === 0 && (
             <motion.div
-              layout="position"
-              style={{ opacity: 1 }}
-              className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3 opacity-100"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-12"
             >
-              {displayedProducts.map((product) => (
-                <motion.div
-                  key={product.id}
-                  layout="position"
-                  initial={{ opacity: 1, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3 }}
-                  style={{ opacity: 1 }}
-                  className="overflow-hidden rounded-2xl shadow-md hover:shadow-xl border border-gray-200 bg-white transition-all duration-300"
-                >
-                  <div
-                    onClick={() => {
-                      openInNewTab(`/product/${product.id}`);
-                    }}
-                    className="relative flex cursor-pointer justify-center items-center p-4 md:p-6 rounded-xl sm:rounded-2xl border-2 border-blue-200 shadow-inner w-full h-[260px] md:min-w-[260px] md:h-[260px]"
+              {searchQuery ? (
+                <div className="space-y-4">
+                  <FiSearch className="text-6xl text-blue-300 mx-auto" />
+                  <h3 className="text-xl font-bold text-blue-800">
+                    No products found
+                  </h3>
+                  <p className="text-blue-600 max-w-md mx-auto">
+                    No products match your search for "
+                    <span className="font-semibold">{searchQuery}</span>". Try
+                    different keywords or check your spelling.
+                  </p>
+                  <button
+                    onClick={clearSearch}
+                    className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-6 py-2 rounded-full font-medium hover:shadow-lg transition-all duration-300 mt-4"
                   >
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="max-w-full max-h-full object-contain rounded-md"
-                    />
+                    View all products
+                  </button>
+                </div>
+              ) : (
+                <div className="text-gray-500 space-y-2">
+                  <FiPackage className="text-4xl mx-auto mb-4 text-blue-300" />
+                  <p className="text-lg">You haven't added any products yet.</p>
+                  <p className="text-sm">
+                    Start by adding your first product to see it here.
+                  </p>
+                </div>
+              )}
+            </motion.div>
+          )
+        )}
 
-                    {product.amazing_offer && (
-                      <div className="absolute flex top-3 left-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg z-10">
-                        <PiLightningFill
-                          className="mt-0.25 mr-0.75"
-                          size={13}
-                        />
-                        {product.amazing_offer}
-                      </div>
+        <div>
+          <motion.div
+            layout="position"
+            style={{ opacity: 1 }}
+            className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3 opacity-100"
+          >
+            {displayedProducts.map((product) => (
+              <motion.div
+                key={product.id}
+                layout="position"
+                initial={{ opacity: 1, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+                style={{ opacity: 1 }}
+                className="overflow-hidden rounded-2xl shadow-md hover:shadow-xl border border-gray-200 bg-white transition-all duration-300"
+              >
+                <div
+                  onClick={() => {
+                    openInNewTab(`/product/${product.id}`);
+                  }}
+                  className="relative flex cursor-pointer justify-center items-center p-4 md:p-6 rounded-xl sm:rounded-2xl border-2 border-blue-200 shadow-inner w-full h-[260px] md:min-w-[260px] md:h-[260px]"
+                >
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="max-w-full max-h-full object-contain rounded-md"
+                  />
+
+                  {product.amazing_offer && (
+                    <div className="absolute flex top-3 left-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg z-10">
+                      <PiLightningFill className="mt-0.25 mr-0.75" size={13} />
+                      {product.amazing_offer}
+                    </div>
+                  )}
+                </div>
+
+                <div className="p-4 space-y-2">
+                  <h3 className="text-lg font-bold text-blue-900 truncate">
+                    {product.name}
+                  </h3>
+
+                  <div className="flex items-center flex-wrap gap-2">
+                    <span className="text-lg sm:text-lg font-bold text-blue-900">
+                      ${product.discounted_price || product.price}
+                    </span>
+                    {product.discounted_price && (
+                      <span className="text-sm text-rose-500 line-through ml-1">
+                        ${product.price}
+                      </span>
+                    )}
+                    {product.discount_percentage && (
+                      <span className="ml-1 text-xs bg-gradient-to-r from-rose-500 to-pink-500 text-white px-2 sm:px-2 py-1 rounded-full">
+                        {product.discount_percentage}% OFF
+                      </span>
                     )}
                   </div>
 
-                  <div className="p-4 space-y-2">
-                    <h3 className="text-lg font-bold text-blue-900 truncate">
-                      {product.name}
-                    </h3>
+                  <p className="text-xs text-gray-500">
+                    Stock: {product.stock_quantity}
+                  </p>
 
-                    <div className="flex items-center flex-wrap gap-2">
-                      <span className="text-lg sm:text-lg font-bold text-blue-900">
-                        ${product.discounted_price || product.price}
-                      </span>
-                      {product.discounted_price && (
-                        <span className="text-sm text-rose-500 line-through ml-1">
-                          ${product.price}
-                        </span>
-                      )}
-                      {product.discount_percentage && (
-                        <span className="ml-1 text-xs bg-gradient-to-r from-rose-500 to-pink-500 text-white px-2 sm:px-2 py-1 rounded-full">
-                          {product.discount_percentage}% OFF
-                        </span>
-                      )}
-                    </div>
-
-                    <p className="text-xs text-gray-500">
-                      Stock: {product.stock_quantity}
-                    </p>
-
-                    <div className="flex items-center mb-3 gap-2">
-                      <div className="flex items-center bg-blue-100 w-max px-2 py-1 rounded-full">
-                        <FiStar className="text-yellow-500 fill-yellow-500 mr-1 mb-0.5" />
-                        <span className="text-sm text-blue-600">
-                          {product.average_rating?.toFixed(1) || "0"}
-                        </span>
-                      </div>
+                  <div className="flex items-center mb-3 gap-2">
+                    <div className="flex items-center bg-blue-100 w-max px-2 py-1 rounded-full">
+                      <FiStar className="text-yellow-500 fill-yellow-500 mr-1 mb-0.5" />
                       <span className="text-sm text-blue-600">
-                        ({product.comment_count || 0} reviews)
+                        {product.average_rating?.toFixed(1) || "0"}
                       </span>
                     </div>
-
-                    <div className="flex flex-wrap gap-2 pt-2">
-                      <button
-                        className="flex cursor-pointer items-center justify-center p-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors duration-300"
-                        onClick={() => {
-                          navigate(`edit/${product.id}`);
-                        }}
-                      >
-                        <FiEdit className="w-4 h-4 mb-0.5" /> Edit
-                      </button>
-
-                      <button
-                        className="flex cursor-pointer items-center justify-center p-2 bg-cyan-100 text-cyan-700 rounded-lg hover:bg-cyan-200 transition-colors duration-300"
-                        onClick={() => {
-                          navigate(`images/${product.id}`);
-                        }}
-                      >
-                        <FiImage className="w-4 h-4 mb-0.5 " /> Images
-                      </button>
-
-                      <button
-                        className="flex cursor-pointer items-center justify-center p-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors duration-300"
-                        onClick={() => {
-                          navigate(`features/${product.id}`);
-                        }}
-                      >
-                        <FiList className="mb-0.5" size={19} /> Features
-                      </button>
-
-                      <button
-                        className="flex cursor-pointer items-center justify-center p-2 bg-rose-100 text-rose-700 rounded-lg hover:bg-rose-200 transition-colors duration-300"
-                        onClick={() => {
-                          setRremoveFromCartPopup(true);
-                          setSelectedProduct(product);
-                          setIsRemoveCartItem(false);
-                        }}
-                      >
-                        <FiTrash2 className="w-4 h-4 mb-0.5" /> Delete
-                      </button>
-                    </div>
+                    <span className="text-sm text-blue-600">
+                      ({product.comment_count || 0} reviews)
+                    </span>
                   </div>
-                </motion.div>
-              ))}
-            </motion.div>
 
-            {filteredProducts.length > 6 && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="flex justify-center mt-8 pt-6 border-t-2 border-blue-200"
-              >
-                <button
-                  onClick={toggleShowAllProducts}
-                  className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-8 py-3 rounded-full font-medium shadow-lg hover:shadow-xl transform hover:scale-102 cursor-pointer transition-all duration-300 border border-white/30"
-                >
-                  <span>
-                    {showAllProducts
-                      ? "Show Less"
-                      : `Show All ${filteredProducts.length} Products`}
-                  </span>
-                  {showAllProducts ? (
-                    <FiChevronUp className="text-lg mb-0.5" />
-                  ) : (
-                    <FiChevronDown className="text-lg" />
-                  )}
-                </button>
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    <button
+                      className="flex cursor-pointer items-center justify-center p-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors duration-300"
+                      onClick={() => {
+                        navigate(`edit/${product.id}`);
+                      }}
+                    >
+                      <FiEdit className="w-4 h-4 mb-0.5" /> Edit
+                    </button>
+
+                    <button
+                      className="flex cursor-pointer items-center justify-center p-2 bg-cyan-100 text-cyan-700 rounded-lg hover:bg-cyan-200 transition-colors duration-300"
+                      onClick={() => {
+                        navigate(`images/${product.id}`);
+                      }}
+                    >
+                      <FiImage className="w-4 h-4 mb-0.5 " /> Images
+                    </button>
+
+                    <button
+                      className="flex cursor-pointer items-center justify-center p-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors duration-300"
+                      onClick={() => {
+                        navigate(`features/${product.id}`);
+                      }}
+                    >
+                      <FiList className="mb-0.5" size={19} /> Features
+                    </button>
+
+                    <button
+                      className="flex cursor-pointer items-center justify-center p-2 bg-rose-100 text-rose-700 rounded-lg hover:bg-rose-200 transition-colors duration-300"
+                      onClick={() => {
+                        setSelectedProduct(product);
+                        setShowRemovePopup(true);
+                      }}
+                    >
+                      <FiTrash2 className="w-4 h-4 mb-0.5" /> Delete
+                    </button>
+                  </div>
+                </div>
               </motion.div>
-            )}
+            ))}
+          </motion.div>
 
-            {filteredProducts.length > 6 && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-center mt-4"
+          {filteredProducts.length > 6 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="flex justify-center mt-8 pt-6 border-t-2 border-blue-200"
+            >
+              <button
+                onClick={toggleShowAllProducts}
+                className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-8 py-3 rounded-full font-medium shadow-lg hover:shadow-xl transform hover:scale-102 cursor-pointer transition-all duration-300 border border-white/30"
               >
-                <p className="text-blue-600 text-sm">
+                <span>
                   {showAllProducts
-                    ? `Showing all ${filteredProducts.length} products`
-                    : `Showing 6 of ${filteredProducts.length} products`}
-                </p>
-              </motion.div>
-            )}
-          </>
-        )}
+                    ? "Show Less"
+                    : `Show All ${filteredProducts.length} Products`}
+                </span>
+                {showAllProducts ? (
+                  <FiChevronUp className="text-lg mb-0.5" />
+                ) : (
+                  <FiChevronDown className="text-lg" />
+                )}
+              </button>
+            </motion.div>
+          )}
+
+          {filteredProducts.length > 6 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center mt-4"
+            >
+              <p className="text-blue-600 text-sm">
+                {showAllProducts
+                  ? `Showing all ${filteredProducts.length} products`
+                  : `Showing 6 of ${filteredProducts.length} products`}
+              </p>
+            </motion.div>
+          )}
+        </div>
       </div>
+
+      {showRemovePopup && (
+        <RemoveProductPopup
+          onClose={() => {
+            setSelectedProduct(null);
+            setShowRemovePopup(false);
+          }}
+          product={selectedProduct}
+          onSuccess={() =>
+            setProducts(() =>
+              products.filter((item) => item.id != selectedProduct.id)
+            )
+          }
+          isRemoveCartItem={false}
+        />
+      )}
     </motion.div>
   );
 }

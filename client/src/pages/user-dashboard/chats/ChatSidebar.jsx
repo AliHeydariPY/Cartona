@@ -5,8 +5,10 @@ import { FiMessageSquare, FiSearch, FiX, FiLock } from "react-icons/fi";
 import { MdStorefront } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { userAtom } from "../../../atoms/userAtom";
+import { SectionLoader } from "../../../components/SectionLoader";
 
 const ChatSidebar = ({
+  isLoading,
   conversations,
   setSelectedChat,
   showSidebar,
@@ -108,7 +110,9 @@ const ChatSidebar = ({
             </div>
 
             <div className="flex-1 overflow-y-auto custom-chat-scroll">
-              {displayedConversations.length === 0 ? (
+              {isLoading ? (
+                <SectionLoader chatLoader={true} />
+              ) : displayedConversations.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-32 text-blue-600 p-4">
                   <FiMessageSquare
                     size={28}

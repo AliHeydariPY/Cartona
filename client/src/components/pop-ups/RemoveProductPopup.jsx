@@ -10,8 +10,8 @@ import { successToast } from "../../utils/toast";
 const RemoveProductPopup = ({
   onClose,
   product,
-  setReloadComponent,
   isRemoveCartItem,
+  onSuccess,
 }) => {
   const [show, setShow] = useState(false);
 
@@ -27,12 +27,12 @@ const RemoveProductPopup = ({
   const handleConfirm = () => {
     if (isRemoveCartItem) {
       deleteCartProduct(product.id).then(() => {
-        setReloadComponent((prev) => !prev);
+        onSuccess();
         handleClose();
       });
     } else {
       deleteProduct(product.id).then(() => {
-        setReloadComponent((prev) => !prev);
+        onSuccess();
         handleClose();
         successToast("Product successfully deleted");
       });

@@ -1,4 +1,4 @@
-import { motion, transformValueTypes } from "framer-motion";
+import { motion } from "framer-motion";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 
@@ -35,6 +35,8 @@ export default function SearchPage() {
 
   const [notFound, setNotFound] = useState(false);
 
+  const innerWidth = window.innerWidth;
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -44,7 +46,7 @@ export default function SearchPage() {
           const favoriteProductsRes = await getFavorites();
           favorites = favoriteProductsRes.data;
         } catch (error) {
-          console.warn("User not logged in, skipping favorites...");
+          errorToast("You need to log in first");
         }
 
         const res = query
@@ -120,12 +122,12 @@ export default function SearchPage() {
                   <div className="relative overflow-hidden">
                     <div
                       onClick={() => {
-                        if (window.innerWidth <= 1024) {
+                        if (innerWidth <= 1024) {
                           openInNewTab(`/product/${product.id}`);
                         }
                       }}
                       className={`${
-                        window.innerWidth <= 1024 && "cursor-pointer"
+                        innerWidth <= 1024 && "cursor-pointer"
                       } w-full h-80 flex items-center justify-center border-b-1 border-blue-300 mb-0 relative overflow-hidden p-7`}
                     >
                       <img
@@ -145,7 +147,7 @@ export default function SearchPage() {
                       </div>
                     )}
 
-                    {window.innerWidth > 1024 && (
+                    {innerWidth > 1024 && (
                       <>
                         <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                           {(() => {
@@ -200,7 +202,7 @@ export default function SearchPage() {
                       <h3 className="font-bold text-blue-900 text-lg line-clamp-2 mb-1">
                         {product.name}
                       </h3>
-                      {window.innerWidth <= 1024 && (
+                      {innerWidth <= 1024 && (
                         <div className="flex gap-2  duration-300">
                           {(() => {
                             const favorite = favorites.find(

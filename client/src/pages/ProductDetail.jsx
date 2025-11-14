@@ -30,7 +30,6 @@ const ProductDetails = ({
   setReloadComponent,
   setAddToCartPopup,
   setSelectedProduct,
-  setRemoveProductPopup,
 }) => {
   const { id } = useParams();
 
@@ -151,11 +150,8 @@ const ProductDetails = ({
 
               <ProductDisplay
                 product={product}
-                reloadComponent={reloadComponent}
-                setReloadComponent={setReloadComponent}
                 setAddToCartPopup={setAddToCartPopup}
                 setSelectedProduct={setSelectedProduct}
-                setRemoveProductPopup={setRemoveProductPopup}
               />
 
               <ProductSeller seller={seller} />
