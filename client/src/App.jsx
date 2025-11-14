@@ -9,6 +9,9 @@ import UserDashboard from "./pages/UserDashboard";
 import ProductDetail from "./pages/ProductDetail";
 import About from "./pages/About";
 import Team from "./pages/Team";
+import SearchPage from "./pages/SearchPage";
+import SubCategories from "./pages/SubCategories";
+import CollectionPage from "./pages/CollectionPage";
 
 import Profile from "./pages/user-dashboard/Profile";
 import Favorites from "./pages/user-dashboard/Favorites";
@@ -18,9 +21,6 @@ import AddProduct from "./pages/user-dashboard/AddProduct";
 import MyProducts from "./pages/user-dashboard/MyProducts";
 import Chat from "./pages/user-dashboard/Chat";
 import Notifications from "./pages/user-dashboard/Notifications";
-
-import SearchPage from "./pages/SearchPage";
-import SubCategories from "./pages/SubCategories";
 
 import ProductFeatures from "./pages/user-dashboard/my-products/ProductFeatures";
 import ProductImages from "./pages/user-dashboard/my-products/ProductImages";
@@ -124,13 +124,7 @@ function App() {
           <Route path="setting/change-username" element={<ChangeUsername />} />
           <Route path="setting/store-setting" element={<StoreSetting />} />
 
-          <Route
-            path="my-products"
-            element={
-              <MyProducts
-              />
-            }
-          />
+          <Route path="my-products" element={<MyProducts />} />
 
           <Route
             path="my-products/features/:id"
@@ -178,6 +172,8 @@ function App() {
         <Route path="/team" element={<Team />} />
 
         <Route path="/about" element={<About />} />
+
+        <Route path="/collection/:id" element={<CollectionPage />} />
       </Routes>
     </>
   );

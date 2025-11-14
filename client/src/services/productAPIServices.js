@@ -89,7 +89,6 @@ export const getListProducts = () => {
   return api.get(url);
 };
 
-
 export const getSubCategoryItems = (categoryID) => {
   const url = `/product-api/products/?category=${categoryID}`;
   return api.get(url);
@@ -98,4 +97,19 @@ export const getSubCategoryItems = (categoryID) => {
 export const getProducImages = (productID) => {
   const url = `/product-api/images/product/${productID}`;
   return api.get(url);
+};
+
+export const getCollections = () => {
+  const url = `/product-api/collections/`;
+  return api.get(url);
+};
+
+export const getCollection = (collectionID) => {
+  const url = `/product-api/collections/${collectionID}/`;
+  return api.get(url);
+};
+
+export const createCollection = (collection) => {
+  const url = `/product-api/collections/`;
+  return api.post(url, collection);
 };

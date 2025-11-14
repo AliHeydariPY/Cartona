@@ -24,6 +24,10 @@ const Favorites = ({ setAddToCartPopup, setSelectedProduct }) => {
   const [favorites, setFavorites] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+const visibleCountNum = window.innerWidth >= 1280 ? 6 : 4
+
+  const [visibleCount, setVisibleCount] = useState(visibleCountNum);
+
   useEffect(() => {
     const fetchData = async () => {
       const favoriteProductsRes = await getFavorites();
@@ -39,7 +43,7 @@ const Favorites = ({ setAddToCartPopup, setSelectedProduct }) => {
           return { ...favorite, product: productRes.data, cartItem: hasCart };
         })
       );
-setIsLoading(false)
+      setIsLoading(false);
       setFavorites(favoriteProducts.filter(Boolean));
     };
     fetchData();
@@ -134,7 +138,7 @@ setIsLoading(false)
           )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-            {favorites.map((fav) => {
+            {favorites.slice(0, visibleCount).map((fav) => {
               const product = fav.product;
 
               return (
@@ -325,6 +329,26 @@ setIsLoading(false)
               );
             })}
           </div>
+
+          {favorites.length > visibleCountNum && (
+            <div className="flex justify-center pt-3 xs:pt-4 mt-4 xs:mt-5 border-t border-blue-300">
+              {visibleCount < favorites.length ? (
+                <button
+                  onClick={() => setVisibleCount(visibleCount + visibleCountNum)}
+                  className="px-4 xs:px-6 py-2 cursor-pointer rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-300 text-sm xs:text-base font-medium"
+                >
+                  Show more favorites
+                </button>
+              ) : (
+                <button
+                  onClick={() => setVisibleCount(visibleCountNum)}
+                  className="px-4 xs:px-6 py-2 cursor-pointer rounded-lg border border-blue-400 text-blue-600 hover:bg-blue-50 transition-colors duration-300 text-sm xs:text-base font-medium"
+                >
+                  Show less
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </motion.div>

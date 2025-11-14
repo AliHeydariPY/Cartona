@@ -7,6 +7,7 @@ import { productFormSchema } from "../../validations/productForm";
 
 import {
   addNewProduct,
+  getCollections,
   getMainCategories,
   getSubCategories,
 } from "../../services/productAPIServices";
@@ -26,23 +27,36 @@ import {
   FiChevronDown,
   FiChevronLeft,
 } from "react-icons/fi";
+import { BiCollection } from "react-icons/bi";
+
 import { successToast } from "../../utils/toast";
+import CreateCollectionPopup from "../../components/pop-ups/CreateCollectionPopup";
 
 const AddProduct = () => {
   const [image, setImage] = useState({});
   const [hasDiscount, setHasDiscount] = useState(false);
   const [isAmazingOffer, setIsAmazingOffer] = useState(false);
-  // const { setFieldValue } = useFormikContext();
+
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [selectedMainCategory, setSelectedMainCategory] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [mainCategories, setMainCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
 
+  const [collections, setCollections] = useState([]);
+  const [isCollectionOpen, setIsCollectionOpen] = useState(false);
+  const [selectedCollection, setSelectedCollection] = useState(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState();
+
+  const [isCreatePopupOpen, setIsCreatePopupOpen] = useState(false);
+
   useEffect(() => {
     getMainCategories().then((res) => {
-      console.log(res.data);
       setMainCategories(res.data);
+    });
+    getCollections().then((res) => {
+      setCollections(res.data);
+      console.log(res.data);
     });
   }, []);
 
@@ -97,6 +111,7 @@ const AddProduct = () => {
             discount_period: "",
             amazing_offer: "",
             amazing_offer_period: "",
+            collection: "",
             description: "",
           }}
           validationSchema={productFormSchema}
@@ -115,6 +130,7 @@ const AddProduct = () => {
               "amazing_offer_period",
               values.amazing_offer_period
             );
+            formData.append("collection", values.collection);
             formData.append("description", values.description);
 
             console.log(Object.fromEntries(formData.entries()));
@@ -126,6 +142,7 @@ const AddProduct = () => {
               onSubmitProps.resetForm();
               setImage({});
               setSelectedCategory(null);
+              setSelectedCollection(null);
               successToast("Product added successfully");
             });
           }}
@@ -134,7 +151,7 @@ const AddProduct = () => {
             <Form className="space-y-6 px-0.5">
               <div className="space-y-2">
                 <label className="flex items-center text-blue-800 font-medium">
-                  <FiImage className="mr-2" /> Product Image
+                  <FiImage className="mr-2 mb-0.5" /> Product Image*
                 </label>
 
                 <div className="relative group w-24 h-24 xl:w-28 xl:h-28">
@@ -193,7 +210,6 @@ const AddProduct = () => {
                   className="text-red-500 text-sm ml-0.5 mt-2"
                 />
               </div>
-
               <div className="space-y-2">
                 <label className="flex items-center text-blue-800 font-medium">
                   <FiTag className="mr-2" /> Product Name*
@@ -210,7 +226,6 @@ const AddProduct = () => {
                   className="text-red-500 text-sm ml-0.5"
                 />
               </div>
-
               <div className="space-y-2">
                 <label className="flex items-center text-blue-800 font-medium">
                   <BiCategory size={18} className="mr-2" /> Category*
@@ -296,7 +311,6 @@ const AddProduct = () => {
                   className="text-red-500 text-sm mt-1 ml-0.5"
                 />
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="flex items-center text-blue-800 font-medium">
@@ -340,7 +354,6 @@ const AddProduct = () => {
                   />
                 </div>
               </div>
-
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <label className="flex items-center text-blue-800 font-medium">
@@ -424,7 +437,6 @@ const AddProduct = () => {
                   </>
                 )}
               </div>
-
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <label className="flex items-center text-blue-800 font-medium">
@@ -446,6 +458,7 @@ const AddProduct = () => {
                     <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
                   </label>
                 </div>
+
                 {isAmazingOffer && (
                   <div className="space-y-2 sm:space-y-0 grid grid-cols-1 md:grid-cols-2 sm:gap-6">
                     <div>
@@ -484,6 +497,108 @@ const AddProduct = () => {
               </div>
 
               <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center text-blue-800 font-medium">
+                    <BiCollection className="mr-2" /> Collection
+                  </label>
+
+                  <label className="inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="sr-only peer"
+                      checked={isCollectionOpen}
+                      onChange={() => {
+                        if (isCollectionOpen) {
+                          setSelectedCollection(null);
+                          setFieldValue("collection", "");
+                        }
+                        setIsCollectionOpen(!isCollectionOpen);
+                      }}
+                    />
+
+                    <div
+                      className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full 
+                      peer peer-checked:bg-blue-500
+                      peer-checked:after:translate-x-full
+                      after:content-[''] after:absolute after:top-[2px] after:left-[2px]
+                      after:bg-white after:border-gray-300 after:border 
+                      after:rounded-full after:h-5 after:w-5 after:transition-all"
+                    ></div>
+                  </label>
+                </div>
+
+                <Field
+                  type="hidden"
+                  name="collection"
+                  value={selectedCollection?.id || ""}
+                />
+
+                {isCollectionOpen && (
+                  <div className="relative">
+                    <button
+                      type="button"
+                      className="flex justify-between w-full items-center bg-white border border-blue-300 
+                   rounded-lg px-4 py-3 text-blue-800 hover:border-blue-400 
+                   transition-colors duration-300"
+                      onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    >
+                      <span>
+                        {selectedCollection
+                          ? selectedCollection.collection_name
+                          : "Select collection"}
+                      </span>
+
+                      <FiChevronDown
+                        className={`ml-2 transform ${
+                          isDropdownOpen ? "rotate-180" : ""
+                        } transition-transform duration-300`}
+                        size={16}
+                      />
+                    </button>
+
+                    {isDropdownOpen && (
+                      <div
+                        className="absolute w-full z-20 mt-1 bg-white rounded-lg shadow-xl border border-blue-200 
+                        max-h-64 overflow-y-auto"
+                      >
+                        <button
+                          type="button"
+                          className="w-full text-left px-4 py-2 cursor-pointer bg-blue-50 hover:bg-blue-100
+      text-blue-700 font-medium transition-colors duration-200 border-b border-blue-200"
+                          onClick={() => setIsCreatePopupOpen(true)}
+                        >
+                          + Create new collection
+                        </button>
+                        {collections.map((col) => (
+                          <button
+                            key={col.id}
+                            type="button"
+                            className="w-full text-left px-4 py-2 cursor-pointer hover:bg-blue-50 text-blue-800 transition-colors duration-200"
+                            onClick={() => {
+                              setSelectedCollection(col);
+                              setFieldValue("collection", col.id);
+                              setIsDropdownOpen(false);
+                            }}
+                          >
+                            {col.collection_name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {isCreatePopupOpen && (
+                <CreateCollectionPopup
+                  onClose={() => setIsCreatePopupOpen(false)}
+                  setCollections={setCollections}
+                  setSelectedCollection={setSelectedCollection}
+                  setFieldValue={setFieldValue}
+                />
+              )}
+
+              <div className="space-y-2">
                 <label className="flex items-center text-blue-800 font-medium">
                   <FiAlignLeft className="mr-2" /> Description*
                 </label>
@@ -500,7 +615,6 @@ const AddProduct = () => {
                   className="text-red-500 text-sm ml-0.5"
                 />
               </div>
-
               <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 pt-4">
                 <button
                   type="submit"
@@ -513,6 +627,7 @@ const AddProduct = () => {
                   type="reset"
                   onClick={() => {
                     setSelectedCategory(null);
+                    setSelectedCollection(null);
                     setImage({});
                   }}
                   className="px-6 py-3 cursor-pointer bg-white border border-rose-400 text-rose-700 rounded-lg hover:bg-rose-50 transition-colors duration-300 sm:ml-auto"

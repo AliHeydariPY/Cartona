@@ -10,6 +10,8 @@ import {
   FiDollarSign,
   FiFileText,
   FiChevronRight,
+  FiZap,
+  FiZapOff,
 } from "react-icons/fi";
 import { IoCart, IoCartOutline } from "react-icons/io5";
 
@@ -34,8 +36,11 @@ const Profile = ({ setAddToCartPopup, setSelectedProduct }) => {
     userActivity.recent_favorites || []
   );
 
-  const { recent_cart_items = [], recent_successful_payments = [] } =
-    userActivity || {};
+  const [recentCartItems, setRecentCartItems] = useState(
+    userActivity.recent_cart_items || []
+  );
+
+  const { recent_successful_payments = [] } = userActivity || {};
 
   console.log(
     "🚀 ~ Profile ~ recent_successful_payments:",
@@ -46,6 +51,8 @@ const Profile = ({ setAddToCartPopup, setSelectedProduct }) => {
     const fetchData = async () => {
       const activities = await userActivitySummary();
       const cartProductsRes = await getCartProducts();
+
+      setUserActivity(activities.data);
 
       const favoriteProducts = await Promise.all(
         activities.data.recent_favorites.map(async (favorite) => {
@@ -60,8 +67,15 @@ const Profile = ({ setAddToCartPopup, setSelectedProduct }) => {
       );
 
       setRecentFavorites(favoriteProducts);
-      setUserActivity(activities.data);
-      console.log(favoriteProducts);
+
+      const cartItems = await Promise.all(
+        activities.data.recent_cart_items.map(async (item) => {
+          const productRes = await getProduct(item.product);
+          return { ...item, product: productRes.data };
+        })
+      );
+      console.log(cartItems);
+      setRecentCartItems(cartItems);
     };
 
     fetchData();
@@ -233,17 +247,12 @@ const Profile = ({ setAddToCartPopup, setSelectedProduct }) => {
         <div className="bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-lg p-4 sm:p-5 lg:p-6 2xl:p-8 border border-blue-400 hover:shadow-xl hover:shadow-blue-500/50 transition-all duration-300">
           <div className="flex items-center justify-between mb-4 sm:mb-6 lg:mb-8">
             <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-blue-900 flex items-center">
-              <FiFileText className="mr-2 sm:mr-3 text-green-600" size={22} />
+              <FiFileText
+                className="mr-2 sm:mr-3 text-green-600 mb-0.5"
+                size={22}
+              />
               Recent Orders
             </h2>
-            {recent_successful_payments.length > 0 && (
-              <button
-                onClick={() => navigate("/account/orders")}
-                className="text-sm bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-3 sm:px-4 py-1.5 rounded-lg hover:shadow-lg transition-all duration-300 font-medium"
-              >
-                View All
-              </button>
-            )}
           </div>
 
           <div className="lg:hidden space-y-3">
@@ -260,7 +269,7 @@ const Profile = ({ setAddToCartPopup, setSelectedProduct }) => {
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2 min-w-0 flex-1">
                       <div className="w-8 h-8 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:from-blue-200 group-hover:to-cyan-200 transition-colors duration-200">
-                        <FiPackage size={14} className="text-blue-600" />
+                        <FiPackage size={14} className="text-blue-600 " />
                       </div>
                       <div className="min-w-0 flex-1">
                         <span className="font-semibold text-blue-800 text-sm block truncate">
@@ -307,7 +316,7 @@ const Profile = ({ setAddToCartPopup, setSelectedProduct }) => {
 
             {recent_successful_payments.length === 0 && (
               <div className="text-center py-12 bg-blue-50/50 rounded-2xl border border-blue-200">
-                <FiFileText className="text-blue-400 mx-auto mb-4" size={30} />
+                <FiFileText className="text-blue-400 mx-auto mb-4 " size={30} />
                 <h3 className="text-lg font-semibold text-blue-800 mb-2">
                   No orders yet
                 </h3>
@@ -321,8 +330,8 @@ const Profile = ({ setAddToCartPopup, setSelectedProduct }) => {
           <div className="hidden lg:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-              {recent_successful_payments.length > 0 && (
-                  <tr className="text-left border-b border-blue-300 bg-gradient-to-r from-blue-50 to-cyan-50">
+                {recent_successful_payments.length > 0 && (
+                  <tr className="text-left border-b border-blue-300 bg-gradient-to-t from-blue-50 to-blue-50/10">
                     {["Product", "Date & Time", "Amount", "Status"].map(
                       (head, i) => (
                         <th
@@ -334,7 +343,7 @@ const Profile = ({ setAddToCartPopup, setSelectedProduct }) => {
                       )
                     )}
                   </tr>
-              )}
+                )}
               </thead>
               <tbody>
                 {recent_successful_payments.slice(0, 4).map((order) => {
@@ -416,7 +425,7 @@ const Profile = ({ setAddToCartPopup, setSelectedProduct }) => {
 
         <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-lg p-5 sm:p-6 2xl:p-8 border border-blue-400 hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300">
           <h2 className="text-xl sm:text-2xl font-bold text-blue-900 mb-6 sm:mb-8 flex items-center">
-            <FiHeart className="mr-2 sm:mr-3 text-rose-500" size={22} />
+            <FiHeart className="mr-2 sm:mr-3 text-rose-500 mb-0.5" size={22} />
             Recent Favorites
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
@@ -625,50 +634,129 @@ const Profile = ({ setAddToCartPopup, setSelectedProduct }) => {
           </div>
         </div>
 
-        <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-lg p-5 sm:p-6 2xl:p-8 border border-blue-400 hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300">
-          <h2 className="text-xl sm:text-2xl font-bold text-blue-900 mb-6 sm:mb-8 flex items-center">
-            <IoCartOutline className="mr-2 sm:mr-3 text-blue-600" size={22} />
-            Cart Items
-          </h2>
-          <div className="space-y-4">
-            {recent_cart_items.slice(0, 3).map((item) => (
+        <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg p-4 sm:p-6 border border-blue-400 hover:shadow-xl transition-all duration-300">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-xl font-bold text-blue-900 flex items-center">
+              <FiShoppingCart
+                className="mr-2 sm:mr-3 text-blue-600"
+                size={20}
+              />
+              Cart Items
+            </h2>
+          </div>
+
+          <div className="space-y-3 sm:space-y-4">
+            {recentCartItems.slice(0, 4).map((item) => (
               <div
                 key={item.id}
-                className="flex items-center space-x-4 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-200 hover:shadow-md transition-all duration-200"
+                className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-blue-50 rounded-lg sm:rounded-xl border border-blue-200 hover:border-blue-300 transition-all duration-200"
               >
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-200 to-cyan-200 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <FiPackage className="text-blue-600" size={18} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-blue-900 truncate">
-                    Product #{item.product}
-                  </h3>
-                  <div className="flex items-center space-x-4 mt-1">
-                    <span className="text-sm text-blue-700">
-                      Qty: {item.quantity}
-                    </span>
-                    <span className="text-sm font-bold text-blue-900">
-                      ${item.total_price.toFixed(2)}
-                    </span>
+                <div className="flex items-start gap-3 sm:flex-1 w-full sm:w-auto">
+                  <div onClick={() => openInNewTab(`/product/${item.product.id}`)} className="cursor-pointer w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0 rounded-lg overflow-hidden border border-blue-200 bg-white">
+                    <img
+                      src={item.product.image}
+                      alt={item.product.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-blue-900 text-sm sm:text-base mb-1 truncate">
+                      {item.product.name}
+                    </h3>
+
+                    {item.product.average_rating && (
+                      <div className="flex items-center gap-1 mb-2">
+                        <div className="flex items-center gap-0.5">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <FiStar
+                              key={star}
+                              size={12}
+                              className={`${
+                                star <= Math.floor(item.product.average_rating)
+                                  ? "text-amber-400 fill-amber-400"
+                                  : "text-gray-300"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-xs text-blue-600 font-medium ml-1">
+                          {item.product.average_rating}
+                        </span>
+                        {item.product.comment_count > 0 && (
+                          <span className="text-xs text-blue-500">
+                            ({item.product.comment_count})
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                      <div className="flex items-center gap-2">
+                        {item.product.discounted_price ? (
+                          <>
+                            <span className="text-sm sm:text-base font-bold text-blue-900">
+                              ${item.product.discounted_price}
+                            </span>
+                            <span className="text-xs sm:text-sm text-gray-500 line-through">
+                              ${item.product.price}
+                            </span>
+                            <span className="text-xs bg-gradient-to-r from-rose-500 to-pink-500 text-white px-1.5 py-0.5 rounded-full">
+                              -{item.product.discount_percentage}%
+                            </span>
+                          </>
+                        ) : (
+                          <span className="text-sm sm:text-base font-bold text-blue-900">
+                            ${item.product.price}
+                          </span>
+                        )}
+                      </div>
+
+                      <span className="text-xs sm:text-sm text-blue-700 bg-white px-2 py-1 rounded border border-blue-200">
+                        Qty: {item.quantity}
+                      </span>
+                    </div>
                   </div>
                 </div>
-                <button className="px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-lg hover:shadow-lg transition-all duration-300 font-medium text-sm">
-                  Checkout
-                </button>
+
+                <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
+                  <div
+                    className={`text-xs font-medium px-2 py-1 rounded-full whitespace-nowrap ${
+                      item.product.stock_quantity > 10
+                        ? "bg-green-100 text-green-700 border border-green-200"
+                        : item.product.stock_quantity > 0
+                        ? "bg-amber-100 text-amber-700 border border-amber-200"
+                        : "bg-red-100 text-red-700 border border-red-200"
+                    }`}
+                  >
+                    {item.product.stock_quantity > 10
+                      ? "In Stock"
+                      : item.product.stock_quantity > 0
+                      ? `Low Stock`
+                      : "Out of Stock"}
+                  </div>
+
+                  <button
+                    onClick={() => navigate("/account/cart")}
+                    className="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium text-xs sm:text-sm whitespace-nowrap flex-shrink-0"
+                  >
+                    Buy Now
+                  </button>
+                </div>
               </div>
             ))}
 
-            {recent_cart_items.length === 0 && (
-              <div className="text-center py-8 sm:py-12 bg-blue-50/50 rounded-xl sm:rounded-2xl border border-blue-200">
+            {recentCartItems.length === 0 && (
+              <div className="text-center py-8 sm:py-12 bg-blue-50 rounded-lg sm:rounded-xl border border-blue-200">
                 <FiShoppingCart
                   className="text-blue-400 mx-auto mb-3 sm:mb-4"
-                  size={32}
+                  size={40}
                 />
                 <h3 className="text-base sm:text-lg font-semibold text-blue-800 mb-2">
                   Your cart is empty
                 </h3>
                 <p className="text-blue-600 text-sm sm:text-base">
-                  Start shopping to add items to your cart
+                  Discover amazing products and add them to your cart
                 </p>
               </div>
             )}

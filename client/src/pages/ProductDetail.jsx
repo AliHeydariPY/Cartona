@@ -63,7 +63,6 @@ const ProductDetails = ({
           prodcutData.features_set = [];
         }
 
-        console.log(prodcutData);
         setProduct(prodcutData);
 
         const seller = getStorekeeperById(selectedProduct.data.storekeeper);
