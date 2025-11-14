@@ -12,19 +12,21 @@ import {
 import { IoCart, IoCartOutline } from "react-icons/io5";
 
 import { userActivitySummary } from "../../services/userAPIServices";
-import { getCartProducts } from "../../services/cartAPIServices";
+import {
+  addToCart,
+  deleteCartProduct,
+  deleteFavorite,
+  getCartProducts,
+} from "../../services/cartAPIServices";
 import { getProduct } from "../../services/productAPIServices";
 import { FaClock, FaHeart } from "react-icons/fa";
 import { PiLightningFill } from "react-icons/pi";
 import { BiSolidOffer } from "react-icons/bi";
-import { handleRemoveFavorite } from "../../utils/favoritesService";
+import { errorToast } from "../../utils/toast";
 
 const Profile = ({
-  reloadComponent,
-  setReloadComponent,
   setAddToCartPopup,
   setSelectedProduct,
-  setRemoveProductPopup,
 }) => {
   const [userActivity, setUserActivity] = useState({});
   const [recentFavorites, setRecentFavorites] = useState(
@@ -97,6 +99,56 @@ const Profile = ({
       return { text: "Shipped", color: "blue", icon: FiTruck };
     } else {
       return { text: "Processing", color: "amber", icon: FiClock };
+    }
+  };
+
+  const handleAddToCart = async (selectedProduct) => {
+    try {
+      setSelectedProduct(selectedProduct);
+      const response = await addToCart({
+        product: selectedProduct.id,
+        quantity: 1,
+      });
+      setAddToCartPopup(true);
+      setRecentFavorites(() =>
+        recentFavorites.map((item) => {
+          if (item.product.id == selectedProduct.id) {
+            return { ...item, cartItem: response.data };
+          } else {
+            return { ...item };
+          }
+        })
+      );
+    } catch {
+      errorToast("Failed to add product to cart");
+    }
+  };
+
+  const handleRemoveFromCart = async (favProduct) => {
+    try {
+      await deleteCartProduct(favProduct.cartItem.id);
+      setRecentFavorites(() =>
+        recentFavorites.map((item) => {
+          if (item.id == favProduct.id) {
+            return { ...item, cartItem: null };
+          } else {
+            return item;
+          }
+        })
+      );
+    } catch {
+      errorToast("Failed to remove product from cart");
+    }
+  };
+
+  const handleRemoveFavorite = async (favoriteId) => {
+    try {
+      await deleteFavorite(favoriteId);
+      setRecentFavorites((prev) =>
+        prev.filter((item) => item.id != favoriteId)
+      );
+    } catch {
+      errorToast("Failed to remove from favorites");
     }
   };
 
@@ -276,7 +328,7 @@ const Profile = ({
             Recent Favorites
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-            {recentFavorites.slice(0,3).map((fav) => {
+            {recentFavorites.slice(0, 3).map((fav) => {
               console.log(fav.product);
               const product = fav.product;
 
@@ -320,13 +372,7 @@ const Profile = ({
                       <>
                         <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                           <button
-                            onClick={() =>
-                              handleRemoveFavorite(fav.id, () =>
-                                setRecentFavorites((prev) =>
-                                  prev.filter((item) => item.id != fav.id)
-                                )
-                              )
-                            }
+                            onClick={() => handleRemoveFavorite(fav.id)}
                             className="p-2 cursor-pointer bg-rose-100 rounded-full hover:bg-rose-200 transition-colors duration-300"
                           >
                             <FaHeart className="text-rose-500 " size={16} />
@@ -373,13 +419,7 @@ const Profile = ({
                       {window.innerWidth <= 1024 && (
                         <div className="flex gap-2  duration-300">
                           <button
-                            onClick={() =>
-                              handleRemoveFavorite(fav.id, () =>
-                                setRecentFavorites((prev) =>
-                                  prev.filter((item) => item.id != fav.id)
-                                )
-                              )
-                            }
+                            onClick={() => handleRemoveFavorite(fav.id)}
                             className="p-2 cursor-pointer bg-rose-100 rounded-full hover:bg-rose-200 transition-colors duration-300"
                           >
                             <FaHeart className="text-rose-500 " size={16} />

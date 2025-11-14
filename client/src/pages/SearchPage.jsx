@@ -1,4 +1,4 @@
-import { motion, transformValueTypes } from "framer-motion";
+import { motion } from "framer-motion";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 
@@ -15,12 +15,12 @@ import BottomNav from "../components/BottomNav";
 import ProductNotFound from "../components/ProductNotFound";
 
 import { getListProducts, searchProduct } from "../services/productAPIServices";
-import { getFavorites } from "../services/cartAPIServices";
-import { errorToast } from "../utils/toast";
 import {
-  handleAddFavorite,
-  handleRemoveFavorite,
-} from "../utils/favoritesService";
+  addFavorite,
+  deleteFavorite,
+  getFavorites,
+} from "../services/cartAPIServices";
+import { errorToast } from "../utils/toast";
 
 export default function SearchPage() {
   const { query } = useParams();
@@ -35,7 +35,7 @@ export default function SearchPage() {
 
   const [notFound, setNotFound] = useState(false);
 
-  const innerWidth = window.innerWidth
+  const innerWidth = window.innerWidth;
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -67,6 +67,24 @@ export default function SearchPage() {
 
     fetchProducts();
   }, [query]);
+
+  const handleRemoveFavorite = async (favoriteId) => {
+    try {
+      await deleteFavorite(favoriteId);
+      setFavorites((prev) => prev.filter((item) => item.id != favoriteId));
+    } catch {
+      errorToast("Failed to remove from favorites");
+    }
+  };
+
+  const handleAddFavorite = async (productId) => {
+    try {
+      const response = await addFavorite(productId);
+      setFavorites((prev) => [...prev, response.data]);
+    } catch {
+      errorToast("Failed to add to favorites");
+    }
+  };
 
   const openInNewTab = (url) => {
     window.open(url, "_blank", "noreferrer");
@@ -139,13 +157,7 @@ export default function SearchPage() {
                             return favorite ? (
                               <button
                                 onClick={() =>
-                                  handleRemoveFavorite(favorite.id, () =>
-                                    setFavorites((prev) =>
-                                      prev.filter(
-                                        (item) => item.id != favorite.id
-                                      )
-                                    )
-                                  )
+                                  handleRemoveFavorite(favorite.id)
                                 }
                                 className="p-2 cursor-pointer bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-rose-100 transition-colors duration-200"
                               >
@@ -153,11 +165,7 @@ export default function SearchPage() {
                               </button>
                             ) : (
                               <button
-                                onClick={() =>
-                                  handleAddFavorite(product.id, (response) =>
-                                    setFavorites((prev) => [...prev, response])
-                                  )
-                                }
+                                onClick={() => handleAddFavorite(product.id)}
                                 className="p-2 cursor-pointer bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-rose-100 transition-colors duration-200"
                               >
                                 <FiHeart className="text-rose-500" size={16} />
@@ -203,13 +211,7 @@ export default function SearchPage() {
                             return favorite ? (
                               <button
                                 onClick={() =>
-                                  handleRemoveFavorite(favorite.id, () =>
-                                    setFavorites((prev) =>
-                                      prev.filter(
-                                        (item) => item.id != favorite.id
-                                      )
-                                    )
-                                  )
+                                  handleRemoveFavorite(favorite.id)
                                 }
                                 className="p-2 h-8 cursor-pointer bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-rose-100 transition-colors duration-200"
                               >
@@ -217,11 +219,7 @@ export default function SearchPage() {
                               </button>
                             ) : (
                               <button
-                                onClick={() =>
-                                  handleAddFavorite(product.id, (response) =>
-                                    setFavorites((prev) => [...prev, response])
-                                  )
-                                }
+                                onClick={() => handleAddFavorite(product.id)}
                                 className="p-2 h-8 cursor-pointer bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-rose-100 transition-colors duration-200"
                               >
                                 <FiHeart className="text-rose-500" size={16} />

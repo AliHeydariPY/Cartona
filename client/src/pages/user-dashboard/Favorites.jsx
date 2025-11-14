@@ -11,21 +11,15 @@ import { BiSolidOffer } from "react-icons/bi";
 
 import {
   addToCart,
+  deleteCartProduct,
   deleteFavorite,
   getCartProducts,
   getFavorites,
 } from "../../services/cartAPIServices";
 import { getProduct } from "../../services/productAPIServices";
 import { errorToast } from "../../utils/toast";
-import { handleRemoveFavorite } from "../../utils/favoritesService";
 
-const Favorites = ({
-  setAddToCartPopup,
-  setSelectedProduct,
-  reloadComponent,
-  setReloadComponent,
-  setRemoveProductPopup,
-}) => {
+const Favorites = ({ setAddToCartPopup, setSelectedProduct }) => {
   const [favorites, setFavorites] = useState([]);
 
   useEffect(() => {
@@ -36,7 +30,6 @@ const Favorites = ({
       const favoriteProducts = await Promise.all(
         favoriteProductsRes.data.map(async (favorite) => {
           const productRes = await getProduct(favorite.product);
-
           const hasCart = cartProductsRes.data.find((cartProduct) => {
             return cartProduct.product == productRes.data.id;
           });
@@ -48,45 +41,54 @@ const Favorites = ({
       setFavorites(favoriteProducts.filter(Boolean));
     };
     fetchData();
-  }, [reloadComponent]);
+  }, []);
 
-  const handleAddToCart = async (product) => {
+  const handleAddToCart = async (selectedProduct) => {
     try {
-      setSelectedProduct(product);
-      const response = addToCart({
-        product: product.id,
+      setSelectedProduct(selectedProduct);
+      const response = await addToCart({
+        product: selectedProduct.id,
         quantity: 1,
       });
-      response.then(() => {
-        setAddToCartPopup(true);
-        setReloadComponent(!reloadComponent);
-      });
+      setAddToCartPopup(true);
+      setFavorites(() =>
+        favorites.map((item) => {
+          if (item.product.id == selectedProduct.id) {
+            return { ...item, cartItem: response.data };
+          } else {
+            return { ...item };
+          }
+        })
+      );
     } catch {
       errorToast("Failed to add product to cart");
     }
   };
 
   const handleRemoveFromCart = async (favProduct) => {
-    const product = favProduct.product;
-
     try {
-      setSelectedProduct(() => {
-        const currentPrice = product.discounted_price
-          ? product.discounted_price
-          : product.price;
-        const payload = {
-          id: favProduct.cartItem.id,
-          image: product.image,
-          name: product.name,
-          price: currentPrice,
-          stock_quantity: product.stock_quantity,
-        };
-
-        return payload;
-      });
-      setRemoveProductPopup(true);
+      await deleteCartProduct(favProduct.cartItem.id);
+      setFavorites(() =>
+        favorites.map((item) => {
+          if (item.id == favProduct.id) {
+            return { ...item, cartItem: null };
+          } else {
+            return item;
+          }
+        })
+      );
     } catch {
       errorToast("Failed to remove product from cart");
+    }
+  };
+
+  const handleRemoveFavorite = async (favoriteId) => {
+    try {
+      await deleteFavorite(favoriteId);
+      setFavorites((prev) => prev.filter((item) => item.id != favoriteId));
+      errorToast("Removed from favorites");
+    } catch {
+      errorToast("Failed to remove from favorites");
     }
   };
 
@@ -168,13 +170,7 @@ const Favorites = ({
                         <>
                           <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                             <button
-                              onClick={() =>
-                                handleRemoveFavorite(fav.id, () =>
-                                  setFavorites((prev) =>
-                                    prev.filter((item) => item.id != fav.id)
-                                  )
-                                )
-                              }
+                              onClick={() => handleRemoveFavorite(fav.id)}
                               className="p-2 cursor-pointer bg-rose-100 rounded-full hover:bg-rose-200 transition-colors duration-300"
                             >
                               <FaHeart className="text-rose-500 " size={16} />
@@ -221,13 +217,7 @@ const Favorites = ({
                         {window.innerWidth <= 1024 && (
                           <div className="flex gap-2  duration-300">
                             <button
-                              onClick={() =>
-                                handleRemoveFavorite(fav.id, () =>
-                                  setFavorites((prev) =>
-                                    prev.filter((item) => item.id != fav.id)
-                                  )
-                                )
-                              }
+                              onClick={() => handleRemoveFavorite(fav.id)}
                               className="p-2 cursor-pointer bg-rose-100 rounded-full hover:bg-rose-200 transition-colors duration-300"
                             >
                               <FaHeart className="text-rose-500 " size={16} />

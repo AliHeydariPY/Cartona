@@ -5,24 +5,23 @@ import {
   getCartProducts,
   addToCart,
   getFavorites,
+  deleteFavorite,
+  addFavorite,
+  deleteCartProduct,
 } from "../../services/cartAPIServices";
 
-import { FiHeart, FiStar, FiShare2, FiX } from "react-icons/fi";
+import { FiHeart, FiStar, FiShare2 } from "react-icons/fi";
 import { BiSolidOffer } from "react-icons/bi";
 import { FaHeart } from "react-icons/fa";
 import { IoCart, IoCartOutline } from "react-icons/io5";
 
 import ProductImageCarousel from "../ProductImageCarousel";
 import { errorToast, successToast } from "../../utils/toast";
-import { handleAddFavorite, handleRemoveFavorite } from "../../utils/favoritesService";
 
 const ProductDisplay = ({
   product,
-  reloadComponent,
-  setReloadComponent,
   setAddToCartPopup,
   setSelectedProduct,
-  setRemoveProductPopup,
 }) => {
   const { id } = useParams();
   const [currentImage, setCurrentImage] = useState(null);
@@ -51,7 +50,7 @@ const ProductDisplay = ({
     };
 
     fetchCartItems();
-  }, [reloadComponent]);
+  }, []);
 
   const handleAddToCart = async () => {
     try {
@@ -69,14 +68,13 @@ const ProductDisplay = ({
         return payload;
       });
 
-      const response = addToCart({
+      const response = await addToCart({
         product: id,
         quantity: 1,
       });
-      response.then(() => {
-        setAddToCartPopup(true);
-        setReloadComponent(!reloadComponent);
-      });
+      console.log(response);
+      setIsInCart(response.data);
+      setAddToCartPopup(true);
     } catch {
       errorToast("Failed to add product to cart");
     }
@@ -84,24 +82,28 @@ const ProductDisplay = ({
 
   const handleRemoveFromCart = async () => {
     try {
-      setSelectedProduct(() => {
-        const currentPrice = product.discounted_price
-          ? product.discounted_price
-          : product.price;
-
-        const payload = {
-          id: isInCart.id,
-          image: product.image,
-          name: product.name,
-          price: currentPrice,
-          average_rating: product.average_rating,
-        };
-
-        return payload;
-      });
-      setRemoveProductPopup(true);
+      await deleteCartProduct(isInCart.id);
+      setIsInCart(null);
     } catch {
       errorToast("Failed to remove product from cart");
+    }
+  };
+
+  const handleRemoveFavorite = async (favoriteId) => {
+    try {
+      await deleteFavorite(favoriteId);
+      setFavoriteEntry(undefined);
+    } catch {
+      errorToast("Failed to remove from favorites");
+    }
+  };
+
+  const handleAddFavorite = async (productId) => {
+    try {
+      const response = await addFavorite(productId);
+      setFavoriteEntry(response.data);
+    } catch {
+      errorToast("Failed to add to favorites");
     }
   };
 
@@ -287,11 +289,7 @@ const ProductDisplay = ({
 
           {favoriteEntry ? (
             <button
-              onClick={() =>
-                handleRemoveFavorite(favoriteEntry.id, () =>
-                  setFavoriteEntry(null)
-                )
-              }
+              onClick={() => handleRemoveFavorite(favoriteEntry.id)}
               className="flex-1 text-base md:text-sm lg:text-base cursor-pointer py-3 rounded-lg sm:rounded-xl font-semibold transition-colors duration-300 flex items-center justify-center bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white"
             >
               <FaHeart className="mr-1.5 md:mr-0.5 lg:mr-1.5 mb-0.5" /> Remove
@@ -299,11 +297,7 @@ const ProductDisplay = ({
             </button>
           ) : (
             <button
-              onClick={() =>
-                handleAddFavorite(product.id, (response) =>
-                  setFavoriteEntry(response)
-                )
-              }
+              onClick={() => handleAddFavorite(product.id)}
               className="flex-1 text-base md:text-sm lg:text-base cursor-pointer bg-white ring ring-rose-300 text-rose-600 py-3 rounded-lg sm:rounded-xl font-medium hover:bg-rose-50 transition-colors duration-300 flex items-center justify-center"
             >
               <FiHeart className=" mr-1.5 md:mr-0.5 lg:mr-1.5 mb-0.5 text-rose-500" />{" "}

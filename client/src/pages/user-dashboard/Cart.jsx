@@ -23,17 +23,17 @@ import {
 import { errorToast, successToast } from "../../utils/toast";
 import PaymentAddressPopup from "../../components/pop-ups/PaymentAddressPopup";
 import { MdOutlinePayments } from "react-icons/md";
+import RemoveProductPopup from "../../components/pop-ups/RemoveProductPopup";
 
-const Cart = ({
-  setRemoveProductPopup,
-  setSelectedProduct,
-  setIsRemoveCartItem,
-}) => {
+const Cart = () => {
   const navigate = useNavigate();
   const [cartItems, setCartItems] = useState([]);
-  const [showPaymentPopup, setShowPaymentPopup] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
-  const [checkoutProduct, setCheckoutProduct] = useState(null);
+
+  const [showPaymentPopup, setShowPaymentPopup] = useState(false);
+  const [showRemovePopup, setShowRemovePopup] = useState(false);
+
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   useEffect(() => {
     const fetchCartItems = async () => {
@@ -59,7 +59,7 @@ const Cart = ({
 
     fetchCartItems();
   }, []);
-  console.log(cartItems);
+
   const updateQuantity = async (id, newQuantity) => {
     if (newQuantity < 1) return;
 
@@ -103,20 +103,21 @@ const Cart = ({
 
   const handlePayment = (address) => {
     setIsProcessingPayment(true);
-    if (checkoutProduct) {
+    if (selectedProduct) {
       const payload = {
-        cart_item: checkoutProduct.id,
+        cart_item: selectedProduct.id,
         address: address,
         is_successful: true,
       };
       singleCartPayment(payload)
         .then(() => {
           setCartItems(() =>
-            cartItems.filter((item) => item.id != checkoutProduct.id)
+            cartItems.filter((item) => item.id != selectedProduct.id)
           );
           setIsProcessingPayment(false);
           setShowPaymentPopup(false);
-          setCheckoutProduct(null);
+          successToast("Payment was successful");
+          setSelectedProduct(null);
         })
         .catch(() => {
           errorToast();
@@ -233,7 +234,7 @@ const Cart = ({
                           <button
                             onClick={() => {
                               setShowPaymentPopup(true);
-                              setCheckoutProduct(product);
+                              setSelectedProduct(product);
                             }}
                             className="p-1.5 sm:p-2 text-green-500 cursor-pointer hover:bg-green-100 rounded-lg transition-colors duration-200"
                             title="Quick Buy"
@@ -245,9 +246,10 @@ const Cart = ({
                           </button>
                           <button
                             onClick={() => {
-                              setRemoveProductPopup(true);
+                              // setRemoveProductPopup(true);
+                              console.log(product);
                               setSelectedProduct(product);
-                              setIsRemoveCartItem(true);
+                              setShowRemovePopup(true);
                             }}
                             className="p-1.5 sm:p-2 text-rose-500 cursor-pointer hover:bg-rose-100 rounded-lg transition-colors duration-200"
                             title="Remove Item"
@@ -387,15 +389,31 @@ const Cart = ({
         </div>
       </div>
 
+      {showRemovePopup && (
+        <RemoveProductPopup
+          onClose={() => {
+            setSelectedProduct(null);
+            setShowRemovePopup(false);
+          }}
+          product={selectedProduct}
+          onSuccess={() =>
+            setCartItems(() =>
+              cartItems.filter((item) => item.id != selectedProduct.id)
+            )
+          }
+          isRemoveCartItem={true}
+        />
+      )}
+
       {showPaymentPopup && (
         <PaymentAddressPopup
           onClose={() => {
             setShowPaymentPopup(false);
-            setCheckoutProduct(null);
+            setSelectedProduct(null);
           }}
           onConfirm={handlePayment}
           cartItems={cartItems}
-          singleProduct={checkoutProduct}
+          singleProduct={selectedProduct}
           isProcessing={isProcessingPayment}
         />
       )}

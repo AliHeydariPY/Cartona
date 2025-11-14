@@ -18,18 +18,17 @@ import {
   FiStar,
   FiPackage,
 } from "react-icons/fi";
+import RemoveProductPopup from "../../components/pop-ups/RemoveProductPopup";
 
-export default function MyProducts({
-  setRremoveFromCartPopup,
-  setSelectedProduct,
-  reloadComponent,
-  setIsRemoveCartItem,
-}) {
+export default function MyProducts() {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [showAllProducts, setShowAllProducts] = useState(false);
+
+  const [showRemovePopup, setShowRemovePopup] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   const [user] = useAtom(userAtom);
 
@@ -40,7 +39,7 @@ export default function MyProducts({
         setProducts(res.data);
       });
     });
-  }, [reloadComponent, user]);
+  }, [user]);
 
   const filteredProducts = useMemo(() => {
     if (!searchQuery.trim()) return products;
@@ -303,9 +302,8 @@ export default function MyProducts({
                       <button
                         className="flex cursor-pointer items-center justify-center p-2 bg-rose-100 text-rose-700 rounded-lg hover:bg-rose-200 transition-colors duration-300"
                         onClick={() => {
-                          setRremoveFromCartPopup(true);
                           setSelectedProduct(product);
-                          setIsRemoveCartItem(false);
+                          setShowRemovePopup(true);
                         }}
                       >
                         <FiTrash2 className="w-4 h-4 mb-0.5" /> Delete
@@ -357,6 +355,22 @@ export default function MyProducts({
           </>
         )}
       </div>
+
+      {showRemovePopup && (
+        <RemoveProductPopup
+          onClose={() => {
+            setSelectedProduct(null);
+            setShowRemovePopup(false);
+          }}
+          product={selectedProduct}
+          onSuccess={() =>
+            setProducts(() =>
+              products.filter((item) => item.id != selectedProduct.id)
+            )
+          }
+          isRemoveCartItem={false}
+        />
+      )}
     </motion.div>
   );
 }
