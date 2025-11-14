@@ -17,6 +17,7 @@ import {
 } from "../../services/cartAPIServices";
 import { getProduct } from "../../services/productAPIServices";
 import { errorToast } from "../../utils/toast";
+import { handleRemoveFavorite } from "../../utils/favoritesService";
 
 const Favorites = ({
   setAddToCartPopup,
@@ -86,16 +87,6 @@ const Favorites = ({
       setRemoveProductPopup(true);
     } catch {
       errorToast("Failed to remove product from cart");
-    }
-  };
-
-  const handleRemoveFavorite = async (favoriteId) => {
-    try {
-      await deleteFavorite(favoriteId);
-      setFavorites((prev) => prev.filter((item) => item.id != favoriteId));
-      errorToast("Removed from favorites");
-    } catch {
-      errorToast("Failed to remove from favorites");
     }
   };
 
@@ -177,7 +168,13 @@ const Favorites = ({
                         <>
                           <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                             <button
-                              onClick={() => handleRemoveFavorite(fav.id)}
+                              onClick={() =>
+                                handleRemoveFavorite(fav.id, () =>
+                                  setFavorites((prev) =>
+                                    prev.filter((item) => item.id != fav.id)
+                                  )
+                                )
+                              }
                               className="p-2 cursor-pointer bg-rose-100 rounded-full hover:bg-rose-200 transition-colors duration-300"
                             >
                               <FaHeart className="text-rose-500 " size={16} />
@@ -224,7 +221,13 @@ const Favorites = ({
                         {window.innerWidth <= 1024 && (
                           <div className="flex gap-2  duration-300">
                             <button
-                              onClick={() => handleRemoveFavorite(fav.id)}
+                              onClick={() =>
+                                handleRemoveFavorite(fav.id, () =>
+                                  setFavorites((prev) =>
+                                    prev.filter((item) => item.id != fav.id)
+                                  )
+                                )
+                              }
                               className="p-2 cursor-pointer bg-rose-100 rounded-full hover:bg-rose-200 transition-colors duration-300"
                             >
                               <FaHeart className="text-rose-500 " size={16} />

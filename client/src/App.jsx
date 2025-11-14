@@ -93,7 +93,12 @@ function App() {
         <Route path="/" element={<Home />} />
 
         <Route path="/account" element={<UserDashboard user={user} />}>
-          <Route path="profile" element={<Profile />} />
+          <Route path="profile" element={<Profile 
+          reloadComponent={reloadComponent}
+                setReloadComponent={setReloadComponent}
+                setAddToCartPopup={setAddToCartPopup}
+                setSelectedProduct={setSelectedProduct}
+                setRemoveProductPopup={setRemoveProductPopup} />} />
           <Route
             path="cart"
             element={

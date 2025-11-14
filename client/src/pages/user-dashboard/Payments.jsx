@@ -188,8 +188,7 @@ const Payments = () => {
               Manage customer payments and deliveries
             </p>
           </div>
-
-          <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs sm:text-sm font-medium self-start sm:self-auto">
+          <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs sm:text-sm font-medium self-start xs:self-auto">
             {filteredPayments.length} {filter.toLowerCase()} orders
           </span>
         </div>
@@ -287,7 +286,7 @@ const Payments = () => {
                 size={32}
               />
               <h3 className="text-base sm:text-lg font-semibold text-blue-800 mb-2">
-                No {filter.toLowerCase()} payments
+                No {filter.toLowerCase()} payments yet
               </h3>
               <p className="text-blue-600 text-sm">
                 {filter === "All"

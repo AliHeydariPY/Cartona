@@ -89,3 +89,8 @@ export const productSubmission = (payload) => {
   const url = `/user-api/delivery-status/`;
   return api.post(url, payload);
 };
+
+export const userActivitySummary = () => {
+  const url = `/user-api/user-activity-summary/`;
+  return api.get(url);
+};

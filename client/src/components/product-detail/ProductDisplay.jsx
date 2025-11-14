@@ -5,8 +5,6 @@ import {
   getCartProducts,
   addToCart,
   getFavorites,
-  addFavorite,
-  deleteFavorite,
 } from "../../services/cartAPIServices";
 
 import { FiHeart, FiStar, FiShare2, FiX } from "react-icons/fi";
@@ -16,6 +14,7 @@ import { IoCart, IoCartOutline } from "react-icons/io5";
 
 import ProductImageCarousel from "../ProductImageCarousel";
 import { errorToast, successToast } from "../../utils/toast";
+import { handleAddFavorite, handleRemoveFavorite } from "../../utils/favoritesService";
 
 const ProductDisplay = ({
   product,
@@ -103,24 +102,6 @@ const ProductDisplay = ({
       setRemoveProductPopup(true);
     } catch {
       errorToast("Failed to remove product from cart");
-    }
-  };
-
-  const handleRemoveFavorite = async (favoriteId) => {
-    try {
-      await deleteFavorite(favoriteId);
-      setFavoriteEntry(undefined);
-    } catch {
-      errorToast("Failed to remove from favorites");
-    }
-  };
-
-  const handleAddFavorite = async (productId) => {
-    try {
-      const response = await addFavorite(productId);
-      setFavoriteEntry(response.data);
-    } catch {
-      errorToast("Failed to add to favorites");
     }
   };
 
@@ -306,7 +287,11 @@ const ProductDisplay = ({
 
           {favoriteEntry ? (
             <button
-              onClick={() => handleRemoveFavorite(favoriteEntry.id)}
+              onClick={() =>
+                handleRemoveFavorite(favoriteEntry.id, () =>
+                  setFavoriteEntry(null)
+                )
+              }
               className="flex-1 text-base md:text-sm lg:text-base cursor-pointer py-3 rounded-lg sm:rounded-xl font-semibold transition-colors duration-300 flex items-center justify-center bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white"
             >
               <FaHeart className="mr-1.5 md:mr-0.5 lg:mr-1.5 mb-0.5" /> Remove
@@ -314,7 +299,11 @@ const ProductDisplay = ({
             </button>
           ) : (
             <button
-              onClick={() => handleAddFavorite(id)}
+              onClick={() =>
+                handleAddFavorite(product.id, (response) =>
+                  setFavoriteEntry(response)
+                )
+              }
               className="flex-1 text-base md:text-sm lg:text-base cursor-pointer bg-white ring ring-rose-300 text-rose-600 py-3 rounded-lg sm:rounded-xl font-medium hover:bg-rose-50 transition-colors duration-300 flex items-center justify-center"
             >
               <FiHeart className=" mr-1.5 md:mr-0.5 lg:mr-1.5 mb-0.5 text-rose-500" />{" "}

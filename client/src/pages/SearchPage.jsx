@@ -15,12 +15,12 @@ import BottomNav from "../components/BottomNav";
 import ProductNotFound from "../components/ProductNotFound";
 
 import { getListProducts, searchProduct } from "../services/productAPIServices";
-import {
-  addFavorite,
-  deleteFavorite,
-  getFavorites,
-} from "../services/cartAPIServices";
+import { getFavorites } from "../services/cartAPIServices";
 import { errorToast } from "../utils/toast";
+import {
+  handleAddFavorite,
+  handleRemoveFavorite,
+} from "../utils/favoritesService";
 
 export default function SearchPage() {
   const { query } = useParams();
@@ -35,6 +35,8 @@ export default function SearchPage() {
 
   const [notFound, setNotFound] = useState(false);
 
+  const innerWidth = window.innerWidth
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -44,7 +46,7 @@ export default function SearchPage() {
           const favoriteProductsRes = await getFavorites();
           favorites = favoriteProductsRes.data;
         } catch (error) {
-          console.warn("User not logged in, skipping favorites...");
+          errorToast("You need to log in first");
         }
 
         const res = query
@@ -65,24 +67,6 @@ export default function SearchPage() {
 
     fetchProducts();
   }, [query]);
-
-  const handleRemoveFavorite = async (favoriteId) => {
-    try {
-      await deleteFavorite(favoriteId);
-      setFavorites((prev) => prev.filter((item) => item.id != favoriteId));
-    } catch {
-      errorToast("Failed to remove from favorites");
-    }
-  };
-
-  const handleAddFavorite = async (productId) => {
-    try {
-      const response = await addFavorite(productId);
-      setFavorites((prev) => [...prev, response.data]);
-    } catch {
-      errorToast("Failed to add to favorites");
-    }
-  };
 
   const openInNewTab = (url) => {
     window.open(url, "_blank", "noreferrer");
@@ -120,12 +104,12 @@ export default function SearchPage() {
                   <div className="relative overflow-hidden">
                     <div
                       onClick={() => {
-                        if (window.innerWidth <= 1024) {
+                        if (innerWidth <= 1024) {
                           openInNewTab(`/product/${product.id}`);
                         }
                       }}
                       className={`${
-                        window.innerWidth <= 1024 && "cursor-pointer"
+                        innerWidth <= 1024 && "cursor-pointer"
                       } w-full h-80 flex items-center justify-center border-b-1 border-blue-300 mb-0 relative overflow-hidden p-7`}
                     >
                       <img
@@ -145,7 +129,7 @@ export default function SearchPage() {
                       </div>
                     )}
 
-                    {window.innerWidth > 1024 && (
+                    {innerWidth > 1024 && (
                       <>
                         <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                           {(() => {
@@ -155,7 +139,13 @@ export default function SearchPage() {
                             return favorite ? (
                               <button
                                 onClick={() =>
-                                  handleRemoveFavorite(favorite.id)
+                                  handleRemoveFavorite(favorite.id, () =>
+                                    setFavorites((prev) =>
+                                      prev.filter(
+                                        (item) => item.id != favorite.id
+                                      )
+                                    )
+                                  )
                                 }
                                 className="p-2 cursor-pointer bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-rose-100 transition-colors duration-200"
                               >
@@ -163,7 +153,11 @@ export default function SearchPage() {
                               </button>
                             ) : (
                               <button
-                                onClick={() => handleAddFavorite(product.id)}
+                                onClick={() =>
+                                  handleAddFavorite(product.id, (response) =>
+                                    setFavorites((prev) => [...prev, response])
+                                  )
+                                }
                                 className="p-2 cursor-pointer bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-rose-100 transition-colors duration-200"
                               >
                                 <FiHeart className="text-rose-500" size={16} />
@@ -200,7 +194,7 @@ export default function SearchPage() {
                       <h3 className="font-bold text-blue-900 text-lg line-clamp-2 mb-1">
                         {product.name}
                       </h3>
-                      {window.innerWidth <= 1024 && (
+                      {innerWidth <= 1024 && (
                         <div className="flex gap-2  duration-300">
                           {(() => {
                             const favorite = favorites.find(
@@ -209,7 +203,13 @@ export default function SearchPage() {
                             return favorite ? (
                               <button
                                 onClick={() =>
-                                  handleRemoveFavorite(favorite.id)
+                                  handleRemoveFavorite(favorite.id, () =>
+                                    setFavorites((prev) =>
+                                      prev.filter(
+                                        (item) => item.id != favorite.id
+                                      )
+                                    )
+                                  )
                                 }
                                 className="p-2 h-8 cursor-pointer bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-rose-100 transition-colors duration-200"
                               >
@@ -217,7 +217,11 @@ export default function SearchPage() {
                               </button>
                             ) : (
                               <button
-                                onClick={() => handleAddFavorite(product.id)}
+                                onClick={() =>
+                                  handleAddFavorite(product.id, (response) =>
+                                    setFavorites((prev) => [...prev, response])
+                                  )
+                                }
                                 className="p-2 h-8 cursor-pointer bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-rose-100 transition-colors duration-200"
                               >
                                 <FiHeart className="text-rose-500" size={16} />
