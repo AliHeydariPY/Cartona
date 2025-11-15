@@ -2,11 +2,10 @@ import { motion } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 import {
   getMainCategories,
-  getSubCategories,
-} from "../services/productAPIServices";
+} from "../../services/productAPIServices";
 import { FiChevronLeft, FiChevronRight, FiArrowRight } from "react-icons/fi";
 
-import { FiSmartphone, FiHome, FiGlobe } from "react-icons/fi";
+import { FiHome, FiGlobe } from "react-icons/fi";
 import { TbBook } from "react-icons/tb";
 import { RiTShirt2Line } from "react-icons/ri";
 import { LuLeaf } from "react-icons/lu";

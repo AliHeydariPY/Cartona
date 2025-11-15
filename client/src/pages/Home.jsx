@@ -2,17 +2,12 @@ import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
-import Category from "../components/Category";
+import Footer from "../components/home/Footer";
+import Category from "../components/home/Category";
 import BottomNav from "../components/BottomNav";
 
 import {
   FiChevronRight,
-  FiSmartphone,
-  FiShoppingBag,
-  FiHome,
-  FiFeather,
-  FiArrowRight,
   FiChevronLeft,
   FiHeart,
   FiStar,
@@ -211,21 +206,23 @@ const Home = () => {
               </div>
             </div>
 
-            <div className="bg-white/60 backdrop-blur-lg rounded-3xl shadow-lg p-10 md:p-16 mb-20 relative overflow-hidden border border-white/30">
-              <div className="absolute -top-20 -right-20 w-64 h-64 bg-gradient-to-r from-blue-600/10 to-cyan-500/10 rounded-full filter blur-3xl"></div>
-              <div className="absolute -bottom-32 -left-20 w-56 h-56 bg-cyan-500/5 rounded-full filter blur-3xl"></div>
+            <div className="bg-white/60 backdrop-blur-lg rounded-2xl sm:rounded-3xl shadow-lg p-6 sm:p-8 md:p-12 lg:p-16 mb-12 sm:mb-16 lg:mb-20 relative overflow-hidden border border-white/30">
+              <div className="absolute -top-10 sm:-top-16 -right-10 sm:-right-16 w-32 h-32 sm:w-48 sm:h-48 lg:w-64 lg:h-64 bg-gradient-to-r from-blue-600/10 to-cyan-500/10 rounded-full filter blur-2xl sm:blur-3xl"></div>
+              <div className="absolute -bottom-16 sm:-bottom-24 -left-10 sm:-left-16 w-28 h-28 sm:w-40 sm:h-40 lg:w-56 lg:h-56 bg-cyan-500/5 rounded-full filter blur-2xl sm:blur-3xl"></div>
 
               <div className="text-center max-w-4xl mx-auto relative z-10">
-                <TfiQuoteRight className="text-6xl text-blue-600/15 mx-auto mb-8 transform hover:scale-110 transition-transform duration-300" />
-                <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent mb-8">
+                <TfiQuoteRight className="text-4xl sm:text-5xl lg:text-6xl text-blue-600/15 mx-auto mb-4 sm:mb-6 lg:mb-8 transform hover:scale-110 transition-transform duration-300" />
+
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent mb-4 sm:mb-6 lg:mb-8 px-2">
                   Voices of Trust & Satisfaction
                 </h2>
-                <p className="text-blue-700/80 text-lg mb-12 max-w-2xl mx-auto">
+
+                <p className="text-blue-700/80 text-sm sm:text-base lg:text-lg mb-6 sm:mb-8 lg:mb-12 max-w-2xl mx-auto px-4">
                   Discover why thousands of customers choose Cartona for their
                   shopping journey
                 </p>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
                   {[
                     {
                       name: "Sarah Johnson",
@@ -248,31 +245,40 @@ const Home = () => {
                   ].map((testimonial, index) => (
                     <div
                       key={index}
-                      className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-white/40 shadow-md hover:shadow-xl hover:scale-101 transition-all duration-300 group"
+                      className="bg-white/70 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-white/40 shadow-md hover:shadow-lg sm:hover:shadow-xl hover:scale-[1.02] sm:hover:scale-101 transition-all duration-300 group flex flex-col h-full"
                     >
-                      <div className="flex justify-center mb-4">
-                        {[...Array(testimonial.rating)].map((_, starIndex) => (
-                          <FiStar
-                            key={starIndex}
-                            className="text-yellow-400 fill-current transform group-hover:scale-110 transition-transform duration-200"
-                            style={{ transitionDelay: `${starIndex * 100}ms` }}
-                          />
-                        ))}
+                      <div className="flex-1 flex flex-col">
+                        <div className="flex justify-center mb-3 sm:mb-4 gap-1">
+                          {[...Array(testimonial.rating)].map(
+                            (_, starIndex) => (
+                              <FiStar
+                                key={starIndex}
+                                size={14}
+                                className="sm:size-4 text-yellow-400 fill-current transform group-hover:scale-110 transition-transform duration-200"
+                                style={{
+                                  transitionDelay: `${starIndex * 50}ms`,
+                                }}
+                              />
+                            )
+                          )}
+                        </div>
+
+                        <div className="flex-1 mb-4 sm:mb-6">
+                          <p className="text-blue-800/90 text-xs sm:text-sm leading-relaxed italic line-clamp-4 h-full">
+                            "{testimonial.text}"
+                          </p>
+                        </div>
                       </div>
 
-                      <p className="text-blue-800/90 mb-6 leading-relaxed italic">
-                        "{testimonial.text}"
-                      </p>
-
-                      <div className="flex items-center justify-center">
-                        <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-full mr-4 flex items-center justify-center text-white font-bold shadow-lg">
+                      <div className="flex items-center justify-center mt-auto pt-3 sm:pt-4 border-t border-white/50">
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-full mr-3 sm:mr-4 flex items-center justify-center text-white font-bold text-sm sm:text-base shadow-lg flex-shrink-0">
                           {testimonial.name.charAt(0)}
                         </div>
-                        <div>
-                          <h4 className="font-semibold text-blue-900 group-hover:text-blue-700 transition-colors duration-300">
+                        <div className="text-left min-w-0 flex-1">
+                          <h4 className="font-semibold text-blue-900 text-sm sm:text-base group-hover:text-blue-700 transition-colors duration-300 truncate">
                             {testimonial.name}
                           </h4>
-                          <span className="text-sm text-blue-900 font-medium">
+                          <span className="text-xs sm:text-sm text-blue-900/80 font-medium block truncate">
                             {testimonial.role}
                           </span>
                         </div>
@@ -280,7 +286,6 @@ const Home = () => {
                     </div>
                   ))}
                 </div>
-
               </div>
             </div>
 
