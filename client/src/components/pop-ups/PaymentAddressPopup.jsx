@@ -1,13 +1,13 @@
+import { motion, AnimatePresence, number } from "framer-motion";
 import { useState, useEffect } from "react";
 import { Portal } from "react-portal";
 import {
   FiX,
   FiMapPin,
-  FiShoppingCart,
   FiPackage,
   FiCheck,
 } from "react-icons/fi";
-import { motion, AnimatePresence, number } from "framer-motion";
+import { IoCartOutline } from "react-icons/io5";
 
 const PaymentAddressPopup = ({
   onClose,
@@ -84,7 +84,7 @@ const PaymentAddressPopup = ({
                       {singleProduct ? (
                         <FiPackage size={16} className="sm:size-[20px]" />
                       ) : (
-                        <FiShoppingCart size={16} className="sm:size-[20px]" />
+                        <IoCartOutline size={16} className="sm:size-[20px]" />
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
@@ -205,7 +205,7 @@ const PaymentAddressPopup = ({
 
                 <div className="space-y-2 sm:space-y-3">
                   <label className="flex items-center text-blue-800 font-medium text-xs sm:text-sm">
-                    <FiMapPin className="mr-2 text-cyan-500" size={14} />
+                    <FiMapPin className="mr-2 mb-0.5 text-cyan-500" size={14} />
                     Delivery Address *
                   </label>
                   <div className="relative">

@@ -10,8 +10,8 @@ import {
 } from "../../services/cartAPIServices";
 import { getProduct } from "../../services/productAPIServices";
 
+import { IoCartOutline } from "react-icons/io5";
 import {
-  FiShoppingCart,
   FiTrash2,
   FiHeart,
   FiChevronRight,
@@ -20,6 +20,7 @@ import {
   FiShield,
   FiStar,
 } from "react-icons/fi";
+
 import { errorToast, successToast } from "../../utils/toast";
 import PaymentAddressPopup from "../../components/pop-ups/PaymentAddressPopup";
 import { MdOutlinePayments } from "react-icons/md";
@@ -156,7 +157,7 @@ const Cart = () => {
       <div className="bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-lg p-4 sm:p-5 lg:p-6 2xl:p-8 border border-blue-400 hover:shadow-xl hover:shadow-blue-500/50 transition-all duration-300">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
           <div className="flex items-center">
-            <FiShoppingCart className="text-blue-600 mr-2 sm:mr-3" size={20} />
+            <IoCartOutline className="text-blue-600 mr-2 sm:mr-3 mb-0.5" size={22} />
             <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-blue-800">
               Shopping Cart
             </h1>
@@ -173,9 +174,9 @@ const Cart = () => {
             ) : (
               cartItems.length === 0 && (
                 <div className="text-center py-8 sm:py-12 bg-blue-50/50 rounded-xl sm:rounded-2xl border border-blue-200">
-                  <FiShoppingCart
+                  <IoCartOutline
                     className="text-blue-400 mx-auto mb-3 sm:mb-4"
-                    size={32}
+                    size={34}
                   />
                   <h3 className="text-base sm:text-lg font-semibold text-blue-800 mb-2">
                     Your cart is empty
@@ -351,7 +352,7 @@ const Cart = () => {
           {cartItems.length > 0 && (
             <div className="bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 sm:p-6 border border-blue-200 lg:sticky lg:top-6">
               <h3 className="text-lg sm:text-xl font-bold text-blue-900 mb-4 sm:mb-6 flex items-center">
-                <FiShoppingCart className="mr-2" size={18} />
+                <IoCartOutline className="mr-2" size={20} />
                 Order Summary
               </h3>
 

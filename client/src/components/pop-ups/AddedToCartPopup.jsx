@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import {
   FiCheck,
   FiX,
-  FiShoppingCart,
   FiChevronRight,
   FiStar,
 } from "react-icons/fi";
