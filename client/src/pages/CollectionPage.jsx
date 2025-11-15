@@ -6,9 +6,6 @@ import {
   FiArrowLeft,
   FiPackage,
   FiStar,
-  FiZap,
-  FiShoppingCart,
-  FiHeart,
   FiArrowRight,
 } from "react-icons/fi";
 import { PiLightningFill } from "react-icons/pi";

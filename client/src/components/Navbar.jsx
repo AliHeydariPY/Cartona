@@ -6,8 +6,6 @@ import { getNotifications } from "../services/commentAPIServices.js";
 
 import { FiSearch, FiBell } from "react-icons/fi";
 import { IoCart, IoCartOutline } from "react-icons/io5";
-import { BiCategory } from "react-icons/bi";
-import { BiSolidCategory } from "react-icons/bi";
 import { UserCircleIcon } from "@heroicons/react/24/outline";
 import { UserCircleIcon as UserCircleSolid } from "@heroicons/react/24/solid";
 import { GoBellFill, GoHome, GoHomeFill } from "react-icons/go";
@@ -67,7 +65,7 @@ const Navbar = ({ isFocus = false, setIsFocus }) => {
             </div>
           </div>
 
-          <div className="flex ml-5 items-center col-span-6 md:col-span-3 my-2  group p-0.25 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-4xl">
+          <div className="flex ml-6 items-center col-span-6 md:col-span-3 my-2 group p-0.25 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-4xl">
             <div className="w-full bg-white h-12 rounded-l-full ml-0.25">
               <input
                 type="text"

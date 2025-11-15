@@ -242,7 +242,7 @@ const Informations = ({ product }) => {
                   onClick={() =>
                     navigate(`/collection/${collectionProductds.id}`)
                   }
-                  className="bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-medium text-sm transition-colors cursor-pointer duration-200 flex items-center gap-2 px-6 py-3 rounded-lg hover:from-cyan-700 hover:to-blue-700"
+                  className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-medium text-sm transition-colors cursor-pointer duration-200 flex items-center gap-2 px-6 py-3 rounded-lg hover:from-blue-600 hover:to-cyan-600"
                 >
                   View all {collectionProductds.products.length} products
                   <FiArrowRight size={16} />

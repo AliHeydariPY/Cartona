@@ -35,6 +35,10 @@ export default function MyProducts() {
 
   const [isLoading, setIsLoading] = useState(true);
 
+  const visibleCountNum = window.innerWidth >= 1280 ? 6 : 4;
+
+  const [visibleCount, setVisibleCount] = useState(visibleCountNum);
+
   useEffect(() => {
     if (!user) return;
     getStorekeeper(user.username).then((res) => {
@@ -210,7 +214,7 @@ export default function MyProducts() {
             style={{ opacity: 1 }}
             className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3 opacity-100"
           >
-            {displayedProducts.map((product) => (
+            {filteredProducts.slice(0, visibleCount).map((product) => (
               <motion.div
                 key={product.id}
                 layout="position"
@@ -320,43 +324,26 @@ export default function MyProducts() {
             ))}
           </motion.div>
 
-          {filteredProducts.length > 6 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="flex justify-center mt-8 pt-6 border-t-2 border-blue-200"
-            >
-              <button
-                onClick={toggleShowAllProducts}
-                className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-8 py-3 rounded-full font-medium shadow-lg hover:shadow-xl transform hover:scale-102 cursor-pointer transition-all duration-300 border border-white/30"
-              >
-                <span>
-                  {showAllProducts
-                    ? "Show Less"
-                    : `Show All ${filteredProducts.length} Products`}
-                </span>
-                {showAllProducts ? (
-                  <FiChevronUp className="text-lg mb-0.5" />
-                ) : (
-                  <FiChevronDown className="text-lg" />
-                )}
-              </button>
-            </motion.div>
-          )}
-
-          {filteredProducts.length > 6 && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center mt-4"
-            >
-              <p className="text-blue-600 text-sm">
-                {showAllProducts
-                  ? `Showing all ${filteredProducts.length} products`
-                  : `Showing 6 of ${filteredProducts.length} products`}
-              </p>
-            </motion.div>
+          {filteredProducts.length > visibleCountNum && (
+            <div className="flex justify-center pt-3 xs:pt-4 mt-4 xs:mt-5 border-t border-blue-300">
+              {visibleCount < filteredProducts.length ? (
+                <button
+                  onClick={() =>
+                    setVisibleCount(visibleCount + visibleCountNum)
+                  }
+                  className="px-4 xs:px-6 py-2 cursor-pointer rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-300 text-sm xs:text-base font-medium"
+                >
+                  Show more favorites
+                </button>
+              ) : (
+                <button
+                  onClick={() => setVisibleCount(visibleCountNum)}
+                  className="px-4 xs:px-6 py-2 cursor-pointer rounded-lg border border-blue-400 text-blue-600 hover:bg-blue-50 transition-colors duration-300 text-sm xs:text-base font-medium"
+                >
+                  Show less
+                </button>
+              )}
+            </div>
           )}
         </div>
       </div>

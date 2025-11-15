@@ -9,7 +9,6 @@ import {
   FiSettings,
   FiLogOut,
   FiPackage,
-  FiShoppingCart,
   FiDollarSign,
   FiPlusCircle,
   FiFileText,
@@ -23,6 +22,7 @@ import BottomNav from "../components/BottomNav";
 import LogoutPopup from "../components/pop-ups/LogoutPopup";
 import { getStorekeeper } from "../services/userAPIServices";
 import { userAtom } from "../atoms/userAtom";
+import { IoCartOutline } from "react-icons/io5";
 
 const UserDashboard = () => {
   const [isAuth] = useAtom(authAtom);
@@ -51,7 +51,7 @@ const UserDashboard = () => {
     },
     {
       id: "cart",
-      icon: <FiShoppingCart className="ml-3 text-blue-500 mr-0.25" size={18} />,
+      icon: <IoCartOutline className="ml-3 text-blue-500 mb-0.5" size={20} />,
       label: "Cart",
     },
     {
