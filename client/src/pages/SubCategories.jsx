@@ -16,7 +16,6 @@ const SubCategories = () => {
   const [subCategories, setSubCategories] = useState([]);
   const [subCategoryItmes, setSubCategoryItems] = useState([]);
   const [viewMode, setViewMode] = useState("grid");
-  const [selectedCategory, setSelectedCategory] = useState(null);
 
   useEffect(() => {
     const fetchSubCategories = async () => {
@@ -58,26 +57,6 @@ const SubCategories = () => {
             <FiArrowLeft className="mr-2" size={20} />
             Back to Categories
           </button>
-
-          {selectedCategory && (
-            <div className="bg-white/95 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-blue-200 mb-6">
-              <div className="flex items-center">
-                <div
-                  className={`p-4 rounded-xl ${selectedCategory.color} mr-4`}
-                >
-                  <selectedCategory.icon className="text-3xl text-blue-600" />
-                </div>
-                <div>
-                  <h1 className="text-2xl md:text-3xl font-bold text-blue-900">
-                    {selectedCategory.name}
-                  </h1>
-                  <p className="text-blue-600 mt-1">
-                    Explore our {selectedCategory.name.toLowerCase()} collection
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
 
           <div className="flex justify-between items-center mb-6">
             <p className="text-blue-700">

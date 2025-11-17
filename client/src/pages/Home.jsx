@@ -15,6 +15,7 @@ import {
 } from "react-icons/fi";
 import { TfiQuoteRight } from "react-icons/tfi";
 import { IoCartOutline } from "react-icons/io5";
+import FeaturedProducts from "../components/home/FeaturedProducts";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -122,89 +123,8 @@ const Home = () => {
               <div className="absolute right-10 bottom-0 w-40 h-40 bg-white/10 rounded-full filter blur-xl"></div>
             </div>
 
-            <div className="mb-20">
-              <div className="flex justify-between items-end mb-10">
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
-                  Featured Products
-                </h2>
-                <div className="flex space-x-4">
-                  <button className="p-2 rounded-full bg-white shadow hover:bg-blue-50 transition-colors">
-                    <FiChevronLeft className="text-blue-600" />
-                  </button>
-                  <button className="p-2 rounded-full bg-white shadow hover:bg-blue-50 transition-colors">
-                    <FiChevronRight className="text-blue-600" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                {[
-                  {
-                    id: 1,
-                    img: "https://dkstatics-public.digikala.com/digikala-products/9c7ef6413a251ce440b1086d1c12c08a9e5b37c6_1700306862.jpg?x-oss-process=image/resize,m_lfit,h_300,w_300/format,webp/quality,q_80",
-                  },
-                  {
-                    id: 2,
-                    img: "https://dkstatics-public.digikala.com/digikala-products/fbb88bb17b99181c61beb9a725467a9ca1ecb3a7_1657267311.jpg?x-oss-process=image/resize,m_lfit,h_300,w_300/format,webp/quality,q_80",
-                  },
-                  {
-                    id: 3,
-                    img: "https://dkstatics-public.digikala.com/digikala-products/440588a89e2641001b4257aad70e8361edb72cef_1752426612.jpg?x-oss-process=image/resize,m_lfit,h_300,w_300/format,webp/quality,q_80",
-                  },
-                  {
-                    id: 4,
-                    img: "https://dkstatics-public.digikala.com/digikala-products/135df93e0c68205dc94b23d4a8c3db10534ef351_1690386197.jpg?x-oss-process=image/resize,m_lfit,h_300,w_300/format,webp/quality,q_80",
-                  },
-                ].map((item) => (
-                  <div
-                    key={item.id}
-                    className="group relative bg-white rounded-xl shadow-lg hover:shadow-xl overflow-hidden transition-all duration-500"
-                  >
-                    <div className="relative h-60 bg-blue-50 flex items-center justify-center">
-                      <div className="w-40 h-40 bg-gradient-to-br from-blue-100 to-white rounded-full"></div>
-                      {/* <img src={`${item.img}`} alt="" /> */}
-                      <div className="absolute top-4 right-4">
-                        <button className="p-2 cursor-pointer bg-white rounded-full shadow-md hover:bg-rose-100 transition-colors">
-                          <FiHeart className="text-rose-400" />
-                        </button>
-                      </div>
-                      <div className="absolute bottom-4 left-0 right-0 flex justify-center">
-                        <button className="bg-white/90 cursor-pointer backdrop-blur-sm px-6 py-2 rounded-full shadow-md hover:bg-cyan-500 hover:text-white transition-all duration-300 transform translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100">
-                          Quick View
-                        </button>
-                      </div>
-                    </div>
-                    <div className="p-5">
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-medium text-blue-800">
-                          Premium Product {item.id}
-                        </h3>
-                        <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
-                          New
-                        </span>
-                      </div>
-                      <div className="flex items-center mb-3">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <FiStar
-                            key={star}
-                            className="text-yellow-400 fill-current"
-                          />
-                        ))}
-                        <span className="text-sm text-blue-500 ml-2">(24)</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="font-bold text-blue-900">
-                          ${(199 + item.id * 50).toFixed(2)}
-                        </span>
-                        <button className="p-2 cursor-pointer bg-blue-600 hover:bg-cyan-500 rounded-full text-white transition-colors">
-                          <IoCartOutline className="text-lg m-0.5" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            
+              <FeaturedProducts />
 
             <div className="bg-white/60 backdrop-blur-lg rounded-2xl sm:rounded-3xl shadow-lg p-6 sm:p-8 md:p-12 lg:p-16 mb-12 sm:mb-16 lg:mb-20 relative overflow-hidden border border-white/30">
               <div className="absolute -top-10 sm:-top-16 -right-10 sm:-right-16 w-32 h-32 sm:w-48 sm:h-48 lg:w-64 lg:h-64 bg-gradient-to-r from-blue-600/10 to-cyan-500/10 rounded-full filter blur-2xl sm:blur-3xl"></div>

@@ -143,7 +143,7 @@ const CollectionPage = () => {
                       {product.amazing_offer && (
                         <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1">
                           <PiLightningFill size={12} />
-                          {product.amazing_offer}
+                          {product.amazing_offer.length < 25 ? product.amazing_offer : "Special sale" }
                         </span>
                       )}
                     </div>

@@ -173,7 +173,7 @@ const Favorites = ({ setAddToCartPopup, setSelectedProduct }) => {
                           className="mt-0.25 mr-0.75"
                           size={13}
                         />
-                        {product.amazing_offer}
+                        {product.amazing_offer.length < 25 ? product.amazing_offer : "Special sale" }
                       </div>
                     )}
 

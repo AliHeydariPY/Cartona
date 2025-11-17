@@ -18,11 +18,7 @@ import { IoCart, IoCartOutline } from "react-icons/io5";
 import ProductImageCarousel from "../ProductImageCarousel";
 import { errorToast, successToast } from "../../utils/toast";
 
-const ProductDisplay = ({
-  product,
-  setAddToCartPopup,
-  setSelectedProduct,
-}) => {
+const ProductDisplay = ({ product, setAddToCartPopup, setSelectedProduct }) => {
   const { id } = useParams();
   const [currentImage, setCurrentImage] = useState(null);
   const [isInCart, setIsInCart] = useState();
@@ -102,8 +98,12 @@ const ProductDisplay = ({
     try {
       const response = await addFavorite(productId);
       setFavoriteEntry(response.data);
-    } catch {
-      errorToast("Failed to add to favorites");
+    } catch (error) {
+      if (error.response.data.detail == "Refresh token not found.") {
+        errorToast("You need to log in first");
+      } else {
+        errorToast("Failed to add to favorites");
+      }
     }
   };
 
