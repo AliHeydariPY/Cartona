@@ -85,31 +85,26 @@ def attach_image_to_product(product, product_name):
 def attach_additional_images(product):
     images_dir = os.path.join(settings.BASE_DIR, "default image", "product images")
 
-    # اگر از قبل 2 تصویر برای این محصول داریم، دیگر نسازیم (idempotent)
     current_count = Images.objects.filter(product=product).count()
     if current_count >= 2:
         return
 
-    # لیست نام‌های هدف که باید نهایتاً داشته باشیم
     target_filenames = [f"{product.name}{i}.jpeg" for i in range(1, 3)]
 
-    # جمع‌آوری basename‌های موجود (مستقل از مسیر)
     existing_basenames = {
         os.path.basename(img.image.name)
         for img in Images.objects.filter(product=product).only("image")
         if getattr(img.image, "name", "")
     }
 
-    # برای هر نام هدف، اگر فایل فیزیکی هست و هنوز برای این محصول وجود ندارد، بسازیم
     for image_filename in target_filenames:
         if Images.objects.filter(product=product).count() >= 2:
-            break  # نهایتاً فقط دو تصویر برای هر محصول
+            break
 
         image_path = os.path.join(images_dir, image_filename)
         if not os.path.exists(image_path):
             continue
 
-        # اگر قبلاً دقیقاً با همین basename ثبت شده، رد شو
         if image_filename in existing_basenames:
             continue
 
