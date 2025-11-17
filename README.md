@@ -82,13 +82,13 @@ startcode1.bat        # Windows startup script
 client/                 # Frontend root
     public/                 # Static files
     src/
-    api/                 # Authentication, JWT handling, and backend API calls
-    atoms/                 # Reusable small UI units 
-    components/                 # Shared UI components across pages
-    pages/                 # Page-level components 
-    services/                 # All API calls to backend 
-    utils/                 # Helper functions and utilities
-    validations/                 # Form validation schemas 
+        api/                 # Authentication, JWT handling, and backend API calls
+        atoms/                 # Reusable small UI units 
+        components/                 # Shared UI components across pages
+        pages/                 # Page-level components 
+        services/                 # All API calls to backend 
+        utils/                 # Helper functions and utilities
+        validations/                 # Form validation schemas 
 
 ```
 
@@ -227,10 +227,10 @@ Run the corresponding script to prepare and run the backend. These scripts perfo
 
 1. **Navigate to frontend folder**
    ```bash
-   cd client
+    cd client
     npm install 
     openssl req -x509 -newkey rsa:4096 -keyout localhost.key -out localhost.crt -days 365 -nodes -subj "/CN=localhost"
     npm run dev
-    ```
+   ```
 
 The frontend will now run on `https://localhost:5173` using the generated localhost.key and localhost.crt files for HTTPS.
