@@ -151,7 +151,7 @@ const Informations = ({ product }) => {
                         {collectionProduct.amazing_offer && (
                           <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg flex items-center gap-1">
                             <FiZap size={10} />
-                            {collectionProduct.amazing_offer}
+                            {collectionProduct.amazing_offer.length < 25 ? collectionProduct.amazing_offer : "Special sale" }
                           </span>
                         )}
                       </div>

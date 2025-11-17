@@ -114,7 +114,7 @@ const RecentFavorites = ({
                 {product.amazing_offer && (
                   <div className="absolute flex top-3 left-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg z-10">
                     <PiLightningFill className="mt-0.25 mr-0.75" size={13} />
-                    {product.amazing_offer}
+                    {product.amazing_offer.length < 25 ? product.amazing_offer : "Special sale" }
                   </div>
                 )}
 

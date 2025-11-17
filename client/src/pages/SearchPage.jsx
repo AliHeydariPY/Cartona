@@ -41,12 +41,11 @@ export default function SearchPage() {
     const fetchProducts = async () => {
       try {
         let favorites = [];
-
         try {
           const favoriteProductsRes = await getFavorites();
           favorites = favoriteProductsRes.data;
         } catch (error) {
-          errorToast("You need to log in first");
+          console.log(error);
         }
 
         const res = query
@@ -81,8 +80,12 @@ export default function SearchPage() {
     try {
       const response = await addFavorite(productId);
       setFavorites((prev) => [...prev, response.data]);
-    } catch {
-      errorToast("Failed to add to favorites");
+    } catch (error) {
+      if (error.response.data.detail == "Refresh token not found.") {
+        errorToast("You need to log in first");
+      } else {
+        errorToast("Failed to add to favorites");
+      }
     }
   };
 
@@ -143,7 +146,7 @@ export default function SearchPage() {
                           className="mt-0.25 mr-0.75"
                           size={13}
                         />
-                        {product.amazing_offer}
+                        {product.amazing_offer.length < 25 ? product.amazing_offer : "Special sale" }
                       </div>
                     )}
 
@@ -233,7 +236,7 @@ export default function SearchPage() {
                               setMainImages({ image: product.image });
                               setShowImages(true);
                             }}
-                            className="p-2 h-8 cursor-pointer bg-blue-100 rounded-full hover:bg-blue-200 transition-colors duration-300"
+                            className="p-2 h-8 cursor-pointer  rounded-full shadow-md hover:bg-blue-200 transition-colors duration-300"
                           >
                             <FiEye className="text-blue-600" size={16} />
                           </button>
