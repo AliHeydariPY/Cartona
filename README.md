@@ -1,15 +1,26 @@
-backend readme:
-
-# 🛒 Store Project – README
+# 🛒 Cartona – Online Store Project
 
 ## 📌 Introduction
-This project is an **online store** built with **Django 5.2.4** and **Django REST Framework**. It includes user management, vendors, products, shopping cart, payments, comments, and categories.  
-The project uses **JWT Authentication** for user login, **Celery** and **RQ Scheduler** for background and scheduled tasks, and **MySQL** as the database.
+Cartona is a **modern online store** built with **Django 5.2.4** and **Django REST Framework** for the backend, and **React + TailwindCSS** for the frontend.  
+It includes user management, vendors, products, shopping cart, payments, comments, categories, favorites, chat, and collections.  
+
+Key backend features:
+- **JWT Authentication** for secure login.
+- **Celery** and **RQ Scheduler** for background and scheduled tasks.
+- **MySQL** database.
+
+Key frontend features:
+- Fully responsive pages.
+- Dynamic product and collection management.
+- Smooth UI interactions with **framer-motion** and **react-virtuoso** for lists.
+- State management via **Jotai** and forms with **Formik + Yup**.
 
 ---
 
 ## 📂 Project Structure
 ```
+### Backend (Django)
+
 store/                # Project root (main settings)
     __init__.py
     asgi.py
@@ -65,6 +76,20 @@ default image/        # Default images
 requirements.txt      # Project dependencies
 startcode.sh          # Linux startup script
 startcode1.bat        # Windows startup script
+
+### Frontend (React)
+
+client/                 # Frontend root
+    public/                 # Static files
+    src/
+    api/                 # Authentication, JWT handling, and backend API calls
+    atoms/                 # Reusable small UI units 
+    components/                 # Shared UI components across pages
+    pages/                 # Page-level components 
+    services/                 # All API calls to backend 
+    utils/                 # Helper functions and utilities
+    validations/                 # Form validation schemas 
+
 ```
 
 ---
@@ -129,43 +154,83 @@ startcode1.bat        # Windows startup script
 ---
 
 ## 📦 Dependencies
-`requirements.txt` includes:  
-- Django, DRF, JWT, django-filter, django-rq, celery, redis, mysqlclient, pillow.  
-- Development tools: django-extensions, ipython.  
-- Scheduling tools: rq-scheduler, python-crontab, croniter.  
+
+### Backend (`requirements.txt`)
+- Django, Django REST Framework (DRF)  
+- djangorestframework-simplejwt (JWT Auth)  
+- django-filter  
+- django-rq, celery, redis  
+- mysqlclient  
+- pillow  
+- Development tools: django-extensions, ipython  
+- Scheduling: rq-scheduler, python-crontab, croniter  
+
+### Frontend (`package.json`)
+- react, react-dom  
+- react-router-dom  
+- axios  
+- jotai  
+- formik, yup  
+- tailwindcss, @tailwindcss/vite  
+- @heroicons/react, react-icons  
+- framer-motion  
+- react-hot-toast  
+- react-portal  
+- react-range  
+- react-textarea-autosize  
+- react-virtuoso, react-window, react-virtualized-auto-sizer  
+- emoji-picker-react
 
 ---
 
 ## 🖥️ System Requirements
 To run the project, the following must be installed on your system:  
-- ✅ **Python 3.12+** and pip  
-- ✅ **MySQL Server** (for database)  
-- ✅ **Redis Server** (for Celery and RQ)  
-- ✅ **OpenSSL** (for SSL certificate generation)  
-- ✅ **virtualenv/venv** (recommended for virtual environments)  
-- ✅ **Supervisor/systemd** or direct script execution for managing services  
-- 🔄 Optional: **Docker** for containerization, **Git** for source control, **Node.js** for frontend  
+
+### Backend
+- ✅ Python 3.12+ and pip  
+- ✅ MySQL Server (database)  
+- ✅ Redis Server (for Celery and RQ)  
+- ✅ OpenSSL (for SSL certificate generation)  
+- ✅ virtualenv/venv (recommended for isolated environments)  
+- ✅ Supervisor/systemd or direct script execution for managing services  
+- 🔄 Optional: Docker for containerization, Git for source control  
+
+### Frontend
+- ✅ Node.js 18+ and npm/yarn  
+- ✅ Vite (bundler, already in package.json)  
+- ✅ OpenSSL (to generate local HTTPS key and certificate)  
 
 ---
 
 ## 🚀 Running the Project
 
-### Startup Scripts
-Two startup scripts are provided:  
-- **Linux:** `startcode.sh`  
-- **Windows:** `startcode1.bat`  
+### Backend Setup
 
-Both scripts perform the same sequence of operations to prepare and run the project.
+1. **Startup Scripts**
+- Linux: `startcode.sh`  
+- Windows: `startcode1.bat`  
 
-### Explanation of Run Commands
-The scripts execute the following steps:
+Run the corresponding script to prepare and run the backend. These scripts perform the following steps automatically:  
+- Install Python dependencies: `pip install -r requirements.txt`  
+- Create and apply database migrations: `python manage.py makemigrations / migrate`  
+- Collect static files: `python manage.py collectstatic --noinput`  
+- Seed predefined categories, products, and collections into the database  
+- Generate local SSL certificate for HTTPS (for backend, if needed)  
+- Start Django server with SSL: `python manage.py runserver_plus`  
+- Start RQ Scheduler for periodic jobs: `python manage.py rqscheduler`  
+- Start RQ Workers: `python manage.py rqworker default scheduled`  
+- Start Celery Worker for async tasks: `celery -A store worker --loglevel=info`  
 
-- **pip install -r requirements.txt** → Installs all Python dependencies.  
-- **python manage.py makemigrations / migrate** → Creates and applies database migrations.  
-- **python manage.py collectstatic --noinput** → Collects static files into the `staticfiles` directory.  
-- **python manage.py shell ...** → Seeds predefined categories, products, and collections into the database.  
-- **openssl req ...** → Generates a local SSL certificate for HTTPS.  
-- **python manage.py runserver_plus** → Starts the Django server with SSL enabled.  
-- **python manage.py rqscheduler** → Starts the RQ Scheduler to manage periodic jobs.  
-- **python manage.py rqworker default scheduled** → Starts RQ Workers for the `default` and `scheduled` queues.  
-- **celery -A store worker --loglevel=info** → Starts the Celery Worker for asynchronous tasks.
+---
+
+### Frontend Setup
+
+1. **Navigate to frontend folder**
+   ```bash
+   cd client
+    npm install 
+    openssl req -x509 -newkey rsa:4096 -keyout localhost.key -out localhost.crt -days 365 -nodes -subj "/CN=localhost"
+    npm run dev
+    ```
+
+The frontend will now run on `https://localhost:5173` using the generated localhost.key and localhost.crt files for HTTPS.
