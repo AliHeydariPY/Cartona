@@ -44,7 +44,6 @@ export const editProductQuestion = (editedQuestion, questionID) => {
 };
 
 export const answerProductQuestion = (answer, questionID) => {
-  console.log(questionID);
   const url = `/comments-api/product-questions/${questionID}/`;
   return api.patch(url, answer);
 };

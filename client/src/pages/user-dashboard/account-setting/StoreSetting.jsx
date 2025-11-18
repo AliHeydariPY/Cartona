@@ -57,7 +57,6 @@ const StoreSetting = () => {
         );
       }),
   });
-  console.log(storeInfo);
   if (!user || !storeInfo) return null;
 
   const initialValues = {
@@ -87,7 +86,6 @@ const StoreSetting = () => {
           ...prev,
           store: "new",
         }));
-        console.log(res);
         setFieldValue("store_name", res.data.storeName);
         setFieldValue("description", res.data.description);
         setFieldValue("address", res.data.address);

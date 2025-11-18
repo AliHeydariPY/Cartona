@@ -1,5 +1,4 @@
 import axios from "axios";
-import { getStorekeeper } from "../services/userAPIServices";
 import { authAtom } from "../atoms/authAtom";
 import { getDefaultStore } from "jotai";
 import { tokenAtom } from "../atoms/tokenAtom";
@@ -15,7 +14,6 @@ let accessToken = localStorage.getItem("accessToken");
 
 const updateAccessToken = () => {
   accessToken = localStorage.getItem("accessToken");
-  console.log("🔄 AccessToken updated:", accessToken);
 };
 
 const setupLocalStorageListener = () => {
@@ -86,17 +84,6 @@ api.interceptors.response.use(
         localStorage.setItem("accessToken", accessToken);
         store.set(tokenAtom, accessToken);
         store.set(authAtom, true);
-
-        const userData = JSON.parse(atob(accessToken.split(".")[1]));
-        console.log("🔄 refresh user data:", userData);
-
-        getStorekeeper(userData.user_id)
-          .then((res) => {
-            console.log("🏪 Storekeeper data:", res);
-          })
-          .catch((err) => {
-            console.log("❌ Storekeeper error:", err);
-          });
 
         api.defaults.headers.common["Authorization"] = "Bearer " + accessToken;
         processQueue(null, accessToken);

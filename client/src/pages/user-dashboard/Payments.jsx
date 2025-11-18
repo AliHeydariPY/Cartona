@@ -45,7 +45,6 @@ const Payments = () => {
               const product = await getProduct(productPayment.product);
               try {
                 const payment = await getPayment(productPayment.id);
-                console.log(payment);
                 return {
                   ...productPayment,
                   product: product?.data ?? null,
@@ -67,7 +66,6 @@ const Payments = () => {
             }
           })
         );
-        console.log("🚀 ~ fetchPayments ~ productPayments:", productPayments);
         setIsLoading(false);
         setPayments(productPayments.filter(Boolean));
       } catch (error) {
@@ -438,8 +436,6 @@ const Payments = () => {
                 <button
                   onClick={() =>
                     setVisibleCount(() => {
-                      console.log(visibleCount);
-
                       return visibleCount + 4;
                     })
                   }
@@ -462,12 +458,6 @@ const Payments = () => {
               onClose={() => setShowSendNotePopup(false)}
               onConfirm={(note) => {
                 const date = new Date();
-                console.log({
-                  ...payload,
-                  note,
-                  is_sent: true,
-                  sent_at: date,
-                });
                 productSubmission({
                   ...payload,
                   note,

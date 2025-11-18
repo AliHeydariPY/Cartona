@@ -33,7 +33,6 @@ export default function ChatInput({
 
   useEffect(() => {
     (prev) => {
-      console.log(prev.trim());
       if (prev) {
         return prev;
       } else {

@@ -111,7 +111,6 @@ const Reviews = ({
               <button
                 key={star}
                 onClick={() => {
-                  console.log(star);
                   setSelectedStars(star);
                 }}
                 className="transition-transform duration-200 hover:scale-110"

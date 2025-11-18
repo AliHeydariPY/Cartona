@@ -210,7 +210,6 @@ const ProductFeatures = ({ reloadComponent, setReloadComponent }) => {
 
                       <button
                         onClick={() => {
-                          console.log(feature);
                           setSelecetedFeature(feature);
                           setShowRemovePopup(true);
                         }}

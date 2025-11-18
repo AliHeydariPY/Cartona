@@ -68,7 +68,6 @@ const ProductDisplay = ({ product, setAddToCartPopup, setSelectedProduct }) => {
         product: id,
         quantity: 1,
       });
-      console.log(response);
       setIsInCart(response.data);
       setAddToCartPopup(true);
     } catch {
