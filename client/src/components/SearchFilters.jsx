@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Range, getTrackBackground } from "react-range";
-import { Formik, Form, Field } from "formik";
+import { useState, useEffect } from "react";
+import { Formik, Form } from "formik";
 
 import CategoryFilter from "./filters/CategoryFilter";
 
@@ -21,6 +20,9 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import { getCategory } from "../services/productAPIServices";
 import { getStorekeeperById } from "../services/userAPIServices";
+import PriceFilter from "./filters/PriceFilter";
+import RatingFilter from "./filters/RatingFilter";
+import ReviewsFiltre from "./filters/ReviewsFiltre";
 
 const SearchFilters = () => {
   const navigate = useNavigate();
@@ -53,34 +55,38 @@ const SearchFilters = () => {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    const newFilters = { ...initialFilters };
+    const loadFilters = async () => {
+      const newFilters = { ...initialFilters };
 
-    Object.keys(initialFilters).forEach((filter) => {
-      if (params.has(filter)) {
-        const value = params.get(filter);
+      await Promise.all(
+        Object.keys(initialFilters).map(async (filter) => {
+          if (params.has(filter)) {
+            const value = params.get(filter);
 
-        if (filter == "category") {
-          getCategory(value).then((res) => {
-            newFilters[filter] = res.data;
-          });
-        } else {
-          newFilters[filter] = isNaN(value) ? value : Number(value);
-        }
-      } else {
-        newFilters[filter] = "";
-      }
-    });
+            if (filter === "category") {
+              const res = await getCategory(value);
+              newFilters[filter] = res.data;
+            } else {
+              newFilters[filter] = isNaN(value) ? value : Number(value);
+            }
+          } else {
+            newFilters[filter] = "";
+          }
+        })
+      );
 
-    if (newFilters.storekeeper) {
-      getStorekeeperById(newFilters.storekeeper).then((res) => {
+      if (newFilters.storekeeper) {
+        const res = await getStorekeeperById(newFilters.storekeeper);
         setStorekeeperInfo(res.data);
-      });
-    } else {
-      setStorekeeperInfo(true);
-    }
+      } else {
+        setStorekeeperInfo(true);
+      }
 
-    setInitialFilters(newFilters);
-    setIsReady(true);
+      setInitialFilters(newFilters);
+      setIsReady(true);
+    };
+
+    loadFilters();
   }, [query]);
 
   useEffect(() => {
@@ -99,11 +105,24 @@ const SearchFilters = () => {
 
   const buildUrl = (values) => {
     const filtersName = Object.keys(filters);
-    let url =
-      query.search("&") === -1 ? query : query.slice(0, query.search("&"));
+
+    const firstFilter = query?.slice(0, query?.search("&"));
+    let url = "";
+    if (
+      firstFilter?.includes("storekeeper") ||
+      firstFilter?.includes("search")
+    ) {
+      url =
+        query?.search("&") === -1 ? query : query?.slice(0, query?.search("&"));
+    }
+
     filtersName.forEach((filterName) => {
       if (values[filterName]) {
-        url += `&${filterName}=${values[filterName]}`;
+        if (!url) {
+          url = `${filterName}=${values[filterName]}`;
+        } else {
+          url += `&${filterName}=${values[filterName]}`;
+        }
       }
     });
     return url;
@@ -158,13 +177,12 @@ const SearchFilters = () => {
                   storekeeper: "",
                 });
               } else {
-                url = buildUrl({ ...values, category: "" });
+                url = buildUrl({ ...values, category: cat.id });
               }
             }
           } else {
             url = buildUrl({ ...values, storekeeper: "" });
           }
-
           navigate(`/search/${url}`);
         }}
       >
@@ -275,33 +293,6 @@ const SearchFilters = () => {
                       </div>
                     )}
 
-                    {initialFilters.category &&
-                      location.pathname.includes("/search/category") && (
-                        <div className="mb-4 p-3 rounded-lg bg-blue-100 border border-blue-300 text-blue-800 text-sm flex items-center justify-between">
-                          <span>
-                            viewing products in the{" "}
-                            <span className="font-semibold">
-                              {initialFilters.category.name}
-                            </span>{" "}
-                            category
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setInitialFilters({
-                                ...initialFilters,
-                                storekeeper: "",
-                              });
-
-                              navigate("/search");
-                            }}
-                            className="text-red-600 hover:text-red-800 "
-                          >
-                            exit
-                          </button>
-                        </div>
-                      )}
-
                     <div className="space-y-7">
                       <div className="border-b border-blue-400 pb-4">
                         <div
@@ -327,80 +318,10 @@ const SearchFilters = () => {
                           />
                         </div>
                         {open == "Price Range" && (
-                          <div className=" py-1">
-                            <Range
-                              step={5}
-                              min={0}
-                              max={1000}
-                              values={[
-                                Number(values.min_price) || 0,
-                                Number(values.max_price) || 1000,
-                              ]}
-                              onChange={(rangeVals) => {
-                                setFieldValue("min_price", rangeVals[0]);
-                                setFieldValue("max_price", rangeVals[1]);
-                              }}
-                              renderTrack={({ props, children }) => {
-                                const { key, ...rest } = props;
-                                return (
-                                  <div
-                                    key={key}
-                                    {...rest}
-                                    className="h-2 mx-3 bg-blue-200 rounded-full cursor-pointer"
-                                    style={{
-                                      background: getTrackBackground({
-                                        values: [
-                                          values.min_price || 0,
-                                          values.max_price || 1000,
-                                        ],
-                                        colors: [
-                                          "#c6dbfa",
-                                          "#3b82f6",
-                                          "#c6dbfa",
-                                        ],
-                                        min: 0,
-                                        max: 1000,
-                                      }),
-                                    }}
-                                  >
-                                    {children}
-                                  </div>
-                                );
-                              }}
-                              renderThumb={({ props }) => {
-                                const { key, ...rest } = props;
-                                return (
-                                  <div
-                                    key={key}
-                                    {...rest}
-                                    className="w-5 h-5 bg-blue-500 rounded-full shadow-md cursor-grab focus:outline-none"
-                                  />
-                                );
-                              }}
-                            />
-                            <div className="flex justify-between text-sm text-blue-800 mt-3 ">
-                              <div>
-                                $
-                                <Field
-                                  type="number"
-                                  name="min_price"
-                                  className="w-15 p-0.5 placeholder:text-blue-800 rounded-lg focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                  placeholder="0"
-                                />
-                              </div>
-                              <div>
-                                $
-                                <Field
-                                  type="number"
-                                  name="max_price"
-                                  className="w-10 p-0.5 placeholder:text-blue-800 rounded-lg focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                  placeholder="1000"
-                                />
-                              </div>
-                              {/* <span>${values.min_price || 0}</span> */}
-                              {/* <span>${values.max_price || 1000}</span> */}
-                            </div>
-                          </div>
+                          <PriceFilter
+                            values={values}
+                            setFieldValue={setFieldValue}
+                          />
                         )}
                       </div>
 
@@ -466,94 +387,10 @@ const SearchFilters = () => {
                           />
                         </div>
                         {open == "Rating" && (
-                          <div className="space-y-4">
-                            <div>
-                              <label className="block text-sm text-blue-700 mb-2">
-                                Maximum Rating
-                              </label>
-                              <div className="flex items-center space-x-1">
-                                {[1, 2, 3, 4, 5].map((star) => (
-                                  <button
-                                    key={star}
-                                    type="button"
-                                    onClick={() => {
-                                      if (star >= values.min_rating) {
-                                        setFieldValue("max_rating", star);
-                                      }
-                                    }}
-                                    className={`p-1 rounded-full transition-all duration-200 ${
-                                      values.max_rating >= star
-                                        ? "bg-amber-100 scale-110"
-                                        : "bg-blue-50 hover:bg-blue-100"
-                                    }`}
-                                  >
-                                    <FiStar
-                                      className={`text-xl ${
-                                        values.max_rating >= star
-                                          ? "text-amber-400 fill-amber-400"
-                                          : "text-gray-300"
-                                      }`}
-                                    />
-                                  </button>
-                                ))}
-                              </div>
-                              <div className="text-xs text-blue-600 mt-1">
-                                {values.max_rating
-                                  ? `Up to ${values.max_rating} Stars`
-                                  : "Any rating"}
-                              </div>
-                            </div>
-
-                            <div>
-                              <label className="block text-sm text-blue-700 mb-2">
-                                Minimum Rating
-                              </label>
-                              <div className="flex items-center space-x-1">
-                                {[1, 2, 3, 4, 5].map((star) => (
-                                  <button
-                                    key={star}
-                                    type="button"
-                                    onClick={() => {
-                                      if (star <= values.max_rating) {
-                                        setFieldValue("min_rating", star);
-                                      }
-                                    }}
-                                    className={`p-1 rounded-full transition-all duration-200 ${
-                                      values.min_rating >= star
-                                        ? "bg-amber-100 scale-110"
-                                        : "bg-blue-50 hover:bg-blue-100"
-                                    }`}
-                                  >
-                                    <FiStar
-                                      className={`text-xl ${
-                                        values.min_rating >= star
-                                          ? "text-amber-400 fill-amber-400"
-                                          : "text-gray-300"
-                                      }`}
-                                    />
-                                  </button>
-                                ))}
-                              </div>
-                              <div className="text-xs text-blue-600 mt-1">
-                                {values.min_rating
-                                  ? `${values.min_rating}+ Stars`
-                                  : "Any rating"}
-                              </div>
-                            </div>
-
-                            {(values.min_rating || values.max_rating) && (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setFieldValue("min_rating", "");
-                                  setFieldValue("max_rating", "");
-                                }}
-                                className="text-xs text-blue-600 hover:text-cyan-500 transition-colors duration-200"
-                              >
-                                Clear rating filters
-                              </button>
-                            )}
-                          </div>
+                          <RatingFilter
+                            values={values}
+                            setFieldValue={setFieldValue}
+                          />
                         )}
                       </div>
 
@@ -580,32 +417,7 @@ const SearchFilters = () => {
                             size={17}
                           />
                         </div>
-                        {open == "Reviews" && (
-                          <div className="grid grid-cols-2 gap-3">
-                            <div>
-                              <label className="block text-sm text-blue-700 mb-1">
-                                Min Reviews
-                              </label>
-                              <Field
-                                type="number"
-                                name="min_comments"
-                                className="w-full p-2 ring ring-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                                placeholder="0"
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-sm text-blue-700 mb-1">
-                                Max Reviews
-                              </label>
-                              <Field
-                                type="number"
-                                name="max_comments"
-                                className="w-full p-2 ring ring-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                                placeholder="1000"
-                              />
-                            </div>
-                          </div>
-                        )}
+                        {open == "Reviews" && <ReviewsFiltre />}
                       </div>
                     </div>
 
@@ -618,7 +430,7 @@ const SearchFilters = () => {
                       </button>
                     </div>
                   </motion.div>
-                )} 
+                )}
               </AnimatePresence>
             </div>
           </Form>

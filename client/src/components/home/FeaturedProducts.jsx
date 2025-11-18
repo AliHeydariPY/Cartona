@@ -4,13 +4,11 @@ import { getStorekeeperProducts } from "../../services/productAPIServices";
 import {
   FiChevronLeft,
   FiChevronRight,
-  FiArrowRight,
   FiEye,
   FiStar,
   FiHeart,
 } from "react-icons/fi";
 
-import { useNavigate } from "react-router-dom";
 import { BiSolidOffer } from "react-icons/bi";
 import { FaClock, FaHeart } from "react-icons/fa";
 import { PiLightningFill } from "react-icons/pi";
@@ -23,7 +21,6 @@ import {
 import ProductImageCarousel from "../ProductImageCarousel";
 
 const ProductsCarousel = ({ featuredProducts }) => {
-  const navigate = useNavigate();
   const [favorites, setFavorites] = useState([]);
 
   const containerRef = useRef(null);
@@ -43,8 +40,8 @@ const ProductsCarousel = ({ featuredProducts }) => {
       try {
         const favoriteProductsRes = await getFavorites();
         setFavorites(favoriteProductsRes.data);
-      } catch (error) {
-        console.log(error);
+      } catch {
+        setFavorites([]);
       }
     };
     fetchData();
@@ -174,7 +171,9 @@ const ProductsCarousel = ({ featuredProducts }) => {
                 {product.amazing_offer && (
                   <div className="absolute flex top-3 left-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg z-10">
                     <PiLightningFill className="mt-0.25 mr-0.75" size={13} />
-                    {product.amazing_offer.length < 25 ? product.amazing_offer : "Special sale" }
+                    {product.amazing_offer.length < 25
+                      ? product.amazing_offer
+                      : "Special sale"}
                   </div>
                 )}
 

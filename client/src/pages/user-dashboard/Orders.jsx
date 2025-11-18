@@ -53,7 +53,6 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
     const fetchPaymentsData = async () => {
       try {
         const paymentsRes = await getPayments();
-        console.log(paymentsRes);
         const payments = await Promise.all(
           paymentsRes.data.map(async (payment) => {
             const productRes = await getProduct(payment.product);
@@ -91,10 +90,9 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
             }
           })
         );
-        console.log(payments);
         setIsLoading(false);
         setOrders([...payments]);
-      } catch (error) {
+      } catch {
         setIsLoading(false);
       }
     };
@@ -364,8 +362,6 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
                 <button
                   onClick={() =>
                     setVisibleCount(() => {
-                      console.log(visibleCount);
-
                       return visibleCount + 4;
                     })
                   }

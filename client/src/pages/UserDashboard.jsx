@@ -109,8 +109,6 @@ const UserDashboard = () => {
 
     getStorekeeper(user.username)
       .then((res) => {
-        console.log("🚀 ~ UserDashboard ~ res:", res.data);
-
         setStorekeeper(res.data);
         setIsSeller(user.role == "storekeeper");
       })

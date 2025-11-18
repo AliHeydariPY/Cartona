@@ -56,7 +56,6 @@ const AddProduct = () => {
     });
     getCollections().then((res) => {
       setCollections(res.data);
-      console.log(res.data);
     });
   }, []);
 
@@ -133,12 +132,9 @@ const AddProduct = () => {
             formData.append("collection", values.collection);
             formData.append("description", values.description);
 
-            console.log(Object.fromEntries(formData.entries()));
-
             const response = addNewProduct(formData, onSubmitProps, setImage);
 
-            response.then((res) => {
-              console.log(res.data);
+            response.then(() => {
               onSubmitProps.resetForm();
               setImage({});
               setSelectedCategory(null);

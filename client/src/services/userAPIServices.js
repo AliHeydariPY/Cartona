@@ -25,7 +25,6 @@ export const logout = async () => {
 };
 
 export const createUser = (userData) => {
-  console.log(userData);
   const url = `${SERVER_URL}/user-api/users/`;
   return axios.post(url, userData);
 };

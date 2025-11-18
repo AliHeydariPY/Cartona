@@ -37,10 +37,6 @@ const SubCategories = () => {
     fetchSubCategories();
   }, [categoryId]);
 
-  useEffect(() => {
-    console.log(subCategoryItmes);
-  }, [subCategoryItmes]);
-
   return (
     <>
       <motion.div

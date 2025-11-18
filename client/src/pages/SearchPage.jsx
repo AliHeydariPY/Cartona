@@ -44,8 +44,8 @@ export default function SearchPage() {
         try {
           const favoriteProductsRes = await getFavorites();
           favorites = favoriteProductsRes.data;
-        } catch (error) {
-          console.log(error);
+        } catch {
+          setFavorites([]);
         }
 
         const res = query
@@ -59,7 +59,7 @@ export default function SearchPage() {
         } else {
           setNotFound(true);
         }
-      } catch (error) {
+      } catch {
         setNotFound(true);
       }
     };
@@ -146,7 +146,9 @@ export default function SearchPage() {
                           className="mt-0.25 mr-0.75"
                           size={13}
                         />
-                        {product.amazing_offer.length < 25 ? product.amazing_offer : "Special sale" }
+                        {product.amazing_offer.length < 25
+                          ? product.amazing_offer
+                          : "Special sale"}
                       </div>
                     )}
 

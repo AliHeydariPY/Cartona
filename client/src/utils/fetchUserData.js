@@ -9,11 +9,10 @@ export const fetchUserData = async () => {
     const res = await api.get("/user-api/users/");
     if (res.data && res.data.length > 0) {
       store.set(userAtom, res.data[0]);
-      console.log("🚀 ~ fetchUserData ~ res.data[0]:", res.data[0])
     } else {
       store.set(userAtom, null);
     }
-  } catch (error) {
+  } catch {
     store.set(userAtom, null);
   }
 };

@@ -24,11 +24,19 @@ const Navbar = ({ isFocus = false, setIsFocus }) => {
 
   useEffect(() => {
     const fetchCartItems = async () => {
-      const cartProductsRes = await getCartProducts();
-      setCartItems(cartProductsRes.data);
+      try {
+        const cartProductsRes = await getCartProducts();
+        setCartItems(cartProductsRes.data);
+      } catch {
+        setCartItems([]);
+      }
 
-      const notifRes = await getNotifications();
-      setNotifications(notifRes.data);
+      try {
+        const notifRes = await getNotifications();
+        setNotifications(notifRes.data);
+      } catch {
+        setNotifications([]);
+      }
     };
 
     fetchCartItems();
@@ -57,7 +65,10 @@ const Navbar = ({ isFocus = false, setIsFocus }) => {
       <div className="max-w-7xl mx-auto py-2 px-2 lg:px-4">
         <div className="grid grid-cols-6 items-center justify-between h-16">
           <div className=" hidden md:grid col-span-2 md:col-span-1">
-            <div className="flex items-center cursor-pointer" onClick={() => navigate("/")}>
+            <div
+              className="flex items-center cursor-pointer"
+              onClick={() => navigate("/")}
+            >
               <img src="../../public/CartonaLogo.png" alt="" />
               <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
                 Cartona

@@ -80,8 +80,8 @@ export const deleteImage = (imageID) => {
 };
 
 export const searchProduct = (query) => {
-  const url = `/product-api/products/?${query}`;
-  return api.get(url);
+  const url = `${SERVER_URL}/product-api/products/?${query}`;
+  return axios.get(url);
 };
 
 export const getListProducts = () => {

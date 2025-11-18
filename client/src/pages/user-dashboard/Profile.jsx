@@ -47,14 +47,11 @@ const Profile = ({ setAddToCartPopup, setSelectedProduct }) => {
           return { ...item, product: productRes.data };
         })
       );
-      console.log(cartItems);
       setRecentCartItems(cartItems);
     };
 
     fetchData();
   }, []);
-
-  console.log(userActivity);
 
   const activeOrders = recent_successful_payments.filter(
     (order) => !order.is_delivered
