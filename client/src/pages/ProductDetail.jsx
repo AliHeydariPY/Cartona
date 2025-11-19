@@ -122,14 +122,14 @@ const ProductDetails = ({
       <Navbar />
 
       {product && productComments && seller && productQuestions && user[0] && (
-        <div className="min-h-screen flex justify-center p-0 sm:p-4">
+        <div className="min-h-screen flex justify-center p-0 sm:p-4 sm:pb-20 md:p-4">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
             className="w-full max-w-6xl"
           >
-            <div className="bg-white/95 backdrop-blur-xl shadow-lg sm:border border-blue-400 transition-all duration-300 pb-20 p-4 sm:p-6 md:p-8 sm:rounded-xl md:rounded-2xl lg:rounded-3xl">
+            <div className="bg-white/95 backdrop-blur-xl \ sm:border border-blue-400 transition-all duration-300 pb-20 p-4 sm:p-6 md:p-8 sm:rounded-xl md:rounded-2xl lg:rounded-3xl">
               <div className="flex flex-row items-start justify-between mb-6 sm:mb-8">
                 <div className="flex items-start mb-0">
                   <span>
