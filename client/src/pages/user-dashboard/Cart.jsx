@@ -169,7 +169,7 @@ const Cart = () => {
         <div className="grid grid-cols-1 gap-4 sm:gap-6">
           <div className="space-y-4 sm:space-y-6">
             {isLoading ? (
-              <SectionLoader chatLoader={true} />
+              <SectionLoader chatLoader={true} title="Cart Items" />
             ) : (
               cartItems.length === 0 && (
                 <div className="text-center py-8 sm:py-12 bg-blue-50/50 rounded-xl sm:rounded-2xl border border-blue-200">

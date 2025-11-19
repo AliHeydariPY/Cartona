@@ -391,7 +391,7 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
         )}
 
         {isLoading ? (
-          <SectionLoader chatLoader={false} />
+          <SectionLoader chatLoader={false} title="Orders" />
         ) : (
           filteredOrders.length === 0 && (
             <div className="text-center py-12 bg-blue-50/50 rounded-2xl border border-blue-200">

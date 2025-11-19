@@ -1,4 +1,4 @@
-export const SectionLoader = ({ chatLoader }) => {
+export const SectionLoader = ({ chatLoader, title }) => {
   return (
     <div
       className={`flex flex-col items-center justify-center py-16 ${!chatLoader && "bg-gradient-to-br from-blue-50/50 to-cyan-50/50 rounded-2xl border border-blue-200"}`}
@@ -13,11 +13,11 @@ export const SectionLoader = ({ chatLoader }) => {
 
       <div className="text-center space-y-2">
         <h3 className="text-lg font-semibold text-blue-800">
-          Loading Your Orders
+          Loading Your {title}
         </h3>
-        <p className="text-blue-600 text-sm">
+        {/* <p className="text-blue-600 text-sm">
           Fetching your purchase history...
-        </p>
+        </p> */}
       </div>
 
       <div className="flex space-x-1.5 mt-4">

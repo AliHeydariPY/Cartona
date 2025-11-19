@@ -28,7 +28,7 @@ const Payments = () => {
   const [showSendNotePopup, setShowSendNotePopup] = useState(false);
   const [payload, setPayload] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
-  const [visibleCount, setVisibleCount] = useState(4);
+  const [visibleCount, setVisibleCount] = useState(3);
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -277,7 +277,7 @@ const Payments = () => {
 
         <div className="space-y-4">
           {isLoading ? (
-            <SectionLoader chatLoader={false} />
+            <SectionLoader chatLoader={false} title="Payments"/>
           ) : (
             filteredPayments.length === 0 && (
               <div className="text-center py-8 sm:py-12 bg-blue-50/50 rounded-xl sm:rounded-2xl border border-blue-200">
@@ -430,13 +430,13 @@ const Payments = () => {
               </div>
             </motion.div>
           ))}
-          {filteredPayments.length > 4 && (
+          {filteredPayments.length > 3 && (
             <div className="flex justify-center pt-3 xs:pt-4 mt-4 xs:mt-5 border-t border-blue-300">
               {visibleCount < filteredPayments.length ? (
                 <button
                   onClick={() =>
                     setVisibleCount(() => {
-                      return visibleCount + 4;
+                      return visibleCount + 3;
                     })
                   }
                   className="px-4 xs:px-6 py-2 cursor-pointer rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-300 text-sm xs:text-base font-medium"
@@ -445,7 +445,7 @@ const Payments = () => {
                 </button>
               ) : (
                 <button
-                  onClick={() => setVisibleCount(4)}
+                  onClick={() => setVisibleCount(3)}
                   className="px-4 xs:px-6 py-2 cursor-pointer rounded-lg border border-blue-400 text-blue-600 hover:bg-blue-50 transition-colors duration-300 text-sm xs:text-base font-medium"
                 >
                   Show less

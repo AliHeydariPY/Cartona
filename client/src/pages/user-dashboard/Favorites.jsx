@@ -122,7 +122,7 @@ const Favorites = ({ setAddToCartPopup, setSelectedProduct }) => {
           </div>
 
           {isLoading ? (
-            <SectionLoader chatLoader={false} />
+            <SectionLoader chatLoader={false} title="Favorites" />
           ) : (
             favorites.length === 0 && (
               <div className="text-center py-12 bg-blue-50/50 rounded-2xl border border-blue-200">
@@ -173,7 +173,9 @@ const Favorites = ({ setAddToCartPopup, setSelectedProduct }) => {
                           className="mt-0.25 mr-0.75"
                           size={13}
                         />
-                        {product.amazing_offer.length < 25 ? product.amazing_offer : "Special sale" }
+                        {product.amazing_offer.length < 25
+                          ? product.amazing_offer
+                          : "Special sale"}
                       </div>
                     )}
 

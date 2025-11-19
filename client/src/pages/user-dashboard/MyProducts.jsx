@@ -174,7 +174,7 @@ export default function MyProducts() {
         )}
 
         {isLoading ? (
-          <SectionLoader chatLoader={false} />
+          <SectionLoader chatLoader={false} title="Products"/>
         ) : (
           filteredProducts.length === 0 && (
             <motion.div
