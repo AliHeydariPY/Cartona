@@ -243,7 +243,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         if mode not in ['max', 'min']:
             raise ValidationError("Mode must be either 'max' or 'min'.")
 
-        queryset = self.get_queryset()
+        queryset = self.filter_queryset(self.get_queryset())
         if request.method not in ['GET', 'HEAD', 'OPTIONS']:
             queryset = queryset.filter(storekeeper__user=request.user)
 
@@ -301,7 +301,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         if mode not in ['max', 'min']:
             raise ValidationError("Mode must be either 'max' or 'min'.")
 
-        queryset = self.get_queryset()
+        queryset = self.filter_queryset(self.get_queryset())
         if request.method not in ['GET', 'HEAD', 'OPTIONS']:
             queryset = queryset.filter(storekeeper__user=request.user)
 
