@@ -1,6 +1,21 @@
 import { Field } from "formik";
+import { useEffect, useState } from "react";
 
-const ReviewsFiltre = () => {
+const ReviewsFiltre = ({ minMaxComments, values, setFieldValue }) => {
+  const minComments = minMaxComments[0];
+  const maxComments = minMaxComments[1];
+
+  const [safeMin, setSafeMin] = useState(minComments);
+  const [safeMax, setSafeMax] = useState(maxComments);
+
+  useEffect(() => {
+    const currentMin = values.min_comments ?? minComments;
+    const currentMax = values.max_comments ?? maxComments;
+
+    setSafeMin(currentMin < minComments ? minComments : currentMin);
+    setSafeMax(currentMax > maxComments ? maxComments : currentMax);
+  }, [minMaxComments]);
+
   return (
     <div className="grid grid-cols-2 gap-3">
       <div>
@@ -8,8 +23,24 @@ const ReviewsFiltre = () => {
         <Field
           type="number"
           name="min_comments"
+          min={minComments}
+          max={safeMax-1}
+          placeholder={minComments}
+          onChange={(e) => {
+            let val = Number(e.target.value);
+
+            if (val < minComments) val = minComments;
+            if (val > safeMax) val = safeMax;
+
+            setSafeMin(val);
+            setFieldValue("min_comments", val);
+
+            if (val > safeMax) {
+              setSafeMax(val);
+              setFieldValue("max_comments", val);
+            }
+          }}
           className="w-full p-2 ring ring-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-          placeholder="0"
         />
       </div>
       <div>
@@ -17,8 +48,24 @@ const ReviewsFiltre = () => {
         <Field
           type="number"
           name="max_comments"
+          min={safeMin}
+          max={maxComments}
+          placeholder={maxComments}
+          onChange={(e) => {
+            let val = Number(e.target.value);
+
+            if (val > maxComments) val = maxComments;
+            if (val < safeMin) val = safeMin;
+
+            setSafeMax(val);
+            setFieldValue("max_comments", val);
+
+            if (val < safeMin) {
+              setSafeMin(val);
+              setFieldValue("min_comments", val);
+            }
+          }}
           className="w-full p-2 ring ring-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-          placeholder="1000"
         />
       </div>
     </div>

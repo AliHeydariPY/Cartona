@@ -1,18 +1,57 @@
 import { Field } from "formik";
+import { useEffect, useState } from "react";
 import { Range, getTrackBackground } from "react-range";
 
-const PriceFilter = ({ values, setFieldValue }) => {
+const PriceFilter = ({ minMaxPrice, values, setFieldValue }) => {
+  const rawMin = Number(minMaxPrice[0]);
+  const rawMax = Number(minMaxPrice[1]);
+
+  const minPrice = Math.floor(rawMin);
+  const maxPrice = Math.ceil(rawMin === rawMax ? rawMax + 1 : rawMax);
+
+  const [safeMin, setSafeMin] = useState(minPrice);
+  const [safeMax, setSafeMax] = useState(maxPrice);
+
+  useEffect(() => {
+    setFieldValue(
+      "min_price",
+      values.min_price > minPrice ? values.min_price || minPrice : minPrice
+    );
+
+    setFieldValue(
+      "max_price",
+      values.max_price < maxPrice ? values.max_price || maxPrice : maxPrice
+    );
+    if (rawMin === rawMax) {
+      setSafeMin(rawMin);
+      setSafeMax(rawMin + 1);
+
+      setFieldValue("min_price", rawMin);
+      setFieldValue("max_price", rawMin + 1);
+    } else {
+      console.log(values.max_price < maxPrice);
+      console.log(maxPrice);
+      setSafeMin(
+        values.min_price > minPrice ? values.min_price || minPrice : minPrice
+      );
+      setSafeMax(
+        values.max_price < maxPrice ? values.max_price || maxPrice : maxPrice
+      );
+    }
+  }, [minMaxPrice]);
+  
+  const maxWidth = `${String(safeMax).length + 1}ch`;
+
   return (
-    <div className=" py-1">
+    <div className="py-1">
       <Range
-        step={5}
-        min={0}
-        max={1000}
-        values={[
-          Number(values.min_price) || 0,
-          Number(values.max_price) || 1000,
-        ]}
+        step={1}
+        min={minPrice}
+        max={maxPrice}
+        values={[safeMin, safeMax]}
         onChange={(rangeVals) => {
+          setSafeMin(rangeVals[0]);
+          setSafeMax(rangeVals[1]);
           setFieldValue("min_price", rangeVals[0]);
           setFieldValue("max_price", rangeVals[1]);
         }}
@@ -25,10 +64,10 @@ const PriceFilter = ({ values, setFieldValue }) => {
               className="h-2 mx-3 bg-blue-200 rounded-full cursor-pointer"
               style={{
                 background: getTrackBackground({
-                  values: [values.min_price || 0, values.max_price || 1000],
+                  values: [safeMin, safeMax],
                   colors: ["#c6dbfa", "#3b82f6", "#c6dbfa"],
-                  min: 0,
-                  max: 1000,
+                  min: minPrice,
+                  max: maxPrice,
                 }),
               }}
             >
@@ -47,27 +86,54 @@ const PriceFilter = ({ values, setFieldValue }) => {
           );
         }}
       />
-      <div className="flex justify-between text-sm text-blue-800 mt-3 ">
+
+      <div className="flex justify-between text-sm text-blue-800 mt-3">
         <div>
           $
           <Field
             type="number"
             name="min_price"
-            className="w-15 p-0.5 placeholder:text-blue-800 rounded-lg focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-            placeholder="0"
+            min={minPrice}
+            max={safeMax}
+            className="w-16 p-0.5 rounded-lg focus:outline-none
+                       [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none
+                       [&::-webkit-outer-spin-button]:appearance-none"
+            placeholder={minPrice}
+            onChange={(e) => {
+              let val = Number(e.target.value);
+
+              if (val < minPrice) val = minPrice;
+              if (val > safeMax) val = safeMax;
+
+              setSafeMin(val);
+              setFieldValue("min_price", val);
+            }}
           />
         </div>
+
         <div>
           $
           <Field
             type="number"
             name="max_price"
-            className="w-10 p-0.5 placeholder:text-blue-800 rounded-lg focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-            placeholder="1000"
+            min={safeMin}
+            max={maxPrice}
+            className="p-0.5 rounded-lg focus:outline-none
+             [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none
+             [&::-webkit-outer-spin-button]:appearance-none"
+            style={{ width: maxWidth }}
+            placeholder={maxPrice}
+            onChange={(e) => {
+              let val = Number(e.target.value);
+
+              if (val > maxPrice) val = maxPrice;
+              if (val < safeMin) val = safeMin;
+
+              setSafeMax(val);
+              setFieldValue("max_price", val);
+            }}
           />
         </div>
-        {/* <span>${values.min_price || 0}</span> */}
-        {/* <span>${values.max_price || 1000}</span> */}
       </div>
     </div>
   );

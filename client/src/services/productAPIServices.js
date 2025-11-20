@@ -113,3 +113,13 @@ export const createCollection = (collection) => {
   const url = `/product-api/collections/`;
   return api.post(url, collection);
 };
+
+export const getMinMaxPrice = (type, query) => {
+  const url = `/product-api/products/price/${type}/1/?${query}`;
+  return api.get(url);
+};
+
+export const getMinMaxComments = (type, query) => {
+  const url = `/product-api/products/comment/${type}/1/?${query}`;
+  return api.get(url);
+};
