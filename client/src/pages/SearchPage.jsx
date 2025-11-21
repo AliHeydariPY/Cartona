@@ -22,7 +22,7 @@ import {
 } from "../services/cartAPIServices";
 import { errorToast } from "../utils/toast";
 
-export default function SearchPage() {
+const SearchPage = () => {
   const { query } = useParams();
   const [products, setProducts] = useState([]);
   const [favorites, setFavorites] = useState([]);
@@ -47,7 +47,6 @@ export default function SearchPage() {
         } catch {
           setFavorites([]);
         }
-
         const res = query
           ? await searchProduct(query)
           : await getListProducts();
@@ -331,4 +330,6 @@ export default function SearchPage() {
       <BottomNav />
     </>
   );
-}
+};
+
+export default SearchPage;

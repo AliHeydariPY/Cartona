@@ -5,7 +5,6 @@ import { Formik, Form } from "formik";
 import CategoryFilter from "./filters/CategoryFilter";
 
 import { BiCategory } from "react-icons/bi";
-import { MdStorefront } from "react-icons/md";
 
 import {
   FiFilter,
@@ -18,7 +17,11 @@ import {
 
 import { useNavigate, useParams } from "react-router-dom";
 
-import { getCategory } from "../services/productAPIServices";
+import {
+  getCategory,
+  getMinMaxComments,
+  getMinMaxPrice,
+} from "../services/productAPIServices";
 import { getStorekeeperById } from "../services/userAPIServices";
 import PriceFilter from "./filters/PriceFilter";
 import RatingFilter from "./filters/RatingFilter";
@@ -28,6 +31,13 @@ const SearchFilters = () => {
   const navigate = useNavigate();
   const { query } = useParams();
   const [isOpen, setIsOpen] = useState(false);
+  const params = new URLSearchParams(query);
+  const [open, setOpen] = useState(false);
+  const [storekeeperInfo, setStorekeeperInfo] = useState();
+
+  const [minMaxPrice, setMinMaxPrice] = useState([]);
+  const [minMaxComments, setMinMaxComments] = useState([]);
+
   const filters = {
     min_rating: "",
     max_rating: "",
@@ -38,10 +48,6 @@ const SearchFilters = () => {
     category: null,
     storekeeper: "",
   };
-  const params = new URLSearchParams(query);
-  const [open, setOpen] = useState(false);
-  const [storekeeperInfo, setStorekeeperInfo] = useState();
-
   const [initialFilters, setInitialFilters] = useState({
     min_rating: "",
     max_rating: "",
@@ -82,6 +88,9 @@ const SearchFilters = () => {
         setStorekeeperInfo(true);
       }
 
+      setPriceRange();
+      setCommentRange();
+
       setInitialFilters(newFilters);
       setIsReady(true);
     };
@@ -102,6 +111,36 @@ const SearchFilters = () => {
 
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  const setPriceRange = async () => {
+    let priceRange = [];
+    const filteredQuery = query
+      .replace(/(&)?min_price=\d+/g, "")
+      .replace(/(&)?max_price=\d+/g, "");
+
+    const min = await getMinMaxPrice("min", filteredQuery);
+    priceRange.push(min.data.price);
+
+    const max = await getMinMaxPrice("max", filteredQuery);
+    priceRange.push(max.data.price);
+
+    setMinMaxPrice(priceRange);
+  };
+
+  const setCommentRange = async () => {
+    let commentsRange = [];
+    const filteredQuery = query
+      .replace(/(&)?min_comments=\d+/g, "")
+      .replace(/(&)?max_comments=\d+/g, "");
+
+    const min = await getMinMaxComments("min", filteredQuery);
+    commentsRange.push(min.data.comment_count);
+    const max = await getMinMaxComments("max", filteredQuery);
+    commentsRange.push(max.data.comment_count);
+
+    console.log(commentsRange);
+    setMinMaxComments(commentsRange);
+  };
 
   const buildUrl = (values) => {
     const filtersName = Object.keys(filters);
@@ -319,6 +358,7 @@ const SearchFilters = () => {
                         </div>
                         {open == "Price Range" && (
                           <PriceFilter
+                            minMaxPrice={minMaxPrice}
                             values={values}
                             setFieldValue={setFieldValue}
                           />
@@ -417,7 +457,13 @@ const SearchFilters = () => {
                             size={17}
                           />
                         </div>
-                        {open == "Reviews" && <ReviewsFiltre />}
+                        {open == "Reviews" && (
+                          <ReviewsFiltre
+                            values={values}
+                            minMaxComments={minMaxComments}
+                            setFieldValue={setFieldValue}
+                          />
+                        )}
                       </div>
                     </div>
 

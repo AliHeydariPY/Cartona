@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import {
-    FiX,
+  FiX,
   FiGithub,
   FiLinkedin,
   FiMail,
@@ -21,7 +21,11 @@ import {
   SiJavascript,
   SiPostgresql,
   SiTypescript,
+  SiMysql,
 } from "react-icons/si";
+import { GrMysql } from "react-icons/gr";
+import { RiNextjsFill } from "react-icons/ri";
+import { TbBrandNextjs } from "react-icons/tb";
 import ScrollToTop from "../components/ScrollToTop";
 
 const Team = () => {
@@ -42,12 +46,12 @@ What drives me:
 • Collaborative problem-solving
 
 When I'm not coding, you'll find me exploring new design trends, contributing to open-source projects, or enjoying a good cup of coffee while brainstorming new ideas.`,
-      image: "https://avatars.githubusercontent.com/u/176317348?v=4",
+      image: "../../public/profile/adelnouri.jpg",
       skills: [
-        { name: "React", icon: FaReact, level: 95 },
         { name: "TypeScript", icon: SiTypescript, level: 90 },
-        { name: "Tailwind CSS", icon: SiTailwindcss, level: 92 },
-        { name: "UI/UX Design", icon: FiHeart, level: 88 },
+        { name: "React", icon: FaReact, level: 95 },
+        { name: "NextJS", icon: RiNextjsFill  , level: 88 },
+        { name: "Tailwind CSS", icon: SiTailwindcss, level: 95 },
       ],
       social: {
         github: "https://github.com/AdelNouri",
@@ -63,21 +67,20 @@ When I'm not coding, you'll find me exploring new design trends, contributing to
       name: "Ali Heydari",
       role: "Backend Specialist",
       bio: "Expert in building robust, scalable backend systems. Enjoys architecting solutions that handle millions of requests with elegance and efficiency.",
-      fullBio: `I have 4 years of experience in backend development, specializing in Python and Django. My expertise lies in creating secure, high-performance APIs and database architectures that scale seamlessly.
-
-My philosophy:
-• Write clean, maintainable code
-• Prioritize security and performance
-• Embrace agile methodologies
-• Continuous learning and improvement
-
-Outside of coding, I'm an avid reader, enjoy hiking in the mountains, and love experimenting with new backend technologies. I believe great software is built through collaboration and attention to detail.`,
-      image:
-        "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80",
+      fullBio: `I have 3 years of experience in backend development, specializing in Python and Django. My expertise lies in creating secure, high-performance APIs and database architectures that scale seamlessly. 
+ 
+My philosophy: 
+• Write clean, maintainable code 
+• Prioritize security and performance 
+• Embrace agile methodologies 
+• Continuous learning and improvement 
+ 
+Outside of coding, I'm an avid computer knowledge reader, enjoy and love experimenting with new backend technologies. I believe great software is built through collaboration and attention to detail.`,
+      image: "../../public/profile/aliheydari.png",
       skills: [
         { name: "Python", icon: FaPython, level: 94 },
         { name: "Django", icon: SiDjango, level: 92 },
-        { name: "PostgreSQL", icon: SiPostgresql, level: 89 },
+        { name: "MySQL", icon: GrMysql, level: 89 },
         { name: "System Architecture", icon: FiServer, level: 91 },
       ],
       social: {
@@ -106,7 +109,7 @@ Outside of coding, I'm an avid reader, enjoy hiking in the mountains, and love e
       icon: SiTailwindcss,
       description: "Styling Framework",
     },
-    { name: "PostgreSQL", icon: SiPostgresql, description: "Database" },
+    { name: "MySQL", icon: GrMysql, description: "Database" },
   ];
 
   return (
@@ -179,7 +182,7 @@ Outside of coding, I'm an avid reader, enjoy hiking in the mountains, and love e
                           <img
                             src={dev.image}
                             alt={dev.name}
-                            className="w-full h-full rounded-xl object-cover"
+                            className="w-full h-full rounded-xl object-center"
                           />
                         </div>
                         <div className="absolute -bottom-2 -right-2 bg-white rounded-full p-1 shadow-lg">
@@ -211,9 +214,16 @@ Outside of coding, I'm an avid reader, enjoy hiking in the mountains, and love e
                           className="flex items-center justify-between"
                         >
                           <div className="flex items-center space-x-3">
-                            <skill.icon
-                              className={`text-${dev.bgColor}-500 text-lg`}
-                            />
+                            {skill.name == "MySQL" ? (
+                              <skill.icon
+                                strokeWidth={1}
+                                className={`text-${dev.bgColor}-500 text-2xl mb-0.5`}
+                              />
+                            ) : (
+                              <skill.icon
+                                className={`text-${dev.bgColor}-500 text-2xl mb-0.5`}
+                              />
+                            )}
                             <span className="text-blue-700 font-medium">
                               {skill.name}
                             </span>
@@ -259,7 +269,7 @@ Outside of coding, I'm an avid reader, enjoy hiking in the mountains, and love e
                       onClick={() => setSelectedDev(dev)}
                     >
                       <span>View Full Profile</span>
-                      <FiExternalLink size={16} />
+                      <FiExternalLink size={16} className="mb-0.5" />
                     </motion.button>
                   </div>
                 </div>
@@ -397,7 +407,7 @@ const DeveloperModal = ({ developer, onClose }) => {
                   <img
                     src={developer.image}
                     alt={developer.name}
-                    className="w-full h-full rounded-xl object-cover"
+                    className="w-full h-full rounded-xl object-center"
                   />
                 </div>
                 <div className="absolute -bottom-2 -right-2 bg-white rounded-full p-2 shadow-lg">
@@ -419,7 +429,7 @@ const DeveloperModal = ({ developer, onClose }) => {
               onClick={onClose}
               className="p-2.5 bg-white/25 rounded-xl hover:bg-white/35 transition-colors duration-200"
             >
-                <FiX className="text-white" size={20}/>
+              <FiX className="text-white" size={20} />
               {/* <FiX className="text-white text-xl" /> */}
             </button>
           </div>
@@ -453,7 +463,7 @@ const DeveloperModal = ({ developer, onClose }) => {
                     >
                       <div className="flex items-center space-x-2">
                         <skill.icon
-                          className={`text-${developer.bgColor}-500`}
+                          className={`text-${developer.bgColor}-500 text-xl`}
                         />
                         <span className="text-blue-700">{skill.name}</span>
                       </div>
@@ -474,7 +484,7 @@ const DeveloperModal = ({ developer, onClose }) => {
                     href={developer.social.github}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center space-x-3 text-blue-600 hover:text-blue-700 transition-colors p-2 rounded-lg hover:bg-blue-50"
+                    className={`flex items-center space-x-3 hover:text-${developer.bgColor}-700 text-${developer.bgColor}-600  transition-colors p-2 rounded-lg hover:bg-${developer.bgColor}-100`}
                   >
                     <FiGithub className="text-lg" />
                     <span>GitHub</span>
@@ -483,7 +493,7 @@ const DeveloperModal = ({ developer, onClose }) => {
                     href={developer.social.linkedin}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center space-x-3 text-blue-600 hover:text-blue-700 transition-colors p-2 rounded-lg hover:bg-blue-50"
+                    className={`flex items-center space-x-3 hover:text-${developer.bgColor}-700 text-${developer.bgColor}-600 transition-colors p-2 rounded-lg hover:bg-${developer.bgColor}-100`}
                   >
                     <FiLinkedin className="text-lg" />
                     <span>LinkedIn</span>
@@ -492,14 +502,14 @@ const DeveloperModal = ({ developer, onClose }) => {
                     href={developer.social.telegram}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center space-x-3 text-blue-600 hover:text-blue-700 transition-colors p-2 rounded-lg hover:bg-blue-50"
+                    className={`flex items-center space-x-3 hover:text-${developer.bgColor}-700 text-${developer.bgColor}-600 transition-colors p-2 rounded-lg hover:bg-${developer.bgColor}-100`}
                   >
                     <FaTelegram className="text-lg" />
                     <span>Telegram</span>
                   </a>
                   <a
                     href={`mailto:${developer.social.email}`}
-                    className="flex items-center space-x-3 text-blue-600 hover:text-blue-700 transition-colors p-2 rounded-lg hover:bg-blue-50"
+                    className={`flex items-center space-x-3 hover:text-${developer.bgColor}-700 text-${developer.bgColor}-600 transition-colors p-2 rounded-lg hover:bg-${developer.bgColor}-100`}
                   >
                     <FiMail className="text-lg" />
                     <span>Email</span>
