@@ -10,7 +10,14 @@ import {
   sendCommentReply,
 } from "../../../services/commentAPIServices";
 
-import { FiStar, FiX, FiAlertCircle, FiEdit3, FiTrash2 } from "react-icons/fi";
+import {
+  FiStar,
+  FiX,
+  FiAlertCircle,
+  FiEdit3,
+  FiTrash2,
+  FiSend,
+} from "react-icons/fi";
 import { LuReply } from "react-icons/lu";
 
 import EditPostPopup from "../../pop-ups/EditPostPopup";
@@ -26,6 +33,8 @@ const Reviews = ({
   const { id } = useParams();
   const [commentText, setCommentText] = useState("");
   const [selectedStars, setSelectedStars] = useState(1);
+  const [showRating, setShowRating] = useState(false);
+
   const [userPost, setUserPost] = useState({});
 
   const [replyingTo, setReplyingTo] = useState(null);
@@ -91,6 +100,38 @@ const Reviews = ({
     });
   };
 
+  const handleSubmit = () => {
+    if (commentText.trim() == "") {
+      showValidationError("Please write your comment before submitting");
+    } else {
+      const res = sendComment({
+        text: commentText,
+        rating: showRating ? selectedStars : null,
+        product: id,
+      });
+
+      res
+        .then(() => {
+          setCommentText("");
+          setSelectedStars(1);
+          setShowRating(false);
+          setReloadComponent(!reloadComponent);
+          successToast("Your review was successfully sent");
+        })
+        .catch((err) => {
+          setCommentText("");
+          setSelectedStars(1);
+          setShowRating(false);
+          const errorMessage =
+            err.response.data.detail == "Refresh token not found."
+              ? "To submit a review, first log in to your account"
+              : err.response.data.rating;
+
+          errorToast(errorMessage);
+        });
+    }
+  };
+
   return (
     <motion.div
       initial="hidden"
@@ -105,71 +146,103 @@ const Reviews = ({
         <h4 className="text-lg font-semibold text-blue-800 mb-2 sm:mb-4">
           Leave a Review
         </h4>
-        <div className="flex items-center mb-2 sm:mb-4 space-x-1">
-          <div className="flex justify-center gap-2 ">
-            {[1, 2, 3, 4, 5].map((star) => (
+
+        <div className="mb-4 sm:mb-6">
+          {!showRating ? (
+            <div className="flex flex-wrap justify-center sm:justify-start items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <span className="text-sm text-blue-700 font-medium">
+                Would you like to rate this product?
+              </span>
               <button
-                key={star}
-                onClick={() => {
-                  setSelectedStars(star);
-                }}
-                className="transition-transform duration-200 hover:scale-110"
+                onClick={() => setShowRating(true)}
+                className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg hover:shadow-lg transition-all duration-300 text-sm font-medium"
               >
-                <FiStar
-                  size={24}
-                  className={`${
-                    star <= selectedStars
-                      ? "text-amber-400 fill-amber-400"
-                      : "text-gray-300 fill-gray-300"
-                  } transition-colors duration-200`}
-                />
+                <FiStar size={14} className="fill-current mb-0.5" />
+                Add Rating
               </button>
-            ))}
-          </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-blue-700">
+                  Your Rating:
+                </span>
+                <button
+                  onClick={() => {
+                    setShowRating(false);
+                    setSelectedStars(1);
+                  }}
+                  className="cursor-pointer text-xs text-rose-600 hover:text-rose-700 font-medium transition-colors duration-200"
+                >
+                  Remove Rating
+                </button>
+              </div>
+
+              <div className="flex justify-center gap-1 sm:gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    onClick={() => setSelectedStars(star)}
+                    className="transition-transform duration-200 hover:scale-110"
+                  >
+                    <FiStar
+                      size={28}
+                      className={`${
+                        star <= selectedStars
+                          ? "text-amber-400 fill-amber-400"
+                          : "text-gray-300 fill-gray-300"
+                      } transition-colors duration-200`}
+                    />
+                  </button>
+                ))}
+              </div>
+
+              {selectedStars > 0 && (
+                <div className="text-center">
+                  <span className="text-sm font-medium text-amber-600 bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
+                    {selectedStars} star{selectedStars > 1 ? "s" : ""} selected
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
         </div>
+
         <textarea
           rows={3}
           value={commentText}
           onChange={(e) => setCommentText(e.target.value)}
-          placeholder="Write your review..."
-          className="w-full p-2 sm:p-4 border border-blue-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-400 focus:outline-none text-blue-900 transition-all duration-300"
+          placeholder="Share your experience with this product..."
+          className="w-full p-3 sm:p-4 border border-blue-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-400 focus:outline-none text-blue-900 transition-all duration-300 resize-none"
         />
-        <button
-          onClick={() => {
-            if (commentText.trim() == "") {
-              showValidationError(
-                "Please write your comment before submitting"
-              );
-            } else {
-              const res = sendComment({
-                text: commentText,
-                rating: selectedStars,
-                product: id,
-              });
 
-              res
-                .then(() => {
-                  setCommentText("");
-                  setSelectedStars(1);
-                  setReloadComponent(!reloadComponent);
-                  successToast("Your comment was successfully sent");
-                })
-                .catch((err) => {
-                  setCommentText("");
-                  setSelectedStars(1);
-                  const errorMessage =
-                    err.response.data.detail == "Refresh token not found."
-                      ? "To submit a review, first log in to your account"
-                      : err.response.data.detail;
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-4 sm:mt-6">
+          <button
+            onClick={handleSubmit}
+            className="flex-1 flex items-center justify-center gap-2 cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white px-4 sm:px-6 py-3 rounded-lg font-medium transition-colors duration-300"
+          >
+            <FiSend size={16} className="mb-0.5" />
+            Submit Review
+          </button>
 
-                  errorToast(errorMessage);
-                });
-            }
-          }}
-          className="mt-2 sm:mt-4 cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white px-4 sm:px-6 py-2 rounded-lg sm:rounded-lg font-medium transition-colors duration-300"
-        >
-          Submit Review
-        </button>
+          {showRating && (
+            <button
+              onClick={() => {
+                setShowRating(false);
+                setSelectedStars(1);
+              }}
+              className="px-4 sm:px-6 py-3 cursor-pointer bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-300 font-medium"
+            >
+              Cancel Rating
+            </button>
+          )}
+        </div>
+
+        <p className="text-xs text-blue-600 mt-3 text-center">
+          {showRating
+            ? "Rating is optional but helps other shoppers"
+            : "You can submit a review without rating"}
+        </p>
       </motion.div>
 
       <motion.div variants={itemVariants} className="space-y-3 sm:space-y-4">
@@ -197,19 +270,21 @@ const Reviews = ({
                       </span>
 
                       <div className="flex items-center gap-2">
-                        <div className="flex mb-0.5">
-                          {[...Array(5)].map((_, i) => (
-                            <FiStar
-                              key={i}
-                              size={14}
-                              className={`xs:size-[16px] ${
-                                i < comment.rating
-                                  ? "text-yellow-500 fill-yellow-500"
-                                  : "text-gray-300 fill-gray-300"
-                              }`}
-                            />
-                          ))}
-                        </div>
+                        {comment.rating && (
+                          <div className="flex mb-0.5">
+                            {[...Array(5)].map((_, i) => (
+                              <FiStar
+                                key={i}
+                                size={14}
+                                className={`xs:size-[16px] ${
+                                  i < comment.rating
+                                    ? "text-yellow-500 fill-yellow-500"
+                                    : "text-gray-300 fill-gray-300"
+                                }`}
+                              />
+                            ))}
+                          </div>
+                        )}
                         <span className="text-xs text-blue-500 whitespace-nowrap">
                           {comment.updated_time}
                         </span>
