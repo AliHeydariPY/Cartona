@@ -230,7 +230,7 @@ const About = () => {
                 "React.js",
                 "Django REST",
                 "Tailwind CSS",
-                "PostgreSQL",
+                "MySQL",
                 "Cloud Deployment",
               ].map((tech) => (
                 <span
@@ -267,8 +267,7 @@ const About = () => {
                   role: "Frontend Developer",
                   description:
                     "Adel is the creative force behind Cartona’s frontend — focusing on smooth interactions, responsive design, and a delightful user experience.",
-                  image:
-                    "https://avatars.githubusercontent.com/u/176317348?v=4",
+                  image: "../../public/profile/adelnouri.jpg",
                   link: "/team/adel",
                 },
                 {
@@ -276,7 +275,7 @@ const About = () => {
                   role: "Backend Developer",
                   description:
                     "Specializing in Python and Django, he ensures Cartona’s backend is fast, secure, and ready for scale.",
-                  image: "/images/ali.jpg",
+                  image: "../../public/profile/aliheydari.png",
                   link: "/team/friend",
                 },
               ].map((member, index) => (
@@ -290,7 +289,7 @@ const About = () => {
                   <img
                     src={member.image}
                     alt={member.name}
-                    className="w-28 h-28 rounded-full object-cover mb-4 border-4 border-blue-500/30"
+                    className="w-28 h-28 rounded-full object-center mb-4 border-4 border-blue-500/30"
                   />
                   <h3 className="text-xl font-semibold text-blue-900 mb-1">
                     {member.name}

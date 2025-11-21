@@ -69,7 +69,7 @@ const Navbar = ({ isFocus = false, setIsFocus }) => {
               className="flex items-center cursor-pointer"
               onClick={() => navigate("/")}
             >
-              <img src="../../public/CartonaLogo.png" alt="" />
+              <img src="../../public/logo/CartonaLogo.png" alt="" />
               <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
                 Cartona
               </h1>
