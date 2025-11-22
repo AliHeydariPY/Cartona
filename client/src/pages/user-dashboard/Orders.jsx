@@ -27,7 +27,7 @@ import { useAtom } from "jotai";
 import { userAtom } from "../../atoms/userAtom";
 import { SectionLoader } from "../../components/SectionLoader";
 
-const Orders = ({ reloadComponent, setReloadComponent }) => {
+const Orders = () => {
   const navigate = useNavigate();
   const [user] = useAtom(userAtom);
 
@@ -98,7 +98,7 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
     };
 
     fetchPaymentsData();
-  }, [reloadComponent, user]);
+  }, [user]);
 
   const getStatusCount = (status) => {
     switch (status) {
@@ -386,7 +386,7 @@ const Orders = ({ reloadComponent, setReloadComponent }) => {
             onClose={() => setIsReviewOpen(false)}
             product={selectedProduct}
             seller={selectedSeller}
-            setReloadComponent={setReloadComponent}
+            setOrders={setOrders}
           />
         )}
 

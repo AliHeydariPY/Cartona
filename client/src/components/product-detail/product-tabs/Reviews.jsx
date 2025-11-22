@@ -24,12 +24,7 @@ import EditPostPopup from "../../pop-ups/EditPostPopup";
 import DeletePostPopup from "../../pop-ups/DeletePostPopup";
 import { errorToast, successToast } from "../../../utils/toast";
 
-const Reviews = ({
-  productComments,
-  setReloadComponent,
-  reloadComponent,
-  user,
-}) => {
+const Reviews = ({ setProductComments, productComments, user }) => {
   const { id } = useParams();
   const [commentText, setCommentText] = useState("");
   const [selectedStars, setSelectedStars] = useState(1);
@@ -90,11 +85,23 @@ const Reviews = ({
 
   const sendReply = (commentId) => {
     if (!replyText.trim()) return;
-    // sendReplyToComment({ parent: commentId, text: replyText, user: userID })
     sendCommentReply({
       comment: commentId,
       text: replyText,
-    }).then(() => {
+    }).then((res) => {
+      setProductComments((prevComments) =>
+        prevComments.map((comment) => {
+          if (comment.id == commentId) {
+            if (comment.replies) {
+              return { ...comment, replies: [res.data, ...comment.replies] };
+            } else {
+              return { ...comment, replies: [res.data] };
+            }
+          } else {
+            return comment;
+          }
+        })
+      );
       setReplyText("");
       setReplyingTo(null);
     });
@@ -111,11 +118,22 @@ const Reviews = ({
       });
 
       res
-        .then(() => {
+        .then((res) => {
           setCommentText("");
           setSelectedStars(1);
           setShowRating(false);
-          setReloadComponent(!reloadComponent);
+
+          setProductComments([
+            {
+              id: res.data.id,
+              user: user[0].username,
+              text: commentText,
+              rating: showRating ? selectedStars : null,
+              product: id,
+            },
+            ...productComments,
+          ]);
+
           successToast("Your review was successfully sent");
         })
         .catch((err) => {
@@ -252,7 +270,6 @@ const Reviews = ({
 
         {productComments.slice(0, visibleCount).map((comment) => {
           const isUserReview = comment.user == user[0].username;
-
           return (
             <div key={comment.id} className="space-y-2 xs:space-y-3">
               <div
@@ -386,7 +403,6 @@ const Reviews = ({
                       <button
                         onClick={() => {
                           sendReply(comment.id);
-                          setReloadComponent(!reloadComponent);
                         }}
                         className="px-3 xs:px-4 py-1.5 xs:py-2 cursor-pointer rounded-lg bg-gradient-to-r from-blue-600 to-cyan-500 text-white hover:from-blue-700 hover:to-cyan-600 text-xs xs:text-sm transition-colors duration-300 font-medium"
                       >
@@ -459,6 +475,7 @@ const Reviews = ({
                                     onClick={() => {
                                       setUserPost({
                                         id: reply.id,
+                                        comment: comment.id,
                                         type: "Reply",
                                         text: reply.text,
                                       });
@@ -509,8 +526,7 @@ const Reviews = ({
         <EditPostPopup
           onClose={() => setShowEditPopup(false)}
           userPost={userPost}
-          reloadComponent={reloadComponent}
-          setReloadComponent={setReloadComponent}
+          setProductComments={setProductComments}
         />
       )}
 
@@ -518,8 +534,7 @@ const Reviews = ({
         <DeletePostPopup
           onClose={() => setShowDeletePopup(false)}
           userPost={userPost}
-          reloadComponent={reloadComponent}
-          setReloadComponent={setReloadComponent}
+          setProductComments={setProductComments}
         />
       )}
     </motion.div>

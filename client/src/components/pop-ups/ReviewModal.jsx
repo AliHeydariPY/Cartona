@@ -8,7 +8,7 @@ import { errorToast, successToast } from "../../utils/toast";
 
 /////////////////// response it /////////////////////
 
-const ReviewPopup = ({ onClose, product, setReloadComponent }) => {
+const ReviewPopup = ({ onClose, product, setOrders }) => {
   const [show, setShow] = useState(false);
   const [selectedStars, setSelectedStars] = useState(1);
   const [commentText, setCommentText] = useState("");
@@ -42,7 +42,11 @@ const ReviewPopup = ({ onClose, product, setReloadComponent }) => {
 
       setCommentText("");
       setSelectedStars(1);
-      setReloadComponent((prev) => !prev);
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order.product.id == product.id ? { ...order, hasRated: true } : order
+        )
+      );
       successToast("Your comment was successfully sent");
       handleClose();
     } catch (err) {
@@ -82,7 +86,7 @@ const ReviewPopup = ({ onClose, product, setReloadComponent }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 "
+            className="fixed inset-0 z-50 flex items-center justify-center sm:p-4 bg-black/40 "
             onClick={handleClose}
           >
             <motion.div
@@ -110,7 +114,7 @@ const ReviewPopup = ({ onClose, product, setReloadComponent }) => {
                   </div>
                   <button
                     onClick={handleClose}
-                    className="p-2 cursor-pointer rounded-full hover:bg-white/20 transition-colors duration-300 self-end sm:self-auto"
+                    className="p-2 flex mb-0.5 items-center cursor-pointer rounded-full hover:bg-white/20 transition-colors duration-300 self-end sm:self-auto"
                   >
                     <FiX size={22} className="text-white" />
                   </button>

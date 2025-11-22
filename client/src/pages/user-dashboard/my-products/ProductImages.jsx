@@ -18,7 +18,7 @@ import DeleteImagePopup from "../../../components/pop-ups/DeleteImagePopup";
 import ProductNotFound from "../../../components/ProductNotFound";
 import { errorToast, successToast } from "../../../utils/toast";
 
-const ProductImages = ({ reloadComponent, setReloadComponent }) => {
+const ProductImages = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -46,20 +46,26 @@ const ProductImages = ({ reloadComponent, setReloadComponent }) => {
       }
     };
     fetchData();
-  }, [reloadComponent]);
+  }, []);
 
-  const handleAddImage = (values, resetForm, setFieldValue) => {
-    addImage(values).then(() => {
+  const handleAddImage = (formData, resetForm, setFieldValue) => {
+    addImage(formData).then((res) => {
+      const imagesArray = product.images_set;
+      imagesArray.unshift(res.data);
       resetForm();
       setFieldValue("image", null);
-      setReloadComponent(!reloadComponent);
+      setProduct({ ...product, images_set: imagesArray });
       successToast("The image was sent successfully");
     });
   };
 
   const handleRemoveImage = () => {
     deleteImage(selectedImage.id).then(() => {
-      setReloadComponent(!reloadComponent);
+      const imagesArray = product.images_set;
+      setProduct({
+        ...product,
+        images_set: imagesArray.filter((feat) => feat.id != selectedImage.id),
+      });
       errorToast("Image successfully removed");
     });
   };
@@ -136,7 +142,7 @@ const ProductImages = ({ reloadComponent, setReloadComponent }) => {
                 <Form className="space-y-4 mb-6">
                   <div className="space-y-2">
                     <label className="flex items-center text-blue-800 font-medium">
-                      <FiImage className="mr-2" /> Product Image
+                      <FiImage className="mr-2 mb-0.5" /> Product Image
                     </label>
 
                     <div className="relative group w-24 h-24 xl:w-28 xl:h-28">

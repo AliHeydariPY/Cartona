@@ -11,8 +11,8 @@ import {
 const DeletePostPopup = ({
   onClose,
   userPost,
-  reloadComponent,
-  setReloadComponent,
+  setProductComments,
+  setProductQuestions,
 }) => {
   const [show, setShow] = useState(false);
 
@@ -30,18 +30,34 @@ const DeletePostPopup = ({
   const handleSubmit = () => {
     if (userPost.type == "Question") {
       deleteProductQuestion(userPost.id).then(() => {
+        setProductQuestions((prevQuetions) =>
+          prevQuetions.filter((qst) => qst.id != userPost.id)
+        );
         handleClose();
-        setReloadComponent(!reloadComponent);
       });
     } else if (userPost.type == "Review") {
       deleteComment(userPost.id).then(() => {
+        setProductComments((prevComments) =>
+          prevComments.filter((commnet) => commnet.id != userPost.id)
+        );
         handleClose();
-        setReloadComponent(!reloadComponent);
       });
     } else if (userPost.type == "Reply") {
       deleteCommentReply(userPost.id).then(() => {
+        setProductComments((prevComments) =>
+          prevComments.map((comment) => {
+            if (comment.id == userPost.comment) {
+              const replies = comment.replies.filter(
+                (rep) => rep.id != userPost.id
+              );
+
+              return { ...comment, replies };
+            } else {
+              return comment;
+            }
+          })
+        );
         handleClose();
-        setReloadComponent(!reloadComponent);
       });
     }
   };
