@@ -10,13 +10,13 @@ import { FiMessageSquare, FiHelpCircle, FiInfo } from "react-icons/fi";
 const ProductDetailTabs = ({
   setShowAnswerPopup,
   setQuestion,
-  setReloadComponent,
   productQuestions,
-  reloadComponent,
   product,
+  setProductComments,
   productComments,
   seller,
   user,
+  setProductQuestions,
 }) => {
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -51,9 +51,10 @@ const ProductDetailTabs = ({
               : "text-blue-400 hover:text-blue-600"
           }`}
         >
-          <FiMessageSquare size={16} className="sm:size-[18px] flex-shrink-0" /> 
+          <FiMessageSquare size={16} className="sm:size-[18px] flex-shrink-0" />
           <span className="text-xs sm:text-sm lg:text-base">
-            Reviews <span className="hidden xs:inline">({product.comment_count})</span>
+            Reviews{" "}
+            <span className="hidden xs:inline">({product.comment_count})</span>
             <span className="xs:hidden">({product.comment_count})</span>
           </span>
         </button>
@@ -66,9 +67,12 @@ const ProductDetailTabs = ({
               : "text-blue-400 hover:text-blue-600"
           }`}
         >
-          <FiHelpCircle size={16} className="sm:size-[20px] flex-shrink-0" /> 
+          <FiHelpCircle size={16} className="sm:size-[20px] flex-shrink-0" />
           <span className="text-xs sm:text-sm lg:text-base">
-            Q&A <span className="hidden xs:inline">({productQuestions.length})</span>
+            Q&A{" "}
+            <span className="hidden xs:inline">
+              ({productQuestions.length})
+            </span>
             <span className="xs:hidden">({productQuestions.length})</span>
           </span>
         </button>
@@ -80,8 +84,7 @@ const ProductDetailTabs = ({
         {activeTab === "reviews" && (
           <Reviews
             productComments={productComments}
-            setReloadComponent={setReloadComponent}
-            reloadComponent={reloadComponent}
+            setProductComments={setProductComments}
             user={user}
           />
         )}
@@ -92,9 +95,8 @@ const ProductDetailTabs = ({
             setShowAnswerPopup={setShowAnswerPopup}
             setQuestion={setQuestion}
             seller={seller}
-            setReloadComponent={setReloadComponent}
-            reloadComponent={reloadComponent}
             user={user}
+            setProductQuestions={setProductQuestions}
           />
         )}
       </div>

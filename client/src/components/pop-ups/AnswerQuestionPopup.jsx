@@ -6,12 +6,7 @@ import { RiQuestionAnswerLine } from "react-icons/ri";
 import { RiSendPlaneFill } from "react-icons/ri";
 import { answerProductQuestion } from "../../services/commentAPIServices";
 
-const AnswerQuestionPopup = ({
-  onClose,
-  userPost,
-  reloadComponent,
-  setReloadComponent,
-}) => {
+const AnswerQuestionPopup = ({ onClose, userPost, setProductQuestions }) => {
   const [answer, setAnswer] = useState("");
   const [show, setShow] = useState(false);
 
@@ -33,10 +28,18 @@ const AnswerQuestionPopup = ({
         answer_text: answer,
       },
       userPost.id
-    ).then(() => {
+    ).then((res) => {
+      setProductQuestions((prevQuestions) =>
+        prevQuestions.map((qst) => {
+          if (qst.id == res.data.id) {
+            return res.data;
+          } else {
+            return qst;
+          }
+        })
+      );
       setAnswer("");
       handleClose();
-      setReloadComponent(!reloadComponent);
     });
   };
 

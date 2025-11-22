@@ -12,6 +12,23 @@ const ReviewsFiltre = ({ minMaxComments, values, setFieldValue }) => {
     const currentMin = values.min_comments ?? minComments;
     const currentMax = values.max_comments ?? maxComments;
 
+    if (values.min_comments) {
+      setFieldValue(
+        "min_comments",
+        values.min_comments > minComments
+          ? values.min_comments || minComments
+          : minComments
+      );
+    }
+    if (values.max_comments) {
+      setFieldValue(
+        "max_comments",
+        values.max_comments < maxComments
+          ? values.max_comments || maxComments
+          : maxComments
+      );
+    }
+
     setSafeMin(currentMin < minComments ? minComments : currentMin);
     setSafeMax(currentMax > maxComments ? maxComments : currentMax);
   }, [minMaxComments]);
@@ -23,13 +40,13 @@ const ReviewsFiltre = ({ minMaxComments, values, setFieldValue }) => {
         <Field
           type="number"
           name="min_comments"
-          min={minComments}
-          max={safeMax-1}
+          min={minComments-1}
+          max={safeMax }
           placeholder={minComments}
           onChange={(e) => {
             let val = Number(e.target.value);
 
-            if (val < minComments) val = minComments;
+            if (val < minComments) val = minComments-1;
             if (val > safeMax) val = safeMax;
 
             setSafeMin(val);
@@ -48,14 +65,14 @@ const ReviewsFiltre = ({ minMaxComments, values, setFieldValue }) => {
         <Field
           type="number"
           name="max_comments"
-          min={safeMin}
-          max={maxComments}
+          min={safeMin-1}
+          max={maxComments }
           placeholder={maxComments}
           onChange={(e) => {
             let val = Number(e.target.value);
 
             if (val > maxComments) val = maxComments;
-            if (val < safeMin) val = safeMin;
+            if (val < safeMin) val = safeMin-1;
 
             setSafeMax(val);
             setFieldValue("max_comments", val);

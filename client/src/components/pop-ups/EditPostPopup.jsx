@@ -7,13 +7,14 @@ import {
   editProductQuestion,
   editComment,
   editCommentReply,
+  getCommentReplies,
 } from "../../services/commentAPIServices";
 
 const EditPostPopup = ({
   onClose,
   userPost,
-  reloadComponent,
-  setReloadComponent,
+  setProductComments,
+  setProductQuestions,
 }) => {
   const [editedPost, setEditedPost] = useState(userPost.text);
   const [show, setShow] = useState(false);
@@ -41,10 +42,18 @@ const EditPostPopup = ({
           question_text: editedPost,
         },
         userPost.id
-      ).then(() => {
+      ).then((res) => {
+        setProductQuestions((prevQuestions) =>
+          prevQuestions.map((qst) => {
+            if (qst.id == res.data.id) {
+              return res.data;
+            } else {
+              return qst;
+            }
+          })
+        );
         setEditedPost("");
         handleClose();
-        setReloadComponent(!reloadComponent);
       });
     } else if (userPost.type == "Review") {
       editComment(
@@ -53,10 +62,25 @@ const EditPostPopup = ({
           rating: selectedStars,
         },
         userPost.id
-      ).then(() => {
+      ).then(async (res) => {
+        let replies;
+        try {
+          const repliesResponse = await getCommentReplies(res.data.id);
+          replies = repliesResponse.data;
+        } catch {
+          replies = [];
+        }
+        setProductComments((prevComments) =>
+          prevComments.map((comment) => {
+            if (comment.id == res.data.id) {
+              return { ...res.data, replies };
+            } else {
+              return comment;
+            }
+          })
+        );
         setEditedPost("");
         handleClose();
-        setReloadComponent(!reloadComponent);
       });
     } else if (userPost.type == "Reply") {
       editCommentReply(
@@ -64,10 +88,25 @@ const EditPostPopup = ({
           text: editedPost,
         },
         userPost.id
-      ).then(() => {
+      ).then((res) => {
+        setProductComments((prevComments) =>
+          prevComments.map((comment) => {
+            if (comment.id == res.data.comment) {
+              const replies = comment.replies.map((rep) => {
+                if (rep.id == res.data.id) {
+                  return res.data;
+                } else {
+                  return rep;
+                }
+              });
+              return { ...comment, replies };
+            } else {
+              return comment;
+            }
+          })
+        );
         setEditedPost("");
         handleClose();
-        setReloadComponent(!reloadComponent);
       });
     }
   };
@@ -138,7 +177,7 @@ const EditPostPopup = ({
               </p>
             </div>
 
-            {userPost.type === "Review" && (
+            {userPost.type === "Review" && userPost.rating && (
               <div className="flex justify-center gap-2 py-2">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button

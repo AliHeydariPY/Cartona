@@ -14,13 +14,7 @@ import EditPostPopup from "../../pop-ups/EditPostPopup";
 import { sendProductQuestion } from "../../../services/commentAPIServices";
 import { errorToast, successToast } from "../../../utils/toast";
 
-const Questions = ({
-  productQuestions,
-  seller,
-  setReloadComponent,
-  reloadComponent,
-  user,
-}) => {
+const Questions = ({ productQuestions, seller, user, setProductQuestions }) => {
   const { id } = useParams();
   const [questionText, setQuestionText] = useState("");
   const [userPost, setUserPost] = useState("");
@@ -30,6 +24,30 @@ const Questions = ({
   const [showDeletePopup, setShowDeletePopup] = useState(false);
 
   const [visibleCount, setVisibleCount] = useState(5);
+
+  const handleSubmit = () => {
+    if (questionText.trim() !== "") {
+      sendProductQuestion({
+        product: id,
+        question_text: questionText,
+      })
+        .then((res) => {
+          setProductQuestions([res.data, ...productQuestions]);
+          setQuestionText("");
+          successToast("Your question was successfully sent");
+        })
+        .catch((err) => {
+          const errorMessage =
+            err.response.data.detail == "Refresh token not found."
+              ? "To ask a question, first log in to your account"
+              : err.response.data.detail;
+
+          errorToast(errorMessage);
+        });
+    } else {
+      showValidationError("Please write your question before submitting");
+    }
+  };
 
   const showValidationError = (context) => {
     toast.custom((t) => (
@@ -87,29 +105,7 @@ const Questions = ({
             onChange={(e) => setQuestionText(e.target.value)}
             onKeyDown={(e) => {
               if (e.code == "Enter") {
-                if (questionText.trim() !== "") {
-                  sendProductQuestion({
-                    product: id,
-                    question_text: questionText,
-                  })
-                    .then(() => {
-                      setQuestionText("");
-                      setReloadComponent(!reloadComponent);
-                      successToast("Your question was successfully sent");
-                    })
-                    .catch((err) => {
-                      const errorMessage =
-                        err.response.data.detail == "Refresh token not found."
-                          ? "To ask a question, first log in to your account"
-                          : err.response.data.detail;
-
-                      errorToast(errorMessage);
-                    });
-                } else {
-                  showValidationError(
-                    "Please write your question before submitting"
-                  );
-                }
+                handleSubmit();
               }
             }}
             type="text"
@@ -117,31 +113,7 @@ const Questions = ({
             className="flex-1 text-blue-950 border border-blue-300 rounded-lg px-2 sm:px-3 py-1 sm:py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-300"
           />
           <button
-            onClick={() => {
-              if (questionText.trim() !== "") {
-                sendProductQuestion({
-                  product: id,
-                  question_text: questionText,
-                })
-                  .then(() => {
-                    setQuestionText("");
-                    setReloadComponent(!reloadComponent);
-                    successToast("Your question was successfully sent");
-                  })
-                  .catch((err) => {
-                    const errorMessage =
-                      err.response.data.detail == "Refresh token not found."
-                        ? "To ask a question, first log in to your account"
-                        : err.response.data.detail;
-
-                    errorToast(errorMessage);
-                  });
-              } else {
-                showValidationError(
-                  "Please write your question before submitting"
-                );
-              }
-            }}
+            onClick={handleSubmit}
             className="px-2 sm:px-4 py-1 sm:py-2 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-lg cursor-pointer sm:rounded-lg transition-colors duration-300"
           >
             Ask
@@ -287,8 +259,7 @@ const Questions = ({
         <AnswerQuestionPopup
           onClose={() => setShowAnswerPopup(false)}
           userPost={userPost}
-          reloadComponent={reloadComponent}
-          setReloadComponent={setReloadComponent}
+          setProductQuestions={setProductQuestions}
         />
       )}
 
@@ -296,8 +267,7 @@ const Questions = ({
         <EditPostPopup
           onClose={() => setShowEditPopup(false)}
           userPost={userPost}
-          reloadComponent={reloadComponent}
-          setReloadComponent={setReloadComponent}
+          setProductQuestions={setProductQuestions}
         />
       )}
 
@@ -305,8 +275,7 @@ const Questions = ({
         <DeletePostPopup
           onClose={() => setShowDeletePopup(false)}
           userPost={userPost}
-          reloadComponent={reloadComponent}
-          setReloadComponent={setReloadComponent}
+          setProductQuestions={setProductQuestions}
         />
       )}
     </motion.div>

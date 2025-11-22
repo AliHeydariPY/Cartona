@@ -45,8 +45,6 @@ function App() {
 
   const [selectedProduct, setSelectedProduct] = useState(null);
 
-  const [reloadComponent, setReloadComponent] = useState(false);
-
   const [accessToken] = useAtom(tokenAtom);
   const [user] = useAtom(userAtom);
 
@@ -89,7 +87,9 @@ function App() {
               />
             }
           />
+
           <Route path="cart" element={<Cart />} />
+
           <Route
             path="favorites"
             element={
@@ -101,15 +101,7 @@ function App() {
           />
           <Route path="notifications" element={<Notifications />} />
 
-          <Route
-            path="orders"
-            element={
-              <Orders
-                reloadComponent={reloadComponent}
-                setReloadComponent={setReloadComponent}
-              />
-            }
-          />
+          <Route path="orders" element={<Orders />} />
 
           <Route path="payments" element={<Payments />} />
 
@@ -125,25 +117,11 @@ function App() {
           <Route path="setting/store-setting" element={<StoreSetting />} />
 
           <Route path="my-products" element={<MyProducts />} />
-
           <Route
             path="my-products/features/:id"
-            element={
-              <ProductFeatures
-                reloadComponent={reloadComponent}
-                setReloadComponent={setReloadComponent}
-              />
-            }
+            element={<ProductFeatures />}
           />
-          <Route
-            path="my-products/images/:id"
-            element={
-              <ProductImages
-                reloadComponent={reloadComponent}
-                setReloadComponent={setReloadComponent}
-              />
-            }
-          />
+          <Route path="my-products/images/:id" element={<ProductImages />} />
           <Route path="my-products/edit/:id" element={<EditProduct />} />
         </Route>
 
@@ -151,8 +129,6 @@ function App() {
           path="/product/:id"
           element={
             <ProductDetail
-              reloadComponent={reloadComponent}
-              setReloadComponent={setReloadComponent}
               setAddToCartPopup={setAddToCartPopup}
               setSelectedProduct={setSelectedProduct}
             />

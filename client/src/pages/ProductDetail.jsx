@@ -28,8 +28,6 @@ import BottomNav from "../components/BottomNav";
 const ProductDetails = ({
   setShowAnswerPopup,
   setQuestion,
-  reloadComponent,
-  setReloadComponent,
   setAddToCartPopup,
   setSelectedProduct,
 }) => {
@@ -106,7 +104,7 @@ const ProductDetails = ({
       }
     };
     fetchData();
-  }, [id, reloadComponent]);
+  }, [id]);
 
   useEffect(() => {
     getUser().then((res) => {
@@ -162,14 +160,14 @@ const ProductDetails = ({
               <ProductDetailTabs
                 setShowAnswerPopup={setShowAnswerPopup}
                 setQuestion={setQuestion}
-                setReloadComponent={setReloadComponent}
                 productQuestions={productQuestions}
                 id={id}
-                reloadComponent={reloadComponent}
                 product={product}
+                setProductComments={setProductComments}
                 productComments={productComments}
                 seller={seller}
                 user={user}
+                setProductQuestions={setProductQuestions}
               />
             </div>
           </motion.div>

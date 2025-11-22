@@ -5,7 +5,6 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { FiTrash2, FiPlus, FiList } from "react-icons/fi";
 
-
 import {
   getProduct,
   getProductFeatures,
@@ -18,7 +17,7 @@ import DeleteFeaturePopup from "../../../components/pop-ups/DeleteFeaturePopup";
 import ProductNotFound from "../../../components/ProductNotFound";
 import { errorToast, successToast } from "../../../utils/toast";
 
-const ProductFeatures = ({ reloadComponent, setReloadComponent }) => {
+const ProductFeatures = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
@@ -46,7 +45,7 @@ const ProductFeatures = ({ reloadComponent, setReloadComponent }) => {
     };
 
     fetchData();
-  }, [reloadComponent]);
+  }, []);
 
   const handleAddFeature = (values, resetForm) => {
     const feature = {
@@ -54,16 +53,25 @@ const ProductFeatures = ({ reloadComponent, setReloadComponent }) => {
       feature_name: values.feature_name,
       feature_value: values.feature_value,
     };
-    addFeature(feature).then(() => {
+
+    addFeature(feature).then((res) => {
+      const featuresArray = product.features_set;
+      featuresArray.unshift(res.data);
       resetForm();
-      setReloadComponent(!reloadComponent);
+      setProduct({ ...product, features_set: featuresArray });
       successToast("Feature successfully submitted");
     });
   };
 
   const handleRemoveFeature = () => {
     deleteFeature(selectedFeature.id).then(() => {
-      setReloadComponent(!reloadComponent);
+      const featuresArray = product.features_set;
+      setProduct({
+        ...product,
+        features_set: featuresArray.filter(
+          (feat) => feat.id != selectedFeature.id
+        ),
+      });
       errorToast("Feature successfully removed");
     });
   };
