@@ -31,8 +31,12 @@ import { BiCollection } from "react-icons/bi";
 
 import { successToast } from "../../utils/toast";
 import CreateCollectionPopup from "../../components/pop-ups/CreateCollectionPopup";
+import { useAtom } from "jotai";
+import { userAtom } from "../../atoms/userAtom";
 
 const AddProduct = () => {
+  const [user] = useAtom(userAtom);
+
   const [image, setImage] = useState({});
   const [hasDiscount, setHasDiscount] = useState(false);
   const [isAmazingOffer, setIsAmazingOffer] = useState(false);
@@ -54,10 +58,15 @@ const AddProduct = () => {
     getMainCategories().then((res) => {
       setMainCategories(res.data);
     });
+    if (!user) return;
     getCollections().then((res) => {
-      setCollections(res.data);
+      setCollections(() =>
+        res.data.filter(
+          (collection) => collection.storekeeper == user.storekeeper_id
+        )
+      );
     });
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     if (!selectedMainCategory) return;
@@ -145,6 +154,7 @@ const AddProduct = () => {
         >
           {({ setFieldValue }) => (
             <Form className="space-y-6 px-0.5">
+              {/* Product Image */}
               <div className="space-y-2">
                 <label className="flex items-center text-blue-800 font-medium">
                   <FiImage className="mr-2 mb-0.5" /> Product Image*
@@ -206,6 +216,8 @@ const AddProduct = () => {
                   className="text-red-500 text-sm ml-0.5 mt-2"
                 />
               </div>
+
+              {/* Product Name */}
               <div className="space-y-2">
                 <label className="flex items-center text-blue-800 font-medium">
                   <FiTag className="mr-2" /> Product Name*
@@ -222,6 +234,8 @@ const AddProduct = () => {
                   className="text-red-500 text-sm ml-0.5"
                 />
               </div>
+
+              {/* Category */}
               <div className="space-y-2">
                 <label className="flex items-center text-blue-800 font-medium">
                   <BiCategory size={18} className="mr-2" /> Category*
@@ -307,6 +321,8 @@ const AddProduct = () => {
                   className="text-red-500 text-sm mt-1 ml-0.5"
                 />
               </div>
+
+              {/* Price */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="flex items-center text-blue-800 font-medium">
@@ -350,6 +366,8 @@ const AddProduct = () => {
                   />
                 </div>
               </div>
+
+              {/* Discount */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <label className="flex items-center text-blue-800 font-medium">
@@ -433,6 +451,8 @@ const AddProduct = () => {
                   </>
                 )}
               </div>
+
+              {/* Amazing Offer */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <label className="flex items-center text-blue-800 font-medium">
@@ -492,6 +512,7 @@ const AddProduct = () => {
                 )}
               </div>
 
+              {/* Collection */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <label className="flex items-center text-blue-800 font-medium">
@@ -594,6 +615,7 @@ const AddProduct = () => {
                 />
               )}
 
+              {/* Description */}
               <div className="space-y-2">
                 <label className="flex items-center text-blue-800 font-medium">
                   <FiAlignLeft className="mr-2" /> Description*
@@ -611,6 +633,7 @@ const AddProduct = () => {
                   className="text-red-500 text-sm ml-0.5"
                 />
               </div>
+
               <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 pt-4">
                 <button
                   type="submit"
