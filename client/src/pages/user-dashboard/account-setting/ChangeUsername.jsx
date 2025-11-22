@@ -20,8 +20,8 @@ const ChangeUsername = () => {
       .min(3, "Username must be at least 3 characters")
       .max(20, "Username cannot exceed 20 characters")
       .matches(
-        /^[a-zA-Z0-9_]+$/,
-        "Username can only contain letters, numbers, and underscores"
+        /^[a-zA-Z0-9_-]+$/,
+        "Username can only contain letters, numbers, underscores, and hyphens"
       )
       .matches(/^[a-zA-Z]/, "Username must start with a letter")
       .notOneOf(
@@ -137,7 +137,7 @@ const ChangeUsername = () => {
                 <ul className="text-xs text-blue-600 space-y-1">
                   <li className="flex items-center">
                     <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2 flex-shrink-0"></span>
-                    3-20 characters long
+                    3–20 characters long
                   </li>
                   <li className="flex items-center">
                     <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2 flex-shrink-0"></span>
@@ -145,7 +145,7 @@ const ChangeUsername = () => {
                   </li>
                   <li className="flex items-center">
                     <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2 flex-shrink-0"></span>
-                    Letters, numbers, and underscores only
+                    Letters, numbers, underscores (_), and hyphens (-) only
                   </li>
                   <li className="flex items-center">
                     <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2 flex-shrink-0"></span>

@@ -37,7 +37,6 @@ const Cart = () => {
 
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-
   useEffect(() => {
     const fetchCartItems = async () => {
       const cartProductsRes = await getCartProducts();
@@ -156,7 +155,10 @@ const Cart = () => {
       <div className="bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-lg p-4 sm:p-5 lg:p-6 2xl:p-8 border border-blue-400 hover:shadow-xl hover:shadow-blue-500/50 transition-all duration-300">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
           <div className="flex items-center">
-            <IoCartOutline className="text-blue-600 mr-2 sm:mr-3 mb-0.5" size={22} />
+            <IoCartOutline
+              className="text-blue-600 mr-2 sm:mr-3 mb-0.5"
+              size={22}
+            />
             <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-blue-800">
               Shopping Cart
             </h1>
