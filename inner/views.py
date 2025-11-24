@@ -30,12 +30,12 @@ class ProductFilter(django_filters.FilterSet):
     )
 
     min_comments = django_filters.NumberFilter(
-        field_name='comment_count',
+        field_name='total_comment_count',
         lookup_expr='gte',
         label='Minimum Comment Count'
     )
     max_comments = django_filters.NumberFilter(
-        field_name='comment_count',
+        field_name='total_comment_count',
         lookup_expr='lte',
         label='Maximum Comment Count'
     )
@@ -143,7 +143,9 @@ class ProductViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         base_queryset = Product.objects.annotate(
-            comment_count=Count('comments'),
+            comment_count=Count('comments', distinct=True),
+            reply_count=Count('comments__replies', distinct=True),
+            total_comment_count=F('comment_count') + F('reply_count'),
             average_rating=Avg('comments__rating'),
             final_price=Case(
                 When(discounted_price__isnull=False, then=F('discounted_price')),

@@ -344,6 +344,9 @@ class ProductPaymentSerializer(serializers.ModelSerializer):
                 message=f"💬 Chat opened for your purchase of '{cart_item.product.name}'. You can now communicate with the seller."
             )
 
+            if CartItem.objects.filter(pk=cart_item.pk).exists():
+                cart_item.delete()
+
         return pp
 
     def update(self, instance, validated_data):
