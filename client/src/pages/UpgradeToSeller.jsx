@@ -4,6 +4,7 @@ import * as Yup from "yup";
 import { useState } from "react";
 import { FiUpload, FiUser, FiMapPin, FiEdit3 } from "react-icons/fi";
 import { MdStorefront } from "react-icons/md";
+import { useEffect } from "react";
 
 import { upgradeToSeller } from "../services/userAPIServices";
 import { errorToast, successToast } from "../utils/toast";
@@ -14,12 +15,15 @@ import { authAtom } from "../atoms/authAtom";
 const UpgradeToSeller = () => {
   const navigate = useNavigate();
   const [isAuth] = useAtom(authAtom);
-  const [user] = useAtom(userAtom);
+  const [user, setUser] = useAtom(userAtom);
   const [previewImage, setPreviewImage] = useState(null);
 
-  if (isAuth) {
-    navigate("/account/profile");
-  }
+  useEffect(() => {
+    if (!user) return;
+    if (user?.role == "storekeeper") {
+      navigate("/account/profile");
+    }
+  }, [user]);
 
   const StoreSchema = Yup.object().shape({
     user: Yup.string()
@@ -74,7 +78,12 @@ const UpgradeToSeller = () => {
             formData.append("image", values.image);
 
             upgradeToSeller(formData)
-              .then(() => {
+              .then((res) => {
+                setUser({
+                  ...user,
+                  role: "storekeeper",
+                  storekeeper_id: res.data.id,
+                });
                 successToast("Account upgraded to seller successfully!");
                 navigate("/account/profile");
               })
@@ -213,7 +222,7 @@ const UpgradeToSeller = () => {
 
               <button
                 type="submit"
-                className="w-full cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-semibold py-3 px-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 mt-4 flex items-center justify-center gap-2"
+                className="w-full cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-semibold py-3 px-4 rounded-lg shadow-lg hover:shadow-xl transition-colors duration-300 mt-4 flex items-center justify-center gap-2"
               >
                 <MdStorefront size={18} className="mb-0.5" />
                 Register Store

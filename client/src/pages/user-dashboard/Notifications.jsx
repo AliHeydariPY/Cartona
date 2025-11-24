@@ -99,7 +99,6 @@ const Notifications = () => {
         prev.filter((sub) => sub.id !== subscriptionId)
       );
     } catch (error) {
-      console.log(error);
       console.error("Failed to unsubscribe:", error);
     }
   };

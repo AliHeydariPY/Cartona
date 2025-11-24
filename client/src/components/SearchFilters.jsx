@@ -138,7 +138,6 @@ const SearchFilters = () => {
     const max = await getMinMaxComments("max", filteredQuery);
     commentsRange.push(max.data.comment_count);
 
-    console.log(commentsRange);
     setMinMaxComments(commentsRange);
   };
 
@@ -156,7 +155,7 @@ const SearchFilters = () => {
     }
 
     filtersName.forEach((filterName) => {
-      if (values[filterName]) {
+      if (values[filterName] || values[filterName] == null) {
         if (!url) {
           url = `${filterName}=${values[filterName]}`;
         } else {

@@ -189,7 +189,7 @@ const ChatSidebar = ({
                                 <span className="text-blue-800 mt-0.5">
                                   <MdStorefront
                                     size={12}
-                                    className="sm:size-[15px]"
+                                    className="sm:size-[15px] mb-1"
                                   />
                                 </span>
                               )}

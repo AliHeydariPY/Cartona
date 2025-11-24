@@ -23,6 +23,7 @@ import LogoutPopup from "../components/pop-ups/LogoutPopup";
 import { getStorekeeper } from "../services/userAPIServices";
 import { userAtom } from "../atoms/userAtom";
 import { IoCartOutline } from "react-icons/io5";
+import { convertOffsetToTimes } from "framer-motion";
 
 const UserDashboard = () => {
   const [isAuth] = useAtom(authAtom);
@@ -105,6 +106,7 @@ const UserDashboard = () => {
   ];
 
   useEffect(() => {
+    console.log(user);
     if (!user) return;
 
     getStorekeeper(user.username)
