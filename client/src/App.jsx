@@ -106,7 +106,6 @@ function App() {
           <Route path="payments" element={<Payments />} />
 
           <Route path="chats" element={<Chat />} />
-
           <Route path="chats/:chatID" element={<Chat />} />
 
           <Route path="add-product" element={<AddProduct />} />

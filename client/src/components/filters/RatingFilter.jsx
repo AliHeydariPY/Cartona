@@ -13,8 +13,13 @@ const RatingFilter = ({ values, setFieldValue }) => {
               key={star}
               type="button"
               onClick={() => {
-                if (star >= values.min_rating) {
+                const minRating =
+                  values.min_rating != "null" ? values.min_rating : 0;
+                if (star >= minRating) {
                   setFieldValue("max_rating", star);
+                  if (minRating < 1) {
+                    setFieldValue("min_rating", null);
+                  }
                 }
               }}
               className="transition-transform duration-200 hover:scale-110"
@@ -43,7 +48,9 @@ const RatingFilter = ({ values, setFieldValue }) => {
               type="button"
               onClick={() => {
                 if (star <= values.max_rating) {
-                  setFieldValue("min_rating", star);
+                  if (star > 0) {
+                    setFieldValue("min_rating", star);
+                  }
                 }
               }}
               className="transition-transform duration-200 hover:scale-110"

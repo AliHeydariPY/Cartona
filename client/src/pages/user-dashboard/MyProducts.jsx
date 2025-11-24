@@ -5,11 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { getStorekeeperProducts } from "../../services/productAPIServices";
 import { getStorekeeper } from "../../services/userAPIServices";
 import { PiLightningFill } from "react-icons/pi";
-import {
-  FiSearch,
-  FiX,
-  FiMoreHorizontal,
-} from "react-icons/fi";
+import { FiSearch, FiX, FiMoreHorizontal } from "react-icons/fi";
 
 import { useAtom } from "jotai";
 import { userAtom } from "../../atoms/userAtom";
@@ -47,10 +43,14 @@ export default function MyProducts() {
   useEffect(() => {
     if (!user) return;
     getStorekeeper(user.username).then((res) => {
-      getStorekeeperProducts(res.data.id).then((res) => {
-        setIsLoading(false);
-        setProducts(res.data);
-      });
+      getStorekeeperProducts(res.data.id)
+        .then((res) => {
+          setIsLoading(false);
+          setProducts(res.data);
+        })
+        .catch(() => {
+          setIsLoading(false);
+        });
     });
   }, [user]);
 
@@ -174,13 +174,13 @@ export default function MyProducts() {
         )}
 
         {isLoading ? (
-          <SectionLoader chatLoader={false} title="Products"/>
+          <SectionLoader chatLoader={false} title="Products" />
         ) : (
           filteredProducts.length === 0 && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-center py-12"
+              className="text-center "
             >
               {searchQuery ? (
                 <div className="space-y-4">
@@ -201,10 +201,10 @@ export default function MyProducts() {
                   </button>
                 </div>
               ) : (
-                <div className="text-gray-500 space-y-2">
-                  <FiPackage className="text-4xl mx-auto mb-4 text-blue-300" />
-                  <p className="text-lg">You haven't added any products yet.</p>
-                  <p className="text-sm">
+                <div className="text-center py-12 bg-blue-50/50 rounded-2xl border border-blue-200">
+                  <FiPackage className="text-blue-400 mx-auto mb-4" size={48}/>
+                  <p className="text-lg font-semibold text-blue-800 mb-2">You haven't added any products yet.</p>
+                  <p className="text-blue-600">
                     Start by adding your first product to see it here.
                   </p>
                 </div>

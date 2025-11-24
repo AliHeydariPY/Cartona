@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef, use } from "react";
+import { convertOffsetToTimes, motion } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { motion } from "framer-motion";
 import { Portal } from "react-portal";
 import { FaRegCircleCheck } from "react-icons/fa6";
 
@@ -8,7 +8,6 @@ import { RiEdit2Line } from "react-icons/ri";
 import {
   FiMenu,
   FiX,
-  FiShoppingBag,
   FiLock,
   FiRefreshCcw,
   FiTrash2,
@@ -98,7 +97,6 @@ const Chat = () => {
             }
           })
         );
-        console.log(pvs);
         setIsLoading(false);
         setConversations(pvs.filter(Boolean));
       } catch (error) {
@@ -157,7 +155,6 @@ const Chat = () => {
         })
       );
       setMessages(sortMessages.reverse());
-      console.log(sortMessages);
     } catch {
       setMessages([]);
     }
@@ -300,10 +297,12 @@ const Chat = () => {
             return conversation.id != chatId;
           })
         );
-        successToast("Chat successfully deleted");
+        setSelectedChat(null);
         navigate("/account/chats");
+        successToast("Chat successfully deleted");
       })
-      .catch(() => {
+      .catch((error) => {
+        console.log(error);
         errorToast("There is a problem");
       });
   };
