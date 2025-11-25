@@ -28,7 +28,7 @@ const SearchPage = () => {
   const [favorites, setFavorites] = useState([]);
 
   const [showImages, setShowImages] = useState(false);
-  const [mainImage, setMainImages] = useState([]);
+  const [mainImage, setMainImage] = useState([]);
   const [productID, setProductID] = useState(null);
 
   const [isFocus, setIsFocus] = useState(false);
@@ -40,24 +40,26 @@ const SearchPage = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        let favorites = [];
+        let favs = [];
         try {
-          const favoriteProductsRes = await getFavorites();
-          favorites = favoriteProductsRes.data;
+          const favRes = await getFavorites();
+          favs = favRes.data;
         } catch {
-          setFavorites([]);
+          favs = [];
         }
+
         const res = query
           ? await searchProduct(query)
           : await getListProducts();
 
-        if (res.data[0]) {
-          setFavorites(favorites);
-          setProducts(res.data);
-          setNotFound(false);
-        } else {
+        if (!res.data[0]) {
           setNotFound(true);
+          return;
         }
+
+        setFavorites(favs);
+        setProducts(res.data);
+        setNotFound(false);
       } catch {
         setNotFound(true);
       }
@@ -69,7 +71,7 @@ const SearchPage = () => {
   const handleRemoveFavorite = async (favoriteId) => {
     try {
       await deleteFavorite(favoriteId);
-      setFavorites((prev) => prev.filter((item) => item.id != favoriteId));
+      setFavorites((prev) => prev.filter((f) => f.id !== favoriteId));
     } catch {
       errorToast("Failed to remove from favorites");
     }
@@ -77,15 +79,22 @@ const SearchPage = () => {
 
   const handleAddFavorite = async (productId) => {
     try {
-      const response = await addFavorite(productId);
-      setFavorites((prev) => [...prev, response.data]);
+      const res = await addFavorite(productId);
+      setFavorites((prev) => [...prev, res.data]);
     } catch (error) {
-      if (error.response.data.detail == "Refresh token not found.") {
+      const msg = error?.response?.data?.detail;
+      if (msg === "Refresh token not found.") {
         errorToast("You need to log in first");
       } else {
         errorToast("Failed to add to favorites");
       }
     }
+  };
+
+  const handleShowImagesCarousel = (product) => {
+    setProductID(product.id);
+    setMainImage({ image: product.image });
+    setShowImages(true);
   };
 
   const openInNewTab = (url) => {
@@ -103,6 +112,8 @@ const SearchPage = () => {
       </div>
     );
   }
+
+  const favoriteMap = new Map(favorites.map((f) => [f.product, f]));
 
   return (
     <>
@@ -155,9 +166,8 @@ const SearchPage = () => {
                       <>
                         <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                           {(() => {
-                            const favorite = favorites.find(
-                              (fav) => fav.product === product.id
-                            );
+                            const favorite = favoriteMap.get(product.id);
+
                             return favorite ? (
                               <button
                                 onClick={() =>
@@ -177,11 +187,7 @@ const SearchPage = () => {
                             );
                           })()}
                           <button
-                            onClick={() => {
-                              setProductID(product.id);
-                              setMainImages({ image: product.image });
-                              setShowImages(true);
-                            }}
+                            onClick={() => handleShowImagesCarousel(product)}
                             className="p-2 cursor-pointer bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-blue-100 transition-colors duration-200"
                           >
                             <FiEye className="text-blue-600" size={16} />
@@ -232,11 +238,7 @@ const SearchPage = () => {
                           })()}
 
                           <button
-                            onClick={() => {
-                              setProductID(product.id);
-                              setMainImages({ image: product.image });
-                              setShowImages(true);
-                            }}
+                            onClick={() => handleShowImagesCarousel(product)}
                             className="p-2 h-8 cursor-pointer  rounded-full shadow-md hover:bg-blue-200 transition-colors duration-300"
                           >
                             <FiEye className="text-blue-600" size={16} />

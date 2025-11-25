@@ -2,18 +2,13 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getCollection, getProduct } from "../services/productAPIServices";
-import {
-  FiArrowLeft,
-  FiPackage,
-  FiStar,
-  FiArrowRight,
-} from "react-icons/fi";
+import { FiArrowLeft, FiPackage, FiStar, FiArrowRight } from "react-icons/fi";
 import { PiLightningFill } from "react-icons/pi";
 import CartonaLoader from "../components/CartonaLoader";
 
 const CollectionPage = () => {
-  const { id } = useParams();
   const navigate = useNavigate();
+  const { id } = useParams();
   const [collection, setCollection] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -37,8 +32,7 @@ const CollectionPage = () => {
         setTimeout(() => {
           setIsLoading(false);
         }, 100);
-      } catch (error) {
-        console.error("Error fetching collection:", error);
+      } catch {
         setIsLoading(false);
         setNotFound(true);
       }
@@ -63,7 +57,6 @@ const CollectionPage = () => {
       {collection && (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 py-6">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Header */}
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -71,10 +64,10 @@ const CollectionPage = () => {
               className="mb-8"
             >
               <button
-                onClick={() => navigate(-1)}
+                onClick={() => navigate(-1) || navigate("/")}
                 className="flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-6 transition-colors duration-200"
               >
-                <FiArrowLeft size={18} />
+                <FiArrowLeft size={18} className="mb-0.5" />
                 <span className="font-medium cursor-pointer">Back</span>
               </button>
 
@@ -101,7 +94,6 @@ const CollectionPage = () => {
               </div>
             </motion.div>
 
-            {/* Products Grid */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -122,10 +114,6 @@ const CollectionPage = () => {
                       src={product.image}
                       alt={product.name}
                       className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
-                      onError={(e) => {
-                        e.target.style.display = "none";
-                        e.target.nextSibling.style.display = "flex";
-                      }}
                     />
                     <div className="hidden w-full h-full items-center justify-center flex-col text-blue-400">
                       <FiPackage size={48} />
@@ -143,7 +131,9 @@ const CollectionPage = () => {
                       {product.amazing_offer && (
                         <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1">
                           <PiLightningFill size={12} />
-                          {product.amazing_offer.length < 25 ? product.amazing_offer : "Special sale" }
+                          {product.amazing_offer.length < 25
+                            ? product.amazing_offer
+                            : "Special sale"}
                         </span>
                       )}
                     </div>
@@ -233,46 +223,33 @@ const CollectionPage = () => {
               ))}
             </motion.div>
 
-            {collection.products.length === 0 && (
+            {(collection.products.length === 0 || notFound) && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="text-center py-20"
+                className="text-center sm:py-16 lg:py-20"
               >
-                <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-12 border border-blue-200 max-w-2xl mx-auto">
-                  <FiPackage className="text-blue-400 mx-auto mb-6" size={80} />
-                  <h3 className="text-2xl font-bold text-blue-800 mb-3">
+                <div className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl p-6 sm:p-8 lg:p-12 border border-blue-200 max-w-md sm:max-w-lg lg:max-w-2xl mx-auto">
+                  <FiPackage
+                    className="text-blue-400 mx-auto mb-4 sm:mb-6"
+                    size={48}
+                  />
+                  <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-800 mb-3 sm:mb-4">
                     No products in this collection
                   </h3>
-                  <p className="text-blue-600 text-lg mb-8">
+                  <p className="text-blue-600 text-base sm:text-lg mb-6 sm:mb-8 leading-relaxed">
                     This collection is currently empty. Check back later for new
                     products!
                   </p>
                   <button
                     onClick={() => navigate("/")}
-                    className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-8 py-4 rounded-lg hover:shadow-xl transition-all duration-300 font-medium text-lg"
+                    className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:from-blue-700 hover:to-cyan-600 transition-colors duration-300 font-medium text-base sm:text-lg w-full sm:w-auto"
                   >
                     Explore Other Collections
                   </button>
                 </div>
               </motion.div>
             )}
-          </div>
-        </div>
-      )}
-      {notFound && (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-cyan-50">
-          <div className="text-center">
-            <FiPackage className="text-blue-400 mx-auto mb-4" size={48} />
-            <h3 className="text-xl font-semibold text-blue-800 mb-2">
-              Collection not found
-            </h3>
-            <button
-              onClick={() => navigate("/")}
-              className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all duration-300"
-            >
-              Back to Home
-            </button>
           </div>
         </div>
       )}

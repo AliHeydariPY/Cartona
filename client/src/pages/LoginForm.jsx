@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FiX, FiEye, FiEyeOff, FiLogIn } from "react-icons/fi";
 import { login } from "../services/userAPIServices";
@@ -11,13 +11,13 @@ import { errorToast, successToast } from "../utils/toast";
 import { fetchUserData } from "../utils/fetchUserData";
 
 const LoginForm = () => {
+  const navigate = useNavigate();
   const [isAuth] = useAtom(authAtom);
   const [showPassword, setShowPassword] = useState(false);
-  const navigate = useNavigate();
 
-  if (isAuth) {
-    navigate("/account/profile");
-  }
+  useEffect(() => {
+    if (isAuth) navigate("/account/profile");
+  }, [isAuth]);
 
   const LoginSchema = Yup.object().shape({
     username: Yup.string()
@@ -62,27 +62,26 @@ const LoginForm = () => {
         <Formik
           initialValues={{ username: "", password: "" }}
           validationSchema={LoginSchema}
-          onSubmit={(values, { setSubmitting }) => {
-            login({
-              username: values.username,
-              password: values.password,
-            })
-              .then(() => {
-                fetchUserData();
-
-                successToast({
-                  title: "Login successful",
-                  text: "Welcome back to Cartona",
-                });
-                setSubmitting(false);
-
-                // navigate("/account/profile");
-              })
-              .catch(() => {
-                errorToast("Username or password is incorrect");
-
-                setSubmitting(false);
+          onSubmit={async (values, { setSubmitting }) => {
+            try {
+              await login({
+                username: values.username,
+                password: values.password,
               });
+
+              await fetchUserData();
+
+              successToast({
+                title: "Login successful",
+                text: "Welcome back to Cartona",
+              });
+
+              navigate("/account/profile");
+            } catch {
+              errorToast("Username or password is incorrect");
+            } finally {
+              setSubmitting(false);
+            }
           }}
         >
           {({ isSubmitting }) => (
