@@ -1,5 +1,5 @@
 from django.http import Http404
-from django.db.models import Q, OuterRef, Subquery, Exists
+from django.db.models import Q, OuterRef, Subquery, Exists,  F, Case, When, Value, IntegerField
 from django.contrib.auth.models import User
 from django_filters import rest_framework as filters
 from django_filters.rest_framework import DjangoFilterBackend
@@ -261,10 +261,26 @@ class ProductPurchaseViewSet(
         if not user.is_authenticated:
             return ProductPurchase.objects.none()
 
-        return ProductPurchase.objects.filter(
+        qs = ProductPurchase.objects.filter(
             Q(buyer=user, buyer_hidden=False) |
             Q(storekeeper__user=user, storekeeper_hidden=False)
-        ).order_by('-id')
+        ).annotate(
+            updated_time=Subquery(
+                PurchaseChat.objects.filter(purchase=OuterRef('pk'))
+                .order_by('-sent_at')
+                .values('sent_at')[:1]
+            )
+        )
+
+        return qs.order_by(
+            Case(
+                When(chat_enabled=True, then=Value(0)),
+                default=Value(1),
+                output_field=IntegerField()
+            ),
+            F('updated_time').desc(nulls_last=True),
+            F('id').desc()
+        )
 
     def get_serializer_context(self):
         return {"request": self.request}
@@ -292,7 +308,6 @@ class ProductPurchaseViewSet(
             instance.save()
 
     def _handle_filtered_request(self, request, queryset, index, label="purchase"):
-        queryset = queryset.order_by('-id')
 
         if not queryset.exists():
             raise Http404(f"No {label}s found.")

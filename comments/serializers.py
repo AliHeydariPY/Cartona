@@ -249,14 +249,24 @@ class ProductPurchaseSerializer(serializers.ModelSerializer):
         format='%Y-%m-%d %H:%M:%S',
         read_only=True
     )
+    updated_time = serializers.DateTimeField(
+        format='%Y-%m-%d %H:%M:%S',
+        read_only=True
+    )
 
     class Meta:
         model = ProductPurchase
         fields = [
             'id', 'buyer', 'product', 'product_name', 'storekeeper', 'payment', 'chat_enabled',
             'storekeeper_delivery', 'storekeeper_delivered_at',
-            'buyer_delivery', 'buyer_delivered_at'
+            'buyer_delivery', 'buyer_delivered_at', 'updated_time'
         ]
+
+    def get_updated_time(self, obj):
+        if not obj.chat_enabled:
+            return None
+        last_message = PurchaseChat.objects.filter(purchase=obj).order_by('-sent_at').first()
+        return last_message.sent_at if last_message else None
 
     def get_buyer(self, obj):
         return obj.buyer.username if obj.buyer else None

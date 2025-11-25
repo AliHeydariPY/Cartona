@@ -161,13 +161,13 @@ def seed_default_products():
             if item in discount_items:
                 discounted_price = round(price * random.uniform(0.70, 0.90), 2)
                 discount_percentage = round(100 * (1 - discounted_price / price), 2)
-                discount_period = timezone.now() + timedelta(minutes=10)
+                discount_period = timezone.now() + timedelta(minutes=20)
 
             amazing_offer = None
             amazing_offer_period = None
             if item is amazing_item:
                 amazing_offer = f"Limited-time deal on {item['name']} with special bonus!"
-                amazing_offer_period = timezone.now() + timedelta(minutes=10)
+                amazing_offer_period = timezone.now() + timedelta(minutes=20)
 
             product = Product.objects.filter(
                 name=item["name"],
@@ -196,51 +196,21 @@ def seed_default_products():
             if product.name == "white mouse":
                 Features.objects.get_or_create(product=product, feature_name="Connectivity", feature_value="Wireless")
                 Features.objects.get_or_create(product=product, feature_name="DPI", feature_value="1600 DPI")
-                FrequentlyAskedQuestions.objects.get_or_create(
-                    product=product,
-                    frequently_asked_question="Is this mouse suitable for daily use?",
-                    frequently_asked_question_answer="Yes, it is designed for comfortable daily use."
-                )
             elif product.name == "black mouse":
                 Features.objects.get_or_create(product=product, feature_name="Connectivity", feature_value="Wired")
                 Features.objects.get_or_create(product=product, feature_name="DPI", feature_value="1200 DPI")
-                FrequentlyAskedQuestions.objects.get_or_create(
-                    product=product,
-                    frequently_asked_question="Does this mouse have ergonomic design?",
-                    frequently_asked_question_answer="Yes, it has an ergonomic design for long usage."
-                )
             elif product.name == "keyboard":
                 Features.objects.get_or_create(product=product, feature_name="Type", feature_value="Mechanical")
                 Features.objects.get_or_create(product=product, feature_name="Backlight", feature_value="Yes")
-                FrequentlyAskedQuestions.objects.get_or_create(
-                    product=product,
-                    frequently_asked_question="Are the keys durable?",
-                    frequently_asked_question_answer="Yes, the mechanical switches are highly durable."
-                )
             elif product.name == "blue speaker":
                 Features.objects.get_or_create(product=product, feature_name="Connectivity", feature_value="Bluetooth")
                 Features.objects.get_or_create(product=product, feature_name="Battery Life", feature_value="12 hours")
-                FrequentlyAskedQuestions.objects.get_or_create(
-                    product=product,
-                    frequently_asked_question="Is it portable?",
-                    frequently_asked_question_answer="Yes, it is lightweight and portable."
-                )
             elif product.name == "black speaker":
                 Features.objects.get_or_create(product=product, feature_name="Output Power", feature_value="12W RMS")
                 Features.objects.get_or_create(product=product, feature_name="Bass", feature_value="Rich bass")
-                FrequentlyAskedQuestions.objects.get_or_create(
-                    product=product,
-                    frequently_asked_question="Does it provide clear sound?",
-                    frequently_asked_question_answer="Yes, it delivers clear sound with strong bass."
-                )
             elif product.name == "monitor":
                 Features.objects.get_or_create(product=product, feature_name="Screen Size", feature_value="24-inch")
                 Features.objects.get_or_create(product=product, feature_name="Refresh Rate", feature_value="75Hz")
-                FrequentlyAskedQuestions.objects.get_or_create(
-                    product=product,
-                    frequently_asked_question="Is this monitor suitable for office work?",
-                    frequently_asked_question_answer="Yes, the IPS panel and slim bezels make it ideal for office use."
-                )
 
 @receiver(post_migrate)
 def create_default_products(sender, **kwargs):
