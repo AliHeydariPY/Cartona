@@ -8,8 +8,6 @@ import Questions from "./product-tabs/Questions";
 import { FiMessageSquare, FiHelpCircle, FiInfo } from "react-icons/fi";
 
 const ProductDetailTabs = ({
-  setShowAnswerPopup,
-  setQuestion,
   productQuestions,
   product,
   setProductComments,
@@ -92,8 +90,6 @@ const ProductDetailTabs = ({
         {activeTab === "questions" && (
           <Questions
             productQuestions={productQuestions}
-            setShowAnswerPopup={setShowAnswerPopup}
-            setQuestion={setQuestion}
             seller={seller}
             user={user}
             setProductQuestions={setProductQuestions}

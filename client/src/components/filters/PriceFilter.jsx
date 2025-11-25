@@ -29,8 +29,6 @@ const PriceFilter = ({ minMaxPrice, values, setFieldValue }) => {
       setFieldValue("min_price", rawMin);
       setFieldValue("max_price", rawMin + 1);
     } else {
-      console.log(values.max_price < maxPrice);
-      console.log(maxPrice);
       setSafeMin(
         values.min_price > minPrice ? values.min_price || minPrice : minPrice
       );

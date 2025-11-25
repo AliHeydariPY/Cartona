@@ -19,8 +19,13 @@ import {
 import { getProduct } from "../../services/productAPIServices";
 import { errorToast } from "../../utils/toast";
 import { SectionLoader } from "../../components/SectionLoader";
+import { useAtom } from "jotai";
+import { addToCartPopupAtom, selectedProductAtom } from "../../atoms/popupAtom";
 
-const Favorites = ({ setAddToCartPopup, setSelectedProduct }) => {
+const Favorites = () => {
+  const [, setAddToCartPopup] = useAtom(addToCartPopupAtom);
+  const [, setSelectedProduct] = useAtom(selectedProductAtom);
+
   const [favorites, setFavorites] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 

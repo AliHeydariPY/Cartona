@@ -25,12 +25,7 @@ import ProductNotFound from "../components/ProductNotFound";
 import Navbar from "../components/Navbar";
 import BottomNav from "../components/BottomNav";
 
-const ProductDetails = ({
-  setShowAnswerPopup,
-  setQuestion,
-  setAddToCartPopup,
-  setSelectedProduct,
-}) => {
+const ProductDetails = () => {
   const { id } = useParams();
 
   const [product, setProduct] = useState(null);
@@ -149,17 +144,11 @@ const ProductDetails = ({
                 </span>
               </div>
 
-              <ProductDisplay
-                product={product}
-                setAddToCartPopup={setAddToCartPopup}
-                setSelectedProduct={setSelectedProduct}
-              />
+              <ProductDisplay product={product} />
 
               <ProductSeller seller={seller} />
 
               <ProductDetailTabs
-                setShowAnswerPopup={setShowAnswerPopup}
-                setQuestion={setQuestion}
                 productQuestions={productQuestions}
                 id={id}
                 product={product}

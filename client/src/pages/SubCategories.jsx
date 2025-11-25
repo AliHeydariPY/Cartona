@@ -1,6 +1,6 @@
+import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 import {
   getSubCategories,
   getSubCategoryItems,
@@ -9,29 +9,32 @@ import {
 import { BiCategory } from "react-icons/bi";
 import { FiArrowLeft, FiChevronRight, FiList } from "react-icons/fi";
 import BottomNav from "../components/BottomNav";
+import { errorToast } from "../utils/toast";
 
 const SubCategories = () => {
-  const { categoryId } = useParams();
   const navigate = useNavigate();
+  const { categoryId } = useParams();
   const [subCategories, setSubCategories] = useState([]);
   const [subCategoryItmes, setSubCategoryItems] = useState([]);
   const [viewMode, setViewMode] = useState("grid");
 
   useEffect(() => {
     const fetchSubCategories = async () => {
-      const response = await getSubCategories(categoryId);
-      setSubCategories(response.data);
-      //   const mainCatResponse = await getMainCategoryInfo(categoryId);
-      //   setSelectedCategory(mainCatResponse.data)
+      try {
+        const response = await getSubCategories(categoryId);
+        setSubCategories(response.data);
 
-      response.data.map((sub) => {
-        getSubCategoryItems(sub.id).then((res) => {
-          setSubCategoryItems((prev) => [
-            ...prev,
-            { id: sub.id, num: res.data.length },
-          ]);
-        });
-      });
+        const itemsData = await Promise.all(
+          response.data.map(async (sub) => {
+            const res = await getSubCategoryItems(sub.id);
+            return { id: sub.id, num: res.data.length };
+          })
+        );
+
+        setSubCategoryItems(itemsData);
+      } catch {
+        errorToast("There is a problem retrieving categories.");
+      }
     };
 
     fetchSubCategories();

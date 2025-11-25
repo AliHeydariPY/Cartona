@@ -10,26 +10,30 @@ import { upgradeToSeller } from "../services/userAPIServices";
 import { errorToast, successToast } from "../utils/toast";
 import { useAtom } from "jotai";
 import { userAtom } from "../atoms/userAtom";
-import { authAtom } from "../atoms/authAtom";
 
 const UpgradeToSeller = () => {
   const navigate = useNavigate();
-  const [isAuth] = useAtom(authAtom);
   const [user, setUser] = useAtom(userAtom);
   const [previewImage, setPreviewImage] = useState(null);
+  const [width, setWidth] = useState(
+    typeof window !== "undefined" ? window.innerWidth : 0
+  );
+
+  useEffect(() => {
+    const handleResize = () => setWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     if (!user) return;
-    if (user?.role == "storekeeper") {
+
+    if (user.role === "storekeeper") {
       navigate("/account/profile");
     }
-  }, [user]);
+  }, [user, navigate]);
 
   const StoreSchema = Yup.object().shape({
-    user: Yup.string()
-      .min(3, "at least 3 characters")
-      .max(30, "at most 30 characters")
-      .required("required"),
     storeName: Yup.string()
       .min(3, "at least 3 characters")
       .max(50, "at most 50 characters")
@@ -55,44 +59,48 @@ const UpgradeToSeller = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-300 to-cyan-100 sm:p-4">
-      <div className="w-full max-w-md bg-white/20 backdrop-blur-lg sm:rounded-2xl shadow-xl overflow-hidden">
-        <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-6 text-center">
+      <div
+        className={`${width < 640 ? "min-w-screen" : "w-full"}
+ h-screen sm:h-auto max-w-md bg-white/20 backdrop-blur-lg sm:rounded-2xl shadow-xl overflow-hidden`}
+      >
+        <div className="bg-gradient-to-r  from-blue-600 to-cyan-500 p-6 text-center">
           <h2 className="text-3xl font-bold text-white">Register Your Store</h2>
           <p className="text-blue-100 mt-1">Complete your store information</p>
         </div>
 
         <Formik
           initialValues={{
-            user: user?.username,
             storeName: "",
             description: "",
             address: "",
             image: null,
           }}
           validationSchema={StoreSchema}
-          onSubmit={(values) => {
-            const formData = new FormData();
-            formData.append("store_name", values.storeName);
-            formData.append("description", values.description);
-            formData.append("address", values.address);
-            formData.append("image", values.image);
+          onSubmit={async (values) => {
+            try {
+              const formData = new FormData();
+              formData.append("store_name", values.storeName);
+              formData.append("description", values.description);
+              formData.append("address", values.address);
+              formData.append("image", values.image);
 
-            upgradeToSeller(formData)
-              .then((res) => {
-                setUser({
-                  ...user,
-                  role: "storekeeper",
-                  storekeeper_id: res.data.id,
-                });
-                successToast("Account upgraded to seller successfully!");
-                navigate("/account/profile");
-              })
-              .catch((err) => {
-                const errorMessage =
-                  err.response?.data?.store_name ||
-                  "Upgrade failed. Please try again.";
-                errorToast(errorMessage);
-              });
+              const res = await upgradeToSeller(formData);
+
+              setUser((prev) => ({
+                ...prev,
+                role: "storekeeper",
+                storekeeper_id: res.data.id,
+              }));
+
+              successToast("Account upgraded to seller successfully!");
+              navigate("/account/profile");
+            } catch (err) {
+              const errorMessage =
+                err.response?.data?.store_name ||
+                "Upgrade failed. Please try again.";
+
+              errorToast(errorMessage);
+            }
           }}
         >
           {({ setFieldValue }) => (
@@ -145,24 +153,6 @@ const UpgradeToSeller = () => {
               </div>
 
               <div className="space-y-4">
-                <div className="space-y-2">
-                  <label className="flex items-center text-sm font-medium text-blue-800">
-                    <FiUser className="mr-2" size={16} />
-                    Username
-                  </label>
-                  <Field
-                    type="text"
-                    name="user"
-                    placeholder="Your username"
-                    className="w-full px-4 py-3 bg-white/80 rounded-lg border border-blue-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent placeholder-blue-400 text-blue-950"
-                  />
-                  <ErrorMessage
-                    name="user"
-                    component="div"
-                    className="text-red-500 text-sm ml-0.5 mt-1"
-                  />
-                </div>
-
                 <div className="space-y-2">
                   <label className="flex items-center text-sm font-medium text-blue-800">
                     <MdStorefront className="mr-2 mb-0.5" size={16} />

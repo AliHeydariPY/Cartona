@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { lazy, Suspense, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import Navbar from "../components/Navbar";
@@ -6,21 +6,16 @@ import Footer from "../components/home/Footer";
 import Category from "../components/home/Category";
 import BottomNav from "../components/BottomNav";
 
-import {
-  FiChevronRight,
-  FiChevronLeft,
-  FiHeart,
-  FiStar,
-  FiSearch,
-} from "react-icons/fi";
+import { FiStar, FiSearch } from "react-icons/fi";
 import { TfiQuoteRight } from "react-icons/tfi";
-import { IoCartOutline } from "react-icons/io5";
-import FeaturedProducts from "../components/home/FeaturedProducts";
 
 const Home = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const inputRef = useRef();
+  const FeaturedProducts = lazy(() =>
+    import("../components/home/FeaturedProducts")
+  );
 
   return (
     <>
@@ -123,8 +118,9 @@ const Home = () => {
               <div className="absolute right-10 bottom-0 w-40 h-40 bg-white/10 rounded-full filter blur-xl"></div>
             </div>
 
-            
+            <Suspense fallback={<div className="h-90 " />}>
               <FeaturedProducts />
+            </Suspense>
 
             <div className="bg-white/60 backdrop-blur-lg rounded-2xl sm:rounded-3xl shadow-lg p-6 sm:p-8 md:p-12 lg:p-16 mb-12 sm:mb-16 lg:mb-20 relative overflow-hidden border border-white/30">
               <div className="absolute -top-10 sm:-top-16 -right-10 sm:-right-16 w-32 h-32 sm:w-48 sm:h-48 lg:w-64 lg:h-64 bg-gradient-to-r from-blue-600/10 to-cyan-500/10 rounded-full filter blur-2xl sm:blur-3xl"></div>

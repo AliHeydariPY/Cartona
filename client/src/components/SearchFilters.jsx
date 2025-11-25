@@ -114,12 +114,16 @@ const SearchFilters = () => {
 
   const setPriceRange = async () => {
     let priceRange = [];
-    const filteredQuery = query
-      .replace(/(&)?min_price=\d+/g, "")
-      .replace(/(&)?max_price=\d+/g, "");
+    let filteredQuery = "";
+
+    if (query) {
+      filteredQuery = query
+        .replace(/(&)?min_price=\d+/g, "")
+        .replace(/(&)?max_price=\d+/g, "");
+    }
 
     const min = await getMinMaxPrice("min", filteredQuery);
-    priceRange.push(min.data.price);
+    priceRange.push(min.data.discounted_price ?? min.data.price);
 
     const max = await getMinMaxPrice("max", filteredQuery);
     priceRange.push(max.data.price);
@@ -129,9 +133,13 @@ const SearchFilters = () => {
 
   const setCommentRange = async () => {
     let commentsRange = [];
-    const filteredQuery = query
-      .replace(/(&)?min_comments=\d+/g, "")
-      .replace(/(&)?max_comments=\d+/g, "");
+    let filteredQuery = "";
+
+    if (query) {
+      filteredQuery = query
+        .replace(/(&)?min_comments=\d+/g, "")
+        .replace(/(&)?max_comments=\d+/g, "");
+    }
 
     const min = await getMinMaxComments("min", filteredQuery);
     commentsRange.push(min.data.comment_count);
@@ -272,7 +280,7 @@ const SearchFilters = () => {
                                 max_comments: "",
                                 min_price: "",
                                 max_price: "",
-                                category: null,
+                                category: "",
                               });
                             } else {
                               setInitialFilters({
@@ -283,7 +291,7 @@ const SearchFilters = () => {
                                 min_price: "",
                                 max_price: "",
                                 storekeeper: "",
-                                category: null,
+                                category: "",
                               });
                             }
 
@@ -445,9 +453,9 @@ const SearchFilters = () => {
                           <FiMessageSquare className="text-blue-500 mb-0.25" />
                           <h3 className="font-semibold ml-2">Reviews</h3>
 
-                          {(values.min_comments || values.max_comments) && (
+                          {values.min_comments || values.max_comments ? (
                             <span className="ml-2 w-2 h-2 rounded-full bg-blue-500" />
-                          )}
+                          ) : null}
 
                           <FiChevronDown
                             className={`ml-2 transform ${

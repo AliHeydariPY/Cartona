@@ -1,14 +1,9 @@
 import { motion } from "framer-motion";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  FiX,
-  FiEye,
-  FiEyeOff,
-  FiUserPlus,
-} from "react-icons/fi";
+import { FiX, FiEye, FiEyeOff, FiUserPlus } from "react-icons/fi";
 import { createUser, login } from "../services/userAPIServices";
 import { useAtom } from "jotai";
 import { authAtom } from "../atoms/authAtom";
@@ -20,9 +15,9 @@ const CreateAccountForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
-  if (isAuth) {
-    navigate("/account/profile");
-  }
+  useEffect(() => {
+    if (isAuth) navigate("/account/profile");
+  }, [isAuth]);
 
   const SignupSchema = Yup.object().shape({
     username: Yup.string()
@@ -88,7 +83,12 @@ const CreateAccountForm = () => {
                 });
               })
               .catch((error) => {
-                errorToast(error.response?.data.username);
+                errorToast(
+                  error.response?.data?.username ??
+                    error.response?.data?.detail ??
+                    "An error occurred"
+                );
+
                 setSubmitting(false);
               });
           }}

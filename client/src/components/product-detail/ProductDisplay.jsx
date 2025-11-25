@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { useAtom } from "jotai";
 
 import {
   getCartProducts,
@@ -16,10 +17,15 @@ import { FaHeart } from "react-icons/fa";
 import { IoCart, IoCartOutline } from "react-icons/io5";
 
 import ProductImageCarousel from "../ProductImageCarousel";
-import { errorToast, successToast } from "../../utils/toast";
 
-const ProductDisplay = ({ product, setAddToCartPopup, setSelectedProduct }) => {
+import { errorToast, successToast } from "../../utils/toast";
+import { addToCartPopupAtom, selectedProductAtom } from "../../atoms/popupAtom";
+
+const ProductDisplay = ({ product }) => {
   const { id } = useParams();
+  const [, setAddToCartPopup] = useAtom(addToCartPopupAtom);
+  const [, setSelectedProduct] = useAtom(selectedProductAtom);
+
   const [currentImage, setCurrentImage] = useState(null);
   const [isInCart, setIsInCart] = useState();
   const [favoriteEntry, setFavoriteEntry] = useState(null);
