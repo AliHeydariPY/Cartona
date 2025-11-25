@@ -362,7 +362,7 @@ const Chat = () => {
                 <div className="p-3 sm:p-4 border-b border-blue-200 bg-white/80 flex-shrink-0">
                   <div className="flex items-center gap-2 sm:gap-3">
                     <div
-                      className={`w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 ring cursor-pointer ring-blue-400 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden relative`}
+                      className={`w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 ring cursor-pointer ring-blue-400 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden relative`}
                       onClick={() =>
                         openInNewTab(`/product/${selectedChat.product.id}`)
                       }

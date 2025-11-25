@@ -1,6 +1,8 @@
+import { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-import { useEffect, useState } from "react";
+import { useAtom } from "jotai";
+import { userAtom } from "./atoms/userAtom";
 
 import Home from "./pages/Home";
 import CreateAccountForm from "./pages/CreateAccountForm";
@@ -35,18 +37,16 @@ import ChangePassword from "./pages/user-dashboard/account-setting/ChangePasswor
 import ChangeUsername from "./pages/user-dashboard/account-setting/ChangeUsername";
 import StoreSetting from "./pages/user-dashboard/account-setting/StoreSetting";
 
-import { useAtom } from "jotai";
-import { userAtom } from "./atoms/userAtom";
 import { fetchUserData } from "./utils/fetchUserData";
 import { tokenAtom } from "./atoms/tokenAtom";
+import { addToCartPopupAtom, selectedProductAtom } from "./atoms/popupAtom";
 
 function App() {
-  const [addToCartPopup, setAddToCartPopup] = useState(false);
-
-  const [selectedProduct, setSelectedProduct] = useState(null);
-
-  const [accessToken] = useAtom(tokenAtom);
   const [user] = useAtom(userAtom);
+  const [accessToken] = useAtom(tokenAtom);
+
+  const [addToCartPopup, setAddToCartPopup] = useAtom(addToCartPopupAtom);
+  const [selectedProduct] = useAtom(selectedProductAtom);
 
   useEffect(() => {
     if (localStorage.getItem("accessToken")) {
@@ -78,27 +78,11 @@ function App() {
         <Route path="/" element={<Home />} />
 
         <Route path="/account" element={<UserDashboard user={user} />}>
-          <Route
-            path="profile"
-            element={
-              <Profile
-                setAddToCartPopup={setAddToCartPopup}
-                setSelectedProduct={setSelectedProduct}
-              />
-            }
-          />
+          <Route path="profile" element={<Profile />} />
 
           <Route path="cart" element={<Cart />} />
 
-          <Route
-            path="favorites"
-            element={
-              <Favorites
-                setAddToCartPopup={setAddToCartPopup}
-                setSelectedProduct={setSelectedProduct}
-              />
-            }
-          />
+          <Route path="favorites" element={<Favorites />} />
           <Route path="notifications" element={<Notifications />} />
 
           <Route path="orders" element={<Orders />} />
@@ -124,15 +108,7 @@ function App() {
           <Route path="my-products/edit/:id" element={<EditProduct />} />
         </Route>
 
-        <Route
-          path="/product/:id"
-          element={
-            <ProductDetail
-              setAddToCartPopup={setAddToCartPopup}
-              setSelectedProduct={setSelectedProduct}
-            />
-          }
-        />
+        <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/create-account" element={<CreateAccountForm />} />
         <Route path="/login" element={<LoginForm />} />
 

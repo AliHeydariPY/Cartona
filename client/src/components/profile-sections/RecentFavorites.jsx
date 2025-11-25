@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useAtom } from "jotai";
 
 import { FiHeart, FiStar } from "react-icons/fi";
 import {
@@ -10,14 +11,17 @@ import { errorToast } from "../../utils/toast";
 import { PiLightningFill } from "react-icons/pi";
 import { FaClock, FaHeart } from "react-icons/fa";
 import { IoCart, IoCartOutline } from "react-icons/io5";
+
 import { BiSolidOffer } from "react-icons/bi";
+import { addToCartPopupAtom, selectedProductAtom } from "../../atoms/popupAtom";
 
 const RecentFavorites = ({
-  setAddToCartPopup,
-  setSelectedProduct,
   recentFavorites,
   setRecentFavorites,
 }) => {
+  const [, setAddToCartPopup] = useAtom(addToCartPopupAtom);
+  const [, setSelectedProduct] = useAtom(selectedProductAtom);
+
   const handleAddToCart = async (selectedProduct) => {
     try {
       setSelectedProduct(selectedProduct);
@@ -114,7 +118,9 @@ const RecentFavorites = ({
                 {product.amazing_offer && (
                   <div className="absolute flex top-3 left-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg z-10">
                     <PiLightningFill className="mt-0.25 mr-0.75" size={13} />
-                    {product.amazing_offer.length < 25 ? product.amazing_offer : "Special sale" }
+                    {product.amazing_offer.length < 25
+                      ? product.amazing_offer
+                      : "Special sale"}
                   </div>
                 )}
 

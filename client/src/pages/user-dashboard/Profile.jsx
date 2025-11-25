@@ -9,7 +9,7 @@ import RecentOrders from "../../components/profile-sections/RecentOrders";
 import RecentFavorites from "../../components/profile-sections/RecentFavorites";
 import RecentCartItems from "../../components/profile-sections/RecentCartItems";
 
-const Profile = ({ setAddToCartPopup, setSelectedProduct }) => {
+const Profile = () => {
   const [userActivity, setUserActivity] = useState({});
   const [recentFavorites, setRecentFavorites] = useState(
     userActivity.recent_favorites || []
@@ -136,8 +136,6 @@ const Profile = ({ setAddToCartPopup, setSelectedProduct }) => {
 
         <RecentFavorites
           setRecentFavorites={setRecentFavorites}
-          setAddToCartPopup={setAddToCartPopup}
-          setSelectedProduct={setSelectedProduct}
           recentFavorites={recentFavorites}
         />
 

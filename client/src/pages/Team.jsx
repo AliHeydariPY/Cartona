@@ -11,21 +11,12 @@ import {
   FiAward,
   FiUsers,
   FiGlobe,
-  FiMessageCircle,
   FiExternalLink,
 } from "react-icons/fi";
-import { FaReact, FaPython, FaDatabase, FaTelegram } from "react-icons/fa";
-import {
-  SiDjango,
-  SiTailwindcss,
-  SiJavascript,
-  SiPostgresql,
-  SiTypescript,
-  SiMysql,
-} from "react-icons/si";
+import { FaReact, FaPython, FaTelegram } from "react-icons/fa";
+import { SiDjango, SiTailwindcss, SiTypescript } from "react-icons/si";
 import { GrMysql } from "react-icons/gr";
 import { RiNextjsFill } from "react-icons/ri";
-import { TbBrandNextjs } from "react-icons/tb";
 import ScrollToTop from "../components/ScrollToTop";
 
 const Team = () => {
@@ -50,12 +41,12 @@ When I'm not coding, you'll find me exploring new design trends, contributing to
       skills: [
         { name: "TypeScript", icon: SiTypescript, level: 90 },
         { name: "React", icon: FaReact, level: 95 },
-        { name: "NextJS", icon: RiNextjsFill  , level: 88 },
+        { name: "NextJS", icon: RiNextjsFill, level: 88 },
         { name: "Tailwind CSS", icon: SiTailwindcss, level: 95 },
       ],
       social: {
         github: "https://github.com/AdelNouri",
-        linkedin: "https://linkedin.com/in/alexthompson",
+        linkedin: "https://linkedin.com/in/adelnouri0231",
         telegram: "https://t.me/Vdel_Nouri",
         email: "adelnouri0231@gmail.com",
       },
