@@ -1,4 +1,4 @@
-import { convertOffsetToTimes, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Portal } from "react-portal";
@@ -146,9 +146,25 @@ const Chat = () => {
     }
   }, [messages]);
 
-  const fetchMessages = async (purchaseID) => {
+  const bumpConversation = (chatId) => {
+    setConversations((prev) => {
+      const target = prev.find((c) => c.id == chatId);
+      if (!target) return prev;
+
+      const rest = prev.filter((c) => c.id != chatId);
+
+      return [target, ...rest];
+    });
+  };
+
+  const fetchMessages = async (purchaseID, isRefresh) => {
     try {
       const chatsRes = await getPurchaseChats(purchaseID);
+
+      if (isRefresh && chatsRes.data.length != messages.length) {
+        bumpConversation(purchaseID);
+      }
+
       const sortMessages = await Promise.all(
         chatsRes.data.map(async (message) => {
           return { ...message };
@@ -403,7 +419,7 @@ const Chat = () => {
                         </div>
 
                         <button
-                          onClick={() => fetchMessages(selectedChat.id)}
+                          onClick={() => fetchMessages(selectedChat.id, true)}
                           className="p-1.5 sm:p-2 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow hover:from-blue-600 hover:to-cyan-600 transition-colors duration-300 flex-shrink-0"
                           title="Refresh messages"
                         >
@@ -639,6 +655,7 @@ const Chat = () => {
                     selectedChat={selectedChat}
                     emojiBox={emojiBox}
                     setEmojiBox={setEmojiBox}
+                    bumpConversation={bumpConversation}
                   />
                 ) : (
                   <div className="p-3 sm:p-4 border-t border-blue-200 bg-rose-50/80 text-center flex-shrink-0">
