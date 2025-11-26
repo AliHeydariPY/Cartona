@@ -40,7 +40,6 @@ const ChangeUsername = () => {
       .then(() => {
         successToast("Username updated successfully!");
         setUser((prev) => ({ ...prev, username: values.newUsername }));
-        setSubmitting(false);
         resetForm();
       })
       .catch((err) => {
@@ -50,7 +49,8 @@ const ChangeUsername = () => {
           "There is a problem. Please try again later";
 
         errorToast(errorMessage);
-
+      })
+      .finally(() => {
         setSubmitting(false);
       });
   };
