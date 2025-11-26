@@ -6,7 +6,9 @@ import { RiSendPlaneFill } from "react-icons/ri";
 const SendNotePopup = ({ onClose, onConfirm }) => {
   const [show, setShow] = useState(false);
   const [note, setNote] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const textareaRef = useRef();
+
   useEffect(() => {
     setTimeout(() => {
       setShow(true);
@@ -24,7 +26,8 @@ const SendNotePopup = ({ onClose, onConfirm }) => {
   const stopPropagation = (e) => e.stopPropagation();
 
   const handleConfirm = () => {
-    if (note.trim() !== "") {
+    if (note.trim() !== "" || !isSubmitting) {
+      setIsSubmitting(true);
       onConfirm(note);
       handleClose();
     }
@@ -82,11 +85,11 @@ const SendNotePopup = ({ onClose, onConfirm }) => {
                 onClick={handleConfirm}
                 className={`cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-500 text-white py-3 rounded-lg font-semibold flex items-center justify-center hover:from-blue-700 hover:to-cyan-600 transition-colors duration-300 ${
                   note.trim() === "" ? "opacity-60 cursor-not-allowed" : ""
-                }`}
-                disabled={note.trim() === ""}
+                } ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
+                disabled={note.trim() === "" || isSubmitting}
               >
                 <RiSendPlaneFill className="mr-2 mb-0.5" />
-                Send
+                {isSubmitting ? "Sending..." : "Send Note"}
               </button>
             </div>
           </div>

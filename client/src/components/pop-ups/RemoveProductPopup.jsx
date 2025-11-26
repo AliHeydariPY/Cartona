@@ -14,9 +14,11 @@ const RemoveProductPopup = ({
   onSuccess,
 }) => {
   const [show, setShow] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    setTimeout(() => setShow(true), 10);
+    const timer = setTimeout(() => setShow(true), 10);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleClose = () => {
@@ -25,18 +27,19 @@ const RemoveProductPopup = ({
   };
 
   const handleConfirm = () => {
-    if (isRemoveCartItem) {
-      deleteCartProduct(product.id).then(() => {
+    if (isDeleting) return;
+    setIsDeleting(true);
+
+    const action = isRemoveCartItem
+      ? deleteCartProduct(product.id)
+      : deleteProduct(product.id);
+    action
+      .then(() => {
         onSuccess();
+        if (!isRemoveCartItem) successToast("Product successfully deleted");
         handleClose();
-      });
-    } else {
-      deleteProduct(product.id).then(() => {
-        onSuccess();
-        handleClose();
-        successToast("Product successfully deleted");
-      });
-    }
+      })
+      .finally(() => setIsDeleting(false));
   };
 
   const stopPropagation = (e) => e.stopPropagation();
@@ -107,10 +110,13 @@ const RemoveProductPopup = ({
 
               <button
                 onClick={handleConfirm}
-                className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-rose-600 text-white py-3 rounded-lg font-semibold flex items-center justify-center hover:from-red-700 hover:to-rose-700 transition-colors duration-300"
+                disabled={isDeleting}
+                className={`cursor-pointer w-full bg-gradient-to-r from-red-600 to-rose-600 text-white py-3 rounded-lg font-semibold flex items-center justify-center hover:from-red-700 hover:to-rose-700 transition-colors duration-300 ${
+                  isDeleting ? "opacity-50 cursor-not-allowed" : ""
+                }`}
               >
                 <FiTrash2 className="mr-2 mb-0.5" />
-                Remove
+                {isDeleting ? "Removing..." : "Deleting..."}
               </button>
             </div>
           </div>

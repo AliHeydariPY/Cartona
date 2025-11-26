@@ -4,9 +4,11 @@ import { FiX, FiTrash2 } from "react-icons/fi";
 
 const DeleteFeaturePopup = ({ onClose, feature, removeFeature }) => {
   const [show, setShow] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    setTimeout(() => setShow(true), 10);
+    const timer = setTimeout(() => setShow(true), 10);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleClose = () => {
@@ -17,8 +19,10 @@ const DeleteFeaturePopup = ({ onClose, feature, removeFeature }) => {
   const stopPropagation = (e) => e.stopPropagation();
 
   const handleConfirm = () => {
-    handleClose();
+    if (isDeleting) return;
+    setIsDeleting(true);
     removeFeature();
+    handleClose();
   };
 
   return (
@@ -75,10 +79,13 @@ const DeleteFeaturePopup = ({ onClose, feature, removeFeature }) => {
 
               <button
                 onClick={handleConfirm}
-                className="cursor-pointer bg-gradient-to-r from-red-600 to-rose-600 text-white py-3 rounded-lg font-semibold flex items-center justify-center hover:from-red-700 hover:to-rose-700 transition-colors duration-300"
+                disabled={isDeleting}
+                className={`cursor-pointer bg-gradient-to-r from-red-600 to-rose-600 text-white py-3 rounded-lg font-semibold flex items-center justify-center hover:from-red-700 hover:to-rose-700 transition-colors duration-300 ${
+                  isDeleting ? "opacity-50 cursor-not-allowed" : ""
+                }`}
               >
                 <FiTrash2 className="mr-2 mb-0.5" />
-                Remove
+                {isDeleting ? "Removing..." : "Remove"}
               </button>
             </div>
           </div>

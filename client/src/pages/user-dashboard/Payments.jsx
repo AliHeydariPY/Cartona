@@ -43,6 +43,7 @@ const Payments = () => {
           productPaymentsRes.data.map(async (productPayment) => {
             try {
               const product = await getProduct(productPayment.product);
+              console.log(productPayment)
               try {
                 const payment = await getPayment(productPayment.id);
                 return {

@@ -1,12 +1,7 @@
-import { motion, AnimatePresence, number } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { Portal } from "react-portal";
-import {
-  FiX,
-  FiMapPin,
-  FiPackage,
-  FiCheck,
-} from "react-icons/fi";
+import { FiX, FiMapPin, FiPackage, FiCheck } from "react-icons/fi";
 import { IoCartOutline } from "react-icons/io5";
 
 const PaymentAddressPopup = ({
@@ -21,7 +16,8 @@ const PaymentAddressPopup = ({
   const [addressError, setAddressError] = useState("");
 
   useEffect(() => {
-    setTimeout(() => setShow(true), 10);
+    const timer = setTimeout(() => setShow(true), 10);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleClose = () => {
@@ -32,6 +28,8 @@ const PaymentAddressPopup = ({
   const stopPropagation = (e) => e.stopPropagation();
 
   const handleSubmit = () => {
+    if (isProcessing) return;
+
     if (!address.trim()) {
       setAddressError("Please enter your delivery address");
       return;
@@ -48,11 +46,12 @@ const PaymentAddressPopup = ({
 
   const totalItems = singleProduct ? 1 : cartItems.length;
   const totalAmount = singleProduct
-    ? singleProduct.discounted_price || singleProduct.price
+    ? Number(singleProduct.discounted_price || singleProduct.price || 0)
     : cartItems.reduce(
         (total, item) =>
           total +
-          (Number(item.discounted_price) || item.price) * item.stock_quantity,
+          Number(item.discounted_price || item.price || 0) *
+            item.stock_quantity,
         0
       );
 

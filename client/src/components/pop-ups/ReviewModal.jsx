@@ -1,12 +1,10 @@
+import { motion, AnimatePresence } from "framer-motion";
 import { Portal } from "react-portal";
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { FiX, FiStar, FiCheckCircle, FiAlertCircle } from "react-icons/fi";
 import toast from "react-hot-toast";
 import { sendComment } from "../../services/commentAPIServices";
 import { errorToast, successToast } from "../../utils/toast";
-
-/////////////////// response it /////////////////////
 
 const ReviewPopup = ({ onClose, product, setOrders }) => {
   const [show, setShow] = useState(false);
@@ -15,7 +13,8 @@ const ReviewPopup = ({ onClose, product, setOrders }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    setTimeout(() => setShow(true), 10);
+    const timer = setTimeout(() => setShow(true), 10);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleClose = () => {
@@ -26,8 +25,8 @@ const ReviewPopup = ({ onClose, product, setOrders }) => {
   const stopPropagation = (e) => e.stopPropagation();
 
   const handleSubmit = async () => {
-    if (commentText.trim() === "") {
-      showValidationError("Please write your comment before submitting");
+    if (commentText.trim().length < 5) {
+      showValidationError("Comment must be at least 5 characters long");
       return;
     }
 

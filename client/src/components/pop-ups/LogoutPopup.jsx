@@ -13,9 +13,8 @@ const LogoutPopup = ({ onClose }) => {
   const [user] = useAtom(userAtom);
 
   useEffect(() => {
-    setTimeout(() => {
-      setShow(true);
-    }, 10);
+    const timer = setTimeout(() => setShow(true), 10);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleClose = () => {
@@ -25,11 +24,20 @@ const LogoutPopup = ({ onClose }) => {
 
   const stopPropagation = (e) => e.stopPropagation();
 
-  const handleConfirm = () => {
-    logout().catch((err) => {
-      errorToast(err.response.data.detail);
-    });
-    handleClose();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleConfirm = async () => {
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
+
+    try {
+      await logout();
+      handleClose();
+    } catch (err) {
+      errorToast(err?.response?.data?.detail || "Something went wrong");
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
 
   return (
@@ -106,10 +114,13 @@ const LogoutPopup = ({ onClose }) => {
 
                   <button
                     onClick={handleConfirm}
-                    className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-rose-600 text-white py-3 rounded-lg font-semibold flex items-center justify-center hover:from-red-700 hover:to-rose-700 transition-colors duration-300"
+                    disabled={isLoggingOut}
+                    className={`cursor-pointer w-full bg-gradient-to-r from-red-600 to-rose-600 text-white py-3 rounded-lg font-semibold flex items-center justify-center hover:from-red-700 hover:to-rose-700 transition-colors duration-300 ${
+                      isLoggingOut ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                   >
                     <FiLogOut className="mr-2 mb-0.5" />
-                    Sign Out
+                    {isLoggingOut ? "Signing Out..." : "Sign Out"}
                   </button>
                 </div>
               </div>

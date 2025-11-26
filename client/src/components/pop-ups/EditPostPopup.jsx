@@ -18,13 +18,15 @@ const EditPostPopup = ({
 }) => {
   const [editedPost, setEditedPost] = useState(userPost.text);
   const [show, setShow] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [selectedStars, setSelectedStars] = useState(
     userPost.rating ? userPost.rating : null
   );
 
   useEffect(() => {
-    setTimeout(() => setShow(true), 10);
+    const timer = setTimeout(() => setShow(true), 10);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleClose = () => {
@@ -34,36 +36,26 @@ const EditPostPopup = ({
 
   const stopPropagation = (e) => e.stopPropagation();
 
-  const handleSubmit = () => {
-    if (editedPost.trim() === "") return;
-    if (userPost.type == "Question") {
-      editProductQuestion(
-        {
-          question_text: editedPost,
-        },
-        userPost.id
-      ).then((res) => {
-        setProductQuestions((prevQuestions) =>
-          prevQuestions.map((qst) => {
-            if (qst.id == res.data.id) {
-              return res.data;
-            } else {
-              return qst;
-            }
-          })
+  const handleSubmit = async () => {
+    if (editedPost.trim() === "" || editedPost === userPost.text) return;
+
+    setIsSubmitting(true);
+
+    try {
+      if (userPost.type == "Question") {
+        const res = await editProductQuestion(
+          { question_text: editedPost },
+          userPost.id
         );
-        setEditedPost("");
-        handleClose();
-      });
-    } else if (userPost.type == "Review") {
-      editComment(
-        {
-          text: editedPost,
-          rating: selectedStars,
-        },
-        userPost.id
-      ).then(async (res) => {
-        let replies;
+        setProductQuestions((prevQuestions) =>
+          prevQuestions.map((q) => (q.id === res.data.id ? res.data : q))
+        );
+      } else if (userPost.type == "Review") {
+        const res = await editComment(
+          { text: editedPost, rating: selectedStars },
+          userPost.id
+        );
+        let replies = [];
         try {
           const repliesResponse = await getCommentReplies(res.data.id);
           replies = repliesResponse.data;
@@ -71,43 +63,30 @@ const EditPostPopup = ({
           replies = [];
         }
         setProductComments((prevComments) =>
-          prevComments.map((comment) => {
-            if (comment.id == res.data.id) {
-              return { ...res.data, replies };
-            } else {
-              return comment;
-            }
-          })
+          prevComments.map((comment) =>
+            comment.id === res.data.id ? { ...res.data, replies } : comment
+          )
         );
-        setEditedPost("");
-        handleClose();
-      });
-    } else if (userPost.type == "Reply") {
-      editCommentReply(
-        {
-          text: editedPost,
-        },
-        userPost.id
-      ).then((res) => {
+      } else if (userPost.type == "Reply") {
+        const res = await editCommentReply({ text: editedPost }, userPost.id);
         setProductComments((prevComments) =>
           prevComments.map((comment) => {
-            if (comment.id == res.data.comment) {
-              const replies = comment.replies.map((rep) => {
-                if (rep.id == res.data.id) {
-                  return res.data;
-                } else {
-                  return rep;
-                }
-              });
+            if (comment.id === res.data.comment) {
+              const replies = comment.replies.map((rep) =>
+                rep.id === res.data.id ? res.data : rep
+              );
               return { ...comment, replies };
-            } else {
-              return comment;
             }
+            return comment;
           })
         );
-        setEditedPost("");
-        handleClose();
-      });
+      }
+      setEditedPost("");
+      handleClose();
+    } catch {
+      console.error("Failed to submit the edited post:");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -217,10 +196,11 @@ const EditPostPopup = ({
             <div className="flex flex-col sm:flex-row-reverse gap-2 sm:gap-3">
               <button
                 onClick={handleSubmit}
-                className="flex items-center justify-center px-4 cursor-pointer py-3 sm:py-2 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white gap-2 transition-colors duration-200"
+                disabled={isSubmitting}
+                className={`flex items-center justify-center px-4 cursor-pointer py-3 sm:py-2 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white gap-2 transition-colors duration-200 ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
               >
                 <RiSendPlaneFill size={18} className="mb-0.5" />
-                Submit
+                {isSubmitting ? "Submitting..." : "Submit"}
               </button>
               <button
                 onClick={handleClose}

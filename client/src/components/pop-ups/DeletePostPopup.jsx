@@ -15,9 +15,11 @@ const DeletePostPopup = ({
   setProductQuestions,
 }) => {
   const [show, setShow] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    setTimeout(() => setShow(true), 10);
+    const timer = setTimeout(() => setShow(true), 10);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleClose = () => {
@@ -28,34 +30,30 @@ const DeletePostPopup = ({
   const stopPropagation = (e) => e.stopPropagation();
 
   const handleSubmit = () => {
-    if (userPost.type == "Question") {
-      deleteProductQuestion(userPost.id).then(() => {
-        setProductQuestions((prevQuetions) =>
-          prevQuetions.filter((qst) => qst.id != userPost.id)
-        );
-        handleClose();
-      });
-    } else if (userPost.type == "Review") {
-      deleteComment(userPost.id).then(() => {
-        setProductComments((prevComments) =>
-          prevComments.filter((commnet) => commnet.id != userPost.id)
-        );
-        handleClose();
-      });
-    } else if (userPost.type == "Reply") {
-      deleteCommentReply(userPost.id).then(() => {
-        setProductComments((prevComments) =>
-          prevComments.map((comment) => {
-            if (comment.id == userPost.comment) {
-              const replies = comment.replies.filter(
-                (rep) => rep.id != userPost.id
-              );
+    if (isDeleting) return;
+    setIsDeleting(true);
 
-              return { ...comment, replies };
-            } else {
-              return comment;
-            }
-          })
+    if (userPost.type === "Question") {
+      deleteProductQuestion(userPost.id).then(() => {
+        setProductQuestions((prev) => prev.filter((q) => q.id !== userPost.id));
+        handleClose();
+      });
+    } else if (userPost.type === "Review") {
+      deleteComment(userPost.id).then(() => {
+        setProductComments((prev) => prev.filter((c) => c.id !== userPost.id));
+        handleClose();
+      });
+    } else if (userPost.type === "Reply") {
+      deleteCommentReply(userPost.id).then(() => {
+        setProductComments((prev) =>
+          prev.map((comment) =>
+            comment.id === userPost.comment
+              ? {
+                  ...comment,
+                  replies: comment.replies.filter((r) => r.id !== userPost.id),
+                }
+              : comment
+          )
         );
         handleClose();
       });
@@ -124,10 +122,13 @@ const DeletePostPopup = ({
               </button>
               <button
                 onClick={handleSubmit}
-                className="px-4 py-3 cursor-pointer bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-xl font-semibold flex items-center justify-center hover:from-red-700 hover:to-rose-700 transition-colors duration-300 shadow-lg hover:shadow-red-500/25"
+                disabled={isDeleting}
+                className={`px-4 py-3 cursor-pointer bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-xl font-semibold flex items-center justify-center hover:from-red-700 hover:to-rose-700 transition-colors duration-300 shadow-lg hover:shadow-red-500/25 ${
+                  isDeleting ? "opacity-50 cursor-not-allowed" : ""
+                }`}
               >
                 <FiTrash2 className="mr-2 mb-0.5" />
-                Delete
+                {isDeleting ? "Deleting..." : "Delete"}
               </button>
             </div>
           </div>

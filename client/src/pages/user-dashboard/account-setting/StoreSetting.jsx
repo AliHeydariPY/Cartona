@@ -1,7 +1,7 @@
+import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { motion } from "framer-motion";
 
 import {
   FiMapPin,
@@ -28,9 +28,16 @@ const StoreSetting = () => {
   useEffect(() => {
     if (!user) return;
 
-    getStorekeeper(user.username).then((res) => {
-      setStoreInfo(res.data);
-    });
+    const fetchStore = async () => {
+      try {
+        const res = await getStorekeeper(user.username);
+        setStoreInfo(res.data);
+      } catch {
+        errorToast("Failed to fetch store info");
+      }
+    };
+
+    fetchStore();
   }, [user]);
 
   const SellerSchema = Yup.object().shape({
@@ -57,6 +64,7 @@ const StoreSetting = () => {
         );
       }),
   });
+
   if (!user || !storeInfo) return null;
 
   const initialValues = {
@@ -66,10 +74,7 @@ const StoreSetting = () => {
     image: null,
   };
 
-  const handleSubmit = (
-    values,
-    { setSubmitting, resetForm, setFieldValue }
-  ) => {
+  const handleSubmit = (values, { setSubmitting, setFieldValue }) => {
     const formData = new FormData();
     formData.append("store_name", values.storeName);
     formData.append("description", values.description);
@@ -90,9 +95,6 @@ const StoreSetting = () => {
         setFieldValue("description", res.data.description);
         setFieldValue("address", res.data.address);
         setFieldValue("image", null);
-
-        setSubmitting(false);
-        // resetForm();
       })
       .catch((err) => {
         const errorMessage =
@@ -102,9 +104,8 @@ const StoreSetting = () => {
           "Update failed. Please try again.";
 
         errorToast(errorMessage);
-
-        setSubmitting(false);
-      });
+      })
+      .finally(() => setSubmitting(false));
   };
 
   return (
@@ -221,7 +222,10 @@ const StoreSetting = () => {
 
               <div className="space-y-1 sm:space-y-2">
                 <label className="flex items-center text-blue-800 font-medium text-sm sm:text-base">
-                  <FiMapPin className="mr-1 sm:mr-2 flex-shrink-0" size={14} />
+                  <FiMapPin
+                    className="mr-1 sm:mr-2 flex-shrink-0 mb-0.5"
+                    size={14}
+                  />
                   Store Address*
                 </label>
                 <Field
@@ -251,7 +255,10 @@ const StoreSetting = () => {
 
               <div className="space-y-1 sm:space-y-2">
                 <label className="flex items-center text-blue-800 font-medium text-sm sm:text-base">
-                  <FiImage className="mr-1 sm:mr-2 flex-shrink-0" size={14} />
+                  <FiImage
+                    className="mr-1 sm:mr-2 flex-shrink-0 mb-0.5"
+                    size={14}
+                  />
                   Store Image
                 </label>
                 <div className="space-y-3">
