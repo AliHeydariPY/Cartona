@@ -1,5 +1,4 @@
-import { convertOffsetToTimes, motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { useParams } from "react-router-dom";
 
 import CartonaLoader from "../components/CartonaLoader";
@@ -10,111 +9,39 @@ import ProductSeller from "../components/product-detail/ProductSeller";
 
 import { IoCartOutline } from "react-icons/io5";
 
-import {
-  getProduct,
-  getProducImages,
-  getProductFeatures,
-} from "../services/productAPIServices";
-import {
-  getComments,
-  getProductQuestions,
-  getCommentReplies,
-} from "../services/commentAPIServices";
-import { getStorekeeperById, getUser } from "../services/userAPIServices";
 import ProductNotFound from "../components/ProductNotFound";
 import Navbar from "../components/Navbar";
 import BottomNav from "../components/BottomNav";
+import { useProductDetails } from "../hooks/useProductDetails";
 
 const ProductDetails = () => {
   const { id } = useParams();
+  const {
+    product,
+    productComments,
+    productQuestions,
+    seller,
+    user,
+    isLoading,
+    notFound,
+    setProductComments,
+    setProductQuestions,
+  } = useProductDetails(id);
 
-  const [product, setProduct] = useState(null);
-  const [productComments, setProductComments] = useState(null);
-  const [productQuestions, setProductQuestions] = useState(null);
-  const [seller, setSeller] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [notFound, setNotFound] = useState(false);
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const selectedProduct = await getProduct(id);
-        let prodcutData = { ...selectedProduct.data };
-
-        try {
-          const productImgs = await getProducImages(id);
-
-          prodcutData.images_set = productImgs.data;
-        } catch {
-          prodcutData.images_set = [];
-        }
-
-        try {
-          const productsFeatures = await getProductFeatures(id);
-
-          prodcutData.features_set = productsFeatures.data;
-        } catch {
-          prodcutData.features_set = [];
-        }
-
-        setProduct(prodcutData);
-
-        const seller = getStorekeeperById(selectedProduct.data.storekeeper);
-        seller.then((res) => {
-          setSeller(res.data);
-        });
-
-        try {
-          const comments = await getComments(id);
-          const commentsWithReplies = await Promise.all(
-            comments.data.map(async (comment) => {
-              try {
-                const repliesResponse = await getCommentReplies(comment.id);
-                const replies = repliesResponse.data;
-                return { ...comment, replies };
-              } catch {
-                return { ...comment };
-              }
-            })
-          );
-          setProductComments(commentsWithReplies);
-        } catch {
-          setProductComments([]);
-        }
-
-        try {
-          const allQuestions = await getProductQuestions();
-          const questions = allQuestions.data.map((qus) => {
-            return qus.product == id ? qus : null;
-          });
-
-          setProductQuestions(questions.filter(Boolean));
-        } catch {
-          setProductQuestions([]);
-        }
-        setIsLoading(false);
-      } catch {
-        setNotFound(true);
-      }
-    };
-    fetchData();
-  }, [id]);
-
-  useEffect(() => {
-    getUser().then((res) => {
-      setUser([res.data[0] ? res.data[0] : "not found"]);
-    });
-  }, []);
-
-  if (notFound) return <ProductNotFound />;
+  if (notFound)
+    return (
+      <>
+        <Navbar />
+        <ProductNotFound />
+      </>
+    );
 
   return (
     <div className="bg-white/95 sm:bg-blue-100">
       <CartonaLoader isLoading={isLoading} />
       <Navbar />
 
-      {product && productComments && seller && productQuestions && user[0] && (
+      {product && productComments && seller && productQuestions && (
         <div className="min-h-screen flex justify-center p-0 sm:p-4 sm:pb-20 md:p-4">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
