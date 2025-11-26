@@ -4,6 +4,7 @@ import { Portal } from "react-portal";
 import { FiX } from "react-icons/fi";
 import { BiCollection } from "react-icons/bi";
 import { createCollection } from "../../services/productAPIServices";
+import { errorToast } from "../../utils/toast";
 
 const CreateCollectionPopup = ({
   onClose,
@@ -13,6 +14,7 @@ const CreateCollectionPopup = ({
 }) => {
   const [name, setName] = useState("");
   const [show, setShow] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     setTimeout(() => setShow(true), 10);
@@ -25,21 +27,21 @@ const CreateCollectionPopup = ({
 
   const stopPropagation = (e) => e.stopPropagation();
 
-  const handleSubmit = () => {
-    if (name.trim() === "") return;
-
-    createCollection({
-      collection_name: name,
-    }).then((res) => {
+  const handleSubmit = async () => {
+    if (name.trim() === "" || isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      const res = await createCollection({ collection_name: name });
       const created = res.data;
-
       setCollections((prev) => [...prev, created]);
-
       setSelectedCollection(created);
       setFieldValue("collection", created.id);
-
       handleClose();
-    });
+    } catch {
+      errorToast("Failed to create collection. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -92,14 +94,17 @@ const CreateCollectionPopup = ({
             <div className="flex flex-col sm:flex-row-reverse gap-2 sm:gap-3">
               <button
                 onClick={handleSubmit}
+                disabled={isSubmitting}
                 className="flex items-center justify-center px-4 cursor-pointer py-3 sm:py-2 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white gap-2 transition-colors duration-200"
               >
-                Create
+                {isSubmitting ? "Creating..." : "Create"}
               </button>
 
               <button
                 onClick={handleClose}
-                className="px-4 py-3 sm:py-2 cursor-pointer rounded-lg border border-blue-300 text-blue-700 hover:bg-blue-50 transition-colors duration-200"
+                className={`px-4 py-3 sm:py-2 cursor-pointer rounded-lg border border-blue-300 text-blue-700 hover:bg-blue-50 transition-colors duration-200 ${
+                  isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+                }`}
               >
                 Cancel
               </button>

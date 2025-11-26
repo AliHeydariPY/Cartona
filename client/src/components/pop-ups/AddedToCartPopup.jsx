@@ -2,12 +2,7 @@ import { useEffect, useState } from "react";
 import { Portal } from "react-portal";
 import { useNavigate } from "react-router-dom";
 
-import {
-  FiCheck,
-  FiX,
-  FiChevronRight,
-  FiStar,
-} from "react-icons/fi";
+import { FiCheck, FiX, FiChevronRight, FiStar } from "react-icons/fi";
 import { IoCartOutline } from "react-icons/io5";
 
 const AddToCartPopup = ({ onClose, product }) => {
@@ -16,7 +11,8 @@ const AddToCartPopup = ({ onClose, product }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    setTimeout(() => setShow(true), 10);
+    const timer = setTimeout(() => setShow(true), 10);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleClose = () => {
@@ -46,7 +42,7 @@ const AddToCartPopup = ({ onClose, product }) => {
             <div className="flex justify-between items-center">
               <h3 className="text-xl font-bold flex items-center ">
                 <FiCheck
-                strokeWidth={4}
+                  strokeWidth={4}
                   className="mr-2 bg-white/30 text-white rounded-full p-1"
                   size={28}
                 />
@@ -71,11 +67,11 @@ const AddToCartPopup = ({ onClose, product }) => {
                 />
               </div>
               <div className="ml-3">
-                <h4 className="font-bold text-blue-900">
-                  {product.name}
-                </h4>
-                
-                <p className="text-blue-600">${Number(product.price).toFixed(2)}</p>
+                <h4 className="font-bold text-blue-900">{product.name}</h4>
+
+                <p className="text-blue-600">
+                  ${Number(product.price).toFixed(2)}
+                </p>
 
                 <div className="flex items-center mt-0.5 gap-2">
                   <div className="flex text-sm items-center bg-blue-100 px-2 py-1 rounded-full">
@@ -84,7 +80,6 @@ const AddToCartPopup = ({ onClose, product }) => {
                       {product.average_rating?.toFixed(1) || "0"}
                     </span>
                   </div>
-                 
                 </div>
               </div>
             </div>

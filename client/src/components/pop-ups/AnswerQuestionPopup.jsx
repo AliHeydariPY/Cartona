@@ -5,13 +5,16 @@ import { FiX } from "react-icons/fi";
 import { RiQuestionAnswerLine } from "react-icons/ri";
 import { RiSendPlaneFill } from "react-icons/ri";
 import { answerProductQuestion } from "../../services/commentAPIServices";
+import { errorToast } from "../../utils/toast";
 
 const AnswerQuestionPopup = ({ onClose, userPost, setProductQuestions }) => {
   const [answer, setAnswer] = useState("");
   const [show, setShow] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    setTimeout(() => setShow(true), 10);
+    const timer = setTimeout(() => setShow(true), 10);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleClose = () => {
@@ -21,26 +24,25 @@ const AnswerQuestionPopup = ({ onClose, userPost, setProductQuestions }) => {
 
   const stopPropagation = (e) => e.stopPropagation();
 
-  const handleSubmit = () => {
+
+  const handleSubmit = async () => {
     if (answer.trim() === "") return;
-    answerProductQuestion(
-      {
-        answer_text: answer,
-      },
-      userPost.id
-    ).then((res) => {
-      setProductQuestions((prevQuestions) =>
-        prevQuestions.map((qst) => {
-          if (qst.id == res.data.id) {
-            return res.data;
-          } else {
-            return qst;
-          }
-        })
+    setIsSubmitting(true);
+    try {
+      const res = await answerProductQuestion(
+        { answer_text: answer },
+        userPost.id
+      );
+      setProductQuestions((prev) =>
+        prev.map((q) => (q.id === res.data.id ? res.data : q))
       );
       setAnswer("");
       handleClose();
-    });
+    } catch {
+      errorToast("Failed to submit the answer. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -92,10 +94,11 @@ const AnswerQuestionPopup = ({ onClose, userPost, setProductQuestions }) => {
             <div className="flex flex-col sm:flex-row-reverse gap-2 sm:gap-3">
               <button
                 onClick={handleSubmit}
-                className="flex items-center justify-center px-4 cursor-pointer py-3 sm:py-2 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white gap-2 transition-colors duration-200"
+                disabled={isSubmitting}
+                className={`flex items-center justify-center px-4 cursor-pointer py-3 sm:py-2 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white gap-2 transition-colors duration-200 ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
               >
                 <RiSendPlaneFill size={18} className="mb-0.5" />
-                Submit
+                {isSubmitting ? "Submitting..." : "Submit"}
               </button>
               <button
                 onClick={handleClose}
