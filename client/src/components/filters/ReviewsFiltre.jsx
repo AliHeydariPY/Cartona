@@ -22,7 +22,7 @@ const ReviewsFiltre = ({ minMaxComments, values, setFieldValue }) => {
             const currentMax = values.max_comments ?? maxComments;
 
             if (!(v === 0 && currentMax === 0) && v >= currentMax) {
-              v = currentMax - 1;
+              v = currentMax;
             }
 
             setFieldValue("min_comments", v);
@@ -43,13 +43,19 @@ const ReviewsFiltre = ({ minMaxComments, values, setFieldValue }) => {
             let v = Number(e.target.value);
             const currentMin = values.min_comments;
 
-            if ((currentMin === undefined || currentMin === null || currentMin === 0) && v === 0) {
+            if (
+              (currentMin === undefined ||
+                currentMin === null ||
+                currentMin === 0) &&
+              v === 0
+            ) {
               setFieldValue("max_comments", 0);
               return;
             }
 
             const safeMin = currentMin ?? 0;
-            if (v <= safeMin) {
+
+            if (v <= safeMin && v != 0) {
               v = safeMin + 1;
             }
 

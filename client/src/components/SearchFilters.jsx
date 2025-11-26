@@ -189,6 +189,8 @@ const SearchFilters = () => {
     );
   }
 
+  if (!minMaxPrice[0]) return;
+
   return (
     <div className="mb-6 xl:col-span-2 2xl:col-span-1">
       <div className="flex w-full justify-between items-center mb-4 xl:hidden">
@@ -212,8 +214,10 @@ const SearchFilters = () => {
 
           let url;
 
-          if (cat) {
+          if (cat.id) {
             if (params.has("search")) {
+              console.log(cat.id);
+
               url = buildUrl({ ...values, category: cat.id });
             } else {
               if (values.storekeeper) {
@@ -227,7 +231,7 @@ const SearchFilters = () => {
               }
             }
           } else {
-            url = buildUrl({ ...values, storekeeper: "" });
+            url = buildUrl({ ...values, storekeeper: "", category: "" });
           }
           navigate(`/search/${url}`);
         }}
@@ -352,9 +356,14 @@ const SearchFilters = () => {
                           <FiDollarSign className="text-green-500 mb-0.5" />
                           <h3 className="font-semibold ml-2">Price Range</h3>
 
-                          {(values.min_price || values.max_price) && (
-                            <span className="ml-2 w-2 h-2 rounded-full bg-green-500" />
-                          )}
+                          {values.min_price &&
+                            values.max_price &&
+                            (values.min_price !=
+                              minMaxPrice[0]?.split(".")[0] ||
+                              values.max_price !=
+                                Number(minMaxPrice[1].split(".")[0]) + 1) && (
+                              <span className="ml-2 w-2 h-2 rounded-full bg-green-500" />
+                            )}
 
                           <FiChevronDown
                             className={`ml-2 transform ${
