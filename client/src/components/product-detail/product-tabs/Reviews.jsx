@@ -126,7 +126,7 @@ const Reviews = ({ setProductComments, productComments, user }) => {
           setProductComments([
             {
               id: res.data.id,
-              user: user[0].username,
+              user: user?.username,
               text: commentText,
               rating: showRating ? selectedStars : null,
               product: id,
@@ -136,15 +136,14 @@ const Reviews = ({ setProductComments, productComments, user }) => {
 
           successToast("Your review was successfully sent");
         })
-        .catch((err) => {
+        .catch((error) => {
           setCommentText("");
           setSelectedStars(1);
           setShowRating(false);
           const errorMessage =
-            err.response.data.detail == "Refresh token not found."
+            error.response.data.detail.includes("token")
               ? "To submit a review, first log in to your account"
-              : err.response.data.rating;
-
+              : error.response.data.rating;
           errorToast(errorMessage);
         });
     }
@@ -269,7 +268,7 @@ const Reviews = ({ setProductComments, productComments, user }) => {
         )}
 
         {productComments.slice(0, visibleCount).map((comment) => {
-          const isUserReview = comment.user == user[0].username;
+          const isUserReview = comment.user == user?.username;
           return (
             <div key={comment.id} className="space-y-2 xs:space-y-3">
               <div
@@ -425,7 +424,7 @@ const Reviews = ({ setProductComments, productComments, user }) => {
                       className="ml-2 xs:ml-4 sm:ml-6 space-y-2 xs:space-y-3 mt-2 xs:mt-3"
                     >
                       {comment.replies.map((reply) => {
-                        const isUserReply = reply.user == user[0].username;
+                        const isUserReply = reply.user == user?.username;
 
                         return (
                           <div

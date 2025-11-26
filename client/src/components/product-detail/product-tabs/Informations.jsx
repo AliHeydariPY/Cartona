@@ -1,13 +1,14 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import { containerVariants, itemVariants } from "../../../utils/animations";
 import {
   getCollection,
   getProduct,
 } from "../../../services/productAPIServices";
-import { FiPackage, FiArrowRight, FiZap, FiStar } from "react-icons/fi";
 
-import { useNavigate } from "react-router-dom";
+import { FiPackage, FiArrowRight, FiZap, FiStar } from "react-icons/fi";
 
 const Informations = ({ product }) => {
   const [collectionProductds, setCollectionProductds] = useState(null);

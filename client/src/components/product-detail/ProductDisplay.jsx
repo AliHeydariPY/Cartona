@@ -104,7 +104,7 @@ const ProductDisplay = ({ product }) => {
       const response = await addFavorite(productId);
       setFavoriteEntry(response.data);
     } catch (error) {
-      if (error.response.data.detail == "Refresh token not found.") {
+      if (error.response.data.detail.includes("token")) {
         errorToast("You need to log in first");
       } else {
         errorToast("Failed to add to favorites");
@@ -147,21 +147,6 @@ const ProductDisplay = ({ product }) => {
               className="w-full h-full object-cover"
             />
           </button>
-          {/* <div
-            key="main-image"
-            onClick={() => setCurrentImage(product.image)}
-            className={`flex-shrink-0 w-14 h-14 md:w-18 md:h-18 cursor-pointer overflow-hidden rounded-lg ${
-              currentImage === product.image || !currentImage
-                ? "ring-2 ring-blue-400"
-                : ""
-            }`}
-          >
-            <img
-              src={product.image}
-              alt={`Product Main`}
-              className="w-full h-full object-cover"
-            />
-          </div> */}
 
           {product.images_set?.map((image, index) => (
             <button
@@ -180,21 +165,6 @@ const ProductDisplay = ({ product }) => {
               />
             </button>
           ))}
-          {/* {product.images_set.map((img, index) => (
-            <div
-              key={img.id}
-              onClick={() => setCurrentImage(img.image)}
-              className={`flex-shrink-0 w-14 h-14 md:w-18 md:h-18 cursor-pointer overflow-hidden rounded-lg ${
-                currentImage === img.image ? "ring-2 ring-blue-400" : ""
-              }`}
-            >
-              <img
-                src={img.image}
-                alt={`Product ${index + 1}`}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          ))} */}
         </div>
       </div>
 
@@ -310,27 +280,6 @@ const ProductDisplay = ({ product }) => {
             </button>
           )}
         </div>
-
-        {/* <div className="mt-6 space-y-3">
-          <h3 className="font-semibold text-blue-900 border-b pb-2">
-            Specifications
-          </h3>
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <div>
-              <span className="text-blue-600">Brand:</span> {product.brand}
-            </div>
-            <div>
-              <span className="text-blue-600">SKU:</span> {product.sku}
-            </div>
-            <div>
-              <span className="text-blue-600">Weight:</span> {product.weight}
-            </div>
-            <div>
-              <span className="text-blue-600">Dimensions:</span>{" "}
-              {product.dimensions}
-            </div>
-          </div>
-        </div> */}
 
         <div className="mt-6 flex items-center justify-between border-t border-blue-500 pt-4">
           <span className="text-sm text-blue-600">Share this product:</span>

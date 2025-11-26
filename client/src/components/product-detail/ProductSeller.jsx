@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { FiBell, FiBellOff } from "react-icons/fi";
 import { GrLocation } from "react-icons/gr";
@@ -9,46 +10,48 @@ import {
   enableNotifications,
   disableNotifications,
 } from "../../services/commentAPIServices";
-import { useNavigate } from "react-router-dom";
+import { errorToast } from "../../utils/toast";
 
 const ProductSeller = ({ seller }) => {
   const navigate = useNavigate();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
   useEffect(() => {
+    if (!seller?.id) return;
+
     getSubscriptions()
       .then((res) => {
-        const hasSubscription = res.data.find((subscription) => {
-          return subscription.storekeeper == seller.id;
-        });
-
-        if (hasSubscription) {
-          setNotificationsEnabled(true);
-        } else {
-          setNotificationsEnabled(false);
-        }
+        const isSubscribed = res.data.some(
+          (sub) => sub.storekeeper === seller.id
+        );
+        setNotificationsEnabled(isSubscribed);
       })
-      .catch(() => {
-        setNotificationsEnabled(false);
-      });
-  }, [notificationsEnabled]);
+      .catch(() => setNotificationsEnabled(false));
+  }, [seller?.id]);
 
-  const toggleNotifications = () => {
-    if (notificationsEnabled) {
-      getSubscriptions().then((res) => {
-        const selectedSubscription = res.data.find((subscription) => {
-          return subscription.storekeeper == seller.id;
-        });
-        disableNotifications(selectedSubscription.id).then(() => {
-          setNotificationsEnabled(false);
-        });
-      });
-    } else {
-      enableNotifications({
-        storekeeper: seller.id,
-      }).then(() => {
+  const toggleNotifications = async () => {
+    try {
+      if (notificationsEnabled) {
+        const subs = await getSubscriptions();
+        const selectedSubscription = subs.data.find(
+          (s) => s.storekeeper === seller.id
+        );
+
+        if (selectedSubscription) {
+          await disableNotifications(selectedSubscription.id);
+        }
+
+        setNotificationsEnabled(false);
+      } else {
+        await enableNotifications({ storekeeper: seller.id });
         setNotificationsEnabled(true);
-      });
+      }
+    } catch (error) {
+      const message =
+        error.response.data.detail.includes("token")
+          ? "Please sign in to access this feature"
+          : "There is a problem";
+      errorToast(message);
     }
   };
 

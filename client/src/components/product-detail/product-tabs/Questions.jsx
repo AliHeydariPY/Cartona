@@ -36,12 +36,11 @@ const Questions = ({ productQuestions, seller, user, setProductQuestions }) => {
           setQuestionText("");
           successToast("Your question was successfully sent");
         })
-        .catch((err) => {
+        .catch((error) => {
           const errorMessage =
-            err.response.data.detail == "Refresh token not found."
+            error.response.data.detail.includes("token")
               ? "To ask a question, first log in to your account"
-              : err.response.data.detail;
-
+              : error.response.data.non_field_errors;
           errorToast(errorMessage);
         });
     } else {
@@ -69,20 +68,6 @@ const Questions = ({ productQuestions, seller, user, setProductQuestions }) => {
       </div>
     ));
   };
-
-  if (!user) {
-    return (
-      <div className="mt-6 col-span-2 2xl:col-span-1">
-        <div className="w-full bg-white/80 backdrop-blur-lg rounded-2xl p-4 border border-white/30 shadow-lg">
-          <div className="animate-pulse">
-            <div className="h-6 bg-blue-200 rounded w-1/3 mb-4"></div>
-            <div className="h-4 bg-blue-200 rounded w-full mb-2"></div>
-            <div className="h-4 bg-blue-200 rounded w-2/3 "></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <motion.div
@@ -129,7 +114,7 @@ const Questions = ({ productQuestions, seller, user, setProductQuestions }) => {
             </div>
           ) : (
             productQuestions.slice(0, visibleCount).map((faq) => {
-              const isUserQuestion = faq.user == user[0].username;
+              const isUserQuestion = faq.user == user?.username;
 
               return (
                 <div
@@ -162,7 +147,7 @@ const Questions = ({ productQuestions, seller, user, setProductQuestions }) => {
                         </span>
                       )}
 
-                      {user[0].username == seller.user && !faq.answer_text && (
+                      {user?.username == seller.user && !faq.answer_text && (
                         <button
                           className="p-1.5 xs:p-2 cursor-pointer rounded-full hover:bg-blue-100 text-blue-600 transition-colors duration-300 flex-shrink-0"
                           onClick={() => {
@@ -199,7 +184,7 @@ const Questions = ({ productQuestions, seller, user, setProductQuestions }) => {
                         </button>
                       )}
 
-                      {(user[0].username == seller.user || isUserQuestion) && (
+                      {(user?.username == seller.user || isUserQuestion) && (
                         <button
                           className="p-1.5 xs:p-2 cursor-pointer rounded-full hover:bg-rose-100 text-rose-500 transition-colors duration-300 flex-shrink-0"
                           onClick={() => {

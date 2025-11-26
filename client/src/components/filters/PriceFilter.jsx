@@ -12,6 +12,12 @@ const PriceFilter = ({ minMaxPrice, values, setFieldValue }) => {
   const [safeMin, setSafeMin] = useState(minPrice);
   const [safeMax, setSafeMax] = useState(maxPrice);
 
+  console.log(values.min_price )
+  console.log(minMaxPrice[0].split(".")[0])
+
+  console.log(values.max_price )
+  console.log(Number(minMaxPrice[1].split(".")[0]) +1)
+
   useEffect(() => {
     setFieldValue(
       "min_price",
@@ -27,7 +33,7 @@ const PriceFilter = ({ minMaxPrice, values, setFieldValue }) => {
       setSafeMax(rawMin + 1);
 
       setFieldValue("min_price", rawMin);
-      setFieldValue("max_price", rawMin + 1);
+      setFieldValue("max_price", rawMin);
     } else {
       setSafeMin(
         values.min_price > minPrice ? values.min_price || minPrice : minPrice

@@ -82,8 +82,7 @@ const SearchPage = () => {
       const res = await addFavorite(productId);
       setFavorites((prev) => [...prev, res.data]);
     } catch (error) {
-      const msg = error?.response?.data?.detail;
-      if (msg === "Refresh token not found.") {
+      if (error.response.data.detail.includes("token")) {
         errorToast("You need to log in first");
       } else {
         errorToast("Failed to add to favorites");

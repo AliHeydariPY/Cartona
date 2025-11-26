@@ -115,7 +115,7 @@ const ProductsCarousel = ({ featuredProducts }) => {
       const response = await addFavorite(productId);
       setFavorites((prev) => [...prev, response.data]);
     } catch (error) {
-      if (error.response.data.detail == "Refresh token not found.") {
+      if (error.response.data.detail.includes("token")) {
         errorToast("You need to log in first");
       } else {
         errorToast("Failed to add to favorites");

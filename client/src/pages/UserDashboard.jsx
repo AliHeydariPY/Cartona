@@ -216,21 +216,18 @@ const UserDashboard = () => {
         <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-xl p-4 sm:p-6 2xl:p-8 h-fit border border-blue-400 hover:shadow-lg hover:shadow-blue-400/50 transition-all duration-300">
           <nav className="space-y-3 sm:space-y-4">
             {navItems.map((item, idx) => (
-              <button
+              <Link
                 key={idx}
+                to={item.id === "home" ? "/" : `/account/${item.id}`}
                 className={`w-full flex cursor-pointer items-center p-3 sm:p-4 rounded-xl font-semibold text-sm sm:text-base transition-all duration-300 ${
                   location.pathname.includes(`/account/${item.id}`)
                     ? "bg-gradient-to-r from-cyan-200 to-blue-400 text-blue-900 shadow-md"
                     : "hover:bg-gradient-to-r hover:from-cyan-100 hover:to-blue-200 text-blue-800 transition-colors duration-300"
                 }`}
-                onClick={() => {
-                  const path = item.id === "home" ? "/" : `/account/${item.id}`;
-                  navigate(path);
-                }}
               >
                 <span>{item.icon}</span>
                 <span className="ml-2 mt-0.25">{item.label}</span>
-              </button>
+              </Link>
             ))}
           </nav>
 
@@ -239,7 +236,7 @@ const UserDashboard = () => {
               <div className="flex items-center mb-3 sm:mb-4">
                 <span>
                   <MdStorefront
-                    className="text-blue-700 mr-2 lg:mr-1 xl:mr-2"
+                    className="text-blue-700 mr-2 lg:mr-1 xl:mr-2 mb-0.5"
                     size={20}
                   />
                 </span>

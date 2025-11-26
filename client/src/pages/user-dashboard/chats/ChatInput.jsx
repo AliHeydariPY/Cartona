@@ -21,6 +21,7 @@ export default function ChatInput({
   selectedChat,
   emojiBox,
   setEmojiBox,
+  bumpConversation
 }) {
   const [textareaHeight, setTextareaHeight] = useState(0);
   const textareaRef = useRef();
@@ -65,6 +66,7 @@ export default function ChatInput({
       .then((res) => {
         fetchMessages(res.data.purchase);
         setMessage("");
+        bumpConversation(chatID);
       })
       .catch((err) => {
         setMessage("");
