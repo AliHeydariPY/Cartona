@@ -89,7 +89,7 @@ const DeleteImagePopup = ({ onClose, image, removeImage }) => {
                 }`}
               >
                 <FiTrash2 className="mr-2 mb-0.5" />
-                {isDeleting ? "Removing..." : "Remove"}
+                {isDeleting ? "Deleting..." : "Delete"}
               </button>
             </div>
           </div>

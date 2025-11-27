@@ -1,15 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useAtom } from "jotai";
 
-import {
-  getCartProducts,
-  addToCart,
-  getFavorites,
-  deleteFavorite,
-  addFavorite,
-  deleteCartProduct,
-} from "../../services/cartAPIServices";
+import { getCartProducts, getFavorites } from "../../services/cartAPIServices";
 
 import { FiHeart, FiStar, FiShare2 } from "react-icons/fi";
 import { BiSolidOffer } from "react-icons/bi";
@@ -18,17 +10,22 @@ import { IoCart, IoCartOutline } from "react-icons/io5";
 
 import ProductImageCarousel from "../ProductImageCarousel";
 
-import { errorToast, successToast } from "../../utils/toast";
-import { addToCartPopupAtom, selectedProductAtom } from "../../atoms/popupAtom";
+import { successToast } from "../../utils/toast";
+import { useProductDetailActions } from "../../hooks/useProductDetailActions";
 
 const ProductDisplay = ({ product }) => {
   const { id } = useParams();
-  const [, setAddToCartPopup] = useAtom(addToCartPopupAtom);
-  const [, setSelectedProduct] = useAtom(selectedProductAtom);
 
   const [currentImage, setCurrentImage] = useState(null);
   const [isInCart, setIsInCart] = useState();
   const [favoriteEntry, setFavoriteEntry] = useState(null);
+
+  const {
+    addToCartHandler,
+    removeFromCartHandler,
+    addFavoriteHandler,
+    removeFavoriteHandler,
+  } = useProductDetailActions(product, isInCart, setIsInCart, setFavoriteEntry);
 
   const [showImages, setShowImages] = useState(false);
   const [mainImage, setMainImage] = useState([]);
@@ -53,64 +50,6 @@ const ProductDisplay = ({ product }) => {
 
     fetchCartItems();
   }, []);
-
-  const handleAddToCart = async () => {
-    try {
-      setSelectedProduct(() => {
-        const currentPrice = product.discounted_price
-          ? product.discounted_price
-          : product.price;
-        const payload = {
-          image: product.image,
-          name: product.name,
-          price: currentPrice,
-          average_rating: product.average_rating,
-        };
-
-        return payload;
-      });
-
-      const response = await addToCart({
-        product: id,
-        quantity: 1,
-      });
-      setIsInCart(response.data);
-      setAddToCartPopup(true);
-    } catch {
-      errorToast("Failed to add product to cart");
-    }
-  };
-
-  const handleRemoveFromCart = async () => {
-    try {
-      await deleteCartProduct(isInCart.id);
-      setIsInCart(null);
-    } catch {
-      errorToast("Failed to remove product from cart");
-    }
-  };
-
-  const handleRemoveFavorite = async (favoriteId) => {
-    try {
-      await deleteFavorite(favoriteId);
-      setFavoriteEntry(undefined);
-    } catch {
-      errorToast("Failed to remove from favorites");
-    }
-  };
-
-  const handleAddFavorite = async (productId) => {
-    try {
-      const response = await addFavorite(productId);
-      setFavoriteEntry(response.data);
-    } catch (error) {
-      if (error.response.data.detail.includes("token")) {
-        errorToast("You need to log in first");
-      } else {
-        errorToast("Failed to add to favorites");
-      }
-    }
-  };
 
   return (
     <div className="grid md:grid-cols-2 gap-4 md:gap-8 mb-6 md:mb-8">
@@ -240,7 +179,7 @@ const ProductDisplay = ({ product }) => {
         <div className="flex flex-col sm:flex-row gap-3 md:gap-1 lg:gap-4">
           {isInCart ? (
             <button
-              onClick={handleRemoveFromCart}
+              onClick={removeFromCartHandler}
               className="flex-1 text-base md:text-sm lg:text-base cursor-pointer py-3 rounded-lg sm:rounded-xl font-semibold transition-colors duration-300 flex items-center justify-center bg-gradient-to-r from-red-600 to-rose-500 hover:from-red-700 hover:to-rose-700 text-white"
             >
               <IoCart
@@ -251,7 +190,7 @@ const ProductDisplay = ({ product }) => {
             </button>
           ) : (
             <button
-              onClick={handleAddToCart}
+              onClick={addToCartHandler}
               className="flex-1 text-base md:text-sm lg:text-base cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white py-3 rounded-lg sm:rounded-xl font-semibold transition-colors duration-300 flex items-center justify-center"
             >
               <IoCartOutline
@@ -264,7 +203,7 @@ const ProductDisplay = ({ product }) => {
 
           {favoriteEntry ? (
             <button
-              onClick={() => handleRemoveFavorite(favoriteEntry.id)}
+              onClick={() => removeFavoriteHandler(favoriteEntry.id)}
               className="flex-1 text-base md:text-sm lg:text-base cursor-pointer py-3 rounded-lg sm:rounded-xl font-semibold transition-colors duration-300 flex items-center justify-center bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white"
             >
               <FaHeart className="mr-1.5 md:mr-0.5 lg:mr-1.5 mb-0.5" /> Remove
@@ -272,7 +211,7 @@ const ProductDisplay = ({ product }) => {
             </button>
           ) : (
             <button
-              onClick={() => handleAddFavorite(product.id)}
+              onClick={() => addFavoriteHandler(product.id)}
               className="flex-1 text-base md:text-sm lg:text-base cursor-pointer bg-white ring ring-rose-300 text-rose-600 py-3 rounded-lg sm:rounded-xl font-medium hover:bg-rose-50 transition-colors duration-300 flex items-center justify-center"
             >
               <FiHeart className=" mr-1.5 md:mr-0.5 lg:mr-1.5 mb-0.5 text-rose-500" />{" "}

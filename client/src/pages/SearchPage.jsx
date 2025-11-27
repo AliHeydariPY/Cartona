@@ -15,12 +15,8 @@ import BottomNav from "../components/BottomNav";
 import ProductNotFound from "../components/ProductNotFound";
 
 import { getListProducts, searchProduct } from "../services/productAPIServices";
-import {
-  addFavorite,
-  deleteFavorite,
-  getFavorites,
-} from "../services/cartAPIServices";
-import { errorToast } from "../utils/toast";
+import { getFavorites } from "../services/cartAPIServices";
+import { useProductActions } from "../hooks/useProductActions";
 
 const SearchPage = () => {
   const { query } = useParams();
@@ -32,8 +28,10 @@ const SearchPage = () => {
   const [productID, setProductID] = useState(null);
 
   const [isFocus, setIsFocus] = useState(false);
-
   const [notFound, setNotFound] = useState(false);
+
+  const { addFavoriteHandler, removeFavoriteHandler } =
+    useProductActions(setFavorites);
 
   const innerWidth = window.innerWidth;
 
@@ -67,28 +65,6 @@ const SearchPage = () => {
 
     fetchProducts();
   }, [query]);
-
-  const handleRemoveFavorite = async (favoriteId) => {
-    try {
-      await deleteFavorite(favoriteId);
-      setFavorites((prev) => prev.filter((f) => f.id !== favoriteId));
-    } catch {
-      errorToast("Failed to remove from favorites");
-    }
-  };
-
-  const handleAddFavorite = async (productId) => {
-    try {
-      const res = await addFavorite(productId);
-      setFavorites((prev) => [...prev, res.data]);
-    } catch (error) {
-      if (error.response.data.detail.includes("token")) {
-        errorToast("You need to log in first");
-      } else {
-        errorToast("Failed to add to favorites");
-      }
-    }
-  };
 
   const handleShowImagesCarousel = (product) => {
     setProductID(product.id);
@@ -170,7 +146,7 @@ const SearchPage = () => {
                             return favorite ? (
                               <button
                                 onClick={() =>
-                                  handleRemoveFavorite(favorite.id)
+                                  removeFavoriteHandler(favorite.id)
                                 }
                                 className="p-2 cursor-pointer bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-rose-100 transition-colors duration-200"
                               >
@@ -178,7 +154,7 @@ const SearchPage = () => {
                               </button>
                             ) : (
                               <button
-                                onClick={() => handleAddFavorite(product.id)}
+                                onClick={() => addFavoriteHandler(product.id)}
                                 className="p-2 cursor-pointer bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-rose-100 transition-colors duration-200"
                               >
                                 <FiHeart className="text-rose-500" size={16} />
@@ -220,7 +196,7 @@ const SearchPage = () => {
                             return favorite ? (
                               <button
                                 onClick={() =>
-                                  handleRemoveFavorite(favorite.id)
+                                  removeFavoriteHandler(favorite.id)
                                 }
                                 className="p-2 h-8 cursor-pointer bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-rose-100 transition-colors duration-200"
                               >
@@ -228,7 +204,7 @@ const SearchPage = () => {
                               </button>
                             ) : (
                               <button
-                                onClick={() => handleAddFavorite(product.id)}
+                                onClick={() => addFavoriteHandler(product.id)}
                                 className="p-2 h-8 cursor-pointer bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-rose-100 transition-colors duration-200"
                               >
                                 <FiHeart className="text-rose-500" size={16} />
