@@ -1,76 +1,16 @@
 import { motion } from "framer-motion";
-import { useAtom } from "jotai";
 
 import { FiHeart, FiStar } from "react-icons/fi";
-import {
-  addToCart,
-  deleteCartProduct,
-  deleteFavorite,
-} from "../../services/cartAPIServices";
-import { errorToast } from "../../utils/toast";
 import { PiLightningFill } from "react-icons/pi";
 import { FaClock, FaHeart } from "react-icons/fa";
 import { IoCart, IoCartOutline } from "react-icons/io5";
 
 import { BiSolidOffer } from "react-icons/bi";
-import { addToCartPopupAtom, selectedProductAtom } from "../../atoms/popupAtom";
+import { useProductActions } from "../../hooks/useProductActions";
 
-const RecentFavorites = ({
-  recentFavorites,
-  setRecentFavorites,
-}) => {
-  const [, setAddToCartPopup] = useAtom(addToCartPopupAtom);
-  const [, setSelectedProduct] = useAtom(selectedProductAtom);
-
-  const handleAddToCart = async (selectedProduct) => {
-    try {
-      setSelectedProduct(selectedProduct);
-      const response = await addToCart({
-        product: selectedProduct.id,
-        quantity: 1,
-      });
-      setAddToCartPopup(true);
-      setRecentFavorites(() =>
-        recentFavorites.map((item) => {
-          if (item.product.id == selectedProduct.id) {
-            return { ...item, cartItem: response.data };
-          } else {
-            return { ...item };
-          }
-        })
-      );
-    } catch {
-      errorToast("Failed to add product to cart");
-    }
-  };
-
-  const handleRemoveFromCart = async (favProduct) => {
-    try {
-      await deleteCartProduct(favProduct.cartItem.id);
-      setRecentFavorites(() =>
-        recentFavorites.map((item) => {
-          if (item.id == favProduct.id) {
-            return { ...item, cartItem: null };
-          } else {
-            return item;
-          }
-        })
-      );
-    } catch {
-      errorToast("Failed to remove product from cart");
-    }
-  };
-
-  const handleRemoveFavorite = async (favoriteId) => {
-    try {
-      await deleteFavorite(favoriteId);
-      setRecentFavorites((prev) =>
-        prev.filter((item) => item.id != favoriteId)
-      );
-    } catch {
-      errorToast("Failed to remove from favorites");
-    }
-  };
+const RecentFavorites = ({ recentFavorites, setRecentFavorites }) => {
+  const { addToCartHandler, removeFromCartHandler, removeFavoriteHandler } =
+    useProductActions( setRecentFavorites);
 
   const openInNewTab = (url) => {
     window.open(url, "_blank");
@@ -128,7 +68,7 @@ const RecentFavorites = ({
                   <>
                     <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                       <button
-                        onClick={() => handleRemoveFavorite(fav.id)}
+                        onClick={() => removeFavoriteHandler(fav.id)}
                         className="p-2 cursor-pointer bg-rose-100 rounded-full hover:bg-rose-200 transition-colors duration-300"
                       >
                         <FaHeart className="text-rose-500 " size={16} />
@@ -136,14 +76,14 @@ const RecentFavorites = ({
 
                       {fav.cartItem ? (
                         <button
-                          onClick={() => handleRemoveFromCart(fav)}
+                          onClick={() => removeFromCartHandler(fav)}
                           className="px-1.5 py-1.5 cursor-pointer bg-blue-100 rounded-full hover:bg-blue-200 transition-colors duration-300"
                         >
                           <IoCart className="text-blue-600 " size={20} />
                         </button>
                       ) : (
                         <button
-                          onClick={() => handleAddToCart(product)}
+                          onClick={() => addToCartHandler(product)}
                           className="px-1.5 py-1.5 cursor-pointer bg-blue-100 rounded-full hover:bg-blue-200 transition-colors duration-300"
                         >
                           <IoCartOutline className="text-blue-600" size={20} />
@@ -170,7 +110,7 @@ const RecentFavorites = ({
                   {window.innerWidth <= 1024 && (
                     <div className="flex gap-2  duration-300">
                       <button
-                        onClick={() => handleRemoveFavorite(fav.id)}
+                        onClick={() => removeFavoriteHandler(fav.id)}
                         className="p-2 cursor-pointer bg-rose-100 rounded-full hover:bg-rose-200 transition-colors duration-300"
                       >
                         <FaHeart className="text-rose-500 " size={16} />
@@ -178,14 +118,14 @@ const RecentFavorites = ({
 
                       {fav.cartItem ? (
                         <button
-                          onClick={() => handleRemoveFromCart(fav)}
+                          onClick={() => removeFromCartHandler(fav)}
                           className="px-1.5 cursor-pointer bg-blue-100 rounded-full hover:bg-blue-200 transition-colors duration-300"
                         >
                           <IoCart className="text-blue-600 " size={20} />
                         </button>
                       ) : (
                         <button
-                          onClick={() => handleAddToCart(product)}
+                          onClick={() => addToCartHandler(product)}
                           className="px-1.5 cursor-pointer bg-blue-100 rounded-full hover:bg-blue-200 transition-colors duration-300"
                         >
                           <IoCartOutline className="text-blue-600" size={20} />
@@ -222,7 +162,7 @@ const RecentFavorites = ({
                   <div className="flex items-center gap-2">
                     <div className="flex items-center bg-blue-100 px-2 py-1 rounded-full">
                       <FiStar
-                        className="text-amber-400 fill-amber-400"
+                        className="text-amber-400 fill-amber-400 mb-0.5"
                         size={12}
                       />
                       <span className="text-xs font-medium text-blue-800 ml-1">

@@ -116,7 +116,7 @@ const RemoveProductPopup = ({
                 }`}
               >
                 <FiTrash2 className="mr-2 mb-0.5" />
-                {isDeleting ? "Removing..." : "Deleting..."}
+                {isDeleting ? "Removing..." : "Remove"}
               </button>
             </div>
           </div>

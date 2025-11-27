@@ -12,13 +12,9 @@ import {
 import { BiSolidOffer } from "react-icons/bi";
 import { FaClock, FaHeart } from "react-icons/fa";
 import { PiLightningFill } from "react-icons/pi";
-import { errorToast } from "../../utils/toast";
-import {
-  addFavorite,
-  deleteFavorite,
-  getFavorites,
-} from "../../services/cartAPIServices";
+import { getFavorites } from "../../services/cartAPIServices";
 import ProductImageCarousel from "../ProductImageCarousel";
+import { useProductActions } from "../../hooks/useProductActions";
 
 const ProductsCarousel = ({ featuredProducts }) => {
   const [favorites, setFavorites] = useState([]);
@@ -34,6 +30,9 @@ const ProductsCarousel = ({ featuredProducts }) => {
   const [visibleCount, setVisibleCount] = useState(1);
   const [itemWidthPx, setItemWidthPx] = useState(0);
   const [gapPx, setGapPx] = useState(8);
+
+  const { addFavoriteHandler, removeFavoriteHandler } =
+    useProductActions(setFavorites);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -101,28 +100,6 @@ const ProductsCarousel = ({ featuredProducts }) => {
 
   if (!featuredProducts || featuredProducts.length === 0) return;
 
-  const handleRemoveFavorite = async (favoriteId) => {
-    try {
-      await deleteFavorite(favoriteId);
-      setFavorites((prev) => prev.filter((item) => item.id != favoriteId));
-    } catch {
-      errorToast("Failed to remove from favorites");
-    }
-  };
-
-  const handleAddFavorite = async (productId) => {
-    try {
-      const response = await addFavorite(productId);
-      setFavorites((prev) => [...prev, response.data]);
-    } catch (error) {
-      if (error.response.data.detail.includes("token")) {
-        errorToast("You need to log in first");
-      } else {
-        errorToast("Failed to add to favorites");
-      }
-    }
-  };
-
   const openInNewTab = (url) => {
     window.open(url, "_blank", "noreferrer");
   };
@@ -186,14 +163,14 @@ const ProductsCarousel = ({ featuredProducts }) => {
                         );
                         return favorite ? (
                           <button
-                            onClick={() => handleRemoveFavorite(favorite.id)}
+                            onClick={() => removeFavoriteHandler(favorite.id)}
                             className="p-2 cursor-pointer bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-rose-100 transition-colors duration-200"
                           >
                             <FaHeart className="text-rose-500" size={16} />
                           </button>
                         ) : (
                           <button
-                            onClick={() => handleAddFavorite(product.id)}
+                            onClick={() => addFavoriteHandler(product.id)}
                             className="p-2 cursor-pointer bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-rose-100 transition-colors duration-200"
                           >
                             <FiHeart className="text-rose-500" size={16} />
@@ -236,14 +213,14 @@ const ProductsCarousel = ({ featuredProducts }) => {
                         );
                         return favorite ? (
                           <button
-                            onClick={() => handleRemoveFavorite(favorite.id)}
+                            onClick={() => removeFavoriteHandler(favorite.id)}
                             className="p-2 h-8 cursor-pointer bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-rose-100 transition-colors duration-200"
                           >
                             <FaHeart className="text-rose-500" size={16} />
                           </button>
                         ) : (
                           <button
-                            onClick={() => handleAddFavorite(product.id)}
+                            onClick={() => addFavoriteHandler(product.id)}
                             className="p-2 h-8 cursor-pointer bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-rose-100 transition-colors duration-200"
                           >
                             <FiHeart className="text-rose-500" size={16} />

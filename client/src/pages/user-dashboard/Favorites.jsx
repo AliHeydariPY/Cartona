@@ -2,32 +2,21 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
 import { FiHeart, FiStar } from "react-icons/fi";
-
 import { FaHeart, FaClock } from "react-icons/fa";
 import { IoCart, IoCartOutline } from "react-icons/io5";
-
 import { PiLightningFill } from "react-icons/pi";
 import { BiSolidOffer } from "react-icons/bi";
 
-import {
-  addToCart,
-  deleteCartProduct,
-  deleteFavorite,
-  getCartProducts,
-  getFavorites,
-} from "../../services/cartAPIServices";
+import { getCartProducts, getFavorites } from "../../services/cartAPIServices";
 import { getProduct } from "../../services/productAPIServices";
-import { errorToast } from "../../utils/toast";
 import { SectionLoader } from "../../components/SectionLoader";
-import { useAtom } from "jotai";
-import { addToCartPopupAtom, selectedProductAtom } from "../../atoms/popupAtom";
+import { useProductActions } from "../../hooks/useProductActions";
 
 const Favorites = () => {
-  const [, setAddToCartPopup] = useAtom(addToCartPopupAtom);
-  const [, setSelectedProduct] = useAtom(selectedProductAtom);
-
   const [favorites, setFavorites] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { addToCartHandler, removeFromCartHandler, removeFavoriteHandler } =
+    useProductActions( setFavorites);
 
   const visibleCountNum = window.innerWidth >= 1280 ? 6 : 4;
 
@@ -53,55 +42,6 @@ const Favorites = () => {
     };
     fetchData();
   }, []);
-
-  const handleAddToCart = async (selectedProduct) => {
-    try {
-      setSelectedProduct(selectedProduct);
-      const response = await addToCart({
-        product: selectedProduct.id,
-        quantity: 1,
-      });
-      setAddToCartPopup(true);
-      setFavorites(() =>
-        favorites.map((item) => {
-          if (item.product.id == selectedProduct.id) {
-            return { ...item, cartItem: response.data };
-          } else {
-            return { ...item };
-          }
-        })
-      );
-    } catch {
-      errorToast("Failed to add product to cart");
-    }
-  };
-
-  const handleRemoveFromCart = async (favProduct) => {
-    try {
-      await deleteCartProduct(favProduct.cartItem.id);
-      setFavorites(() =>
-        favorites.map((item) => {
-          if (item.id == favProduct.id) {
-            return { ...item, cartItem: null };
-          } else {
-            return item;
-          }
-        })
-      );
-    } catch {
-      errorToast("Failed to remove product from cart");
-    }
-  };
-
-  const handleRemoveFavorite = async (favoriteId) => {
-    try {
-      await deleteFavorite(favoriteId);
-      setFavorites((prev) => prev.filter((item) => item.id != favoriteId));
-      errorToast("Removed from favorites");
-    } catch {
-      errorToast("Failed to remove from favorites");
-    }
-  };
 
   const openInNewTab = (url) => {
     window.open(url, "_blank");
@@ -188,7 +128,7 @@ const Favorites = () => {
                       <>
                         <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                           <button
-                            onClick={() => handleRemoveFavorite(fav.id)}
+                            onClick={() => removeFavoriteHandler(fav.id)}
                             className="p-2 cursor-pointer bg-rose-100 rounded-full hover:bg-rose-200 transition-colors duration-300"
                           >
                             <FaHeart className="text-rose-500 " size={16} />
@@ -196,14 +136,14 @@ const Favorites = () => {
 
                           {fav.cartItem ? (
                             <button
-                              onClick={() => handleRemoveFromCart(fav)}
+                              onClick={() => removeFromCartHandler(fav)}
                               className="px-1.5 py-1.5 cursor-pointer bg-blue-100 rounded-full hover:bg-blue-200 transition-colors duration-300"
                             >
                               <IoCart className="text-blue-600 " size={20} />
                             </button>
                           ) : (
                             <button
-                              onClick={() => handleAddToCart(product)}
+                              onClick={() => addToCartHandler(product)}
                               className="px-1.5 py-1.5 cursor-pointer bg-blue-100 rounded-full hover:bg-blue-200 transition-colors duration-300"
                             >
                               <IoCartOutline
@@ -235,7 +175,7 @@ const Favorites = () => {
                       {window.innerWidth <= 1024 && (
                         <div className="flex gap-2  duration-300">
                           <button
-                            onClick={() => handleRemoveFavorite(fav.id)}
+                            onClick={() => removeFavoriteHandler(fav.id)}
                             className="p-2 cursor-pointer bg-rose-100 rounded-full hover:bg-rose-200 transition-colors duration-300"
                           >
                             <FaHeart className="text-rose-500 " size={16} />
@@ -243,14 +183,14 @@ const Favorites = () => {
 
                           {fav.cartItem ? (
                             <button
-                              onClick={() => handleRemoveFromCart(fav)}
+                              onClick={() => removeFromCartHandler(fav)}
                               className="px-1.5 cursor-pointer bg-blue-100 rounded-full hover:bg-blue-200 transition-colors duration-300"
                             >
                               <IoCart className="text-blue-600 " size={20} />
                             </button>
                           ) : (
                             <button
-                              onClick={() => handleAddToCart(product)}
+                              onClick={() => addToCartHandler(product)}
                               className="px-1.5 cursor-pointer bg-blue-100 rounded-full hover:bg-blue-200 transition-colors duration-300"
                             >
                               <IoCartOutline
