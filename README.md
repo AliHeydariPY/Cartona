@@ -127,24 +127,93 @@ To run the project, the following must be installed on your system:
 
 ## 🚀 Running the Project
 
-### Backend Setup
+## 🖥️ 1. Virtual Environment Setup (Backend)
 
-1. **Startup Scripts**
-- Linux: `startcode.sh`  
-- Windows: `startcode1.bat`  
+Before running the backend, you must create and activate a Python virtual environment.
 
-Run the corresponding script to prepare and run the backend.
+### Create Virtual Environment
+
+#### **Windows**
+```bash
+python -m venv .venv  
+.venv\Scripts\activate
+```
+
+#### **Linux / macOS**
+```bash
+python3 -m venv .venv  
+source .venv/bin/activate
+```
+
+### Install Backend Dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+## 🔧 2. Backend Setup
+
+### Run Startup Scripts
+
+#### **Linux**
+```bash
+./startcode.sh
+```
+
+#### **Windows**
+```bash
+startcode1.bat
+```
+
+### Backend Server Information
+
+🌐 **Backend URL:**  https://127.0.0.1:8000/
+
+### ⚠️ Security Confirmation Required
+When you open backend URLs for the first time, your browser may warn you about the SSL certificate.
+
+This is safe because it's your **local development server**.
+
+**Steps:**
+1. Click **Advanced**  
+2. Select **Proceed to localhost (unsafe)**  
+3. Confirm the security exception
 
 ---
 
-### Frontend Setup
+## ⚡ 3. Frontend Setup
 
-1. **Navigate to frontend folder**
-   ```bash
-    cd client
-    npm install 
-    openssl req -x509 -newkey rsa:4096 -keyout localhost.key -out localhost.crt -days 365 -nodes -subj "/CN=localhost"
-    npm run dev
-   ```
+### Navigate to Frontend
+```bash
+cd client  
+npm install
+```
 
-The frontend will now run on `https://localhost:5173` using the generated localhost.key and localhost.crt files for HTTPS.
+### Generate SSL Certificates (for HTTPS)
+```bash
+openssl req -x509 -newkey rsa:4096 -keyout localhost.key -out localhost.crt -days 365 -nodes -subj "/CN=localhost"
+```
+
+### Start Development Server
+```bash
+npm run dev
+```
+
+### Frontend Server Information
+🌐 **Frontend URL:** https://localhost:5173
+
+⚠️ **Security Confirmation Required**
+Because the certificates are self-signed, the browser will show a warning.
+
+**Steps:**
+1. Click **Advanced**  
+2. Select **Proceed to localhost (unsafe)**  
+3. Confirm the security exception
+
+## ✅ 4. Final Access Points
+
+- **Backend API:** https://127.0.0.1:8000/  
+- **Frontend App:** https://localhost:5173/  
+
+⚠️ **Note:** Both frontend and backend use HTTPS in development.  
+You must confirm the security exception the first time your browser loads them.
+
