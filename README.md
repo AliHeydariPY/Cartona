@@ -145,11 +145,6 @@ python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-### Install Backend Dependencies:
-```bash
-pip install -r requirements.txt
-```
-
 ## 🔧 2. Backend Setup
 
 ### Run Startup Scripts
