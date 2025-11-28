@@ -8,6 +8,7 @@ import {
   FiMapPin,
   FiTrendingUp,
   FiMessageSquare,
+  FiBox,
 } from "react-icons/fi";
 import { getProduct } from "../../services/productAPIServices";
 import SendNotePopup from "../../components/pop-ups/SendNotePopup";
@@ -18,7 +19,6 @@ import {
 import { errorToast, successToast } from "../../utils/toast";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { getPurchaseByPayment } from "../../services/commentAPIServices";
-import { getPayment } from "../../services/cartAPIServices";
 import { SectionLoader } from "../../components/SectionLoader";
 
 const Payments = () => {
@@ -47,6 +47,7 @@ const Payments = () => {
                 product: product?.data ?? null,
               };
             } catch {
+              console.log({ ...productPayment });
               return {
                 ...productPayment,
                 product: null,
@@ -56,8 +57,8 @@ const Payments = () => {
         );
         setIsLoading(false);
         setPayments(productPayments.filter(Boolean));
-      } catch (error) {
-        console.error(error);
+      } catch {
+        setIsLoading(false);
       }
     };
 
@@ -295,27 +296,41 @@ const Payments = () => {
             >
               <div className="grid grid-cols-1 lg:grid-cols-7 gap-4 sm:gap-6">
                 <div className="flex items-center col-span-3 space-x-3 sm:space-x-4">
-                  <div
-                    onClick={() =>
-                      openInNewTab(`/product/${payment.product.id}`)
-                    }
-                    className="w-16 h-16 sm:w-20 sm:h-20 cursor-pointer border-2 bg-white border-blue-400 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden p-1"
-                  >
-                    <img
-                      src={payment.product?.image}
-                      alt=""
-                      className="w-full h-full object-contain rounded-md"
-                    />
-                  </div>
+                  {payment.product?.image ? (
+                    <div
+                      onClick={() => {
+                        if (payment.product?.id) {
+                          openInNewTab(`/product/${payment.product.id}`);
+                        } else {
+                          errorToast("This product does not exist");
+                        }
+                      }}
+                      className="w-16 h-16 sm:w-20 sm:h-20 cursor-pointer border-2 bg-white border-blue-400 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden p-1"
+                    >
+                      <img
+                        src={payment.product?.image}
+                        alt=""
+                        className="w-full h-full object-contain rounded-md"
+                      />
+                    </div>
+                  ) : (
+                    <div
+                      onClick={() => errorToast("This product does not exist")}
+                      className="w-20 h-20 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-xl flex items-center justify-center flex-shrink-0"
+                    >
+                      <FiBox className="text-blue-600" size={28} />
+                    </div>
+                  )}
                   <div className="min-w-0 flex-1">
                     <h3 className="font-semibold text-blue-900 text-base sm:text-lg mb-1 truncate">
-                      {payment.product?.name}
+                      {payment.product_name}
                     </h3>
                     <div className="flex items-center space-x-2 mb-2">
                       <span className="text-blue-800 font-bold text-sm sm:text-base">
                         $
                         {payment.product?.discounted_price ||
-                          payment.product?.price}
+                          payment.product?.price ||
+                          payment.total_price / payment.quantity}
                       </span>
                       {payment.product?.discounted_price && (
                         <span className="text-xs sm:text-sm text-rose-500 line-through">
@@ -323,7 +338,7 @@ const Payments = () => {
                         </span>
                       )}
                     </div>
-                    <p className="text-xs sm:text-sm text-blue-600">
+                    <p className="text-xs sm:text-sm text-blue-600 mb-2">
                       Qty: {payment.quantity}
                     </p>
                   </div>
@@ -340,9 +355,9 @@ const Payments = () => {
                       </span>
                     </div>
 
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-start space-x-2">
                       <FiMapPin
-                        className="text-blue-500 flex-shrink-0 mb-0.5"
+                        className="text-blue-500 flex-shrink-0 mt-0.5"
                         size={14}
                       />
                       <span className="text-xs sm:text-sm text-blue-600 whitespace-normal break-words">
