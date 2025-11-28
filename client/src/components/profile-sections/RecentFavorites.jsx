@@ -13,7 +13,7 @@ const RecentFavorites = ({ recentFavorites, setRecentFavorites }) => {
     useProductActions( setRecentFavorites);
 
   const openInNewTab = (url) => {
-    window.open(url, "_blank");
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   return (

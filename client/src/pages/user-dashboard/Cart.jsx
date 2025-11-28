@@ -142,7 +142,7 @@ const Cart = () => {
   };
 
   const openInNewTab = (url) => {
-    window.open(url, "_blank", "noreferrer");
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   return (

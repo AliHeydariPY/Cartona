@@ -43,7 +43,7 @@ const ProductImageCarousel = ({ productID, mainImage, onClose }) => {
   const stopPropagation = (e) => e.stopPropagation();
 
   const openInNewTab = (url) => {
-    window.open(url, "_blank", "noreferrer");
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   if (images.length < 1) return;

@@ -101,7 +101,7 @@ const ProductsCarousel = ({ featuredProducts }) => {
   if (!featuredProducts || featuredProducts.length === 0) return;
 
   const openInNewTab = (url) => {
-    window.open(url, "_blank", "noreferrer");
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   return (
