@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { FixedSizeList as List } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
@@ -10,7 +10,6 @@ import { FiBell, FiCheck, FiTrash2, FiX, FiUser, FiStar } from "react-icons/fi";
 import {
   deleteNotification,
   disableNotifications,
-  enableNotifications,
   getNotifications,
   getSubscriptions,
   notificationMarkAsRead,
@@ -43,28 +42,31 @@ const Notifications = () => {
   );
 
   useEffect(() => {
+    fetchNotifications();
+    fetchSubscriptions();
+  }, []);
+
+  const fetchNotifications = () => {
     getNotifications().then((res) => {
       setNotifications(res.data);
     });
+  };
 
-    const fetchSubscriptions = async () => {
-      const subscriptions = await getSubscriptions();
-      const storekeepersData = await Promise.all(
-        subscriptions.data.map(async (sub) => {
-          try {
-            const storekeeperInfo = await getStorekeeperById(sub.storekeeper)
+  const fetchSubscriptions = async () => {
+    const subscriptions = await getSubscriptions();
+    const storekeepersData = await Promise.all(
+      subscriptions.data.map(async (sub) => {
+        try {
+          const storekeeperInfo = await getStorekeeperById(sub.storekeeper);
 
-            return { ...sub, storekeeper: storekeeperInfo.data };
-          } catch {
-            return { ...sub, storekeeper: null };
-          }
-        })
-      );
-      setStorekeepers(storekeepersData);
-    };
-
-    fetchSubscriptions();
-  }, []);
+          return { ...sub, storekeeper: storekeeperInfo.data };
+        } catch {
+          return { ...sub, storekeeper: null };
+        }
+      })
+    );
+    setStorekeepers(storekeepersData);
+  };
 
   const markAsRead = (id) => {
     setNotifications((prev) =>
@@ -104,10 +106,11 @@ const Notifications = () => {
   };
 
   const openInNewTab = (url) => {
-    window.open(url, "_blank", "noreferrer");
+    window.open(url, "_blank", "noopener,noreferrer");
   };
-
-  const ITEM_HEIGHT = window.innerWidth >= 640 ? 120 : 95;
+  
+  const isMobile = useMemo(() => window.innerWidth < 640, []);
+  const ITEM_HEIGHT = isMobile ? 95 : 120;
 
   const Row = ({ index, style }) => {
     const notification = filteredNotifications[index];
@@ -348,24 +351,27 @@ const Notifications = () => {
         {activeTab === "subscriptions" && (
           <div className="space-y-4">
             {activeSubscriptions.length === 0 ? (
-              <div className="text-center py-12 bg-blue-50/50 rounded-2xl border border-blue-200">
-                <FiUser className="text-blue-400 mx-auto mb-4" size={48} />
-                <h3 className="text-lg font-semibold text-blue-800 mb-2">
+              <div className="text-center py-8 sm:py-12 bg-blue-50/50 rounded-xl sm:rounded-2xl border border-blue-200">
+                <FiUser
+                  className="text-blue-400  mx-auto mb-3 sm:mb-4"
+                  size={32}
+                />
+                <h3 className="text-base sm:text-lg font-semibold text-blue-800 mb-2">
                   No store subscriptions
                 </h3>
-                <p className="text-blue-600">
+                <p className="text-blue-600 text-sm sm:text-base">
                   Subscribe to stores to get notifications about new products
                 </p>
               </div>
             ) : (
-              <div className="grid gap-4">
+              <div className="grid gap-3 sm:gap-4">
                 {activeSubscriptions.map((subscription) => (
                   <div
                     key={subscription.id}
-                    className="flex items-center justify-between p-4 bg-white rounded-xl border border-blue-200 hover:shadow-md transition-all duration-300"
+                    className="flex items-center justify-between p-3 sm:p-4 bg-white rounded-lg sm:rounded-xl border border-blue-200 hover:shadow-md transition-all duration-300"
                   >
-                    <div className="flex items-center gap-3 flex-1">
-                      <div className="w-12 h-12 rounded-lg overflow-hidden border border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50">
+                    <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg overflow-hidden border border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50 flex-shrink-0">
                         {subscription.storekeeper.image ? (
                           <img
                             src={subscription.storekeeper.image}
@@ -374,17 +380,17 @@ const Notifications = () => {
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-blue-400">
-                            <FiUser size={20} />
+                            <FiUser size={16} className="sm:size-20" />
                           </div>
                         )}
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-blue-900 text-sm truncate">
-                          {subscription.storekeeper.store_name}
+                        <h3 className="font-semibold text-blue-900 text-sm truncate max-w-[110px] sm:max-w-[380px]">
+                          wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
                         </h3>
-                        <div className="flex items-center gap-2 mt-1">
-                          <div className="flex items-center bg-blue-100 px-2 py-0.75 rounded-full">
+                        <div className="flex flex-col xs:flex-row xs:items-center gap-1 xs:gap-2 mt-1">
+                          <div className="flex items-center bg-blue-100 px-1.5 sm:px-2 py-1 rounded-full w-fit">
                             <FiStar
                               className="text-amber-400 fill-amber-400 mb-0.5"
                               size={10}
@@ -395,20 +401,18 @@ const Notifications = () => {
                               ) || "0.0"}
                             </span>
                           </div>
-                          <span className="text-xs text-blue-600">
-                            {subscription.storekeeper.description &&
-                              `${subscription.storekeeper.description.substring(
-                                0,
-                                30
-                              )}...`}
-                          </span>
                         </div>
+                        {subscription.storekeeper.description && (
+                          <h4 className="text-xs text-blue-600 mt-1 truncate max-w-[110px] sm:max-w-[380px]">
+                            {subscription.storekeeper.description}
+                          </h4>
+                        )}
                       </div>
                     </div>
 
                     <button
                       onClick={() => handleUnsubscribe(subscription.id)}
-                      className="p-2 cursor-pointer text-rose-600 hover:bg-rose-50 rounded-lg transition-colors duration-300 ml-3"
+                      className="p-1.5 sm:p-2 cursor-pointer text-rose-600 hover:bg-rose-50 rounded-lg transition-colors duration-300 ml-2 sm:ml-3 flex-shrink-0"
                       title="Unsubscribe"
                     >
                       <FiX size={18} />
@@ -418,8 +422,8 @@ const Notifications = () => {
               </div>
             )}
 
-            <div className="bg-blue-50/50 rounded-xl p-4 border border-blue-200">
-              <p className="text-sm text-blue-700 text-center">
+            <div className="bg-blue-50/50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-blue-200">
+              <p className="text-xs sm:text-sm text-blue-700 text-center">
                 You'll receive notifications when these stores add new products
               </p>
             </div>

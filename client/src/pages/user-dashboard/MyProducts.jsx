@@ -79,7 +79,9 @@ export default function MyProducts() {
     });
   }, [products, debouncedSearch]);
 
-  const openInNewTab = (url) => window.open(url, "_blank", "noreferrer");
+  const openInNewTab = (url) => {
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
 
   const clearSearch = () => setSearchQuery("");
 

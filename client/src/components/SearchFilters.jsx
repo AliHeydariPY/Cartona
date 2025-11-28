@@ -1,8 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { Formik, Form } from "formik";
-
-import CategoryFilter from "./filters/CategoryFilter";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { BiCategory } from "react-icons/bi";
 
@@ -15,14 +14,14 @@ import {
   FiMessageSquare,
 } from "react-icons/fi";
 
-import { useNavigate, useParams } from "react-router-dom";
-
 import {
   getCategory,
   getMinMaxComments,
   getMinMaxPrice,
 } from "../services/productAPIServices";
 import { getStorekeeperById } from "../services/userAPIServices";
+
+import CategoryFilter from "./filters/CategoryFilter";
 import PriceFilter from "./filters/PriceFilter";
 import RatingFilter from "./filters/RatingFilter";
 import ReviewsFiltre from "./filters/ReviewsFiltre";

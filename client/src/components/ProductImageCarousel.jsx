@@ -15,17 +15,15 @@ const ProductImageCarousel = ({ productID, mainImage, onClose }) => {
         const productImages = await getProducImages(productID);
 
         setImages([mainImage, ...productImages.data]);
-      } catch (error) {
+      } catch {
         setImages([mainImage]);
       }
     };
     setShow(true);
     fetchImages();
-    //   document.body.style.overflow = "hidden";
   }, []);
 
   const handleClose = () => {
-    // document.body.style.overflow = "unset";
     setShow(false);
     setTimeout(() => onClose(), 300);
   };
@@ -45,7 +43,7 @@ const ProductImageCarousel = ({ productID, mainImage, onClose }) => {
   const stopPropagation = (e) => e.stopPropagation();
 
   const openInNewTab = (url) => {
-    window.open(url, "_blank", "noreferrer");
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   if (images.length < 1) return;
