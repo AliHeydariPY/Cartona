@@ -35,6 +35,7 @@ import { useAtom } from "jotai";
 import { userAtom } from "../../atoms/userAtom";
 import DeleteChatPopup from "../../components/pop-ups/DeleteChatPopup";
 import { errorToast, successToast } from "../../utils/toast";
+import useDebounce from "../../hooks/useDebounce";
 
 const Chat = () => {
   const { chatID } = useParams();
@@ -53,9 +54,11 @@ const Chat = () => {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const [searchResults, setSearchResults] = useState([]);
+  const [searchResults, setSearchResults] = useState({});
 
   const [isLoading, setIsLoading] = useState(true);
+
+  const debouncedSearch = useDebounce(searchQuery, 600);
 
   useEffect(() => {
     const fetchPVs = async () => {
@@ -108,12 +111,13 @@ const Chat = () => {
   }, [user]);
 
   useEffect(() => {
-    if (!searchQuery.trim()) {
-      setSearchResults([]);
+    if (!debouncedSearch.trim()) {
+      setSearchResults({});
       return;
     }
 
-    const query = searchQuery.toLowerCase().trim();
+    const query = debouncedSearch.toLowerCase().trim();
+
     const results = conversations.filter((conversation) => {
       const productName = conversation.product?.name?.toLowerCase() || "";
       const storeName = conversation.store?.store_name?.toLowerCase() || "";
@@ -128,8 +132,8 @@ const Chat = () => {
       );
     });
 
-    setSearchResults(results);
-  }, [searchQuery, conversations]);
+    setSearchResults({ result: results, status: "done" });
+  }, [debouncedSearch, conversations]);
 
   useEffect(() => {
     if (!conversations[0]) return;
@@ -325,6 +329,7 @@ const Chat = () => {
 
   const clearSearch = () => {
     setSearchQuery("");
+    setSearchResults({});
     setIsSearchFocused(false);
   };
 
