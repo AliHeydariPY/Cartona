@@ -33,9 +33,8 @@ export default function MyProducts() {
 
   const [openMenu, setOpenMenu] = useState(null);
 
-  const debouncedSearch = useDebounce(searchQuery, 500);
+  const debouncedSearch = useDebounce(searchQuery, 600);
 
-  // Fetch products
   useEffect(() => {
     if (!user) return;
     getStorekeeper(user.username).then((res) => {
@@ -48,7 +47,6 @@ export default function MyProducts() {
     });
   }, [user]);
 
-  // Close menu on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (openMenu && !event.target.closest(".relative")) {
@@ -59,7 +57,6 @@ export default function MyProducts() {
     return () => document.removeEventListener("click", handleClickOutside);
   }, [openMenu]);
 
-  // Filtered products
   const filteredProducts = useMemo(() => {
     if (!searchQuery.trim()) return products;
 
@@ -93,7 +90,6 @@ export default function MyProducts() {
       className="lg:col-span-3"
     >
       <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-xl p-5 sm:p-6 2xl:p-8 border border-blue-400 hover:shadow-lg hover:shadow-blue-400/50 transition-all duration-300">
-        {/* Header */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-4 sm:mb-6">
           <div className="flex items-center">
             <h2 className="text-xl sm:text-2xl font-bold text-blue-800 flex items-center">
@@ -113,7 +109,6 @@ export default function MyProducts() {
           />
         </div>
 
-        {/* Search Info */}
         {searchQuery && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -137,7 +132,6 @@ export default function MyProducts() {
           </motion.div>
         )}
 
-        {/* Products */}
         {isLoading ? (
           <SectionLoader chatLoader={false} title="Products" />
         ) : filteredProducts.length === 0 ? (
@@ -197,7 +191,6 @@ export default function MyProducts() {
           </motion.div>
         )}
 
-        {/* Show more / Show less */}
         {filteredProducts.length > visibleCountNum && (
           <div className="flex justify-center pt-3 xs:pt-4 mt-4 xs:mt-5 border-t border-blue-300">
             {visibleCount < filteredProducts.length ? (
@@ -219,7 +212,6 @@ export default function MyProducts() {
         )}
       </div>
 
-      {/* Remove Product Popup */}
       {showRemovePopup && (
         <RemoveProductPopup
           onClose={() => {

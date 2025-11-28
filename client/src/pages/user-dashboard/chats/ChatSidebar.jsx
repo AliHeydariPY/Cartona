@@ -39,7 +39,9 @@ const ChatSidebar = ({
   }, [showSidebar]);
 
   const displayedConversations =
-    isSearchFocused && searchQuery ? searchResults : conversations;
+    isSearchFocused && searchResults.status === "done"
+      ? searchResults.result
+      : conversations;
 
   return (
     <>
@@ -91,7 +93,7 @@ const ChatSidebar = ({
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => setIsSearchFocused(true)}
                   placeholder="Search products, stores..."
-                  className="w-full pl-9 sm:pl-10 pr-4 py-2 bg-blue-50 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-blue-900 text-sm sm:text-base"
+                  className="w-full pl-9 sm:pl-10 pr-4 py-2 bg-blue-50 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-blue-900 text-sm sm:text-base transition-all"
                 />
               </div>
 
@@ -111,7 +113,7 @@ const ChatSidebar = ({
 
             <div className="flex-1 overflow-y-auto custom-chat-scroll">
               {isLoading ? (
-                <SectionLoader chatLoader={true} title="Conversation"/>
+                <SectionLoader chatLoader={true} title="Conversation" />
               ) : displayedConversations.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-32 text-blue-600 p-4">
                   <FiMessageSquare
@@ -260,7 +262,7 @@ const ChatSidebar = ({
               <div className="p-3 border-t border-blue-200 bg-blue-50/50">
                 <button
                   onClick={clearSearch}
-                  className="w-full text-sm bg-gradient-to-r from-blue-600 to-cyan-500 text-white py-2 rounded-lg hover:shadow-lg transition-all duration-300 font-medium"
+                  className="w-full text-sm bg-gradient-to-r from-blue-600 to-cyan-500 text-white py-2 rounded-lg hover:from-blue-700 hover:to-cyan-600 transition-colors duration-300 font-medium"
                 >
                   Clear Search
                 </button>

@@ -21,6 +21,10 @@ import {
   FiBox,
   FiFileText,
   FiStar,
+  FiCalendar,
+  FiCreditCard,
+  FiShield,
+  FiHash,
 } from "react-icons/fi";
 import { errorToast, successToast } from "../../utils/toast";
 import { useAtom } from "jotai";
@@ -37,7 +41,7 @@ const Orders = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedSeller, setSelectedSeller] = useState(null);
 
-  const [visibleCount, setVisibleCount] = useState(4);
+  const [visibleCount, setVisibleCount] = useState(3);
   const [isLoading, setIsLoading] = useState(true);
 
   const filter = searchParams.get("filter") || "All";
@@ -53,7 +57,6 @@ const Orders = () => {
     const fetchPaymentsData = async () => {
       try {
         const paymentsRes = await getPayments();
-        console.log(paymentsRes.data);
         const payments = await Promise.all(
           paymentsRes.data.map(async (payment) => {
             try {
@@ -97,8 +100,7 @@ const Orders = () => {
         );
         setIsLoading(false);
         setOrders([...payments]);
-      } catch (error) {
-        console.log(error);
+      } catch {
         setIsLoading(false);
       }
     };
@@ -205,47 +207,55 @@ const Orders = () => {
               transition={{ duration: 0.3 }}
               className="bg-gradient-to-r from-blue-50/80 to-cyan-50/80 rounded-2xl p-6 border border-blue-200/60 hover:border-blue-300 hover:shadow-lg transition-all duration-300 group"
             >
-              <div className="grid grid-cols-1 lg:grid-cols-8 xl:grid-cols-4 2xl:grid-cols-4 gap-6">
-                <div className="flex items-center space-x-4 lg:col-span-4 xl:col-span-2 2xl:col-span-2">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-4">
+                <div className="lg:col-span-6 xl:col-span-5 flex items-start space-x-4">
                   {order.product?.image ? (
                     <div
                       onClick={() =>
                         openInNewTab(`/product/${order.product.id}`)
                       }
-                      className="w-22 h-22 cursor-pointer border-2 bg-white border-blue-400 rounded-lg flex items-center justify-center mb-4 sm:mb-0 relative overflow-hidden p-1"
+                      className="w-20 h-20 cursor-pointer border-2 bg-white border-blue-400 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden p-1 hover:border-blue-500 transition-colors"
                     >
                       <img
                         src={order.product?.image}
-                        alt=""
-                        className="max-w-full max-h-full object-contain rounded-md"
+                        alt={order.product?.name}
+                        className="w-full h-full object-contain rounded-md"
                       />
                     </div>
                   ) : (
-                    <div className="w-22 h-22 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <FiBox className="text-blue-600" size={30} />
+                    <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <FiBox className="text-blue-600" size={28} />
                     </div>
                   )}
-                  <div>
-                    <h3 className="font-semibold text-blue-900 text-lg mb-1">
+
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-blue-900 text-lg mb-2 line-clamp-2">
                       {order.product?.name}
                     </h3>
-                    <p className="text-blue-600 text-sm">
-                      Sold by: {order?.storekeeper}
-                    </p>
-                    <p className="text-blue-800 font-bold text-sm mt-1 flex items-center gap-2">
-                      ${order?.total_price}
-                      <span className="text-xs text-blue-500 bg-blue-100 px-2 py-0.5 rounded-full">
-                        x{order?.quantity}
-                      </span>
-                    </p>
+                    <div className="space-y-1">
+                      <p className="text-blue-600 text-sm">
+                        Sold by:{" "}
+                        <span className="font-medium">
+                          {order?.storekeeper}
+                        </span>
+                      </p>
+                      <div className="flex items-center gap-3">
+                        <p className="text-blue-800 font-bold text-base">
+                          ${order?.total_price}
+                        </p>
+                        <span className="text-xs text-blue-500 bg-blue-100 px-2 py-1 rounded-full font-medium">
+                          x{order?.quantity}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex flex-col justify-center space-y-2 lg:col-span-2 xl:col-span-1">
+                <div className="lg:col-span-3 xl:col-span-3 flex flex-col justify-center space-y-3">
                   <div className="flex items-center space-x-2">
                     {getStatusIcon(order.status)}
                     <span
-                      className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(
+                      className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${getStatusColor(
                         order.status
                       )}`}
                     >
@@ -253,26 +263,30 @@ const Orders = () => {
                     </span>
                   </div>
 
-                  <div className="text-sm text-blue-600">
+                  <div className="text-sm text-blue-600 space-y-1">
                     {order.status === "Delivered" ? (
-                      <span>Delivered on {order.delivered_at}</span>
+                      <p className="flex items-center gap-1">
+                        <FiCheckCircle size={14} className="text-green-500" />
+                        Delivered on {order.delivered_at}
+                      </p>
                     ) : (
-                      <span>
+                      <p className="flex items-center gap-1">
+                        <FiTruck size={14} className="text-blue-500" />
                         Est. delivery:{" "}
                         {new Date(
                           new Date(order.storekeeper_delivered_at).getTime() +
                             7 * 24 * 60 * 60 * 1000
                         ).toLocaleDateString()}
-                      </span>
+                      </p>
                     )}
+                    <p className="text-xs text-blue-500 flex items-center gap-1">
+                      <FiCalendar size={12} />
+                      Ordered: {order.paid_at}
+                    </p>
                   </div>
-
-                  <p className="text-xs text-blue-500">
-                    Ordered: {order.paid_at}
-                  </p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-col 2xl:flex-row gap-2 justify-center items-start lg:items-end xl:items-center lg:col-span-2 xl:col-span-1">
+                <div className="lg:col-span-3 xl:col-span-4 flex flex-col sm:flex-row lg:flex-col xl:flex-row gap-2 justify-start lg:justify-end items-center">
                   <button
                     onClick={() => {
                       getPurchaseByPayment(order.id)
@@ -283,9 +297,9 @@ const Orders = () => {
                           errorToast(err.response.data.detail);
                         });
                     }}
-                    className="flex cursor-pointer items-center justify-center px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-lg hover:from-blue-700 hover:to-cyan-600 transition-colors duration-300 text-sm font-semibold whitespace-nowrap min-w-[120px]"
+                    className="flex items-center justify-center px-4 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-lg hover:from-blue-700 hover:to-cyan-600 transition-all duration-300 text-sm font-semibold whitespace-nowrap min-w-[120px] shadow-sm hover:shadow-md"
                   >
-                    <FiMessageSquare className="mr-2" size={14} />
+                    <FiMessageSquare className="mr-2" size={16} />
                     Chat
                   </button>
 
@@ -310,9 +324,9 @@ const Orders = () => {
                           );
                         });
                       }}
-                      className="flex cursor-pointer items-center justify-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all duration-300 text-sm font-semibold whitespace-nowrap min-w-[120px]"
+                      className="flex items-center justify-center px-4 py-2.5 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all duration-300 text-sm font-semibold whitespace-nowrap min-w-[120px] shadow-sm hover:shadow-md"
                     >
-                      <FiCheckCircle className="mr-2 mb-0.5" size={14} />
+                      <FiCheckCircle className="mr-2" size={16} />
                       Received
                     </button>
                   )}
@@ -321,9 +335,9 @@ const Orders = () => {
                     (order.hasRated ? (
                       <button
                         disabled
-                        className="flex items-center justify-center 2xl:mr-2 px-4 py-2 bg-gray-200 text-gray-600 rounded-lg cursor-not-allowed text-sm font-semibold whitespace-nowrap min-w-[120px]"
+                        className="flex items-center justify-center px-4 py-2.5 bg-gray-200 text-gray-600 rounded-lg cursor-not-allowed text-sm font-semibold whitespace-nowrap min-w-[120px]"
                       >
-                        <FiStar className="mr-1.5 mb-0.5" size={16} />
+                        <FiStar className="mr-1.5" size={16} />
                         Rated
                       </button>
                     ) : (
@@ -333,23 +347,75 @@ const Orders = () => {
                           setSelectedSeller(order.product.storekeeper);
                           setIsReviewOpen(true);
                         }}
-                        className="flex cursor-pointer items-center justify-center px-4 py-2 bg-yellow-400 text-white rounded-lg hover:bg-yellow-500 transition-colors duration-300 text-sm font-semibold whitespace-nowrap min-w-[120px]"
+                        className="flex items-center justify-center px-4 py-2.5 bg-yellow-400 text-white rounded-lg hover:bg-yellow-500 transition-all duration-300 text-sm font-semibold whitespace-nowrap min-w-[120px] shadow-sm hover:shadow-md"
                       >
-                        <FiStar className="mr-2 mb-0.5" size={16} />
+                        <FiStar className="mr-2" size={16} />
                         Rate
                       </button>
                     ))}
                 </div>
               </div>
 
-              <div className="mt-4 pt-4 border-t border-blue-200/50">
-                <div className="flex items-center justify-between text-xs text-blue-600 mb-2">
-                  <span>Order Progress</span>
-                  <span>{order.status}</span>
+              <div className="mb-4 pt-4 border-t border-blue-200/50">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-9 gap-4 text-sm">
+                  <div className="space-y-2 2xl:col-span-3 ">
+                    <div className="flex items-start flex-row lg:flex-col 2xl:flex-row gap-2 text-blue-600">
+                      <div className="flex gap-2">
+                        <FiCreditCard size={14} className="mt-0.5" />
+                        <span className="font-medium ">Card Number:</span>
+                      </div>
+                      <p className="text-blue-800 font-mono text-sm">
+                        {order.fake_card_number}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 2xl:col-span-2">
+                    <div className="flex items-start flex-row lg:flex-col 2xl:flex-row gap-2 text-blue-600">
+                      <div className="flex  gap-2">
+                        <FiShield size={14} className="mt-0.5" />
+                        <span className="font-medium">CVV:</span>
+                      </div>
+                      <p className="text-blue-800 font-mono text-sm">
+                        {order.fake_card_cvv}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 2xl:col-span-2">
+                    <div className="flex items-start flex-row lg:flex-col 2xl:flex-row gap-2 text-blue-600">
+                      <div className="flex  gap-2">
+                        <FiCalendar size={14} className="mt-0.5" />
+                        <span className="font-medium">Expiry:</span>
+                      </div>
+                      <p className="text-blue-800 font-mono text-sm">
+                        {order.fake_card_expiry}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 2xl:col-span-2">
+                    <div className="flex items-start flex-row lg:flex-col 2xl:flex-row gap-2 text-blue-600">
+                      <div className="flex  gap-2">
+                        <FiHash size={14} className="mt-0.5" />
+                        <span className="font-medium">Order ID:</span>
+                      </div>
+                      <p className="text-blue-800 font-mono text-sm">
+                        #{order.id}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div className="w-full bg-blue-200 rounded-full h-2">
+              </div>
+
+              <div className="pt-4 border-t border-blue-200/50">
+                <div className="flex items-center justify-between text-sm text-blue-600 mb-3">
+                  <span className="font-medium">Order Progress</span>
+                  <span className="font-semibold">{order.status}</span>
+                </div>
+                <div className="w-full bg-blue-200 rounded-full h-2.5">
                   <div
-                    className={`h-2 rounded-full transition-all duration-1000 ${
+                    className={`h-2.5 rounded-full transition-all duration-1000 ${
                       order.status === "Pending"
                         ? "bg-amber-500 w-1/3"
                         : order.status === "Shipped"
@@ -358,17 +424,22 @@ const Orders = () => {
                     }`}
                   />
                 </div>
+                <div className="flex justify-between text-xs text-blue-500 mt-2">
+                  <span>Ordered</span>
+                  <span>Shipped</span>
+                  <span>Delivered</span>
+                </div>
               </div>
             </motion.div>
           ))}
 
-          {filteredOrders.length > 4 && (
+          {filteredOrders.length > 3 && (
             <div className="flex justify-center pt-3 xs:pt-4 mt-4 xs:mt-5 border-t border-blue-300">
               {visibleCount < filteredOrders.length ? (
                 <button
                   onClick={() =>
                     setVisibleCount(() => {
-                      return visibleCount + 4;
+                      return visibleCount + 3;
                     })
                   }
                   className="px-4 xs:px-6 py-2 cursor-pointer rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-300 text-sm xs:text-base font-medium"
@@ -377,7 +448,7 @@ const Orders = () => {
                 </button>
               ) : (
                 <button
-                  onClick={() => setVisibleCount(4)}
+                  onClick={() => setVisibleCount(3)}
                   className="px-4 xs:px-6 py-2 cursor-pointer rounded-lg border border-blue-400 text-blue-600 hover:bg-blue-50 transition-colors duration-300 text-sm xs:text-base font-medium"
                 >
                   Show less

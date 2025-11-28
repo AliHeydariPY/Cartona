@@ -42,21 +42,10 @@ const Payments = () => {
           productPaymentsRes.data.map(async (productPayment) => {
             try {
               const product = await getProduct(productPayment.product);
-              try {
-                const payment = await getPayment(productPayment.id);
-                return {
-                  ...productPayment,
-                  product: product?.data ?? null,
-                  fake_card_cvv: payment.data.fake_card_cvv,
-                  fake_card_expiry: payment.data.fake_card_expiry,
-                  fake_card_number: payment.data.fake_card_number,
-                };
-              } catch {
-                return {
-                  ...productPayment,
-                  product: product?.data ?? null,
-                };
-              }
+              return {
+                ...productPayment,
+                product: product?.data ?? null,
+              };
             } catch {
               return {
                 ...productPayment,
@@ -353,10 +342,10 @@ const Payments = () => {
 
                     <div className="flex items-center space-x-2">
                       <FiMapPin
-                        className="text-blue-500 flex-shrink-0"
+                        className="text-blue-500 flex-shrink-0 mb-0.5"
                         size={14}
                       />
-                      <span className="text-xs sm:text-sm text-blue-600 truncate">
+                      <span className="text-xs sm:text-sm text-blue-600 whitespace-normal break-words">
                         {payment.address}
                       </span>
                     </div>
@@ -408,23 +397,6 @@ const Payments = () => {
                       <span className="truncate">Product submission</span>
                     </button>
                   )}
-                </div>
-              </div>
-              <div className="mt-4 pt-4 border-t border-blue-200 grid grid-cols-2 md:grid-cols-5 gap-4 text-xs text-blue-600">
-                <div className="md:col-span-2">
-                  <span className="font-medium">Card Number:</span>{" "}
-                  {payment.fake_card_number}
-                </div>
-                <div>
-                  <span className="font-medium">CVV:</span>{" "}
-                  {payment.fake_card_cvv}
-                </div>
-                <div>
-                  <span className="font-medium">Expiry:</span>{" "}
-                  {payment.fake_card_expiry}
-                </div>
-                <div>
-                  <span className="font-medium">Order ID:</span> #{payment.id}
                 </div>
               </div>
             </motion.div>
