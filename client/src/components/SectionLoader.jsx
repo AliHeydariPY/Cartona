@@ -15,9 +15,6 @@ export const SectionLoader = ({ chatLoader, title }) => {
         <h3 className="text-lg font-semibold text-blue-800">
           Loading Your {title}
         </h3>
-        {/* <p className="text-blue-600 text-sm">
-          Fetching your purchase history...
-        </p> */}
       </div>
 
       <div className="flex space-x-1.5 mt-4">

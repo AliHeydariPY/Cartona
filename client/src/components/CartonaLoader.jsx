@@ -15,7 +15,6 @@ const CartonaLoader = ({ isLoading }) => {
     }
   }, [isLoading]);
 
-
   return (
     <Portal>
       <AnimatePresence>

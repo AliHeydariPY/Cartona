@@ -53,46 +53,52 @@ const Orders = () => {
     const fetchPaymentsData = async () => {
       try {
         const paymentsRes = await getPayments();
+        console.log(paymentsRes.data);
         const payments = await Promise.all(
           paymentsRes.data.map(async (payment) => {
-            const productRes = await getProduct(payment.product);
-            const storekeeperRes = await getStorekeeperById(
-              productRes.data.storekeeper
-            );
             try {
-              const commentRes = await getComments(productRes.data.id);
+              const productRes = await getProduct(payment.product);
+              const storekeeperRes = await getStorekeeperById(
+                productRes.data.storekeeper
+              );
+              try {
+                const commentRes = await getComments(productRes.data.id);
 
-              return {
-                ...payment,
-                product: productRes.data,
-                storekeeper: storekeeperRes.data.store_name,
-                status: payment.storekeeper_delivery
-                  ? payment.is_delivered
-                    ? "Delivered"
-                    : "Shipped"
-                  : "Pending",
-                hasRated: commentRes.data.some((comment) => {
-                  return comment.user == user?.username;
-                }),
-              };
+                return {
+                  ...payment,
+                  product: productRes.data,
+                  storekeeper: storekeeperRes.data.store_name,
+                  status: payment.storekeeper_delivery
+                    ? payment.is_delivered
+                      ? "Delivered"
+                      : "Shipped"
+                    : "Pending",
+                  hasRated: commentRes.data.some((comment) => {
+                    return comment.user == user?.username;
+                  }),
+                };
+              } catch {
+                return {
+                  ...payment,
+                  product: productRes.data,
+                  storekeeper: storekeeperRes.data.store_name,
+                  status: payment.storekeeper_delivery
+                    ? payment.is_delivered
+                      ? "Delivered"
+                      : "Shipped"
+                    : "Pending",
+                  hasRated: false,
+                };
+              }
             } catch {
-              return {
-                ...payment,
-                product: productRes.data,
-                storekeeper: storekeeperRes.data.store_name,
-                status: payment.storekeeper_delivery
-                  ? payment.is_delivered
-                    ? "Delivered"
-                    : "Shipped"
-                  : "Pending",
-                hasRated: false,
-              };
+              return {};
             }
           })
         );
         setIsLoading(false);
         setOrders([...payments]);
-      } catch {
+      } catch (error) {
+        console.log(error);
         setIsLoading(false);
       }
     };
@@ -201,7 +207,7 @@ const Orders = () => {
             >
               <div className="grid grid-cols-1 lg:grid-cols-8 xl:grid-cols-4 2xl:grid-cols-4 gap-6">
                 <div className="flex items-center space-x-4 lg:col-span-4 xl:col-span-2 2xl:col-span-2">
-                  {order.product.image ? (
+                  {order.product?.image ? (
                     <div
                       onClick={() =>
                         openInNewTab(`/product/${order.product.id}`)
@@ -209,7 +215,7 @@ const Orders = () => {
                       className="w-22 h-22 cursor-pointer border-2 bg-white border-blue-400 rounded-lg flex items-center justify-center mb-4 sm:mb-0 relative overflow-hidden p-1"
                     >
                       <img
-                        src={order.product.image}
+                        src={order.product?.image}
                         alt=""
                         className="max-w-full max-h-full object-contain rounded-md"
                       />
@@ -221,15 +227,15 @@ const Orders = () => {
                   )}
                   <div>
                     <h3 className="font-semibold text-blue-900 text-lg mb-1">
-                      {order.product.name}
+                      {order.product?.name}
                     </h3>
                     <p className="text-blue-600 text-sm">
-                      Sold by: {order.storekeeper}
+                      Sold by: {order?.storekeeper}
                     </p>
                     <p className="text-blue-800 font-bold text-sm mt-1 flex items-center gap-2">
-                      ${order.total_price}
+                      ${order?.total_price}
                       <span className="text-xs text-blue-500 bg-blue-100 px-2 py-0.5 rounded-full">
-                        x{order.quantity}
+                        x{order?.quantity}
                       </span>
                     </p>
                   </div>

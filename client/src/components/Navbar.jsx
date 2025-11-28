@@ -119,8 +119,6 @@ const Navbar = ({ isFocus = false, setIsFocus }) => {
 
           <div className="hidden md:block col-span-2">
             <div className="flex items-center justify-center space-x-4 md:space-x-8 lg:space-x-10 xl:space-x-15">
-              {/* have to fix */}
-
               <Link
                 to="/"
                 className="relative group flex flex-col items-center cursor-pointer w-8 h-8 mt-2.5 lg:mt-0.5"
@@ -163,19 +161,6 @@ const Navbar = ({ isFocus = false, setIsFocus }) => {
                   Your Account
                 </div>
               </Link>
-
-              {/* <div className="relative group flex flex-col items-center cursor-pointer w-8 h-8 mt-2 lg:mt-1">
-                <BiCategory className="absolute inset-0 text-2xl lg:text-3xl text-blue-600 opacity-100 group-hover:opacity-0 scale-100 group-hover:scale-0 transition-all duration-300" />
-
-                <BiSolidCategory
-                  className="absolute inset-0 text-2xl lg:text-3xl text-blue-600
-                   opacity-0 group-hover:opacity-100 scale-0 group-hover:scale-100 transition-all duration-300"
-                />
-
-                <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
-                  Categories
-                </div>
-              </div> */}
 
               <Link
                 to={`${isAuth ? "/account/notifications" : "/create-account"}`}

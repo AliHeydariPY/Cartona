@@ -15,17 +15,15 @@ const ProductImageCarousel = ({ productID, mainImage, onClose }) => {
         const productImages = await getProducImages(productID);
 
         setImages([mainImage, ...productImages.data]);
-      } catch (error) {
+      } catch {
         setImages([mainImage]);
       }
     };
     setShow(true);
     fetchImages();
-    //   document.body.style.overflow = "hidden";
   }, []);
 
   const handleClose = () => {
-    // document.body.style.overflow = "unset";
     setShow(false);
     setTimeout(() => onClose(), 300);
   };
