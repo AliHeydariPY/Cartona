@@ -12,6 +12,7 @@ import {
   FiRefreshCcw,
   FiTrash2,
   FiMessageSquare,
+  FiBox,
 } from "react-icons/fi";
 import { MdStorefront } from "react-icons/md";
 import { FaCheck } from "react-icons/fa6";
@@ -19,7 +20,6 @@ import { TbEditCircle } from "react-icons/tb";
 
 import {
   getPurchaseChats,
-  getPurchasesByStorekeepre,
   sendMessagse,
   deleteMessagse,
   editMessage,
@@ -56,37 +56,28 @@ const Chat = () => {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchResults, setSearchResults] = useState({});
 
-  const [isLoading, setIsLoading] = useState(true);
+  const [isConversationLoading, setIsConversationLoading] = useState(true);
+  const [isMessagesLoading, setIsMessagesLoading] = useState(true);
 
   const debouncedSearch = useDebounce(searchQuery, 600);
 
   useEffect(() => {
+    if (!user) return;
     const fetchPVs = async () => {
       try {
-        let pvsByBuyer = [];
-        let pvsByStorekeeper = [];
+        let allPVs = [];
 
         try {
           const res = await getPurchases();
-          pvsByBuyer = res?.data || [];
+          allPVs = res?.data || [];
         } catch (error) {
           console.warn("getPurchasesByBuyer failed:", error);
         }
 
-        if (user.storekeeper_id) {
-          try {
-            const res = await getPurchasesByStorekeepre(user.storekeeper_id);
-            pvsByStorekeeper = res?.data || [];
-          } catch (error) {
-            console.warn("getPurchasesByStorekeepre failed:", error);
-          }
-        }
-
-        const allPVs = [...pvsByBuyer, ...pvsByStorekeeper];
         const pvs = await Promise.all(
           allPVs.map(async (pv) => {
+            const storekeeper = await getStorekeeperById(pv.storekeeper);
             try {
-              const storekeeper = await getStorekeeperById(pv.storekeeper);
               const product = await getProduct(pv.product);
 
               return {
@@ -94,13 +85,16 @@ const Chat = () => {
                 ...pv,
                 product: { ...product.data },
               };
-            } catch (err) {
-              console.error("Error fetching pv details:", err);
-              return null;
+            } catch {
+              return {
+                store: { ...storekeeper.data },
+                ...pv,
+                product: null,
+              };
             }
           })
         );
-        setIsLoading(false);
+        setIsConversationLoading(false);
         setConversations(pvs.filter(Boolean));
       } catch (error) {
         console.error("fetchPVs failed:", error);
@@ -177,6 +171,8 @@ const Chat = () => {
       setMessages(sortMessages.reverse());
     } catch {
       setMessages([]);
+    } finally {
+      setIsMessagesLoading(false);
     }
   };
 
@@ -363,7 +359,7 @@ const Chat = () => {
 
         <div className="flex h-[500px] xs:h-[550px] sm:h-[600px] lg:h-[695px] xl:h-[764px] 2xl:h-[780px]">
           <ChatSidebar
-            isLoading={isLoading}
+            isConversationLoading={isConversationLoading}
             conversations={conversations}
             setSelectedChat={setSelectedChat}
             showSidebar={showSidebar}
@@ -375,6 +371,7 @@ const Chat = () => {
             isSearchFocused={isSearchFocused}
             setIsSearchFocused={setIsSearchFocused}
             clearSearch={clearSearch}
+            setIsMessagesLoading={setIsMessagesLoading}
           />
 
           <div className="flex-1 flex flex-col min-w-0">
@@ -388,11 +385,17 @@ const Chat = () => {
                         openInNewTab(`/product/${selectedChat.product.id}`)
                       }
                     >
-                      <img
-                        src={selectedChat.product.image}
-                        alt={selectedChat.product.name}
-                        className="w-full h-full object-cover"
-                      />
+                      {selectedChat.product?.image ? (
+                        <img
+                          src={selectedChat.product?.image}
+                          alt={selectedChat.product_name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                          <FiBox className="text-blue-600" size={28} />
+                        </div>
+                      )}
                       {!selectedChat.chat_enabled && (
                         <div className="absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center">
                           <FiX className="text-white" size={18} />
@@ -437,7 +440,7 @@ const Chat = () => {
 
                       <div className="flex justify-between items-center">
                         <p className="text-xs sm:text-sm text-blue-800 font-medium truncate min-w-0">
-                          {selectedChat.product.name}
+                          {selectedChat.product_name}
                         </p>
                       </div>
                     </div>
@@ -466,112 +469,142 @@ const Chat = () => {
                     </div>
                   )}
 
-                  {messages.map((message) => {
-                    const dates = [message.edited_at, message.sent_at];
-                    const comparison = dates.map((time) => {
-                      const date = new Date(time);
-                      const hours = date.getHours().toString().padStart(2, "0");
-                      const minutes = date
-                        .getMinutes()
-                        .toString()
-                        .padStart(2, "0");
-                      const seconds = date
-                        .getSeconds()
-                        .toString()
-                        .padStart(2, "0");
-                      return `${hours}:${minutes}:${seconds}`;
-                    });
+                  {isMessagesLoading ? null : messages.length > 0 ? (
+                    messages.map((message) => {
+                      const dates = [message.edited_at, message.sent_at];
+                      const comparison = dates.map((time) => {
+                        const date = new Date(time);
+                        const hours = date
+                          .getHours()
+                          .toString()
+                          .padStart(2, "0");
+                        const minutes = date
+                          .getMinutes()
+                          .toString()
+                          .padStart(2, "0");
+                        const seconds = date
+                          .getSeconds()
+                          .toString()
+                          .padStart(2, "0");
+                        return `${hours}:${minutes}:${seconds}`;
+                      });
 
-                    const isEdited = comparison[0] != comparison[1];
-                    const editTime = comparison[0].slice(0, 5);
-                    const sentTime = comparison[1].slice(0, 5);
-                    return (
-                      <motion.div
-                        key={message.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className={`flex py-1 sm:py-2 rounded-r-2xl ${
-                          message.sender == user?.username
-                            ? "justify-end"
-                            : "justify-start"
-                        }
+                      const isEdited = comparison[0] != comparison[1];
+                      const editTime = comparison[0].slice(0, 5);
+                      const sentTime = comparison[1].slice(0, 5);
+                      return (
+                        <motion.div
+                          key={message.id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className={`flex py-1 sm:py-2 rounded-r-2xl ${
+                            message.sender == user?.username
+                              ? "justify-end"
+                              : "justify-start"
+                          }
                     ${
                       selectedMessages.includes(message.id)
                         ? "bg-blue-100"
                         : null
                     }`}
-                        onContextMenu={(e) => handleContextMenu(e, message)}
-                        onTouchStart={() => handleTouchStart(message)}
-                        onTouchEnd={handleTouchEnd}
-                        onMouseDown={() => handleTouchStart(message)}
-                        onMouseUp={handleTouchEnd}
-                        onMouseLeave={handleTouchEnd}
-                        onClick={() =>
-                          handleMessageClick(message.id, message.sender)
-                        }
-                      >
-                        <div
-                          className={`max-w-[85%] xs:max-w-xs sm:max-w-sm lg:max-w-md px-3 py-2 rounded-xl relative cursor-pointer ${
-                            message.sender == user?.username
-                              ? "bg-gradient-to-br from-blue-600 to-cyan-500 text-white"
-                              : "bg-white border border-blue-200 text-blue-900"
-                          } ${
-                            selectedMessages.includes(message.id)
-                              ? "ring-2 ring-blue-500 ring-offset-1 sm:ring-offset-2"
-                              : ""
-                          }`}
+                          onContextMenu={(e) => handleContextMenu(e, message)}
+                          onTouchStart={() => handleTouchStart(message)}
+                          onTouchEnd={handleTouchEnd}
+                          onMouseDown={() => handleTouchStart(message)}
+                          onMouseUp={handleTouchEnd}
+                          onMouseLeave={handleTouchEnd}
+                          onClick={() =>
+                            handleMessageClick(message.id, message.sender)
+                          }
                         >
-                          {isSelectionMode &&
-                            message.sender == user?.username && (
-                              <div
-                                className={`absolute -left-1 -top-1 sm:-left-2 sm:-top-2 w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center ${
-                                  selectedMessages.includes(message.id)
-                                    ? "bg-blue-600 text-white"
-                                    : "bg-white border border-gray-300"
-                                }`}
-                              >
-                                {selectedMessages.includes(message.id) && (
-                                  <FaCheck
-                                    size={10}
-                                    className="sm:size-[12px]"
-                                  />
-                                )}
-                              </div>
-                            )}
-
                           <div
-                            style={{ whiteSpace: "pre-wrap" }}
-                            className="break-words whitespace-pre-wrap text-sm sm:text-base"
-                          >{`${message.message}`}</div>
+                            className={`max-w-[85%] xs:max-w-xs sm:max-w-sm lg:max-w-md px-3 py-2 rounded-xl relative cursor-pointer ${
+                              message.sender == user?.username
+                                ? "bg-gradient-to-br from-blue-600 to-cyan-500 text-white"
+                                : "bg-white border border-blue-200 text-blue-900"
+                            } ${
+                              selectedMessages.includes(message.id)
+                                ? "ring-2 ring-blue-500 ring-offset-1 sm:ring-offset-2"
+                                : ""
+                            }`}
+                          >
+                            {isSelectionMode &&
+                              message.sender == user?.username && (
+                                <div
+                                  className={`absolute -left-1 -top-1 sm:-left-2 sm:-top-2 w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center ${
+                                    selectedMessages.includes(message.id)
+                                      ? "bg-blue-600 text-white"
+                                      : "bg-white border border-gray-300"
+                                  }`}
+                                >
+                                  {selectedMessages.includes(message.id) && (
+                                    <FaCheck
+                                      size={10}
+                                      className="sm:size-[12px]"
+                                    />
+                                  )}
+                                </div>
+                              )}
 
-                          <div className="flex items-center space-x-1 mt-1 text-xs">
-                            {isEdited ? (
-                              <span
-                                className={`flex items-center space-x-1 ${
-                                  message.sender == user?.username
-                                    ? "text-blue-100"
-                                    : "text-blue-500"
-                                }`}
-                              >
-                                <RiEdit2Line className="mb-0.5" size={11} />
-                                <span>{editTime}</span>
-                              </span>
-                            ) : (
-                              <span
-                                className={
-                                  message.sender == user?.username
-                                    ? "text-blue-100"
-                                    : "text-blue-500"
-                                }
-                              >
-                                {sentTime}
-                              </span>
-                            )}
+                            <div
+                              style={{ whiteSpace: "pre-wrap" }}
+                              className="break-words whitespace-pre-wrap text-sm sm:text-base"
+                            >{`${message.message}`}</div>
+
+                            <div className="flex items-center space-x-1 mt-1 text-xs">
+                              {isEdited ? (
+                                <span
+                                  className={`flex items-center space-x-1 ${
+                                    message.sender == user?.username
+                                      ? "text-blue-100"
+                                      : "text-blue-500"
+                                  }`}
+                                >
+                                  <RiEdit2Line className="mb-0.5" size={11} />
+                                  <span>{editTime}</span>
+                                </span>
+                              ) : (
+                                <span
+                                  className={
+                                    message.sender == user?.username
+                                      ? "text-blue-100"
+                                      : "text-blue-500"
+                                  }
+                                >
+                                  {sentTime}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </motion.div>
+                      );
+                    })
+                  ) : (
+                    <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-blue-50 to-cyan-50 p-4">
+                      <div className="text-center text-blue-600 w-full max-w-[280px] xs:max-w-xs sm:max-w-sm md:max-w-md">
+                        <div className="bg-blue-50/70 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-blue-200">
+                          <FiMessageSquare
+                            className="text-blue-400 mx-auto mb-3 sm:mb-4"
+                            size={40}
+                          />
+
+                          <h3 className="text-base sm:text-lg font-semibold text-blue-800 mb-2">
+                            No Messages Yet
+                          </h3>
+
+                          <p className="text-blue-600 text-sm sm:text-base mb-4 sm:mb-6">
+                            Start a conversation by sending your first message.
+                          </p>
+
+                          <div className="flex justify-center space-x-2 opacity-50">
+                            <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                            <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                            <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
                           </div>
                         </div>
-                      </motion.div>
-                    );
-                  })}
+                      </div>
+                    </div>
+                  )}
 
                   {contextMenu.visible && (
                     <Portal>
