@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { useMessageActions } from "../../hooks/chats/useMessageActions";
+import { useMessageActions } from "../../hooks/useMessageActions";
 import MessageBubble from "./MessageBubble";
 import ContextMenu from "./ContextMenu";
 import SelectionActions from "./SelectionActions";

@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { deleteMessagse } from "../../services/commentAPIServices";
+import { deleteMessagse } from "../services/commentAPIServices";
 
 export const useMessageActions = (
   user,

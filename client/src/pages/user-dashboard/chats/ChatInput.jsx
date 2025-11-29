@@ -49,7 +49,6 @@ export default function ChatInput({
   };
 
   const handleEditMsg = (payload) => {
-    console.log(payload);
     editMessage(payload)
       .then(() => {
         fetchMessages(chatID);

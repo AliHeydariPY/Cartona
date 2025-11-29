@@ -52,17 +52,10 @@ const Chat = () => {
     if (!user) return;
     const fetchPVs = async () => {
       try {
-        let allPVs = [];
-
-        try {
-          const res = await getPurchases();
-          allPVs = res?.data || [];
-        } catch (error) {
-          console.warn("getPurchasesByBuyer failed:", error);
-        }
+        const pvsRes = await getPurchases();
 
         const pvs = await Promise.all(
-          allPVs.map(async (pv) => {
+          pvsRes.data.map(async (pv) => {
             const storekeeper = await getStorekeeperById(pv.storekeeper);
             try {
               const product = await getProduct(pv.product);
@@ -81,10 +74,11 @@ const Chat = () => {
             }
           })
         );
+
         setIsConversationLoading(false);
-        setConversations(pvs.filter(Boolean));
-      } catch (error) {
-        console.error("fetchPVs failed:", error);
+        setConversations(pvs);
+      } catch {
+        setConversations([]);
       }
     };
 
