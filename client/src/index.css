@@ -382,12 +382,12 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 }
 
 .epr-body::-webkit-scrollbar {
-  width: 5px; 
+  width: 5px;
 }
 
 .epr-body::-webkit-scrollbar-thumb {
-  background-color: #3b82f6; 
-  border-radius: 12px; 
+  background-color: #3b82f6;
+  border-radius: 12px;
   transition: background-color 0.3s ease, opacity 0.5s ease;
   opacity: 1;
 }
@@ -411,4 +411,14 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   opacity: 0;
   transform: translateX(100%);
   pointer-events: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Textarea Scrollbar */
+.hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
