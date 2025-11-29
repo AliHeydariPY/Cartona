@@ -34,7 +34,7 @@ export const errorToast = (text) => {
         t.visible ? "animate-enter" : "animate-leave"
       } bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-4 rounded-xl shadow-lg border border-white/20 backdrop-blur-md flex items-center space-x-3 rtl:space-x-reverse`}
     >
-      <FiX className="text-xl shrink-0" />
+      <FiX className="text-xl shrink-0 mb-0.25" />
       <span className="font-medium">{text || "There is a problem"}</span>
     </div>
   ));

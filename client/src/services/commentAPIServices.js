@@ -93,11 +93,6 @@ export const getPurchasesByBuyer = (userID) => {
   return api.get(url);
 };
 
-export const getPurchasesByStorekeepre = (storekeeperID) => {
-  const url = `/comments-api/purchases/storekeeper/${storekeeperID}/`;
-  return api.get(url);
-};
-
 export const getPurchases = () => {
   const url = `/comments-api/purchases/`;
   return api.get(url);

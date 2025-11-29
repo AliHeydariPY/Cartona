@@ -1,14 +1,15 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useAtom } from "jotai";
 import { useEffect } from "react";
-import { FiMessageSquare, FiSearch, FiX, FiLock } from "react-icons/fi";
+import { FiMessageSquare, FiSearch, FiX, FiLock, FiBox } from "react-icons/fi";
 import { MdStorefront } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { userAtom } from "../../../atoms/userAtom";
 import { SectionLoader } from "../../../components/SectionLoader";
 
 const ChatSidebar = ({
-  isLoading,
+  isConversationLoading,
+  setIsMessagesLoading,
   conversations,
   setSelectedChat,
   showSidebar,
@@ -112,7 +113,7 @@ const ChatSidebar = ({
             </div>
 
             <div className="flex-1 overflow-y-auto custom-chat-scroll">
-              {isLoading ? (
+              {isConversationLoading ? (
                 <SectionLoader chatLoader={true} title="Conversation" />
               ) : displayedConversations.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-32 text-blue-600 p-4">
@@ -142,6 +143,7 @@ const ChatSidebar = ({
                       if (window.innerWidth < 1280) {
                         setShowSidebar(false);
                       }
+                      setIsMessagesLoading(true);
                       setSelectedChat(conversation);
                       navigate(`/account/chats/${conversation.id}`);
                     }}
@@ -165,15 +167,21 @@ const ChatSidebar = ({
                             : ""
                         } rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden transition-all duration-300 relative`}
                       >
-                        <img
-                          src={conversation.product.image}
-                          alt={conversation.product.name}
-                          className="w-full h-full object-cover"
-                        />
+                        {conversation.product?.image ? (
+                          <img
+                            src={conversation.product?.image}
+                            alt={conversation.product_name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <FiBox className="text-blue-600" size={28} />
+                          </div>
+                        )}
 
                         {!conversation.chat_enabled && (
                           <div className="absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center">
-                            <FiX className="text-white" size={16} />
+                            <FiX className="text-white" size={20} />
                           </div>
                         )}
                       </div>
@@ -209,10 +217,10 @@ const ChatSidebar = ({
 
                         <div className="mb-1 sm:mb-2">
                           <p className="text-xs sm:text-sm font-medium text-blue-800 truncate">
-                            {conversation.product.name}
+                            {conversation.product_name}
                           </p>
                           <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
-                            {conversation.product.discounted_price ? (
+                            {conversation.product?.discounted_price ? (
                               <>
                                 <span className="text-xs sm:text-sm font-bold text-blue-800">
                                   ${conversation.product.discounted_price}
@@ -228,7 +236,7 @@ const ChatSidebar = ({
                               </>
                             ) : (
                               <span className="text-xs sm:text-sm font-bold text-blue-800">
-                                ${conversation.product.price}
+                                ${conversation.product?.price}
                               </span>
                             )}
                           </div>
