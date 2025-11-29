@@ -47,7 +47,6 @@ const Payments = () => {
                 product: product?.data ?? null,
               };
             } catch {
-              console.log({ ...productPayment });
               return {
                 ...productPayment,
                 product: null,

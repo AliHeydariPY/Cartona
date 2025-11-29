@@ -14,28 +14,27 @@ import {
   FiMessageSquare,
 } from "react-icons/fi";
 
-import {
-  getCategory,
-  getMinMaxComments,
-  getMinMaxPrice,
-} from "../services/productAPIServices";
-import { getStorekeeperById } from "../services/userAPIServices";
-
 import CategoryFilter from "./filters/CategoryFilter";
 import PriceFilter from "./filters/PriceFilter";
 import RatingFilter from "./filters/RatingFilter";
 import ReviewsFiltre from "./filters/ReviewsFiltre";
+import useSearchFilterData from "../hooks/useSearchFilterData";
 
 const SearchFilters = () => {
   const navigate = useNavigate();
   const { query } = useParams();
-  const [isOpen, setIsOpen] = useState(false);
-  const params = new URLSearchParams(query);
-  const [open, setOpen] = useState(false);
-  const [storekeeperInfo, setStorekeeperInfo] = useState();
+  const {
+    params,
+    initialFilters,
+    setInitialFilters,
+    isReady,
+    storekeeperInfo,
+    minMaxPrice,
+    minMaxComments,
+  } = useSearchFilterData(query);
 
-  const [minMaxPrice, setMinMaxPrice] = useState([]);
-  const [minMaxComments, setMinMaxComments] = useState([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const filters = {
     min_rating: "",
@@ -47,55 +46,6 @@ const SearchFilters = () => {
     category: null,
     storekeeper: "",
   };
-  const [initialFilters, setInitialFilters] = useState({
-    min_rating: "",
-    max_rating: "",
-    min_comments: "",
-    max_comments: "",
-    min_price: "",
-    max_price: "",
-    storekeeper: "",
-    category: null,
-  });
-  const [isReady, setIsReady] = useState(false);
-
-  useEffect(() => {
-    const loadFilters = async () => {
-      const newFilters = { ...initialFilters };
-
-      await Promise.all(
-        Object.keys(initialFilters).map(async (filter) => {
-          if (params.has(filter)) {
-            const value = params.get(filter);
-
-            if (filter === "category") {
-              const res = await getCategory(value);
-              newFilters[filter] = res.data;
-            } else {
-              newFilters[filter] = isNaN(value) ? value : Number(value);
-            }
-          } else {
-            newFilters[filter] = "";
-          }
-        })
-      );
-
-      if (newFilters.storekeeper) {
-        const res = await getStorekeeperById(newFilters.storekeeper);
-        setStorekeeperInfo(res.data);
-      } else {
-        setStorekeeperInfo(true);
-      }
-
-      setPriceRange();
-      setCommentRange();
-
-      setInitialFilters(newFilters);
-      setIsReady(true);
-    };
-
-    loadFilters();
-  }, [query]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -110,43 +60,6 @@ const SearchFilters = () => {
 
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-
-  const setPriceRange = async () => {
-    let priceRange = [];
-    let filteredQuery = "";
-
-    if (query) {
-      filteredQuery = query
-        .replace(/(&)?min_price=\d+/g, "")
-        .replace(/(&)?max_price=\d+/g, "");
-    }
-
-    const min = await getMinMaxPrice("min", filteredQuery);
-    priceRange.push(min.data.discounted_price ?? min.data.price);
-
-    const max = await getMinMaxPrice("max", filteredQuery);
-    priceRange.push(max.data.price);
-
-    setMinMaxPrice(priceRange);
-  };
-
-  const setCommentRange = async () => {
-    let commentsRange = [];
-    let filteredQuery = "";
-
-    if (query) {
-      filteredQuery = query
-        .replace(/(&)?min_comments=\d+/g, "")
-        .replace(/(&)?max_comments=\d+/g, "");
-    }
-
-    const min = await getMinMaxComments("min", filteredQuery);
-    commentsRange.push(min.data.comment_count);
-    const max = await getMinMaxComments("max", filteredQuery);
-    commentsRange.push(max.data.comment_count);
-
-    setMinMaxComments(commentsRange);
-  };
 
   const buildUrl = (values) => {
     const filtersName = Object.keys(filters);
@@ -215,8 +128,6 @@ const SearchFilters = () => {
 
           if (cat.id) {
             if (params.has("search")) {
-              console.log(cat.id);
-
               url = buildUrl({ ...values, category: cat.id });
             } else {
               if (values.storekeeper) {

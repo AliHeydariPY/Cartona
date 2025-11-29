@@ -17,7 +17,6 @@ export const useProductDetailActions = (
   const [, setSelectedProduct] = useAtom(selectedProductAtom);
   const [, setAddToCartPopup] = useAtom(addToCartPopupAtom);
   const addToCartHandler = async () => {
-    console.log(product);
     try {
       const response = await addToCart({ product: product.id, quantity: 1 });
 

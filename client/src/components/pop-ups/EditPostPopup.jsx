@@ -9,6 +9,7 @@ import {
   editCommentReply,
   getCommentReplies,
 } from "../../services/commentAPIServices";
+import { errorToast } from "../../utils/toast";
 
 const EditPostPopup = ({
   onClose,
@@ -84,7 +85,7 @@ const EditPostPopup = ({
       setEditedPost("");
       handleClose();
     } catch {
-      console.error("Failed to submit the edited post:");
+      errorToast("Failed to submit the edited post");
     } finally {
       setIsSubmitting(false);
     }
@@ -197,7 +198,9 @@ const EditPostPopup = ({
               <button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className={`flex items-center justify-center px-4 cursor-pointer py-3 sm:py-2 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white gap-2 transition-colors duration-200 ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
+                className={`flex items-center justify-center px-4 cursor-pointer py-3 sm:py-2 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white gap-2 transition-colors duration-200 ${
+                  isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+                }`}
               >
                 <RiSendPlaneFill size={18} className="mb-0.5" />
                 {isSubmitting ? "Submitting..." : "Submit"}

@@ -21,7 +21,7 @@ export default function ChatInput({
   selectedChat,
   emojiBox,
   setEmojiBox,
-  bumpConversation
+  bumpConversation,
 }) {
   const [textareaHeight, setTextareaHeight] = useState(0);
   const textareaRef = useRef();
@@ -161,11 +161,11 @@ export default function ChatInput({
           }}
           placeholder={isEditing ? "Edit your message..." : "Type a message..."}
           className="flex-1 items-center px-3 sm:px-4 py-2 sm:py-2.75 border border-blue-300 rounded-2xl sm:rounded-3xl
-        resize-none overflow-hidden 
-        min-h-[34px] sm:min-h-[43px] leading-[16px] sm:leading-[17px] text-sm sm:text-base
-        hover:outline-none hover:ring-1 hover:ring-blue-400 
-        focus:outline-none focus:ring-1 focus:ring-blue-400 
-        transition-all duration-300"
+             resize-none overflow-y-auto hide-scrollbar
+             min-h-[34px] sm:min-h-[43px] leading-[16px] sm:leading-[17px] text-sm sm:text-base
+             hover:outline-none hover:ring-1 hover:ring-blue-400 
+             focus:outline-none focus:ring-1 focus:ring-blue-400 
+             transition-all duration-300"
         />
 
         {isEditing ? (

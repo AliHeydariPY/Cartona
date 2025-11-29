@@ -15,14 +15,28 @@ const CategoryFilter = ({ selectedCategory, onSelect }) => {
   const [isOpen, setIsOpen] = useState(selectedCategory ? true : false);
 
   useEffect(() => {
-    getMainCategories().then((res) => setMainCategories(res.data));
+    const fetchMainCategories = async () => {
+      try {
+        const res = await getMainCategories();
+        setMainCategories(res.data);
+      } catch {
+        setMainCategories([]);
+      }
+    };
+    fetchMainCategories();
   }, [query]);
 
   useEffect(() => {
     if (!selectedMainCategory) return;
-    getSubCategories(selectedMainCategory.id).then((res) =>
-      setSubCategories(res.data)
-    );
+    const fetchSubCategories = async () => {
+      try {
+        const res = await getSubCategories(selectedMainCategory.id);
+        setSubCategories(res.data);
+      } catch {
+        setSubCategories([]);
+      }
+    };
+    fetchSubCategories();
   }, [selectedMainCategory]);
 
   return (

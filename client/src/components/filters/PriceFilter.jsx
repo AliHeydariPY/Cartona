@@ -1,5 +1,5 @@
-import { Field } from "formik";
 import { useEffect, useState } from "react";
+import { Field } from "formik";
 import { Range, getTrackBackground } from "react-range";
 
 const PriceFilter = ({ minMaxPrice, values, setFieldValue }) => {
@@ -11,12 +11,6 @@ const PriceFilter = ({ minMaxPrice, values, setFieldValue }) => {
 
   const [safeMin, setSafeMin] = useState(minPrice);
   const [safeMax, setSafeMax] = useState(maxPrice);
-
-  console.log(values.min_price )
-  console.log(minMaxPrice[0].split(".")[0])
-
-  console.log(values.max_price )
-  console.log(Number(minMaxPrice[1].split(".")[0]) +1)
 
   useEffect(() => {
     setFieldValue(
@@ -43,7 +37,7 @@ const PriceFilter = ({ minMaxPrice, values, setFieldValue }) => {
       );
     }
   }, [minMaxPrice]);
-  
+
   const maxWidth = `${String(safeMax).length + 1}ch`;
 
   return (
