@@ -147,8 +147,16 @@ class PaymentViewSet(viewsets.ModelViewSet):
             obj = None
 
         if request.method == 'GET':
-            serializer = self.get_serializer(obj if index else queryset, many=not index)
-            return Response(serializer.data)
+            if obj:
+                serializer = self.get_serializer(obj)
+                return Response(serializer.data)
+            else:
+                page = self.paginate_queryset(queryset)
+                if page is not None:
+                    serializer = self.get_serializer(page, many=True)
+                    return self.get_paginated_response(serializer.data)
+                serializer = self.get_serializer(queryset, many=True)
+                return Response(serializer.data)
 
         elif request.method in ['PUT', 'PATCH']:
             serializer = self.get_serializer(obj, data=request.data, partial=(request.method == 'PATCH'))
@@ -157,6 +165,8 @@ class PaymentViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
 
         elif request.method == 'DELETE':
+            if obj is None:
+                raise MethodNotAllowed("DELETE", detail="You must specify an index to delete a single payment.")
             obj.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -217,8 +227,16 @@ class ProductPaymentViewSet(viewsets.ModelViewSet):
             obj = None
 
         if request.method == 'GET':
-            serializer = self.get_serializer(obj if index else queryset, many=not index)
-            return Response(serializer.data)
+            if obj:
+                serializer = self.get_serializer(obj)
+                return Response(serializer.data)
+            else:
+                page = self.paginate_queryset(queryset)
+                if page is not None:
+                    serializer = self.get_serializer(page, many=True)
+                    return self.get_paginated_response(serializer.data)
+                serializer = self.get_serializer(queryset, many=True)
+                return Response(serializer.data)
 
         elif request.method in ['PUT', 'PATCH']:
             serializer = self.get_serializer(obj, data=request.data, partial=(request.method == 'PATCH'))
@@ -226,17 +244,13 @@ class ProductPaymentViewSet(viewsets.ModelViewSet):
             serializer.save()
             return Response(serializer.data)
 
-
         elif request.method == 'DELETE':
-
             if obj is None:
                 raise MethodNotAllowed("DELETE", detail="You must specify an index to delete a single item.")
 
             if not obj.is_successful:
                 serializer = self.get_serializer(obj)
-
                 serializer.perform_delete(obj)
-
                 return Response(status=status.HTTP_204_NO_CONTENT)
 
             if not obj.is_delivered:
@@ -245,11 +259,8 @@ class ProductPaymentViewSet(viewsets.ModelViewSet):
             obj.buyer_hidden = True
 
             if obj.storekeeper_hidden and obj.buyer_hidden:
-
                 obj.delete()
-
             else:
-
                 obj.save()
 
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -309,8 +320,7 @@ class ProductPaymentViewSet(viewsets.ModelViewSet):
         queryset = self.get_queryset().filter(id__in=filtered_ids)
         return self._handle_filtered_request(request, queryset, index, label="storekeeper delivery status")
 
-    @action(detail=False, url_path=r'storekeeper/(?P<storekeeper_id>\d+)(?:/(?P<index>\d+))?',
-            methods=['get', 'put', 'patch', 'delete'])
+    @action(detail=False, url_path=r'storekeeper/(?P<storekeeper_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
     def by_storekeeper(self, request, storekeeper_id=None, index=None):
         try:
             storekeeper_id = int(storekeeper_id)

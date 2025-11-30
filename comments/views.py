@@ -110,8 +110,16 @@ class CommentViewSet(viewsets.ModelViewSet):
             obj = None
 
         if request.method == 'GET':
-            serializer = self.get_serializer(obj if index else queryset, many=not index)
-            return Response(serializer.data)
+            if obj:
+                serializer = self.get_serializer(obj)
+                return Response(serializer.data)
+            else:
+                page = self.paginate_queryset(queryset)
+                if page is not None:
+                    serializer = self.get_serializer(page, many=True)
+                    return self.get_paginated_response(serializer.data)
+                serializer = self.get_serializer(queryset, many=True)
+                return Response(serializer.data)
 
         elif request.method in ['PUT', 'PATCH']:
             serializer = self.get_serializer(obj, data=request.data, partial=(request.method == 'PATCH'))
@@ -120,6 +128,8 @@ class CommentViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
 
         elif request.method == 'DELETE':
+            if obj is None:
+                raise MethodNotAllowed("DELETE", detail="You must specify an index to delete a single comment.")
             obj.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -172,8 +182,16 @@ class CommentReplyViewSet(viewsets.ModelViewSet):
             obj = None
 
         if request.method == 'GET':
-            serializer = self.get_serializer(obj if index else queryset, many=not index)
-            return Response(serializer.data)
+            if obj:
+                serializer = self.get_serializer(obj)
+                return Response(serializer.data)
+            else:
+                page = self.paginate_queryset(queryset)
+                if page is not None:
+                    serializer = self.get_serializer(page, many=True)
+                    return self.get_paginated_response(serializer.data)
+                serializer = self.get_serializer(queryset, many=True)
+                return Response(serializer.data)
 
         elif request.method in ['PUT', 'PATCH']:
             serializer = self.get_serializer(obj, data=request.data, partial=(request.method == 'PATCH'))
@@ -182,6 +200,8 @@ class CommentReplyViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
 
         elif request.method == 'DELETE':
+            if obj is None:
+                raise MethodNotAllowed("DELETE", detail="You must specify an index to delete a single reply.")
             obj.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -229,8 +249,16 @@ class ProductQuestionViewSet(viewsets.ModelViewSet):
             obj = None
 
         if request.method == 'GET':
-            serializer = self.get_serializer(obj if index else queryset, many=not index)
-            return Response(serializer.data)
+            if obj:
+                serializer = self.get_serializer(obj)
+                return Response(serializer.data)
+            else:
+                page = self.paginate_queryset(queryset)
+                if page is not None:
+                    serializer = self.get_serializer(page, many=True)
+                    return self.get_paginated_response(serializer.data)
+                serializer = self.get_serializer(queryset, many=True)
+                return Response(serializer.data)
 
         elif request.method in ['PUT', 'PATCH']:
             serializer = self.get_serializer(obj, data=request.data, partial=(request.method == 'PATCH'))
@@ -239,6 +267,8 @@ class ProductQuestionViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
 
         elif request.method == 'DELETE':
+            if obj is None:
+                raise MethodNotAllowed("DELETE", detail="You must specify an index to delete a single product question.")
             obj.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -327,8 +357,16 @@ class ProductPurchaseViewSet(
             obj = None
 
         if request.method == 'GET':
-            serializer = self.get_serializer(obj if index else queryset, many=not index)
-            return Response(serializer.data)
+            if obj:
+                serializer = self.get_serializer(obj)
+                return Response(serializer.data)
+            else:
+                page = self.paginate_queryset(queryset)
+                if page is not None:
+                    serializer = self.get_serializer(page, many=True)
+                    return self.get_paginated_response(serializer.data)
+                serializer = self.get_serializer(queryset, many=True)
+                return Response(serializer.data)
 
         elif request.method in ['PUT', 'PATCH']:
             serializer = self.get_serializer(obj, data=request.data, partial=(request.method == 'PATCH'))
@@ -434,8 +472,16 @@ class PurchaseChatViewSet(viewsets.ModelViewSet):
             chat = None
 
         if request.method == 'GET':
-            serializer = self.get_serializer(chat if index else chats, many=not index)
-            return Response(serializer.data)
+            if chat:
+                serializer = self.get_serializer(chat)
+                return Response(serializer.data)
+            else:
+                page = self.paginate_queryset(chats)
+                if page is not None:
+                    serializer = self.get_serializer(page, many=True)
+                    return self.get_paginated_response(serializer.data)
+                serializer = self.get_serializer(chats, many=True)
+                return Response(serializer.data)
 
         elif request.method in ['PUT', 'PATCH']:
             serializer = self.get_serializer(chat, data=request.data, partial=(request.method == 'PATCH'))
@@ -511,8 +557,16 @@ class NotificationViewSet(
             obj = None
 
         if request.method == 'GET':
-            serializer = self.get_serializer(obj if index else queryset, many=not index)
-            return Response(serializer.data)
+            if obj:
+                serializer = self.get_serializer(obj)
+                return Response(serializer.data)
+            else:
+                page = self.paginate_queryset(queryset)
+                if page is not None:
+                    serializer = self.get_serializer(page, many=True)
+                    return self.get_paginated_response(serializer.data)
+                serializer = self.get_serializer(queryset, many=True)
+                return Response(serializer.data)
 
         elif request.method in ['PUT', 'PATCH']:
             serializer = self.get_serializer(obj, data=request.data, partial=(request.method == 'PATCH'))

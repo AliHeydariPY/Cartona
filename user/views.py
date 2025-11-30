@@ -185,8 +185,16 @@ class ProductDeliveryStatusViewSet(viewsets.ModelViewSet):
             obj = None
 
         if request.method == 'GET':
-            serializer = self.get_serializer(obj if index else queryset, many=not index)
-            return Response(serializer.data)
+            if obj:
+                serializer = self.get_serializer(obj)
+                return Response(serializer.data)
+            else:
+                page = self.paginate_queryset(queryset)
+                if page is not None:
+                    serializer = self.get_serializer(page, many=True)
+                    return self.get_paginated_response(serializer.data)
+                serializer = self.get_serializer(queryset, many=True)
+                return Response(serializer.data)
 
         elif request.method in ['PUT', 'PATCH']:
             serializer = self.get_serializer(obj, data=request.data, partial=(request.method == 'PATCH'))
@@ -284,8 +292,16 @@ class StorePaymentViewSet(
             obj = None
 
         if request.method == 'GET':
-            serializer = self.get_serializer(obj if index else queryset, many=not index)
-            return Response(serializer.data)
+            if obj:
+                serializer = self.get_serializer(obj)
+                return Response(serializer.data)
+            else:
+                page = self.paginate_queryset(queryset)
+                if page is not None:
+                    serializer = self.get_serializer(page, many=True)
+                    return self.get_paginated_response(serializer.data)
+                serializer = self.get_serializer(queryset, many=True)
+                return Response(serializer.data)
 
         elif request.method in ['PUT', 'PATCH']:
             serializer = self.get_serializer(obj, data=request.data, partial=(request.method == 'PATCH'))
@@ -342,8 +358,7 @@ class StorePaymentViewSet(
         queryset = self.get_queryset().filter(is_delivered=value)
         return self._handle_filtered_request(request, queryset, index, label="buyer delivery status")
 
-    @action(detail=False, url_path=r'storekeeper/(?P<storekeeper_id>\d+)(?:/(?P<index>\d+))?',
-            methods=['get', 'put', 'patch', 'delete'])
+    @action(detail=False, url_path=r'storekeeper/(?P<storekeeper_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
     def by_storekeeper(self, request, storekeeper_id=None, index=None):
         try:
             storekeeper_id = int(storekeeper_id)
