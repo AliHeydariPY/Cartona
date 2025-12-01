@@ -11,6 +11,7 @@ from .serializers import (CartItemSerializer, CartSerializer,
 class CartItemViewSet(viewsets.ModelViewSet):
     serializer_class = CartItemSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = None
 
     def get_queryset(self):
         user = self.request.user
@@ -62,6 +63,7 @@ class CartViewSet(
 ):
     serializer_class = CartSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = None
 
     def get_queryset(self):
         return Cart.objects.filter(user=self.request.user)
@@ -112,6 +114,7 @@ class FavoriteViewSet(
 ):
     serializer_class = FavoriteSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = None
 
     def get_queryset(self):
         return Favorite.objects.filter(user=self.request.user)
@@ -119,6 +122,7 @@ class FavoriteViewSet(
 class PaymentViewSet(viewsets.ModelViewSet):
     serializer_class = PaymentSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = None
 
     def get_queryset(self):
         return Payment.objects.filter(cart__user=self.request.user).order_by('-paid_at')
@@ -147,16 +151,8 @@ class PaymentViewSet(viewsets.ModelViewSet):
             obj = None
 
         if request.method == 'GET':
-            if obj:
-                serializer = self.get_serializer(obj)
-                return Response(serializer.data)
-            else:
-                page = self.paginate_queryset(queryset)
-                if page is not None:
-                    serializer = self.get_serializer(page, many=True)
-                    return self.get_paginated_response(serializer.data)
-                serializer = self.get_serializer(queryset, many=True)
-                return Response(serializer.data)
+            serializer = self.get_serializer(obj if index else queryset, many=not index)
+            return Response(serializer.data)
 
         elif request.method in ['PUT', 'PATCH']:
             serializer = self.get_serializer(obj, data=request.data, partial=(request.method == 'PATCH'))
@@ -165,8 +161,6 @@ class PaymentViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
 
         elif request.method == 'DELETE':
-            if obj is None:
-                raise MethodNotAllowed("DELETE", detail="You must specify an index to delete a single payment.")
             obj.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 

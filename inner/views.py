@@ -363,6 +363,7 @@ class ProductViewSet(viewsets.ModelViewSet):
 
 class ImageViewSet(viewsets.ModelViewSet):
     serializer_class = ImageSerializer
+    pagination_class = None
 
     def get_permissions(self):
         if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
@@ -399,16 +400,8 @@ class ImageViewSet(viewsets.ModelViewSet):
             obj = None
 
         if request.method == 'GET':
-            if obj:
-                serializer = self.get_serializer(obj)
-                return Response(serializer.data)
-            else:
-                page = self.paginate_queryset(queryset)
-                if page is not None:
-                    serializer = self.get_serializer(page, many=True)
-                    return self.get_paginated_response(serializer.data)
-                serializer = self.get_serializer(queryset, many=True)
-                return Response(serializer.data)
+            serializer = self.get_serializer(obj if index else queryset, many=not index)
+            return Response(serializer.data)
 
         elif request.method in ['PUT', 'PATCH']:
             serializer = self.get_serializer(obj, data=request.data, partial=(request.method == 'PATCH'))
@@ -417,8 +410,6 @@ class ImageViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
 
         elif request.method == 'DELETE':
-            if obj is None:
-                raise MethodNotAllowed("DELETE", detail="You must specify an index to delete a single image.")
             obj.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -427,8 +418,10 @@ class ImageViewSet(viewsets.ModelViewSet):
         queryset = self.get_queryset().filter(product_id=product_id)
         return self._handle_filtered_request(request, queryset, index, label="product image")
 
+
 class FeatureViewSet(viewsets.ModelViewSet):
     serializer_class = FeatureSerializer
+    pagination_class = None
 
     def get_permissions(self):
         if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
@@ -465,16 +458,8 @@ class FeatureViewSet(viewsets.ModelViewSet):
             obj = None
 
         if request.method == 'GET':
-            if obj:
-                serializer = self.get_serializer(obj)
-                return Response(serializer.data)
-            else:
-                page = self.paginate_queryset(queryset)
-                if page is not None:
-                    serializer = self.get_serializer(page, many=True)
-                    return self.get_paginated_response(serializer.data)
-                serializer = self.get_serializer(queryset, many=True)
-                return Response(serializer.data)
+            serializer = self.get_serializer(obj if index else queryset, many=not index)
+            return Response(serializer.data)
 
         elif request.method in ['PUT', 'PATCH']:
             serializer = self.get_serializer(obj, data=request.data, partial=(request.method == 'PATCH'))
@@ -483,8 +468,6 @@ class FeatureViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
 
         elif request.method == 'DELETE':
-            if obj is None:
-                raise MethodNotAllowed("DELETE", detail="You must specify an index to delete a single feature.")
             obj.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -495,6 +478,7 @@ class FeatureViewSet(viewsets.ModelViewSet):
 
 class FAQViewSet(viewsets.ModelViewSet):
     serializer_class = FAQSerializer
+    pagination_class = None
 
     def get_permissions(self):
         if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
@@ -531,16 +515,8 @@ class FAQViewSet(viewsets.ModelViewSet):
             obj = None
 
         if request.method == 'GET':
-            if obj:
-                serializer = self.get_serializer(obj)
-                return Response(serializer.data)
-            else:
-                page = self.paginate_queryset(queryset)
-                if page is not None:
-                    serializer = self.get_serializer(page, many=True)
-                    return self.get_paginated_response(serializer.data)
-                serializer = self.get_serializer(queryset, many=True)
-                return Response(serializer.data)
+            serializer = self.get_serializer(obj if index else queryset, many=not index)
+            return Response(serializer.data)
 
         elif request.method in ['PUT', 'PATCH']:
             serializer = self.get_serializer(obj, data=request.data, partial=(request.method == 'PATCH'))
@@ -549,8 +525,6 @@ class FAQViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
 
         elif request.method == 'DELETE':
-            if obj is None:
-                raise MethodNotAllowed("DELETE", detail="You must specify an index to delete a single FAQ.")
             obj.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -559,11 +533,13 @@ class FAQViewSet(viewsets.ModelViewSet):
         queryset = self.get_queryset().filter(product_id=product_id)
         return self._handle_filtered_request(request, queryset, index, label="product FAQ")
 
+
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Category.objects.all().order_by('-id')
     serializer_class = CategorySerializer
     filter_backends = [SearchFilter]
     search_fields = ['name', 'description']
+    pagination_class = None
 
     @action(detail=False, url_path=r'parent/(?P<parent_id>[^/]+)(?:/(?P<index>\d+))?', methods=['get'])
     def by_parent(self, request, parent_id=None, index=None):
@@ -586,16 +562,12 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
             serializer = self.get_serializer(category)
             return Response(serializer.data)
 
-        page = self.paginate_queryset(categories)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
         serializer = self.get_serializer(categories, many=True)
         return Response(serializer.data)
 
 class CollectionModelViewSet(viewsets.ModelViewSet):
     serializer_class = CollectionModelSerializer
+    pagination_class = None
 
     def get_permissions(self):
         if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
@@ -642,10 +614,6 @@ class CollectionModelViewSet(viewsets.ModelViewSet):
                 serializer = self.get_serializer(obj)
                 return Response(serializer.data)
             else:
-                page = self.paginate_queryset(queryset)
-                if page is not None:
-                    serializer = self.get_serializer(page, many=True)
-                    return self.get_paginated_response(serializer.data)
                 serializer = self.get_serializer(queryset, many=True)
                 return Response(serializer.data)
 

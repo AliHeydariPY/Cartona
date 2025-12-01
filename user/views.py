@@ -29,6 +29,7 @@ class UserViewSet(
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
     lookup_field = 'uuid_record__uuid'
+    pagination_class = None
 
     def get_queryset(self):
         user = self.request.user
@@ -98,6 +99,7 @@ class StoreKeeperViewSet(
     serializer_class = StoreKeeperSerializer
     filter_backends = [SearchFilter]
     search_fields = ['store_name', 'description']
+    pagination_class = None
 
     def get_permissions(self):
         if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
@@ -136,6 +138,7 @@ class StoreKeeperViewSet(
 class ProductDeliveryStatusViewSet(viewsets.ModelViewSet):
     serializer_class = DeliveryStatusSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = None
 
     def get_queryset(self):
         user = self.request.user
@@ -185,16 +188,8 @@ class ProductDeliveryStatusViewSet(viewsets.ModelViewSet):
             obj = None
 
         if request.method == 'GET':
-            if obj:
-                serializer = self.get_serializer(obj)
-                return Response(serializer.data)
-            else:
-                page = self.paginate_queryset(queryset)
-                if page is not None:
-                    serializer = self.get_serializer(page, many=True)
-                    return self.get_paginated_response(serializer.data)
-                serializer = self.get_serializer(queryset, many=True)
-                return Response(serializer.data)
+            serializer = self.get_serializer(obj if index else queryset, many=not index)
+            return Response(serializer.data)
 
         elif request.method in ['PUT', 'PATCH']:
             serializer = self.get_serializer(obj, data=request.data, partial=(request.method == 'PATCH'))
