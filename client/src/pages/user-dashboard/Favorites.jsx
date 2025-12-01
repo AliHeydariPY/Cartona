@@ -7,7 +7,7 @@ import { IoCart, IoCartOutline } from "react-icons/io5";
 import { PiLightningFill } from "react-icons/pi";
 import { BiSolidOffer } from "react-icons/bi";
 
-import { getCartProducts, getFavorites } from "../../services/cartAPIServices";
+import { getFavorites, isProductInCart } from "../../services/cartAPIServices";
 import { getProduct } from "../../services/productAPIServices";
 import { SectionLoader } from "../../components/SectionLoader";
 import { useProductActions } from "../../hooks/useProductActions";
@@ -16,7 +16,7 @@ const Favorites = () => {
   const [favorites, setFavorites] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const { addToCartHandler, removeFromCartHandler, removeFavoriteHandler } =
-    useProductActions( setFavorites);
+    useProductActions(setFavorites);
 
   const visibleCountNum = window.innerWidth >= 1280 ? 6 : 4;
 
@@ -25,16 +25,22 @@ const Favorites = () => {
   useEffect(() => {
     const fetchData = async () => {
       const favoriteProductsRes = await getFavorites();
-      const cartProductsRes = await getCartProducts();
 
       const favoriteProducts = await Promise.all(
-        favoriteProductsRes.data.map(async (favorite) => {
+        favoriteProductsRes.data.results.map(async (favorite) => {
           const productRes = await getProduct(favorite.product);
-          const hasCart = cartProductsRes.data.find((cartProduct) => {
-            return cartProduct.product == productRes.data.id;
-          });
+          let hasCart;
+          try {
+            hasCart = await isProductInCart(productRes.data.id);
+          } catch {
+            hasCart = null;
+          }
 
-          return { ...favorite, product: productRes.data, cartItem: hasCart };
+          return {
+            ...favorite,
+            product: productRes.data,
+            cartItem: hasCart?.data,
+          };
         })
       );
       setIsLoading(false);

@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
 import { userActivitySummary } from "../../services/userAPIServices";
-import { getCartProducts } from "../../services/cartAPIServices";
+import { isProductInCart } from "../../services/cartAPIServices";
 import { getProduct } from "../../services/productAPIServices";
 
 import RecentOrders from "../../components/profile-sections/RecentOrders";
@@ -19,22 +19,24 @@ const Profile = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const [activities, cartProductsRes] = await Promise.all([
-        userActivitySummary(),
-        getCartProducts(),
-      ]);
+      const activities = await userActivitySummary();
 
       setUserActivity(activities.data);
 
       const favoriteProducts = await Promise.all(
         activities.data.recent_favorites.map(async (favorite) => {
           const productRes = await getProduct(favorite.product);
-
-          const hasCart = cartProductsRes.data.find((cartProduct) => {
-            return cartProduct.product == productRes.data.id;
-          });
-
-          return { ...favorite, product: productRes.data, cartItem: hasCart };
+          let hasCart;
+          try {
+            hasCart = await isProductInCart(productRes.data.id);
+          } catch {
+            hasCart = null;
+          }
+          return {
+            ...favorite,
+            product: productRes.data,
+            cartItem: hasCart?.data,
+          };
         })
       );
 

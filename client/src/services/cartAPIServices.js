@@ -1,9 +1,13 @@
-import axios from "axios";
 import api from "../api/api";
 const SERVER_URL = "https://127.0.0.1:8000";
 
 export const getCartProducts = () => {
   const url = `/cart-api/cart-items/`;
+  return api.get(url);
+};
+
+export const  isProductInCart = (productID) => {
+  const url = `/cart-api/cart-items/product/${productID}/`;
   return api.get(url);
 };
 
@@ -49,6 +53,11 @@ export const setAsDelivered = (paymentID, editedData) => {
 
 export const getFavorites = () => {
   const url = `/cart-api/favorite-items/`;
+  return api.get(url);
+};
+
+export const isProductInFavorites = (productID) => {
+  const url = `/cart-api/favorite-items/product/${productID}/`;
   return api.get(url);
 };
 

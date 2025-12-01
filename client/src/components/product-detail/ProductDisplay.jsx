@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
-import { getCartProducts, getFavorites } from "../../services/cartAPIServices";
+import {
+  isProductInCart,
+  isProductInFavorites,
+} from "../../services/cartAPIServices";
 
 import { FiHeart, FiStar, FiShare2 } from "react-icons/fi";
 import { BiSolidOffer } from "react-icons/bi";
@@ -33,19 +36,17 @@ const ProductDisplay = ({ product }) => {
 
   useEffect(() => {
     const fetchCartItems = async () => {
-      const cartProductsRes = await getCartProducts();
-      const favoriteProductsRes = await getFavorites();
+      const cartProductRes = await isProductInCart(id);
+      
+      let favoriteProductRes;
+      try {
+        favoriteProductRes = await isProductInFavorites(id);
+      } catch {
+        favoriteProductRes = null;
+      }
 
-      setFavoriteEntry(() => {
-        return favoriteProductsRes.data.find((fav) => fav.product == id);
-      });
-
-      setIsInCart(() => {
-        const hasCart = cartProductsRes.data.find(
-          (cartProduct) => cartProduct.product == product.id
-        );
-        return hasCart;
-      });
+      setFavoriteEntry(favoriteProductRes?.data);
+      setIsInCart(cartProductRes.data);
     };
 
     fetchCartItems();

@@ -12,7 +12,7 @@ import {
 import { BiSolidOffer } from "react-icons/bi";
 import { FaClock, FaHeart } from "react-icons/fa";
 import { PiLightningFill } from "react-icons/pi";
-import { getFavorites } from "../../services/cartAPIServices";
+import { isProductInFavorites } from "../../services/cartAPIServices";
 import ProductImageCarousel from "../ProductImageCarousel";
 import { useProductActions } from "../../hooks/useProductActions";
 
@@ -35,16 +35,23 @@ const ProductsCarousel = ({ featuredProducts }) => {
     useProductActions(setFavorites);
 
   useEffect(() => {
+    if (!featuredProducts) return;
     const fetchData = async () => {
-      try {
-        const favoriteProductsRes = await getFavorites();
-        setFavorites(favoriteProductsRes.data);
-      } catch {
-        setFavorites([]);
-      }
+      const favoriteProducts = await Promise.all(
+        featuredProducts.map(async (product) => {
+          try {
+            let fav = await isProductInFavorites(product.id);
+            return fav.data;
+          } catch {
+            return null;
+          }
+        })
+      );
+      console.log(favoriteProducts.filter(Boolean));
+      setFavorites(favoriteProducts.filter(Boolean));
     };
     fetchData();
-  }, []);
+  }, [featuredProducts]);
 
   const updateVisibleCount = () => {
     const width = window.innerWidth;
@@ -352,7 +359,10 @@ const FeaturedProducts = () => {
       const firstProducts = await getStorekeeperProducts(1);
       const secondeProducts = await getStorekeeperProducts(2);
 
-      setFeaturedProducts([...firstProducts.data, ...secondeProducts.data]);
+      setFeaturedProducts([
+        ...firstProducts.data.results,
+        ...secondeProducts.data.results,
+      ]);
     };
 
     fetchProducts();
