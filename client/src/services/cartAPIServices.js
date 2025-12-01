@@ -6,7 +6,7 @@ export const getCartProducts = () => {
   return api.get(url);
 };
 
-export const  isProductInCart = (productID) => {
+export const isProductInCart = (productID) => {
   const url = `/cart-api/cart-items/product/${productID}/`;
   return api.get(url);
 };
@@ -51,8 +51,8 @@ export const setAsDelivered = (paymentID, editedData) => {
   return api.patch(url, editedData);
 };
 
-export const getFavorites = () => {
-  const url = `/cart-api/favorite-items/`;
+export const getFavorites = (page = 1, visibleCountNum = 6) => {
+  const url = `/cart-api/favorite-items/?page=${page}&page_size=${visibleCountNum}`;
   return api.get(url);
 };
 

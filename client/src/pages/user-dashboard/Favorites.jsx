@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { FiHeart, FiStar } from "react-icons/fi";
 import { FaHeart, FaClock } from "react-icons/fa";
@@ -13,22 +14,39 @@ import { SectionLoader } from "../../components/SectionLoader";
 import { useProductActions } from "../../hooks/useProductActions";
 
 const Favorites = () => {
+  const navigate = useNavigate();
   const [favorites, setFavorites] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [totalPages, setTotalPages] = useState(1);
+
   const { addToCartHandler, removeFromCartHandler, removeFavoriteHandler } =
     useProductActions(setFavorites);
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const page = Number(searchParams.get("page")) || 1;
+
   const visibleCountNum = window.innerWidth >= 1280 ? 6 : 4;
 
-  const [visibleCount, setVisibleCount] = useState(visibleCountNum);
+  const productsStartRef = useRef(null);
 
   useEffect(() => {
+    setIsLoading(true);
+    if (page > totalPages || page < 1) {
+      navigate(`/account/favorites`);
+      return;
+    }
+
     const fetchData = async () => {
-      const favoriteProductsRes = await getFavorites();
+      const favoriteProductsRes = await getFavorites(page, visibleCountNum);
+
+      setTotalPages(
+        Math.ceil(favoriteProductsRes.data.count / visibleCountNum)
+      );
 
       const favoriteProducts = await Promise.all(
         favoriteProductsRes.data.results.map(async (favorite) => {
           const productRes = await getProduct(favorite.product);
+
           let hasCart;
           try {
             hasCart = await isProductInCart(productRes.data.id);
@@ -43,14 +61,39 @@ const Favorites = () => {
           };
         })
       );
-      setIsLoading(false);
+
       setFavorites(favoriteProducts.filter(Boolean));
+      setIsLoading(false);
+
+      if (productsStartRef.current) {
+        setTimeout(() => {
+          productsStartRef.current.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        }, 100);
+      }
     };
+
     fetchData();
-  }, []);
+  }, [page, navigate]);
 
   const openInNewTab = (url) => {
     window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  const goToPage = (newPage) => {
+    if (productsStartRef.current) {
+      productsStartRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+
+    setTimeout(() => {
+      setFavorites([]);
+      setSearchParams({ page: newPage });
+    }, 300);
   };
 
   return (
@@ -61,44 +104,53 @@ const Favorites = () => {
       className="lg:col-span-3"
     >
       <div className="space-y-4 sm:space-y-7 lg:space-y-5 xl:space-y-9">
-        <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-lg p-4 sm:p-6 2xl:p-8 border border-blue-400 hover:shadow-2xl hover:shadow-blue-500/40 transition-all duration-300">
+        <div
+          ref={productsStartRef}
+          className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-lg p-4 sm:p-6 2xl:p-8 border border-blue-400 hover:shadow-2xl hover:shadow-blue-500/40 transition-all duration-300"
+        >
           <div className="flex justify-between flex-wrap items-center mb-6">
             <h2 className="text-xl sm:text-2xl font-bold text-blue-800 flex items-center">
               <FiHeart className="mr-3 text-rose-500 fill-current" size={22} />
               Favorites
             </h2>
-            <span className="ml-auto bg-blue-600 text-white px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
-              {favorites.length} {favorites.length === 1 ? "Item" : "Items"}
-            </span>
           </div>
 
           {isLoading ? (
             <SectionLoader chatLoader={false} title="Favorites" />
-          ) : (
-            favorites.length === 0 && (
-              <div className="text-center py-12 bg-blue-50/50 rounded-2xl border border-blue-200">
-                <FiHeart className="text-blue-400 mx-auto mb-4" size={48} />
-                <h3 className="text-lg font-semibold text-blue-800 mb-2">
-                  No favorites yet
-                </h3>
-                <p className="text-blue-600">
-                  Your favorite products will appear here
-                </p>
-              </div>
-            )
-          )}
+          ) : favorites.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              className="text-center py-12 bg-blue-50/50 rounded-2xl border border-blue-200"
+            >
+              <FiHeart className="text-blue-400 mx-auto mb-4" size={48} />
+              <h3 className="text-lg font-semibold text-blue-800 mb-2">
+                No favorites yet
+              </h3>
+              <p className="text-blue-600">
+                Your favorite products will appear here
+              </p>
+            </motion.div>
+          ) : null}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-            {favorites.slice(0, visibleCount).map((fav) => {
+          <motion.div
+            key={page}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6"
+          >
+            {favorites.map((fav) => {
               const product = fav.product;
 
               return (
                 <motion.div
                   key={product.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.4 }}
-                  className={` group relative bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg hover:shadow-xl border border-blue-200/50 hover:border-blue-300 transition-all duration-300 overflow-hidden`}
+                  className="group relative bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg hover:shadow-xl border border-blue-200/50 hover:border-blue-300 transition-all duration-300 overflow-hidden"
                 >
                   <div className="relative overflow-hidden">
                     <div
@@ -281,28 +333,64 @@ const Favorites = () => {
                 </motion.div>
               );
             })}
-          </div>
+          </motion.div>
 
-          {favorites.length > visibleCountNum && (
-            <div className="flex justify-center pt-3 xs:pt-4 mt-4 xs:mt-5 border-t border-blue-300">
-              {visibleCount < favorites.length ? (
+          {totalPages > 1 && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+              className="flex justify-center mt-8"
+            >
+              <div className="flex items-center gap-2">
                 <button
-                  onClick={() =>
-                    setVisibleCount(visibleCount + visibleCountNum)
-                  }
-                  className="px-4 xs:px-6 py-2 cursor-pointer rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-300 text-sm xs:text-base font-medium"
+                  disabled={page === 1}
+                  onClick={() => goToPage(page - 1)}
+                  className={`px-4 py-2 rounded-lg border transition-all duration-300 
+                    ${
+                      page === 1
+                        ? "cursor-not-allowed bg-gray-100 text-gray-400"
+                        : "cursor-pointer bg-blue-600 text-white hover:bg-blue-700 transform hover:scale-105 active:scale-95"
+                    }`}
                 >
-                  Show more favorites
+                  Prev
                 </button>
-              ) : (
+
+                {[...Array(totalPages)].map((_, i) => {
+                  const p = i + 1;
+                  return (
+                    <motion.button
+                      key={p}
+                      initial={{ scale: 0.8 }}
+                      animate={{ scale: 1 }}
+                      transition={{ duration: 0.2 }}
+                      onClick={() => goToPage(p)}
+                      className={`px-3 py-1 rounded-lg border transition-all duration-200 
+                        ${
+                          p === page
+                            ? "bg-blue-600 text-white border-blue-700 transform scale-110"
+                            : "bg-white text-blue-700 border-blue-300 hover:bg-blue-50 hover:scale-105"
+                        }`}
+                    >
+                      {p}
+                    </motion.button>
+                  );
+                })}
+
                 <button
-                  onClick={() => setVisibleCount(visibleCountNum)}
-                  className="px-4 xs:px-6 py-2 cursor-pointer rounded-lg border border-blue-400 text-blue-600 hover:bg-blue-50 transition-colors duration-300 text-sm xs:text-base font-medium"
+                  disabled={page === totalPages}
+                  onClick={() => goToPage(page + 1)}
+                  className={`px-4 py-2 rounded-lg border transition-all duration-300 
+                    ${
+                      page === totalPages
+                        ? "cursor-not-allowed bg-gray-100 text-gray-400"
+                        : "cursor-pointer bg-blue-600 text-white hover:bg-blue-700 transform hover:scale-105 active:scale-95"
+                    }`}
                 >
-                  Show less
+                  Next
                 </button>
-              )}
-            </div>
+              </div>
+            </motion.div>
           )}
         </div>
       </div>
