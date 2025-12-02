@@ -88,16 +88,25 @@ const SearchFilters = () => {
 
   if (!isReady || !storekeeperInfo) {
     return (
-      <div className="mb-6 col-span-2 2xl:col-span-1">
-        <div className="w-full bg-white/80 backdrop-blur-lg rounded-2xl p-4 border border-white/30 shadow-lg">
-          <div className="animate-pulse">
-            <div className="h-6 bg-blue-200 rounded w-1/3 mb-4"></div>
-            <div className="h-4 bg-blue-200 rounded w-full mb-2"></div>
-            <div className="h-4 bg-blue-200 rounded w-2/3 mb-6"></div>
-            <div className="h-10 bg-blue-200 rounded"></div>
+      <>
+        <div className="xl:hidden">
+          <div className="w-24 bg-white/80 backdrop-blur-lg rounded-lg p-2 border border-white/30 shadow-lg">
+            <div className="w-20 animate-pulse">
+              <div className="h-7 bg-blue-200  rounded"></div>
+            </div>
           </div>
         </div>
-      </div>
+        <div className="hidden xl:block mb-6 col-span-2 2xl:col-span-1">
+          <div className="w-full bg-white/80 backdrop-blur-lg rounded-2xl p-4 border border-white/30 shadow-lg">
+            <div className="animate-pulse">
+              <div className="h-6 bg-blue-200 rounded w-1/3 mb-4"></div>
+              <div className="h-4 bg-blue-200 rounded w-full mb-2"></div>
+              <div className="h-4 bg-blue-200 rounded w-2/3 mb-6"></div>
+              <div className="h-10 bg-blue-200 rounded"></div>
+            </div>
+          </div>
+        </div>
+      </>
     );
   }
 

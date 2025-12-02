@@ -47,7 +47,6 @@ const ProductsCarousel = ({ featuredProducts }) => {
           }
         })
       );
-      console.log(favoriteProducts.filter(Boolean));
       setFavorites(favoriteProducts.filter(Boolean));
     };
     fetchData();

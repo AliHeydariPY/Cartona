@@ -84,13 +84,13 @@ export const deleteImage = (imageID) => {
   return api.delete(url);
 };
 
-export const searchProduct = (query) => {
-  const url = `${SERVER_URL}/product-api/products/?${query}`;
+export const searchProduct = (query, page = 1, size = 12) => {
+  const url = `${SERVER_URL}/product-api/products/?${query}&page=${page}&page_size=${size}`;
   return axios.get(url);
 };
 
-export const getListProducts = () => {
-  const url = `/product-api/products/`;
+export const getListProducts = (page = 1, size = 12) => {
+  const url = `/product-api/products/?page=${page}&page_size=${size}`;
   return api.get(url);
 };
 
