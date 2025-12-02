@@ -23,11 +23,10 @@ const SubCategories = () => {
       try {
         const response = await getSubCategories(categoryId);
         setSubCategories(response.data);
-
         const itemsData = await Promise.all(
           response.data.map(async (sub) => {
             const res = await getSubCategoryItems(sub.id);
-            return { id: sub.id, num: res.data.length };
+            return { id: sub.id, num: res.data.count };
           })
         );
 

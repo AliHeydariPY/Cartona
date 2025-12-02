@@ -23,11 +23,11 @@ export default function MyProducts() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-  
+
   const [showRemovePopup, setShowRemovePopup] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [openMenu, setOpenMenu] = useState(null);
-  
+
   const [isLoading, setIsLoading] = useState(true);
 
   const [totalPages, setTotalPages] = useState(1);
@@ -35,7 +35,6 @@ export default function MyProducts() {
 
   const page = Number(searchParams.get("page")) || 1;
   const visibleCountNum = window.innerWidth >= 1280 ? 6 : 4;
-
 
   const debouncedSearch = useDebounce(searchQuery, 600);
   const productsStartRef = useRef(null);
@@ -45,14 +44,11 @@ export default function MyProducts() {
 
     setIsLoading(true);
 
-    console.log(page > totalPages || page < 1);
-    console.log("🚀 ~ MyProducts ~ page:", page)
-    console.log("🚀 ~ MyProducts ~ totalPages:", totalPages)
     if (page > totalPages + 1 || page < 1) {
       navigate(`/account/my-products`);
       return;
     }
-    
+
     const fetchProducts = async () => {
       try {
         const response = await getStorekeeperProducts(
@@ -121,7 +117,7 @@ export default function MyProducts() {
     }
 
     setTimeout(() => {
-      setProducts([]); 
+      setProducts([]);
       setSearchParams({
         page: newPage,
       });
@@ -155,7 +151,7 @@ export default function MyProducts() {
           className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-xl p-5 sm:p-6 2xl:p-8 border border-blue-400 hover:shadow-lg hover:shadow-blue-400/50 transition-all duration-300"
         >
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-4 sm:mb-6">
-            <div className="flex items-center">
+            <div className="flex items-center justify-between w-full md:w-auto">
               <h2 className="text-xl sm:text-2xl font-bold text-blue-800 flex items-center">
                 <FiPackage className="mr-2 sm:mr-3 text-amber-600" size={24} />
                 My Products
@@ -164,9 +160,10 @@ export default function MyProducts() {
                 initial={{ scale: 0.8 }}
                 animate={{ scale: 1 }}
                 transition={{ duration: 0.3 }}
-                className="ml-3 bg-blue-600 text-white text-sm px-3 py-1 rounded-full"
+                className="ml-3 bg-blue-600 text-white text-sm px-3 py-1 flex rounded-full"
               >
-                {totalProducts} total items
+                {totalProducts}
+                <span className="hidden md:block pl-1">total items</span>
               </motion.span>
             </div>
 
