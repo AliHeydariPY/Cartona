@@ -25,8 +25,13 @@ export const editProduct = (formData) => {
   });
 };
 
-export const getStorekeeperProducts = (storekeeperID) => {
-  const url = `/product-api/products/storekeeper/${storekeeperID}/`;
+export const getStorekeeperProducts = (
+  storekeeperID,
+  page = 1,
+  size = 6,
+  search = ""
+) => {
+  const url = `/product-api/products/?storekeeper=${storekeeperID}&page=${page}&page_size=${size}&search=${search}`;
   return api.get(url);
 };
 
