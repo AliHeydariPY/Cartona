@@ -1,10 +1,12 @@
 from django.http import Http404
+from django.db.models import OuterRef, Exists, Subquery
 from rest_framework import viewsets, mixins, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.exceptions import MethodNotAllowed, PermissionDenied, NotFound
 from rest_framework.response import Response
 from .models import Cart, CartItem, Payment, ProductPayment, Favorite, FavoriteItem
+from user.models import ProductDeliveryStatus
 from .serializers import (CartItemSerializer, CartSerializer,
     PaymentSerializer, ProductPaymentSerializer, FavoriteSerializer, FavoriteItemSerializer)
 
@@ -323,4 +325,19 @@ class ProductPaymentViewSet(viewsets.ModelViewSet):
             raise Http404("Invalid storekeeper ID.")
 
         return self._handle_filtered_request(request, queryset, index, label="storekeeper")
+
+    @action(detail=False, url_path=r'not-delivered/(?P<value>true|false)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
+    def not_delivered(self, request, value=None, index=None):
+        delivery_qs = ProductDeliveryStatus.objects.filter(payment=OuterRef('pk'))
+        queryset = self.get_queryset().annotate(
+            storekeeper_delivery=Exists(delivery_qs.filter(is_sent=True)),
+            is_sent=Subquery(delivery_qs.values('is_sent')[:1])
+        )
+
+        if value.lower() == 'true':
+            queryset = queryset.filter(is_delivered=True)
+        else:
+            queryset = queryset.filter(storekeeper_delivery=True, is_delivered=False)
+
+        return self._handle_filtered_request(request, queryset, index, label="not-delivered payment")
 

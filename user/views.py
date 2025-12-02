@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from django.db.models import Q
+from django.db.models import OuterRef, Exists, Subquery, Q
 from django.http import Http404
 from rest_framework import viewsets, status, mixins
 from rest_framework.views import APIView
@@ -362,6 +362,21 @@ class StorePaymentViewSet(
 
         queryset = self.get_queryset().filter(storekeeper_id=storekeeper_id)
         return self._handle_filtered_request(request, queryset, index, label="storekeeper payment")
+
+    @action(detail=False, url_path=r'buyer-not-delivery/(?P<value>true|false)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
+    def buyer_not_delivery(self, request, value=None, index=None):
+        delivery_qs = ProductDeliveryStatus.objects.filter(payment=OuterRef('pk'))
+        queryset = self.get_queryset().annotate(
+            storekeeper_delivery=Exists(delivery_qs.filter(is_sent=True)),
+            is_sent=Subquery(delivery_qs.values('is_sent')[:1])
+        )
+
+        if value.lower() == 'true':
+            queryset = queryset.filter(is_delivered=True)
+        else:
+            queryset = queryset.filter(storekeeper_delivery=True, is_delivered=False)
+
+        return self._handle_filtered_request(request, queryset, index, label="buyer-not-delivery payment")
 
 class UserActivitySummaryViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
