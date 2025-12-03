@@ -47,6 +47,7 @@ const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [totalOrders, setTotalOrders] = useState(null);
 
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -91,6 +92,8 @@ const Orders = () => {
 
       const response = await getAPIForFilter(nextPage);
       const newOrders = await enrichOrdersData(response.data.results);
+
+      setTotalOrders(response.data.count);
 
       if (isInitial) {
         setOrders(newOrders);
@@ -254,10 +257,9 @@ const Orders = () => {
               <motion.span
                 initial={{ scale: 0.8 }}
                 animate={{ scale: 1 }}
-                className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs sm:text-sm font-medium"
+                className="bg-blue-600 text-white px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium"
               >
-                {filteredOrders.length}{" "}
-                {filteredOrders.length === 1 ? "order" : "orders"}
+                {totalOrders} {totalOrders === 1 ? "order" : "orders"}
               </motion.span>
             </div>
           </div>
