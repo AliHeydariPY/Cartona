@@ -47,12 +47,12 @@ export const getStorekeeperDeliveryPayments = (page = 1) => {
 };
 
 export const getNotDeliveredPayments = (page = 1) => {
-  const url = `https://127.0.0.1:8000/cart-api/product-payments/not-delivered/false/?page=${page}`;
+  const url = `/cart-api/product-payments/not-delivered/false/?page=${page}`;
   return api.get(url);
 };
 
 export const getDeliveredPayments = (page = 1) => {
-  const url = `https://127.0.0.1:8000/cart-api/product-payments/is-delivered/true/?page=${page}`;
+  const url = `/cart-api/product-payments/is-delivered/true/?page=${page}`;
   return api.get(url);
 };
 
