@@ -89,6 +89,11 @@ export const getDeliveredPayments = (page = 1) => {
   return api.get(url);
 };
 
+export const getDeliverySummary = () => {
+  const url = `/user-api/storekeeper-payments/delivery-summary/`;
+  return api.get(url);
+};
+
 export const deliveryStatus = () => {
   const url = `/user-api/delivery-status/`;
   return api.get(url);

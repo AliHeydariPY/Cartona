@@ -2,7 +2,7 @@ import { FiMessageSquare } from "react-icons/fi";
 
 const EmptyMessagesState = () => {
   return (
-    <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-blue-50 to-cyan-50 p-4">
+    <div className="flex-1 flex items-center justify-center ">
       <div className="text-center text-blue-600 w-full max-w-[280px] xs:max-w-xs sm:max-w-sm md:max-w-md">
         <div className="bg-blue-50/70 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-blue-200">
           <FiMessageSquare

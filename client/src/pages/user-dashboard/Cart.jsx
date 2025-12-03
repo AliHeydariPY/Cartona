@@ -270,7 +270,7 @@ const Cart = () => {
                       <div className="flex items-center gap-2 sm:gap-3">
                         <div className="flex items-center bg-blue-100 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">
                           <FiStar
-                            className="text-amber-400 fill-amber-400 mr-1"
+                            className="text-amber-400 fill-amber-400 mr-1 mb-0.5"
                             size={12}
                           />
                           <span className="text-xs sm:text-sm font-medium text-blue-800">

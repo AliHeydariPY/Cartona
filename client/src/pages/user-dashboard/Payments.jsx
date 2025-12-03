@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 
 import {
   getDeliveredPayments,
+  getDeliverySummary,
   getNotDeliveredPayments,
   getStorekeeperDeliveryPayments,
   getStorekeeperPayments,
@@ -38,6 +39,7 @@ const Payments = () => {
   const [payments, setPayments] = useState([]);
   const [showSendNotePopup, setShowSendNotePopup] = useState(false);
   const [payload, setPayload] = useState(null);
+  const [paymentsSummary, setPaymentsSummary] = useState(null);
 
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -53,6 +55,13 @@ const Payments = () => {
     setPage(1);
     setHasMore(true);
     fetchPayments(true);
+
+    const fetchPaymentsSummary = async () => {
+      const response = await getDeliverySummary();
+      setPaymentsSummary(response.data);
+    };
+
+    fetchPaymentsSummary();
   }, [filter]);
 
   const getAPIForFilter = (nextPage) => {
@@ -186,25 +195,6 @@ const Payments = () => {
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
-  const getStatusCount = (status) => {
-    switch (status) {
-      case "Pending":
-        return payments.filter(
-          (p) => !p.storekeeper_delivery && !p.buyer_delivery
-        ).length;
-      case "Shipped":
-        return payments.filter(
-          (p) => p.storekeeper_delivery && !p.buyer_delivery
-        ).length;
-      case "Delivered":
-        return payments.filter(
-          (p) => p.storekeeper_delivery && p.buyer_delivery
-        ).length;
-      default:
-        return payments.length;
-    }
-  };
-
   const filteredPayments =
     filter === "All"
       ? payments
@@ -212,6 +202,11 @@ const Payments = () => {
           const status = determineStatus(payment);
           return status === filter;
         });
+
+  const totalPayments =
+    paymentsSummary?.pending +
+    paymentsSummary?.shipped +
+    paymentsSummary?.delivered;
 
   return (
     <motion.div
@@ -242,10 +237,9 @@ const Payments = () => {
               <motion.span
                 initial={{ scale: 0.8 }}
                 animate={{ scale: 1 }}
-                className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs sm:text-sm font-medium"
+                className="bg-blue-600 text-white px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium"
               >
-                {filteredPayments.length}{" "}
-                {filteredPayments.length === 1 ? "order" : "orders"}
+                {totalPayments} {totalPayments === 1 ? "payment" : "payments"}
               </motion.span>
             </div>
           </div>
@@ -285,10 +279,7 @@ const Payments = () => {
                 />
               </div>
               <p className="text-lg sm:text-xl lg:text-2xl font-bold text-purple-900 mt-1">
-                $
-                {payments
-                  .reduce((total, payment) => total + payment.total_price, 0)
-                  .toFixed(2)}
+                ${paymentsSummary?.amount}
               </p>
             </div>
 
@@ -300,7 +291,7 @@ const Payments = () => {
                 <FiPackage className="text-amber-500 flex-shrink-0" size={16} />
               </div>
               <p className="text-lg sm:text-xl lg:text-2xl font-bold text-amber-900 mt-1">
-                {getStatusCount("Pending")}
+                {paymentsSummary?.pending}
               </p>
             </div>
 
@@ -312,7 +303,7 @@ const Payments = () => {
                 <FiTruck className="text-blue-500 flex-shrink-0" size={16} />
               </div>
               <p className="text-lg sm:text-xl lg:text-2xl font-bold text-blue-900 mt-1">
-                {getStatusCount("Shipped")}
+                {paymentsSummary?.shipped}
               </p>
             </div>
 
@@ -327,7 +318,7 @@ const Payments = () => {
                 />
               </div>
               <p className="text-lg sm:text-xl lg:text-2xl font-bold text-green-900 mt-1">
-                {getStatusCount("Delivered")}
+                {paymentsSummary?.delivered}
               </p>
             </div>
           </div>
@@ -365,7 +356,7 @@ const Payments = () => {
                     key={`${payment.id}-${index}`}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: index * 0.05 }}
+                    transition={{ duration: 0.1, delay: index * 0.01 }}
                     className="bg-gradient-to-r from-blue-50/80 to-cyan-50/80 rounded-2xl p-6 border border-blue-200/60 hover:border-blue-300 hover:shadow-lg transition-all duration-300 group"
                   >
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-4">
