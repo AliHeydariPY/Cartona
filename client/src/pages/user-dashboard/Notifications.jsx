@@ -15,6 +15,7 @@ import {
   notificationMarkAsRead,
 } from "../../services/commentAPIServices";
 import { getStorekeeperById } from "../../services/userAPIServices";
+import { errorToast } from "../../utils/toast";
 
 const Notifications = () => {
   const navigate = useNavigate();
@@ -100,8 +101,8 @@ const Notifications = () => {
       setStorekeepers((prev) =>
         prev.filter((sub) => sub.id !== subscriptionId)
       );
-    } catch (error) {
-      console.error("Failed to unsubscribe:", error);
+    } catch {
+      errorToast("There was a problem unsubscribing from the store.");
     }
   };
 

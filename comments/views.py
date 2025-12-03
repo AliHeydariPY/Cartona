@@ -75,6 +75,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = CommentFilter
+    pagination_class = None
 
     def get_permissions(self):
         if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
@@ -137,6 +138,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 class CommentReplyViewSet(viewsets.ModelViewSet):
     serializer_class = CommentReplySerializer
+    pagination_class = None
 
     def get_permissions(self):
         if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
@@ -192,6 +194,7 @@ class CommentReplyViewSet(viewsets.ModelViewSet):
 
 class ProductQuestionViewSet(viewsets.ModelViewSet):
     serializer_class = ProductQuestionSerializer
+    pagination_class = None
 
     def get_permissions(self):
         if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
@@ -255,6 +258,7 @@ class ProductPurchaseViewSet(
 ):
     serializer_class = ProductPurchaseSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = None
 
     def get_queryset(self):
         user = self.request.user
@@ -393,6 +397,7 @@ class ProductPurchaseViewSet(
 class PurchaseChatViewSet(viewsets.ModelViewSet):
     serializer_class = PurchaseChatSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = None
 
     def get_queryset(self):
         user = self.request.user
@@ -473,6 +478,7 @@ class StoreNotificationSubscriptionViewSet(
 ):
     serializer_class = StoreNotificationSubscriptionSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = None
 
     def get_queryset(self):
         return StoreNotificationSubscription.objects.filter(user=self.request.user).order_by('-id')
@@ -486,6 +492,7 @@ class NotificationViewSet(
 ):
     serializer_class = NotificationSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = None
 
     def get_queryset(self):
         return Notification.objects.filter(user=self.request.user).order_by('-id')

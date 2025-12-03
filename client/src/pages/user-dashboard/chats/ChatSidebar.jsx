@@ -226,7 +226,7 @@ const ChatSidebar = ({
                                   ${conversation.product.discounted_price}
                                 </span>
                                 <span className="text-xs text-rose-500 line-through">
-                                  ${conversation.product.price}
+                                  ${conversation.total_price}
                                 </span>
                                 {conversation.product.discount_percentage && (
                                   <span className="text-xs bg-gradient-to-r from-rose-500 to-pink-500 text-white px-1.5 sm:px-2 py-0.5 rounded-full whitespace-nowrap">
@@ -236,7 +236,7 @@ const ChatSidebar = ({
                               </>
                             ) : (
                               <span className="text-xs sm:text-sm font-bold text-blue-800">
-                                ${conversation.product?.price}
+                                ${conversation.total_price}
                               </span>
                             )}
                           </div>

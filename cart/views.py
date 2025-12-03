@@ -1,16 +1,19 @@
 from django.http import Http404
+from django.db.models import OuterRef, Exists, Subquery
 from rest_framework import viewsets, mixins, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.exceptions import MethodNotAllowed, PermissionDenied, NotFound
 from rest_framework.response import Response
 from .models import Cart, CartItem, Payment, ProductPayment, Favorite, FavoriteItem
+from user.models import ProductDeliveryStatus
 from .serializers import (CartItemSerializer, CartSerializer,
     PaymentSerializer, ProductPaymentSerializer, FavoriteSerializer, FavoriteItemSerializer)
 
 class CartItemViewSet(viewsets.ModelViewSet):
     serializer_class = CartItemSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = None
 
     def get_queryset(self):
         user = self.request.user
@@ -62,6 +65,7 @@ class CartViewSet(
 ):
     serializer_class = CartSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = None
 
     def get_queryset(self):
         return Cart.objects.filter(user=self.request.user)
@@ -112,6 +116,7 @@ class FavoriteViewSet(
 ):
     serializer_class = FavoriteSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = None
 
     def get_queryset(self):
         return Favorite.objects.filter(user=self.request.user)
@@ -119,6 +124,7 @@ class FavoriteViewSet(
 class PaymentViewSet(viewsets.ModelViewSet):
     serializer_class = PaymentSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = None
 
     def get_queryset(self):
         return Payment.objects.filter(cart__user=self.request.user).order_by('-paid_at')
@@ -217,8 +223,16 @@ class ProductPaymentViewSet(viewsets.ModelViewSet):
             obj = None
 
         if request.method == 'GET':
-            serializer = self.get_serializer(obj if index else queryset, many=not index)
-            return Response(serializer.data)
+            if obj:
+                serializer = self.get_serializer(obj)
+                return Response(serializer.data)
+            else:
+                page = self.paginate_queryset(queryset)
+                if page is not None:
+                    serializer = self.get_serializer(page, many=True)
+                    return self.get_paginated_response(serializer.data)
+                serializer = self.get_serializer(queryset, many=True)
+                return Response(serializer.data)
 
         elif request.method in ['PUT', 'PATCH']:
             serializer = self.get_serializer(obj, data=request.data, partial=(request.method == 'PATCH'))
@@ -226,17 +240,13 @@ class ProductPaymentViewSet(viewsets.ModelViewSet):
             serializer.save()
             return Response(serializer.data)
 
-
         elif request.method == 'DELETE':
-
             if obj is None:
                 raise MethodNotAllowed("DELETE", detail="You must specify an index to delete a single item.")
 
             if not obj.is_successful:
                 serializer = self.get_serializer(obj)
-
                 serializer.perform_delete(obj)
-
                 return Response(status=status.HTTP_204_NO_CONTENT)
 
             if not obj.is_delivered:
@@ -245,11 +255,8 @@ class ProductPaymentViewSet(viewsets.ModelViewSet):
             obj.buyer_hidden = True
 
             if obj.storekeeper_hidden and obj.buyer_hidden:
-
                 obj.delete()
-
             else:
-
                 obj.save()
 
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -309,8 +316,7 @@ class ProductPaymentViewSet(viewsets.ModelViewSet):
         queryset = self.get_queryset().filter(id__in=filtered_ids)
         return self._handle_filtered_request(request, queryset, index, label="storekeeper delivery status")
 
-    @action(detail=False, url_path=r'storekeeper/(?P<storekeeper_id>\d+)(?:/(?P<index>\d+))?',
-            methods=['get', 'put', 'patch', 'delete'])
+    @action(detail=False, url_path=r'storekeeper/(?P<storekeeper_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
     def by_storekeeper(self, request, storekeeper_id=None, index=None):
         try:
             storekeeper_id = int(storekeeper_id)
@@ -319,4 +325,19 @@ class ProductPaymentViewSet(viewsets.ModelViewSet):
             raise Http404("Invalid storekeeper ID.")
 
         return self._handle_filtered_request(request, queryset, index, label="storekeeper")
+
+    @action(detail=False, url_path=r'not-delivered/(?P<value>true|false)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
+    def not_delivered(self, request, value=None, index=None):
+        delivery_qs = ProductDeliveryStatus.objects.filter(payment=OuterRef('pk'))
+        queryset = self.get_queryset().annotate(
+            storekeeper_delivery=Exists(delivery_qs.filter(is_sent=True)),
+            is_sent=Subquery(delivery_qs.values('is_sent')[:1])
+        )
+
+        if value.lower() == 'true':
+            queryset = queryset.filter(is_delivered=True)
+        else:
+            queryset = queryset.filter(storekeeper_delivery=True, is_delivered=False)
+
+        return self._handle_filtered_request(request, queryset, index, label="not-delivered payment")
 

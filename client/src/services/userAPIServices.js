@@ -44,9 +44,9 @@ export const ChangeUserName = (userData, username) => {
   return api.patch(url, userData);
 };
 
-export const changeStoreInfo = (storeData,storekeeperName) => {
+export const changeStoreInfo = (storeData, storekeeperName) => {
   const url = `/user-api/storekeepers/username/${storekeeperName}/`;
-  return api.patch(url,storeData);
+  return api.patch(url, storeData);
 };
 
 export const upgradeToSeller = (formData) => {
@@ -69,8 +69,23 @@ export const getStorekeeperById = (storekeeperID) => {
   return axios.get(url);
 };
 
-export const getStorekeeperPayments = () => {
-  const url = `/user-api/storekeeper-payments/`;
+export const getStorekeeperPayments = (page) => {
+  const url = `/user-api/storekeeper-payments/?page=${page}`;
+  return api.get(url);
+};
+
+export const getStorekeeperDeliveryPayments = (page = 1) => {
+  const url = `/user-api/storekeeper-payments/storekeeper-delivery/false/?page=${page}`;
+  return api.get(url);
+};
+
+export const getNotDeliveredPayments = (page = 1) => {
+  const url = `/user-api/storekeeper-payments/buyer-not-delivery/false/?page=${page}`;
+  return api.get(url);
+};
+
+export const getDeliveredPayments = (page = 1) => {
+  const url = `/user-api/storekeeper-payments/buyer-delivery/true/?page=${page}`;
   return api.get(url);
 };
 

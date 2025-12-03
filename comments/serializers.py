@@ -254,12 +254,15 @@ class ProductPurchaseSerializer(serializers.ModelSerializer):
         read_only=True
     )
 
+    total_price = serializers.SerializerMethodField()
+
     class Meta:
         model = ProductPurchase
         fields = [
             'id', 'buyer', 'product', 'product_name', 'storekeeper', 'payment', 'chat_enabled',
             'storekeeper_delivery', 'storekeeper_delivered_at',
-            'buyer_delivery', 'buyer_delivered_at', 'updated_time'
+            'buyer_delivery', 'buyer_delivered_at', 'updated_time',
+            'total_price'
         ]
 
     def get_updated_time(self, obj):
@@ -290,6 +293,9 @@ class ProductPurchaseSerializer(serializers.ModelSerializer):
 
     def get_buyer_delivered_at(self, obj):
         return obj.payment.delivered_at
+
+    def get_total_price(self, obj):
+        return getattr(obj.payment, "total_price", None)
 
     def validate_deletion(self):
         if self.instance and self.instance.chat_enabled:

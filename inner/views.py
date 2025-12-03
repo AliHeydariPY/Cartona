@@ -200,8 +200,16 @@ class ProductViewSet(viewsets.ModelViewSet):
             obj = None
 
         if request.method == 'GET':
-            serializer = self.get_serializer(obj if index else queryset, many=not index)
-            return Response(serializer.data)
+            if obj:
+                serializer = self.get_serializer(obj)
+                return Response(serializer.data)
+            else:
+                page = self.paginate_queryset(queryset)
+                if page is not None:
+                    serializer = self.get_serializer(page, many=True)
+                    return self.get_paginated_response(serializer.data)
+                serializer = self.get_serializer(queryset, many=True)
+                return Response(serializer.data)
 
         elif request.method in ['PUT', 'PATCH']:
             serializer = self.get_serializer(obj, data=request.data, partial=(request.method == 'PATCH'))
@@ -355,6 +363,7 @@ class ProductViewSet(viewsets.ModelViewSet):
 
 class ImageViewSet(viewsets.ModelViewSet):
     serializer_class = ImageSerializer
+    pagination_class = None
 
     def get_permissions(self):
         if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
@@ -409,8 +418,10 @@ class ImageViewSet(viewsets.ModelViewSet):
         queryset = self.get_queryset().filter(product_id=product_id)
         return self._handle_filtered_request(request, queryset, index, label="product image")
 
+
 class FeatureViewSet(viewsets.ModelViewSet):
     serializer_class = FeatureSerializer
+    pagination_class = None
 
     def get_permissions(self):
         if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
@@ -467,6 +478,7 @@ class FeatureViewSet(viewsets.ModelViewSet):
 
 class FAQViewSet(viewsets.ModelViewSet):
     serializer_class = FAQSerializer
+    pagination_class = None
 
     def get_permissions(self):
         if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
@@ -521,11 +533,13 @@ class FAQViewSet(viewsets.ModelViewSet):
         queryset = self.get_queryset().filter(product_id=product_id)
         return self._handle_filtered_request(request, queryset, index, label="product FAQ")
 
+
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Category.objects.all().order_by('-id')
     serializer_class = CategorySerializer
     filter_backends = [SearchFilter]
     search_fields = ['name', 'description']
+    pagination_class = None
 
     @action(detail=False, url_path=r'parent/(?P<parent_id>[^/]+)(?:/(?P<index>\d+))?', methods=['get'])
     def by_parent(self, request, parent_id=None, index=None):
@@ -553,6 +567,7 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
 
 class CollectionModelViewSet(viewsets.ModelViewSet):
     serializer_class = CollectionModelSerializer
+    pagination_class = None
 
     def get_permissions(self):
         if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
@@ -561,8 +576,8 @@ class CollectionModelViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
-            return CollectionModel.objects.all()
-        return CollectionModel.objects.filter(storekeeper__user=self.request.user)
+            return CollectionModel.objects.all().order_by('-id')
+        return CollectionModel.objects.filter(storekeeper__user=self.request.user).order_by('-id')
 
     def get_serializer_context(self):
         return {"request": self.request}
@@ -595,8 +610,12 @@ class CollectionModelViewSet(viewsets.ModelViewSet):
             obj = None
 
         if request.method == 'GET':
-            serializer = self.get_serializer(obj if index else queryset, many=not index)
-            return Response(serializer.data)
+            if obj:
+                serializer = self.get_serializer(obj)
+                return Response(serializer.data)
+            else:
+                serializer = self.get_serializer(queryset, many=True)
+                return Response(serializer.data)
 
         elif request.method in ['PUT', 'PATCH']:
             serializer = self.get_serializer(obj, data=request.data, partial=(request.method == 'PATCH'))

@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
-import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useParams, useSearchParams } from "react-router-dom";
+import { useEffect, useState, useRef } from "react";
 
 import { FiStar, FiHeart, FiEye } from "react-icons/fi";
 import { FaHeart, FaClock } from "react-icons/fa";
@@ -15,11 +15,12 @@ import BottomNav from "../components/BottomNav";
 import ProductNotFound from "../components/ProductNotFound";
 
 import { getListProducts, searchProduct } from "../services/productAPIServices";
-import { getFavorites } from "../services/cartAPIServices";
+import { isProductInFavorites } from "../services/cartAPIServices";
 import { useProductActions } from "../hooks/useProductActions";
 
 const SearchPage = () => {
   const { query } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [favorites, setFavorites] = useState([]);
 
@@ -29,42 +30,83 @@ const SearchPage = () => {
 
   const [isFocus, setIsFocus] = useState(false);
   const [notFound, setNotFound] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [totalPages, setTotalPages] = useState(1);
+  const page = Number(searchParams.get("page")) || 1;
+
+  const productsStartRef = useRef(null);
 
   const { addFavoriteHandler, removeFavoriteHandler } =
     useProductActions(setFavorites);
 
   const innerWidth = window.innerWidth;
+  const visibleCountNum = window.innerWidth >= 1280 ? 12 : 8;
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        let favs = [];
-        try {
-          const favRes = await getFavorites();
-          favs = favRes.data;
-        } catch {
-          favs = [];
-        }
+        setIsLoading(true);
 
-        const res = query
-          ? await searchProduct(query)
-          : await getListProducts();
-
-        if (!res.data[0]) {
-          setNotFound(true);
+        if (page > totalPages || page < 1) {
+          setSearchParams({ page: 1 });
           return;
         }
 
-        setFavorites(favs);
-        setProducts(res.data);
+        const res = query
+          ? await searchProduct(query, page, visibleCountNum)
+          : await getListProducts(page, visibleCountNum);
+
+        const favoriteProducts = await Promise.all(
+          res.data.results.map(async (product) => {
+            try {
+              let fav = await isProductInFavorites(product.id);
+              return fav.data;
+            } catch {
+              return null;
+            }
+          })
+        );
+
+        if (!res.data.results[0]) {
+          setNotFound(true);
+          setIsLoading(false);
+          return;
+        }
+
+        setFavorites(favoriteProducts.filter(Boolean));
+        setProducts(res.data.results);
+        setTotalPages(Math.ceil(res.data.count / visibleCountNum));
         setNotFound(false);
+        setIsLoading(false);
+
+        if (productsStartRef.current) {
+          setTimeout(() => {
+            productsStartRef.current.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            });
+          }, 100);
+        }
       } catch {
         setNotFound(true);
+        setIsLoading(false);
       }
     };
 
     fetchProducts();
-  }, [query]);
+  }, [query, page]);
+
+  const goToPage = (newPage) => {
+    setProducts([]);
+    setSearchParams({ page: newPage });
+    if (productsStartRef.current) {
+      productsStartRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  };
 
   const handleShowImagesCarousel = (product) => {
     setProductID(product.id);
@@ -92,19 +134,26 @@ const SearchPage = () => {
 
   return (
     <>
-      {products[0] && favorites && (
-        <>
-          <Navbar />
-          <div className="xl:grid xl:grid-cols-8 2xl:grid-cols-5 gap-5 mx-auto pb-20 md:pb-6 px-4 py-6 items-start">
+      <div ref={productsStartRef}></div>
+      <Navbar />
+      {products.length > 0 && (
+        <div className="pb-20 md:pb-6 px-4 py-6">
+          <div className="xl:grid xl:grid-cols-8 2xl:grid-cols-5 gap-5 mx-auto px-4 py-4 xl:py-0 items-start">
             <SearchFilters />
 
-            <div className="grid xl:col-span-6 2xl:col-span-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-5 bg-blue-50">
-              {products.map((product) => (
+            <motion.div
+              key={page}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              className="grid xl:col-span-6 2xl:col-span-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-5 bg-blue-50"
+            >
+              {products.map((product, index) => (
                 <motion.div
                   key={product.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4 }}
+                  transition={{ duration: 0.4, delay: index * 0.05 }}
                   className={` group relative bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg hover:shadow-xl border border-blue-200/50 hover:border-blue-300 transition-all duration-300 overflow-hidden`}
                 >
                   <div className="relative overflow-hidden">
@@ -293,16 +342,92 @@ const SearchPage = () => {
                   )}
                 </motion.div>
               ))}
-            </div>
-            {showImages && (
-              <ProductImageCarousel
-                productID={productID}
-                mainImage={mainImage}
-                onClose={() => setShowImages(false)}
-              />
-            )}
+            </motion.div>
           </div>
-        </>
+          {totalPages > 1 && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+              className="flex justify-center mt-8 pt-6 border-t border-blue-200"
+            >
+              <div className="flex flex-wrap items-center gap-2 justify-center">
+                <button
+                  disabled={page === 1}
+                  onClick={() => goToPage(page - 1)}
+                  className={`px-4 py-2 rounded-lg border transition-all duration-300 
+                    ${
+                      page === 1
+                        ? "cursor-not-allowed bg-gray-100 text-gray-400"
+                        : "cursor-pointer bg-blue-600 text-white hover:bg-blue-700 transform hover:scale-105 active:scale-95"
+                    }`}
+                >
+                  Prev
+                </button>
+
+                {[...Array(totalPages)].map((_, i) => {
+                  const p = i + 1;
+                  const showPage =
+                    p === 1 ||
+                    p === totalPages ||
+                    (p >= page - 1 && p <= page + 1) ||
+                    (page <= 2 && p <= 5) ||
+                    (page >= totalPages - 1 && p >= totalPages - 4);
+
+                  if (!showPage) {
+                    if (p === page - 2 || p === page + 2) {
+                      return (
+                        <span key={p} className="text-blue-600 px-2">
+                          ...
+                        </span>
+                      );
+                    }
+                    return null;
+                  }
+
+                  return (
+                    <motion.button
+                      key={p}
+                      initial={{ scale: 0.8 }}
+                      animate={{ scale: 1 }}
+                      transition={{ duration: 0.2 }}
+                      onClick={() => goToPage(p)}
+                      className={`px-3 py-1 rounded-lg border transition-all duration-200 
+                        ${
+                          p === page
+                            ? "bg-blue-600 text-white border-blue-700 transform scale-110"
+                            : "bg-white text-blue-700 border-blue-300 hover:bg-blue-50 hover:scale-105"
+                        }`}
+                    >
+                      {p}
+                    </motion.button>
+                  );
+                })}
+
+                <button
+                  disabled={page === totalPages}
+                  onClick={() => goToPage(page + 1)}
+                  className={`px-4 py-2 rounded-lg border transition-all duration-300 
+                    ${
+                      page === totalPages
+                        ? "cursor-not-allowed bg-gray-100 text-gray-400"
+                        : "cursor-pointer bg-blue-600 text-white hover:bg-blue-700 transform hover:scale-105 active:scale-95"
+                    }`}
+                >
+                  Next
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </div>
+      )}
+
+      {showImages && (
+        <ProductImageCarousel
+          productID={productID}
+          mainImage={mainImage}
+          onClose={() => setShowImages(false)}
+        />
       )}
       <BottomNav />
     </>

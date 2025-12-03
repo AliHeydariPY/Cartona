@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from django.db.models import Q
+from django.db.models import OuterRef, Exists, Subquery, Q
 from django.http import Http404
 from rest_framework import viewsets, status, mixins
 from rest_framework.views import APIView
@@ -29,6 +29,7 @@ class UserViewSet(
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
     lookup_field = 'uuid_record__uuid'
+    pagination_class = None
 
     def get_queryset(self):
         user = self.request.user
@@ -98,6 +99,7 @@ class StoreKeeperViewSet(
     serializer_class = StoreKeeperSerializer
     filter_backends = [SearchFilter]
     search_fields = ['store_name', 'description']
+    pagination_class = None
 
     def get_permissions(self):
         if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
@@ -136,6 +138,7 @@ class StoreKeeperViewSet(
 class ProductDeliveryStatusViewSet(viewsets.ModelViewSet):
     serializer_class = DeliveryStatusSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = None
 
     def get_queryset(self):
         user = self.request.user
@@ -284,8 +287,16 @@ class StorePaymentViewSet(
             obj = None
 
         if request.method == 'GET':
-            serializer = self.get_serializer(obj if index else queryset, many=not index)
-            return Response(serializer.data)
+            if obj:
+                serializer = self.get_serializer(obj)
+                return Response(serializer.data)
+            else:
+                page = self.paginate_queryset(queryset)
+                if page is not None:
+                    serializer = self.get_serializer(page, many=True)
+                    return self.get_paginated_response(serializer.data)
+                serializer = self.get_serializer(queryset, many=True)
+                return Response(serializer.data)
 
         elif request.method in ['PUT', 'PATCH']:
             serializer = self.get_serializer(obj, data=request.data, partial=(request.method == 'PATCH'))
@@ -342,8 +353,7 @@ class StorePaymentViewSet(
         queryset = self.get_queryset().filter(is_delivered=value)
         return self._handle_filtered_request(request, queryset, index, label="buyer delivery status")
 
-    @action(detail=False, url_path=r'storekeeper/(?P<storekeeper_id>\d+)(?:/(?P<index>\d+))?',
-            methods=['get', 'put', 'patch', 'delete'])
+    @action(detail=False, url_path=r'storekeeper/(?P<storekeeper_id>\d+)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
     def by_storekeeper(self, request, storekeeper_id=None, index=None):
         try:
             storekeeper_id = int(storekeeper_id)
@@ -352,6 +362,21 @@ class StorePaymentViewSet(
 
         queryset = self.get_queryset().filter(storekeeper_id=storekeeper_id)
         return self._handle_filtered_request(request, queryset, index, label="storekeeper payment")
+
+    @action(detail=False, url_path=r'buyer-not-delivery/(?P<value>true|false)(?:/(?P<index>\d+))?', methods=['get', 'put', 'patch', 'delete'])
+    def buyer_not_delivery(self, request, value=None, index=None):
+        delivery_qs = ProductDeliveryStatus.objects.filter(payment=OuterRef('pk'))
+        queryset = self.get_queryset().annotate(
+            storekeeper_delivery=Exists(delivery_qs.filter(is_sent=True)),
+            is_sent=Subquery(delivery_qs.values('is_sent')[:1])
+        )
+
+        if value.lower() == 'true':
+            queryset = queryset.filter(is_delivered=True)
+        else:
+            queryset = queryset.filter(storekeeper_delivery=True, is_delivered=False)
+
+        return self._handle_filtered_request(request, queryset, index, label="buyer-not-delivery payment")
 
 class UserActivitySummaryViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]

@@ -1,130 +1,189 @@
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+
 import {
-  FiPackage,
-  FiTruck,
-  FiCheckCircle,
-  FiDollarSign,
-  FiMapPin,
-  FiTrendingUp,
-  FiMessageSquare,
-  FiBox,
-} from "react-icons/fi";
-import { getProduct } from "../../services/productAPIServices";
-import SendNotePopup from "../../components/pop-ups/SendNotePopup";
-import {
+  getDeliveredPayments,
+  getNotDeliveredPayments,
+  getStorekeeperDeliveryPayments,
   getStorekeeperPayments,
   productSubmission,
 } from "../../services/userAPIServices";
-import { errorToast, successToast } from "../../utils/toast";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { getProduct } from "../../services/productAPIServices";
 import { getPurchaseByPayment } from "../../services/commentAPIServices";
+
+import SendNotePopup from "../../components/pop-ups/SendNotePopup";
+
+import {
+  FiPackage,
+  FiMessageSquare,
+  FiCheckCircle,
+  FiTruck,
+  FiDollarSign,
+  FiMapPin,
+  FiTrendingUp,
+  FiBox,
+  FiFileText,
+  FiCalendar,
+  FiRefreshCw,
+  FiChevronDown,
+} from "react-icons/fi";
+import { errorToast, successToast } from "../../utils/toast";
 import { SectionLoader } from "../../components/SectionLoader";
 
 const Payments = () => {
   const navigate = useNavigate();
+
+  const [searchParams, setSearchParams] = useSearchParams();
   const [payments, setPayments] = useState([]);
   const [showSendNotePopup, setShowSendNotePopup] = useState(false);
   const [payload, setPayload] = useState(null);
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [visibleCount, setVisibleCount] = useState(3);
 
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(1);
+
+  const paymentsStartRef = useRef(null);
 
   const filter = searchParams.get("filter") || "All";
 
   useEffect(() => {
-    const fetchPayments = async () => {
-      try {
-        const productPaymentsRes = await getStorekeeperPayments();
+    setPayments([]);
+    setPage(1);
+    setHasMore(true);
+    fetchPayments(true);
+  }, [filter]);
 
-        const productPayments = await Promise.all(
-          productPaymentsRes.data.map(async (productPayment) => {
-            try {
-              const product = await getProduct(productPayment.product);
-              return {
-                ...productPayment,
-                product: product?.data ?? null,
-              };
-            } catch {
-              return {
-                ...productPayment,
-                product: null,
-              };
-            }
-          })
-        );
-        setIsLoading(false);
-        setPayments(productPayments.filter(Boolean));
-      } catch {
-        setIsLoading(false);
-      }
-    };
-
-    fetchPayments();
-  }, []);
-
-  const handleFilterChange = (status) => {
-    if (status === "All") {
-      searchParams.delete("filter");
-    } else {
-      searchParams.set("filter", status);
-    }
-    setSearchParams(searchParams);
-  };
-
-  const getFilteredPayments = () => {
+  const getAPIForFilter = (nextPage) => {
     switch (filter) {
       case "Pending":
-        return payments.filter(
-          (p) => !p.storekeeper_delivery && !p.buyer_delivery
-        );
+        return getStorekeeperDeliveryPayments(nextPage);
       case "Shipped":
-        return payments.filter(
-          (p) => p.storekeeper_delivery && !p.buyer_delivery
-        );
+        return getNotDeliveredPayments(nextPage);
       case "Delivered":
-        return payments.filter(
-          (p) => p.storekeeper_delivery && p.buyer_delivery
-        );
+        return getDeliveredPayments(nextPage);
       default:
-        return payments;
+        return getStorekeeperPayments(nextPage);
     }
   };
 
-  const filteredPayments = getFilteredPayments();
+  const fetchPayments = async (isInitial = false) => {
+    try {
+      const nextPage = isInitial ? 1 : page + 1;
 
-  const getStatusBadge = (payment) => {
-    if (payment.buyer_delivery) {
-      return (
-        <span className="bg-green-100 text-green-800 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium flex items-center">
-          <FiCheckCircle className="mr-1 mb-0.5 flex-shrink-0" size={12} />
-          <span className="truncate">
-            Delivered{" "}
-            {payment.buyer_delivered_at &&
-              new Date(payment.buyer_delivered_at).toLocaleDateString()}
-          </span>
-        </span>
-      );
+      if (isInitial) {
+        setIsLoading(true);
+      } else {
+        setIsLoadingMore(true);
+      }
+
+      const response = await getAPIForFilter(nextPage);
+      const newPayments = await enrichPaymentsData(response.data.results);
+
+      if (isInitial) {
+        setPayments(newPayments);
+        setPage(1);
+      } else {
+        setPayments((prev) => {
+          const merged = [...prev, ...newPayments];
+          return merged;
+        });
+        setPage(nextPage);
+      }
+
+      setHasMore(response.data.next !== null);
+
+      setIsLoading(false);
+      setIsLoadingMore(false);
+
+      if (isInitial && paymentsStartRef.current) {
+        setTimeout(() => {
+          paymentsStartRef.current.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        }, 100);
+      }
+    } catch {
+      setIsLoading(false);
+      setIsLoadingMore(false);
+      if (isInitial) setPayments([]);
     }
-    if (payment.storekeeper_delivery) {
-      return (
-        <span className="bg-blue-100 text-blue-800 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium flex items-center">
-          <FiTruck className="mr-1 mb-0.5 flex-shrink-0" size={12} />
-          <span className="truncate">
-            Shipped{" "}
-            {payment.storekeeper_delivered_at &&
-              new Date(payment.storekeeper_delivered_at).toLocaleDateString()}
-          </span>
-        </span>
-      );
-    }
-    return (
-      <span className="bg-amber-100 text-amber-800 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium flex items-center">
-        <FiPackage className="mr-1 mb-0.5 flex-shrink-0" size={12} />
-        <span className="truncate">Pending Delivery</span>
-      </span>
+  };
+
+  const enrichPaymentsData = async (paymentsData) => {
+    return await Promise.all(
+      paymentsData.map(async (payment) => {
+        try {
+          const productRes = await getProduct(payment.product);
+          return {
+            ...payment,
+            product: productRes?.data ?? null,
+          };
+        } catch {
+          return {
+            ...payment,
+            product: null,
+          };
+        }
+      })
     );
+  };
+
+  const determineStatus = (payment) => {
+    if (payment.storekeeper_delivery) {
+      return payment.buyer_delivery ? "Delivered" : "Shipped";
+    }
+    return "Pending";
+  };
+
+  const handleFilterChange = (newFilter) => {
+    if (paymentsStartRef.current) {
+      paymentsStartRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+
+    setTimeout(() => {
+      setSearchParams({ filter: newFilter });
+    }, 300);
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case "Pending":
+        return <FiPackage className="text-amber-500" size={18} />;
+      case "Shipped":
+        return <FiTruck className="text-blue-500" size={18} />;
+      case "Delivered":
+        return <FiCheckCircle className="text-green-500" size={18} />;
+      default:
+        return <FiPackage className="text-gray-500" size={18} />;
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Pending":
+        return "bg-amber-100 text-amber-800 border-amber-300";
+      case "Shipped":
+        return "bg-blue-100 text-blue-800 border-blue-300";
+      case "Delivered":
+        return "bg-green-100 text-green-800 border-green-300";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-300";
+    }
+  };
+
+  const handleLoadMore = () => {
+    if (!hasMore || isLoadingMore) return;
+    fetchPayments(false);
+  };
+
+  const openInNewTab = (url) => {
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   const getStatusCount = (status) => {
@@ -146,9 +205,13 @@ const Payments = () => {
     }
   };
 
-  const openInNewTab = (url) => {
-    window.open(url, "_blank", "noopener,noreferrer");
-  };
+  const filteredPayments =
+    filter === "All"
+      ? payments
+      : payments.filter((payment) => {
+          const status = determineStatus(payment);
+          return status === filter;
+        });
 
   return (
     <motion.div
@@ -157,317 +220,439 @@ const Payments = () => {
       transition={{ duration: 0.4 }}
       className="lg:col-span-3"
     >
-      <div className="bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-lg p-4 sm:p-6 2xl:p-8 border border-blue-400 hover:shadow-xl hover:shadow-blue-500/50 transition-all duration-300">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 sm:mb-8 gap-4">
-          <div className="mb-2">
-            <div className="flex items-center mb-1">
-              <FiDollarSign
-                className="text-green-500 mr-2 sm:mr-3 flex-shrink-0"
-                size={20}
-              />
-              <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-blue-800">
-                Payments
-              </h1>
+      <div className="space-y-4 sm:space-y-7 lg:space-y-5 xl:space-y-9">
+        <div
+          ref={paymentsStartRef}
+          className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-lg p-4 sm:p-6 2xl:p-8 border border-blue-400 hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300"
+        >
+          <div className="sm:flex sm:items-center mb-3">
+            <div className="mb-2">
+              <div className="flex items-center mb-1 sm:mb-0">
+                <FiDollarSign className="text-green-600 mr-3" size={22} />
+                <h1 className="text-base sm:text-lg md:text-2xl font-bold text-blue-800">
+                  Payments
+                </h1>
+              </div>
+              <p className="text-blue-700 text-xs sm:text-sm ml-8 sm:ml-[34px]">
+                Manage customer payments and deliveries
+              </p>
             </div>
-            <p className="text-blue-700 text-xs sm:text-sm ml-7 sm:ml-9">
-              Manage customer payments and deliveries
-            </p>
-          </div>
-          <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs sm:text-sm font-medium self-start xs:self-auto">
-            {filteredPayments.length} {filter.toLowerCase()} orders
-          </span>
-        </div>
 
-        <div className="flex flex-wrap gap-2 sm:gap-3 mb-4 sm:mb-6">
-          {["All", "Pending", "Shipped", "Delivered"].map((status) => (
-            <button
-              key={status}
-              onClick={() => handleFilterChange(status)}
-              className={`px-3 py-1.5 sm:py-2 cursor-pointer rounded-lg text-xs sm:text-sm font-semibold border transition-colors duration-300 flex-1 sm:flex-none min-w-[60px] text-center ${
-                filter === status
-                  ? "bg-blue-600 text-white border-blue-600"
-                  : "bg-white text-blue-700 border-blue-300 hover:bg-blue-50"
-              }`}
-            >
-              <span className="hidden sm:inline">{status}</span>
-              <span className="sm:hidden">{status.charAt(0)}</span>
-              <span className="ml-1">({getStatusCount(status)})</span>
-            </button>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
-          <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-purple-200">
-            <div className="flex items-center justify-between">
-              <span className="text-purple-600 text-xs sm:text-sm">
-                Total Revenue
-              </span>
-              <FiTrendingUp
-                className="text-purple-500 flex-shrink-0"
-                size={16}
-              />
+            <div className="ml-auto">
+              <motion.span
+                initial={{ scale: 0.8 }}
+                animate={{ scale: 1 }}
+                className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs sm:text-sm font-medium"
+              >
+                {filteredPayments.length}{" "}
+                {filteredPayments.length === 1 ? "order" : "orders"}
+              </motion.span>
             </div>
-            <p className="text-lg sm:text-xl lg:text-2xl font-bold text-purple-900 mt-1">
-              $
-              {payments
-                .reduce((total, payment) => total + payment.total_price, 0)
-                .toFixed(2)}
-            </p>
           </div>
 
-          <div className="bg-amber-50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-amber-200">
-            <div className="flex items-center justify-between">
-              <span className="text-amber-600 text-xs sm:text-sm">Pending</span>
-              <FiPackage className="text-amber-500 flex-shrink-0" size={16} />
+          <motion.div
+            key={filter}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-wrap sm:flex-nowrap gap-2 sm:gap-3 mb-4"
+          >
+            {["All", "Pending", "Shipped", "Delivered"].map((status) => (
+              <motion.button
+                key={status}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => handleFilterChange(status)}
+                className={`px-3 sm:px-4 py-1.5 sm:py-2 cursor-pointer rounded-lg text-xs sm:text-sm font-semibold border transition-all duration-300 ${
+                  filter === status
+                    ? "bg-blue-600 text-white border-blue-600 transform scale-105"
+                    : "bg-white text-blue-700 border-blue-300 hover:bg-blue-50"
+                }`}
+              >
+                {status}
+              </motion.button>
+            ))}
+          </motion.div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+            <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-purple-200">
+              <div className="flex items-center justify-between">
+                <span className="text-purple-600 text-xs sm:text-sm">
+                  Total Revenue
+                </span>
+                <FiTrendingUp
+                  className="text-purple-500 flex-shrink-0"
+                  size={16}
+                />
+              </div>
+              <p className="text-lg sm:text-xl lg:text-2xl font-bold text-purple-900 mt-1">
+                $
+                {payments
+                  .reduce((total, payment) => total + payment.total_price, 0)
+                  .toFixed(2)}
+              </p>
             </div>
-            <p className="text-lg sm:text-xl lg:text-2xl font-bold text-amber-900 mt-1">
-              {
-                payments.filter(
-                  (p) => !p.storekeeper_delivery && !p.buyer_delivery
-                ).length
-              }
-            </p>
+
+            <div className="bg-amber-50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-amber-200">
+              <div className="flex items-center justify-between">
+                <span className="text-amber-600 text-xs sm:text-sm">
+                  Pending
+                </span>
+                <FiPackage className="text-amber-500 flex-shrink-0" size={16} />
+              </div>
+              <p className="text-lg sm:text-xl lg:text-2xl font-bold text-amber-900 mt-1">
+                {getStatusCount("Pending")}
+              </p>
+            </div>
+
+            <div className="bg-blue-50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-blue-200">
+              <div className="flex items-center justify-between">
+                <span className="text-blue-600 text-xs sm:text-sm">
+                  Shipped
+                </span>
+                <FiTruck className="text-blue-500 flex-shrink-0" size={16} />
+              </div>
+              <p className="text-lg sm:text-xl lg:text-2xl font-bold text-blue-900 mt-1">
+                {getStatusCount("Shipped")}
+              </p>
+            </div>
+
+            <div className="bg-green-50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-green-200">
+              <div className="flex items-center justify-between">
+                <span className="text-green-600 text-xs sm:text-sm">
+                  Delivered
+                </span>
+                <FiCheckCircle
+                  className="text-green-500 flex-shrink-0"
+                  size={16}
+                />
+              </div>
+              <p className="text-lg sm:text-xl lg:text-2xl font-bold text-green-900 mt-1">
+                {getStatusCount("Delivered")}
+              </p>
+            </div>
           </div>
 
-          <div className="bg-blue-50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-blue-200">
-            <div className="flex items-center justify-between">
-              <span className="text-blue-600 text-xs sm:text-sm">Shipped</span>
-              <FiTruck className="text-blue-500 flex-shrink-0" size={16} />
-            </div>
-            <p className="text-lg sm:text-xl lg:text-2xl font-bold text-blue-900 mt-1">
-              {
-                payments.filter(
-                  (p) => p.storekeeper_delivery && !p.buyer_delivery
-                ).length
-              }
-            </p>
-          </div>
-
-          <div className="bg-green-50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-green-200">
-            <div className="flex items-center justify-between">
-              <span className="text-green-600 text-xs sm:text-sm">
-                Delivered
-              </span>
-              <FiCheckCircle
-                className="text-green-500 flex-shrink-0"
-                size={16}
-              />
-            </div>
-            <p className="text-lg sm:text-xl lg:text-2xl font-bold text-green-900 mt-1">
-              {
-                payments.filter(
-                  (p) => p.storekeeper_delivery && p.buyer_delivery
-                ).length
-              }
-            </p>
-          </div>
-        </div>
-
-        <div className="space-y-4">
           {isLoading ? (
             <SectionLoader chatLoader={false} title="Payments" />
-          ) : (
-            filteredPayments.length === 0 && (
-              <div className="text-center py-8 sm:py-12 bg-blue-50/50 rounded-xl sm:rounded-2xl border border-blue-200">
-                <FiDollarSign
-                  className="text-blue-400 mx-auto mb-3 sm:mb-4"
-                  size={32}
-                />
-                <h3 className="text-base sm:text-lg font-semibold text-blue-800 mb-2">
-                  No {filter.toLowerCase()} payments yet
-                </h3>
-                <p className="text-blue-600 text-sm">
-                  {filter === "All"
-                    ? "Customer payments will appear here"
-                    : `No ${filter.toLowerCase()} payments found`}
-                </p>
-              </div>
-            )
-          )}
-
-          {filteredPayments.slice(0, visibleCount).map((payment) => (
+          ) : filteredPayments.length === 0 ? (
             <motion.div
-              key={payment.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              className="bg-gradient-to-r from-blue-50/80 to-cyan-50/80 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-blue-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              className="text-center py-12 bg-blue-50/50 rounded-2xl border border-blue-200"
             >
-              <div className="grid grid-cols-1 lg:grid-cols-7 gap-4 sm:gap-6">
-                <div className="flex items-center col-span-3 space-x-3 sm:space-x-4">
-                  {payment.product?.image ? (
-                    <div
-                      onClick={() => {
-                        if (payment.product?.id) {
-                          openInNewTab(`/product/${payment.product.id}`);
-                        } else {
-                          errorToast("This product does not exist");
-                        }
-                      }}
-                      className="w-16 h-16 sm:w-20 sm:h-20 cursor-pointer border-2 bg-white border-blue-400 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden p-1"
-                    >
-                      <img
-                        src={payment.product?.image}
-                        alt=""
-                        className="w-full h-full object-contain rounded-md"
-                      />
-                    </div>
-                  ) : (
-                    <div
-                      onClick={() => errorToast("This product does not exist")}
-                      className="w-20 h-20 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-xl flex items-center justify-center flex-shrink-0"
-                    >
-                      <FiBox className="text-blue-600" size={28} />
-                    </div>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <h3 className="font-semibold text-blue-900 text-base sm:text-lg mb-1 truncate">
-                      {payment.product_name}
-                    </h3>
-                    <div className="flex items-center space-x-2 mb-2">
-                      <span className="text-blue-800 font-bold text-sm sm:text-base">
-                        $
-                        {payment.product?.discounted_price ||
-                          payment.product?.price ||
-                          payment.total_price / payment.quantity}
-                      </span>
-                      {payment.product?.discounted_price && (
-                        <span className="text-xs sm:text-sm text-rose-500 line-through">
-                          ${payment.product?.price}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-xs sm:text-sm text-blue-600 mb-2">
-                      Qty: {payment.quantity}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="h-full flex items-center col-span-2">
-                  <div className=" space-y-2 ">
-                    <div className="flex items-center">
-                      <span className="text-blue-700 font-medium text-sm sm:text-base">
-                        Total:
-                      </span>
-                      <span className="font-bold text-blue-900 text-sm sm:text-base ml-2">
-                        ${payment.total_price.toFixed(2)}
-                      </span>
-                    </div>
-
-                    <div className="flex items-start space-x-2">
-                      <FiMapPin
-                        className="text-blue-500 flex-shrink-0 mt-0.5"
-                        size={14}
-                      />
-                      <span className="text-xs sm:text-sm text-blue-600 whitespace-normal break-words">
-                        {payment.address}
-                      </span>
-                    </div>
-
-                    <p className="text-xs text-blue-500">
-                      Paid: {new Date(payment.paid_at).toLocaleDateString()} •
-                      {new Date(payment.paid_at).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex flex-col justify-between col-span-2 space-y-3 sm:space-y-4">
-                  <div>{getStatusBadge(payment)}</div>
-                  <button
-                    onClick={() => {
-                      getPurchaseByPayment(payment.id)
-                        .then((res) => {
-                          navigate(`/account/chats/${res.data[0].id}`);
-                        })
-                        .catch((err) => {
-                          errorToast(err.response.data.detail);
-                        });
-                    }}
-                    className="flex cursor-pointer items-center justify-center px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-lg hover:from-blue-700 hover:to-cyan-600 transition-colors duration-300 text-sm font-semibold whitespace-nowrap min-w-[120px]"
-                  >
-                    <FiMessageSquare className="mr-2 mb-0.5" size={14} />
-                    Chat
-                  </button>
-                  {!payment.buyer_delivery && !payment.storekeeper_delivery && (
-                    <button
-                      onClick={() => {
-                        setShowSendNotePopup(true);
-                        const now = new Date().toISOString();
-                        setPayload(() => {
-                          return {
-                            payment: payment.id,
-                            is_shipped: true,
-                            shipped_at: now,
-                            note: "",
-                          };
-                        });
-                      }}
-                      className="bg-green-500 cursor-pointer  text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-green-600 transition-colors duration-300 font-semibold flex items-center justify-center text-xs sm:text-sm"
-                    >
-                      <FiTruck className="mr-2 flex-shrink-0" size={14} />
-                      <span className="truncate">Product submission</span>
-                    </button>
-                  )}
-                </div>
-              </div>
+              <FiDollarSign className="text-blue-400 mx-auto mb-4" size={48} />
+              <h3 className="text-lg font-semibold text-blue-800 mb-2">
+                No payments found
+              </h3>
+              <p className="text-blue-600">
+                {filter === "All"
+                  ? "Customer payments will appear here."
+                  : `No ${filter.toLowerCase()} payments found.`}
+              </p>
             </motion.div>
-          ))}
-          {filteredPayments.length > 3 && (
-            <div className="flex justify-center pt-3 xs:pt-4 mt-4 xs:mt-5 border-t border-blue-300">
-              {visibleCount < filteredPayments.length ? (
-                <button
-                  onClick={() =>
-                    setVisibleCount(() => {
-                      return visibleCount + 3;
-                    })
-                  }
-                  className="px-4 xs:px-6 py-2 cursor-pointer rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-300 text-sm xs:text-base font-medium"
+          ) : (
+            <>
+              <motion.div
+                key={`${filter}-${page}`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                className="space-y-6"
+              >
+                {filteredPayments.map((payment, index) => (
+                  <motion.div
+                    key={`${payment.id}-${index}`}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: index * 0.05 }}
+                    className="bg-gradient-to-r from-blue-50/80 to-cyan-50/80 rounded-2xl p-6 border border-blue-200/60 hover:border-blue-300 hover:shadow-lg transition-all duration-300 group"
+                  >
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-4">
+                      <div className="lg:col-span-6 xl:col-span-5 flex items-start space-x-4">
+                        {payment.product?.image ? (
+                          <div
+                            onClick={() =>
+                              openInNewTab(`/product/${payment.product.id}`)
+                            }
+                            className="w-20 h-20 cursor-pointer border-2 bg-white border-blue-400 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden p-1 hover:border-blue-500 transition-colors"
+                          >
+                            <img
+                              src={payment.product?.image}
+                              alt={payment.product?.name}
+                              className="w-full h-full object-contain rounded-md"
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <FiBox className="text-blue-600" size={28} />
+                          </div>
+                        )}
+
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-blue-900 text-lg mb-2 line-clamp-2">
+                            {payment.product_name}
+                          </h3>
+                          <div className="space-y-1">
+                            <p className="text-blue-600 text-sm">
+                              Customer:{" "}
+                              <span className="font-medium">
+                                {payment?.buyer_name || "Unknown Customer"}
+                              </span>
+                            </p>
+                            <div className="flex items-center gap-3">
+                              <p className="text-blue-800 font-bold text-base">
+                                ${payment?.total_price}
+                              </p>
+                              <span className="text-xs text-blue-500 bg-blue-100 px-2 py-1 rounded-full font-medium">
+                                x{payment?.quantity}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="lg:col-span-3 xl:col-span-3 flex flex-col justify-center space-y-3">
+                        <div className="flex items-center space-x-2">
+                          {getStatusIcon(determineStatus(payment))}
+                          <span
+                            className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${getStatusColor(
+                              determineStatus(payment)
+                            )}`}
+                          >
+                            {determineStatus(payment)}
+                          </span>
+                        </div>
+
+                        <div className="text-sm text-blue-600 space-y-1">
+                          {determineStatus(payment) === "Delivered" ? (
+                            <p className="flex items-center gap-1">
+                              <FiCheckCircle
+                                size={14}
+                                className="text-green-500 mb-0.5"
+                              />
+                              Delivered on{" "}
+                              {payment.buyer_delivered_at
+                                ? new Date(
+                                    payment.buyer_delivered_at
+                                  ).toLocaleDateString()
+                                : "Unknown date"}
+                            </p>
+                          ) : determineStatus(payment) === "Shipped" ? (
+                            <p className="flex items-center gap-1">
+                              <FiTruck
+                                size={14}
+                                className="text-blue-500 mb-0.5"
+                              />
+                              Shipped on{" "}
+                              {payment.storekeeper_delivered_at
+                                ? new Date(
+                                    payment.storekeeper_delivered_at
+                                  ).toLocaleDateString()
+                                : "Unknown date"}
+                            </p>
+                          ) : (
+                            <p className="flex items-center gap-1">
+                              <FiPackage
+                                size={14}
+                                className="text-amber-500 mb-0.5"
+                              />
+                              Waiting for shipment
+                            </p>
+                          )}
+                          <p className="text-xs text-blue-500 flex items-center gap-1">
+                            <FiCalendar size={12} className="mb-1" />
+                            Ordered:{" "}
+                            {new Date(payment.paid_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="lg:col-span-3 xl:col-span-4 flex flex-col sm:flex-row lg:flex-col xl:flex-row gap-2 justify-start lg:justify-end items-center">
+                        <button
+                          onClick={() => {
+                            getPurchaseByPayment(payment.id)
+                              .then((res) => {
+                                navigate(`/account/chats/${res.data[0].id}`);
+                              })
+                              .catch((err) => {
+                                errorToast(err.response.data.detail);
+                              });
+                          }}
+                          className="flex items-center w-full md:w-auto justify-center px-4 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-lg hover:from-blue-700 hover:to-cyan-600 transition-colors duration-300 text-sm font-semibold whitespace-nowrap min-w-[120px] shadow-sm hover:shadow-md"
+                        >
+                          <FiMessageSquare className="mr-2" size={16} />
+                          Chat
+                        </button>
+
+                        {determineStatus(payment) === "Pending" && (
+                          <button
+                            onClick={() => {
+                              setShowSendNotePopup(true);
+                              const now = new Date().toISOString();
+                              setPayload({
+                                payment: payment.id,
+                                is_shipped: true,
+                                shipped_at: now,
+                                note: "",
+                              });
+                            }}
+                            className="flex items-center w-full md:w-auto justify-center px-4 py-2.5 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all duration-300 text-sm font-semibold whitespace-nowrap min-w-[120px] shadow-sm hover:shadow-md"
+                          >
+                            <FiTruck className="mr-2" size={16} />
+                            Ship Order
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="mb-4 pt-4 border-t border-blue-200/50">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-9 gap-4 text-sm">
+                        <div className="space-y-2 2xl:col-span-3">
+                          <div className="flex items-start flex-row lg:flex-col 2xl:flex-row gap-2 text-blue-600">
+                            <div className="flex gap-2">
+                              <FiMapPin size={14} className="mt-0.5" />
+                              <span className="font-medium">Address:</span>
+                            </div>
+                            <p className="text-blue-800 text-sm">
+                              {payment.address}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2 2xl:col-span-2">
+                          <div className="flex items-start flex-row lg:flex-col 2xl:flex-row gap-2 text-blue-600">
+                            <div className="flex gap-2">
+                              <FiDollarSign size={14} className="mt-0.5" />
+                              <span className="font-medium">Price:</span>
+                            </div>
+                            <p className="text-blue-800 font-mono text-sm">
+                              ${payment.total_price}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2 2xl:col-span-2">
+                          <div className="flex items-start flex-row lg:flex-col 2xl:flex-row gap-2 text-blue-600">
+                            <div className="flex gap-2">
+                              <FiBox size={14} className="mt-0.5" />
+                              <span className="font-medium">Quantity:</span>
+                            </div>
+                            <p className="text-blue-800 font-mono text-sm">
+                              {payment.quantity}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2 2xl:col-span-2">
+                          <div className="flex items-start flex-row lg:flex-col 2xl:flex-row gap-2 text-blue-600">
+                            <div className="flex gap-2">
+                              <FiFileText size={14} className="mt-0.5" />
+                              <span className="font-medium">Order ID:</span>
+                            </div>
+                            <p className="text-blue-800 font-mono text-sm">
+                              #{payment.id}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-4 border-t border-blue-200/50">
+                      <div className="flex items-center justify-between text-sm text-blue-600 mb-3">
+                        <span className="font-medium">Order Progress</span>
+                        <span className="font-semibold">
+                          {determineStatus(payment)}
+                        </span>
+                      </div>
+                      <div className="w-full bg-blue-200 rounded-full h-2.5">
+                        <div
+                          className={`h-2.5 rounded-full transition-all duration-1000 ${
+                            determineStatus(payment) === "Pending"
+                              ? "bg-amber-500 w-1/3"
+                              : determineStatus(payment) === "Shipped"
+                              ? "bg-blue-500 w-2/3"
+                              : "bg-green-500 w-full"
+                          }`}
+                        />
+                      </div>
+                      <div className="flex justify-between text-xs text-blue-500 mt-2">
+                        <span>Ordered</span>
+                        <span>Shipped</span>
+                        <span>Delivered</span>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </motion.div>
+
+              {hasMore && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.2 }}
+                  className="flex justify-center mt-8 pt-6 border-t border-blue-200"
                 >
-                  Show more payments
-                </button>
-              ) : (
-                <button
-                  onClick={() => setVisibleCount(3)}
-                  className="px-4 xs:px-6 py-2 cursor-pointer rounded-lg border border-blue-400 text-blue-600 hover:bg-blue-50 transition-colors duration-300 text-sm xs:text-base font-medium"
-                >
-                  Show less
-                </button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleLoadMore}
+                    disabled={isLoadingMore}
+                    className="flex items-center gap-2 px-4 xs:px-6 py-2 cursor-pointer rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-300 text-sm xs:text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isLoadingMore ? (
+                      <>
+                        <FiRefreshCw className="animate-spin" size={18} />
+                        Loading more payments...
+                      </>
+                    ) : (
+                      <>
+                        <FiChevronDown size={18} />
+                        Load More Payments
+                      </>
+                    )}
+                  </motion.button>
+                </motion.div>
               )}
-            </div>
-          )}
-          {showSendNotePopup && (
-            <SendNotePopup
-              onClose={() => setShowSendNotePopup(false)}
-              onConfirm={(note) => {
-                const date = new Date();
-                productSubmission({
-                  ...payload,
-                  note,
-                  is_sent: true,
-                  sent_at: date,
-                }).then(() => {
-                  successToast("The product status was successfully updated");
-                  setPayments((prev) =>
-                    prev.map((payment) =>
-                      payment.id == payload.payment
-                        ? {
-                            ...payment,
-                            storekeeper_delivered_at: date,
-                            storekeeper_delivery: true,
-                          }
-                        : payment
-                    )
-                  );
-                });
-              }}
-              payload={payload}
-            />
+            </>
           )}
         </div>
       </div>
+
+      {showSendNotePopup && (
+        <SendNotePopup
+          onClose={() => setShowSendNotePopup(false)}
+          onConfirm={(note) => {
+            const date = new Date();
+            productSubmission({
+              ...payload,
+              note,
+              is_sent: true,
+              sent_at: date,
+            })
+              .then(() => {
+                successToast("The product shipped successfully");
+                setPayments((prev) =>
+                  prev.map((payment) =>
+                    payment.id == payload.payment
+                      ? {
+                          ...payment,
+                          storekeeper_delivered_at: date,
+                          storekeeper_delivery: true,
+                        }
+                      : payment
+                  )
+                );
+              })
+              .catch(() => {
+                errorToast(
+                  "The desired product does not exist. The operation was not successful"
+                );
+              });
+          }}
+          payload={payload}
+        />
+      )}
     </motion.div>
   );
 };
