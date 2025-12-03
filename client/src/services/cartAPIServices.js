@@ -36,8 +36,23 @@ export const singleCartPayment = (payload) => {
   return api.post(url, payload);
 };
 
-export const getPayments = () => {
-  const url = `/cart-api/product-payments/`;
+export const getPayments = (page = 1) => {
+  const url = `/cart-api/product-payments/?page=${page}`;
+  return api.get(url);
+};
+
+export const getStorekeeperDeliveryPayments = (page = 1) => {
+  const url = `/cart-api/product-payments/storekeeper-delivery/false/?page=${page}`;
+  return api.get(url);
+};
+
+export const getNotDeliveredPayments = (page = 1) => {
+  const url = `https://127.0.0.1:8000/cart-api/product-payments/not-delivered/false/?page=${page}`;
+  return api.get(url);
+};
+
+export const getDeliveredPayments = (page = 1) => {
+  const url = `https://127.0.0.1:8000/cart-api/product-payments/is-delivered/true/?page=${page}`;
   return api.get(url);
 };
 
