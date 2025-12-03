@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from django.db.models import OuterRef, Exists, Subquery, Q
+from django.db.models import Sum, OuterRef, Exists, Subquery, Q
 from django.http import Http404
 from rest_framework import viewsets, status, mixins
 from rest_framework.views import APIView
@@ -377,6 +377,28 @@ class StorePaymentViewSet(
             queryset = queryset.filter(storekeeper_delivery=True, is_delivered=False)
 
         return self._handle_filtered_request(request, queryset, index, label="buyer-not-delivery payment")
+
+    @action(detail=False, methods=['get'], url_path='delivery-summary')
+    def delivery_summary(self, request):
+        delivery_qs = ProductDeliveryStatus.objects.filter(payment=OuterRef('pk'))
+        queryset = self.get_queryset().annotate(
+            storekeeper_delivery=Exists(delivery_qs.filter(is_sent=True)),
+            is_sent=Subquery(delivery_qs.values('is_sent')[:1])
+        )
+
+        pending_count = queryset.filter(storekeeper_delivery=False).count()
+        shipped_count = queryset.filter(storekeeper_delivery=True, is_delivered=False).count()
+        delivered_count = queryset.filter(is_delivered=True).count()
+
+        total_amount = queryset.aggregate(total=Sum('total_price'))['total'] or 0
+
+        data = {
+            "pending": pending_count,
+            "shipped": shipped_count,
+            "delivered": delivered_count,
+            "amount": total_amount
+        }
+        return Response(data)
 
 class UserActivitySummaryViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
