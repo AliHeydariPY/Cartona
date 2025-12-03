@@ -86,7 +86,7 @@ Outside of coding, I'm an avid computer knowledge reader, enjoy and love experim
   ];
 
   const projectStats = [
-    { icon: FiCode, number: "25K+", label: "Lines of Code" },
+    { icon: FiCode, number: "26K+", label: "Lines of Code" },
     { icon: FiUsers, number: "2", label: "Expert Developers" },
     { icon: FiAward, number: "150+", label: "Features Delivered" },
     { icon: FiGlobe, number: "99.9%", label: "Uptime" },

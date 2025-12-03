@@ -288,7 +288,7 @@ const Favorites = () => {
                       <div className="flex items-center gap-2">
                         <div className="flex items-center bg-blue-100 px-2 py-1 rounded-full">
                           <FiStar
-                            className="text-amber-400 fill-amber-400"
+                            className="text-amber-400 fill-amber-400 mb-0.5"
                             size={12}
                           />
                           <span className="text-xs font-medium text-blue-800 ml-1">

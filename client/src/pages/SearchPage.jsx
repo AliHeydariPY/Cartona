@@ -30,7 +30,6 @@ const SearchPage = () => {
 
   const [isFocus, setIsFocus] = useState(false);
   const [notFound, setNotFound] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
 
   const [totalPages, setTotalPages] = useState(1);
   const page = Number(searchParams.get("page")) || 1;
@@ -46,7 +45,6 @@ const SearchPage = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        setIsLoading(true);
 
         if (page > totalPages || page < 1) {
           setSearchParams({ page: 1 });
@@ -70,7 +68,6 @@ const SearchPage = () => {
 
         if (!res.data.results[0]) {
           setNotFound(true);
-          setIsLoading(false);
           return;
         }
 
@@ -78,7 +75,6 @@ const SearchPage = () => {
         setProducts(res.data.results);
         setTotalPages(Math.ceil(res.data.count / visibleCountNum));
         setNotFound(false);
-        setIsLoading(false);
 
         if (productsStartRef.current) {
           setTimeout(() => {
@@ -90,7 +86,6 @@ const SearchPage = () => {
         }
       } catch {
         setNotFound(true);
-        setIsLoading(false);
       }
     };
 
@@ -138,7 +133,7 @@ const SearchPage = () => {
       <Navbar />
       {products.length > 0 && (
         <div className="pb-20 md:pb-6 px-4 py-6">
-          <div className="xl:grid xl:grid-cols-8 2xl:grid-cols-5 gap-5 mx-auto px-4 py-4 xl:py-0 items-start">
+          <div className="xl:grid xl:grid-cols-8 2xl:grid-cols-5 gap-5 mx-auto sm:px-4 py-4 xl:py-0 items-start">
             <SearchFilters />
 
             <motion.div

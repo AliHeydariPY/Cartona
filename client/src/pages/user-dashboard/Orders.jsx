@@ -320,7 +320,7 @@ const Orders = () => {
                     key={`${order.id}-${index}`}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: index * 0.05 }}
+                    transition={{ duration: 0.1, delay: index * 0.01 }}
                     className="bg-gradient-to-r from-blue-50/80 to-cyan-50/80 rounded-2xl p-6 border border-blue-200/60 hover:border-blue-300 hover:shadow-lg transition-all duration-300 group"
                   >
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-4">
